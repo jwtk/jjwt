@@ -16,11 +16,14 @@
 package io.jsonwebtoken.orgjson.io;
 
 import io.jsonwebtoken.io.AbstractDeserializer;
+import io.jsonwebtoken.lang.Assert;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.CharArrayReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,14 +36,25 @@ import java.util.Map;
  */
 public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
 
+    private final JSONTokenerFactory TOKENER_FACTORY;
+
+    public OrgJsonDeserializer() {
+        this(JSONTokenerFactory.INSTANCE);
+    }
+
+    private OrgJsonDeserializer(JSONTokenerFactory factory) {
+        this.TOKENER_FACTORY = Assert.notNull(factory, "JSONTokenerFactory cannot be null.");
+    }
+
     @Override
     protected Object doDeserialize(Reader reader) {
         return parse(reader);
     }
 
-    private Object parse(java.io.Reader reader) throws JSONException {
+    private Object parse(Reader reader) throws JSONException {
 
-        JSONTokener tokener = new JSONTokener(reader);
+        JSONTokener tokener = this.TOKENER_FACTORY.newTokener(reader);
+        Assert.notNull(tokener, "JSONTokener cannot be null.");
 
         char c = tokener.nextClean(); //peak ahead
         tokener.back(); //revert
@@ -93,5 +107,68 @@ public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
             value = toMap((JSONObject) value);
         }
         return value;
+    }
+
+    /**
+     * A factory to create {@link JSONTokener} instances from {@link Reader}s.
+     *
+     * @see <a href="https://github.com/jwtk/jjwt/issues/882">JJWT Issue 882</a>.
+     * @since 0.12.4
+     */
+    static class JSONTokenerFactory { // package-protected on purpose. Not to be exposed as part of public API
+
+        private static final Reader TEST_READER = new CharArrayReader("{}".toCharArray());
+
+        private static final JSONTokenerFactory INSTANCE = new JSONTokenerFactory();
+
+        private final boolean readerCtorAvailable;
+
+        // package protected visibility for testing only:
+        JSONTokenerFactory() {
+            boolean avail = true;
+            try {
+                testTokener(TEST_READER);
+            } catch (NoSuchMethodError err) {
+                avail = false;
+            }
+            this.readerCtorAvailable = avail;
+        }
+
+        // visible for testing only
+        protected void testTokener(@SuppressWarnings("SameParameterValue") Reader reader) throws NoSuchMethodError {
+            new JSONTokener(reader);
+        }
+
+        /**
+         * Reads all content from the specified reader and returns it as a single String.
+         *
+         * @param reader the reader to read characters from
+         * @return the reader content as a single string
+         */
+        private static String toString(Reader reader) throws IOException {
+            StringBuilder sb = new StringBuilder(4096);
+            char[] buf = new char[4096];
+            int n = 0;
+            while (EOF != n) {
+                n = reader.read(buf);
+                if (n > 0) sb.append(buf, 0, n);
+            }
+            return sb.toString();
+        }
+
+        private JSONTokener newTokener(Reader reader) {
+            if (this.readerCtorAvailable) {
+                return new JSONTokener(reader);
+            }
+            // otherwise not available, likely Android or earlier org.json version, fall back to String ctor:
+            String s;
+            try {
+                s = toString(reader);
+            } catch (IOException ex) {
+                String msg = "Unable to obtain JSON String from Reader: " + ex.getMessage();
+                throw new JSONException(msg, ex);
+            }
+            return new JSONTokener(s);
+        }
     }
 }
