@@ -481,17 +481,24 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     @Override
-    public JwtBuilder expireAfter(long duration, TimeUnit timeUnit) {  // TODO: use java.time for version 1.0?
+    public JwtBuilder expireAfter(final long duration, final TimeUnit timeUnit) { // TODO: use java.time and optionals from jdk 8 for version 1.0
         Assert.gt(duration, 0L, "duration must be > 0.");
         Assert.notNull(timeUnit, "timeUnit cannot be null.");
 
-        Date exp = Optional.ofNullable(this.claimsBuilder.get(DefaultClaims.ISSUED_AT))
-                .map(Date::getTime)
-                .map(time -> time + timeUnit.toMillis(duration))
-                .map(expMillis -> JwtDateConverter.INSTANCE.applyFrom(expMillis / 1000L))
-                .orElse(JwtDateConverter.INSTANCE.applyFrom((System.currentTimeMillis() + timeUnit.toMillis(duration)) / 1000L));
+        Date issuedAtDate = this.claimsBuilder.get(DefaultClaims.ISSUED_AT);
+        long expiryEpochMillis;
+        if (null != issuedAtDate) {
+            expiryEpochMillis = issuedAtDate.getTime() + timeUnit.toMillis(duration);
+        } else {
+            expiryEpochMillis = (System.currentTimeMillis() + timeUnit.toMillis(duration));
+        }
+        Date expiryDate = JwtDateConverter.INSTANCE.applyFrom(expiryEpochMillis / 1000L);
 
-        return claims().expiration(exp).and();
+        /*Instant expiryInstant = Optional.ofNullable(this.claimsBuilder.get(DefaultClaims.ISSUED_AT)) // this should return an instant I guess
+                .orElseGet(() -> Instant.now())
+                .plus(duration, timeUnit);*/
+
+        return claims().expiration(expiryDate).and();
     }
 
     private void assertPayloadEncoding(String type) {
