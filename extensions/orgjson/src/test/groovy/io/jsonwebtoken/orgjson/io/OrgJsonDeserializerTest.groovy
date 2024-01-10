@@ -20,7 +20,6 @@ import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.IOException
 import io.jsonwebtoken.lang.Strings
-import org.json.JSONTokener
 import org.junit.Before
 import org.junit.Test
 
@@ -209,12 +208,7 @@ class OrgJsonDeserializerTest {
         def json = '{"hello": "世界", "test": [1, 2]}'
         def expected = read(json) // 'normal' reading
 
-        des = new OrgJsonDeserializer() {
-            @Override
-            protected JSONTokener newTokener(Reader reader) throws NoSuchMethodError {
-                throw new NoSuchMethodError('Android says nope!')
-            }
-        }
+        des = new OrgJsonDeserializer(new NoReaderCtorTokenerFactory())
 
         def reader = reader('{"hello": "世界", "test": [1, 2]}')
 
@@ -242,12 +236,8 @@ class OrgJsonDeserializerTest {
             void close() throws IOException {
             }
         }
-        des = new OrgJsonDeserializer() {
-            @Override
-            protected JSONTokener newTokener(Reader r) throws NoSuchMethodError {
-                throw new NoSuchMethodError('Android says nope!')
-            }
-        }
+
+        des = new OrgJsonDeserializer(new NoReaderCtorTokenerFactory())
 
         try {
             des.deserialize(reader)
@@ -257,6 +247,13 @@ class OrgJsonDeserializerTest {
             String msg = "Unable to obtain JSON String from Reader: $causeMsg"
             assertEquals msg, jsonEx.getMessage()
             assertSame cause, jsonEx.getCause()
+        }
+    }
+
+    private static class NoReaderCtorTokenerFactory extends OrgJsonDeserializer.JSONTokenerFactory {
+        @Override
+        protected void testTokener(Reader reader) throws NoSuchMethodError {
+            throw new NoSuchMethodError('Android says nope!')
         }
     }
 
