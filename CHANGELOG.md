@@ -1,5 +1,14 @@
 ## Release Notes
 
+### 0.12.4
+
+This patch release:
+
+* Ensures Android environments and older `org.json` library usages can parse JSON from a `JwtBuilder`-provided
+  `java.io.Reader` instance. [Issue 882](https://github.com/jwtk/jjwt/issues/882).
+* Ensures a single string `aud` (Audience) claim is retained (without converting it to a `Set`) when copying/applying a 
+  source Claims instance to a destination Claims builder. [Issue 890](https://github.com/jwtk/jjwt/issues/890).
+
 ### 0.12.3
 
 This patch release:
