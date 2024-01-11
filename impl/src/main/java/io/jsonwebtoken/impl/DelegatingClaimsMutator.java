@@ -24,6 +24,7 @@ import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,6 +45,31 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
     <F> T put(Parameter<F> param, F value) {
         this.DELEGATE.put(param, value);
         return self();
+    }
+
+    @Override
+    public Object put(String key, Object value) {
+        if (AUDIENCE_STRING.getId().equals(key)) { // https://github.com/jwtk/jjwt/issues/890
+            if (value instanceof String) {
+                Object existing = get(key);
+                //noinspection deprecation
+                audience().single((String) value);
+                return existing;
+            }
+            // otherwise ensure that the Parameter type is the RFC-default data type (JSON Array of Strings):
+            getAudience();
+        }
+        // otherwise retain expected behavior:
+        return super.put(key, value);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ?> m) {
+        if (m == null) return;
+        for (Map.Entry<? extends String, ?> entry : m.entrySet()) {
+            String s = entry.getKey();
+            put(s, entry.getValue()); // ensure local put is called per https://github.com/jwtk/jjwt/issues/890
+        }
     }
 
     <F> F get(Parameter<F> param) {
