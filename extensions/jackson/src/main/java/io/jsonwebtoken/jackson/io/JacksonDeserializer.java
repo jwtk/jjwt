@@ -17,6 +17,7 @@ package io.jsonwebtoken.jackson.io;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -65,13 +66,27 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
      * specified {@code claimTypeMap}.  This ensures that the JJWT parsing behavior does not unexpectedly
      * modify the state of another application-specific {@code ObjectMapper}.
      * <p>
+     * The {@code FAIL_ON_UNKNOWN_PROPERTIES} deserialization feature of Jackson {@code ObjectMapper} is disabled by default.
+     * <p>
      * If you would like to use your own {@code ObjectMapper} instance that also supports custom types for
      * JWT {@code Claims}, you will need to first customize your {@code ObjectMapper} instance by registering
      * your custom types and then use the {@link #JacksonDeserializer(ObjectMapper)} constructor instead.
      *
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
+     * @see JacksonDeserializer#JacksonDeserializer(Map, boolean)
      */
     public JacksonDeserializer(Map<String, Class<?>> claimTypeMap) {
+        this(claimTypeMap, false);
+    }
+
+    /**
+     * Creates a new JacksonDeserializer where the values of the claims can be parsed into given types.
+     * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
+     * @param failOnUnknownProperties The flag used to enable({@code true}) or disable({@code false})
+     * the {@code FAIL_ON_UNKNOWN_PROPERTIES} deserialization feature of Jackson {@code ObjectMapper}
+     * @see JacksonDeserializer#JacksonDeserializer(Map)
+     */
+    public JacksonDeserializer(Map<String, Class<?>> claimTypeMap, boolean failOnUnknownProperties) {
         // DO NOT reuse JacksonSerializer.DEFAULT_OBJECT_MAPPER as this could result in sharing the custom deserializer
         // between instances
         this(new ObjectMapper());
@@ -80,6 +95,7 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
         objectMapper.registerModule(module);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
     }
 
     /**
