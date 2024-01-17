@@ -100,10 +100,8 @@ class RFC7797Test {
         def claims = Jwts.claims().subject('me').build()
 
         ByteArrayOutputStream out = new ByteArrayOutputStream()
-        Services.loadFirst(Serializer).serialize(claims, out)
+        Services.get(Serializer).serialize(claims, out)
         byte[] content = out.toByteArray()
-
-        //byte[] content = Services.loadFirst(Serializer).serialize(claims)
 
         String s = Jwts.builder().signWith(key).content(content).encodePayload(false).compact()
 

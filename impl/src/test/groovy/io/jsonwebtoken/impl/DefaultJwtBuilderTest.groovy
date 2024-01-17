@@ -45,7 +45,7 @@ class DefaultJwtBuilderTest {
     private DefaultJwtBuilder builder
 
     private static byte[] serialize(Map<String, ?> map) {
-        def serializer = Services.loadFirst(Serializer)
+        def serializer = Services.get(Serializer)
         ByteArrayOutputStream out = new ByteArrayOutputStream(512)
         serializer.serialize(map, out)
         return out.toByteArray()
@@ -53,7 +53,7 @@ class DefaultJwtBuilderTest {
 
     private static Map<String, ?> deser(byte[] data) {
         def reader = Streams.reader(data)
-        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(reader) as Map<String, ?>
+        Map<String, ?> m = Services.get(Deserializer).deserialize(reader) as Map<String, ?>
         return m
     }
 
@@ -749,7 +749,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(Streams.reader(jwt)).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Deserializer).deserialize(Streams.reader(bytes))
+        def claims = Services.get(Deserializer).deserialize(Streams.reader(bytes))
 
         assertEquals two, claims.aud
     }

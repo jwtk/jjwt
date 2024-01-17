@@ -38,7 +38,7 @@ class RfcTests {
 
     static final Map<String, ?> jsonToMap(String json) {
         Reader r = new CharSequenceReader(json)
-        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(r) as Map<String, ?>
+        Map<String, ?> m = Services.get(Deserializer).deserialize(r) as Map<String, ?>
         return m
     }
 

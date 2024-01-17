@@ -370,7 +370,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
         if (this.deserializer == null) {
             //noinspection unchecked
-            json(Services.loadFirst(Deserializer.class));
+            json(Services.get(Deserializer.class));
         }
         if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
             String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " +
