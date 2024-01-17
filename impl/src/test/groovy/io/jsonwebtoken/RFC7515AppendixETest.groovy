@@ -29,8 +29,8 @@ import static org.junit.Assert.fail
 
 class RFC7515AppendixETest {
 
-    static final Serializer<Map<String, ?>> serializer = Services.loadFirst(Serializer)
-    static final Deserializer<Map<String, ?>> deserializer = Services.loadFirst(Deserializer)
+    static final Serializer<Map<String, ?>> serializer = Services.get(Serializer)
+    static final Deserializer<Map<String, ?>> deserializer = Services.get(Deserializer)
 
     static byte[] ser(def value) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(512)

@@ -20,32 +20,21 @@ import io.jsonwebtoken.impl.DefaultStubService
 import org.junit.After
 import org.junit.Test
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class ServicesTest {
 
     @Test
     void testSuccessfulLoading() {
-        def factory = Services.loadFirst(StubService)
-        assertNotNull factory
-        assertEquals(DefaultStubService, factory.class)
+        def service = Services.get(StubService)
+        assertNotNull service
+        assertEquals(DefaultStubService, service.class)
     }
 
     @Test(expected = UnavailableImplementationException)
-    void testLoadFirstUnavailable() {
-        Services.loadFirst(NoService.class)
-    }
-
-    @Test
-    void testLoadAllAvailable() {
-        def list = Services.loadAll(StubService.class)
-        assertEquals 1, list.size()
-        assertTrue list[0] instanceof StubService
-    }
-
-    @Test(expected = UnavailableImplementationException)
-    void testLoadAllUnavailable() {
-        Services.loadAll(NoService.class)
+    void testLoadUnavailable() {
+        Services.get(NoService.class)
     }
 
     @Test

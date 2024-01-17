@@ -75,7 +75,7 @@ class JwtsTest {
     }
 
     static def toJson(def o) {
-        def serializer = Services.loadFirst(Serializer)
+        def serializer = Services.get(Serializer)
         def out = new ByteArrayOutputStream()
         serializer.serialize(o, out)
         return Strings.utf8(out.toByteArray())
@@ -1192,7 +1192,7 @@ class JwtsTest {
         int j = jws.lastIndexOf('.')
         def b64 = jws.substring(i, j)
         def json = Strings.utf8(Decoders.BASE64URL.decode(b64))
-        def deser = Services.loadFirst(Deserializer)
+        def deser = Services.get(Deserializer)
         def m = deser.deserialize(new StringReader(json)) as Map<String,?>
 
         assertEquals aud, m.get('aud') // single string value

@@ -32,7 +32,7 @@ public final class JwksBridge {
 
     @SuppressWarnings({"unchecked", "unused"}) // used via reflection by io.jsonwebtoken.security.Jwks
     public static String UNSAFE_JSON(Jwk<?> jwk) {
-        Serializer<Map<String, ?>> serializer = Services.loadFirst(Serializer.class);
+        Serializer<Map<String, ?>> serializer = Services.get(Serializer.class);
         Assert.stateNotNull(serializer, "Serializer lookup failed. Ensure JSON impl .jar is in the runtime classpath.");
         NamedSerializer ser = new NamedSerializer("JWK", serializer);
         ByteArrayOutputStream out = new ByteArrayOutputStream(512);

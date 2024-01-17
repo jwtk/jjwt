@@ -50,7 +50,7 @@ public abstract class AbstractParserBuilder<T, B extends ParserBuilder<T, B>> im
     public final Parser<T> build() {
         if (this.deserializer == null) {
             //noinspection unchecked
-            this.deserializer = Services.loadFirst(Deserializer.class);
+            this.deserializer = Services.get(Deserializer.class);
         }
         return doBuild();
     }
