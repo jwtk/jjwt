@@ -16,6 +16,7 @@
 //file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.jackson.io
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
@@ -118,6 +119,31 @@ class JacksonDeserializerTest {
         def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build())
                 .deserialize(new StringReader(json))
         assertEquals expected, result
+    }
+
+    /**
+     * Asserts https://github.com/jwtk/jjwt/issues/877
+     */
+    @Test
+    void testStrictDuplicateDetection() {
+        // 'bKey' is repeated twice:
+        String json = """
+             {
+                "aKey":"oneValue", 
+                "bKey": 15,
+                "bKey": "hello"
+             }
+            """
+        try {
+            new JacksonDeserializer<>().deserialize(new StringReader(json))
+            fail()
+        } catch (DeserializationException expected) {
+            String causeMsg = "Duplicate field 'bKey'\n at [Source: (StringReader); line: 5, column: 23]"
+            String msg = "Unable to deserialize: $causeMsg"
+            assertEquals msg, expected.getMessage()
+            assertTrue expected.getCause() instanceof JsonParseException
+            assertEquals causeMsg, expected.getCause().getMessage()
+        }
     }
 
     /**
