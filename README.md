@@ -3767,11 +3767,11 @@ assert privJwk.equals(parsed);
 
 ## Learn More
 
-- [JSON Web Token for Java and Android](https://stormpath.com/blog/jjwt-how-it-works-why/)
-- [How to Create and Verify JWTs in Java](https://stormpath.com/blog/jwt-java-create-verify/)
-- [Where to Store Your JWTs - Cookies vs HTML5 Web Storage](https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage/)
-- [Use JWT the Right Way!](https://stormpath.com/blog/jwt-the-right-way/)
-- [Token Authentication for Java Applications](https://stormpath.com/blog/token-auth-for-java/)
+- [JSON Web Token for Java and Android](https://web.archive.org/web/20230427122653/https://stormpath.com/blog/jjwt-how-it-works-why)
+- [How to Create and Verify JWTs in Java](https://web.archive.org/web/20230426235608/https://stormpath.com/blog/jwt-java-create-verify)
+- [Where to Store Your JWTs - Cookies vs HTML5 Web Storage](https://web.archive.org/web/20230428094039/https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage)
+- [Use JWT the Right Way!](https://web.archive.org/web/20230428184004/https://stormpath.com/blog/jwt-the-right-way)
+- [Token Authentication for Java Applications](https://web.archive.org/web/20230427151310/https://stormpath.com/blog/token-auth-for-java)
 - [JJWT Changelog](CHANGELOG.md)
 
 ## Author
