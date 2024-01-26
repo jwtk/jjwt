@@ -240,4 +240,25 @@ public final class Bytes {
             }
         }
     }
+
+    /**
+     * Pads the front of the specified byte array with zeros if necessary, returning a new padded result, or the
+     * original array unmodified if padding isn't necessary.  Padding is only performed if {@code length} is greater
+     * than {@code bytes.length}.
+     *
+     * @param bytes  the byte array to pre-pad with zeros if necessary
+     * @param length the length of the required output array
+     * @return the potentially pre-padded byte array, or the existing {@code bytes} array if padding wasn't necessary.
+     * @since 0.12.4
+     */
+    public static byte[] prepad(byte[] bytes, int length) {
+        Assert.notNull(bytes, "byte array cannot be null.");
+        Assert.gt(length, 0, "length must be positive (> 0).");
+        if (bytes.length < length) { // need to pad with leading zero(es):
+            byte[] padded = new byte[length];
+            System.arraycopy(bytes, 0, padded, length - bytes.length, bytes.length);
+            bytes = padded;
+        }
+        return bytes;
+    }
 }

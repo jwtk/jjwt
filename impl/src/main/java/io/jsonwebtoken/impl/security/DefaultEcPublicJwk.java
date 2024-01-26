@@ -30,9 +30,12 @@ import java.util.Set;
 class DefaultEcPublicJwk extends AbstractPublicJwk<ECPublicKey> implements EcPublicJwk {
 
     static final String TYPE_VALUE = "EC";
+
     static final Parameter<String> CRV = Parameters.string("crv", "Curve");
-    static final Parameter<BigInteger> X = Parameters.bigInt("x", "X Coordinate").build();
-    static final Parameter<BigInteger> Y = Parameters.bigInt("y", "Y Coordinate").build();
+    static final Parameter<BigInteger> X = Parameters.bigInt("x", "X Coordinate")
+            .setConverter(FieldElementConverter.B64URL_CONVERTER).build();
+    static final Parameter<BigInteger> Y = Parameters.bigInt("y", "Y Coordinate")
+            .setConverter(FieldElementConverter.B64URL_CONVERTER).build();
     static final Set<Parameter<?>> PARAMS = Collections.concat(AbstractAsymmetricJwk.PARAMS, CRV, X, Y);
 
     // https://www.rfc-editor.org/rfc/rfc7638#section-3.2
@@ -52,4 +55,5 @@ class DefaultEcPublicJwk extends AbstractPublicJwk<ECPublicKey> implements EcPub
     protected boolean equals(PublicJwk<?> jwk) {
         return jwk instanceof EcPublicJwk && equalsPublic(this, jwk);
     }
+
 }

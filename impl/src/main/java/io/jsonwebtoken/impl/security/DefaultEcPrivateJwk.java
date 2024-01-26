@@ -31,7 +31,10 @@ import static io.jsonwebtoken.impl.security.DefaultEcPublicJwk.equalsPublic;
 
 class DefaultEcPrivateJwk extends AbstractPrivateJwk<ECPrivateKey, ECPublicKey, EcPublicJwk> implements EcPrivateJwk {
 
-    static final Parameter<BigInteger> D = Parameters.secretBigInt("d", "ECC Private Key");
+    static final Parameter<BigInteger> D = Parameters.bigInt("d", "ECC Private Key")
+            .setConverter(FieldElementConverter.B64URL_CONVERTER)
+            .setSecret(true) // important!
+            .build();
     static final Set<Parameter<?>> PARAMS = Collections.concat(DefaultEcPublicJwk.PARAMS, D);
 
     DefaultEcPrivateJwk(JwkContext<ECPrivateKey> ctx, EcPublicJwk pubJwk) {

@@ -81,11 +81,10 @@ class EcPublicJwkFactory extends AbstractEcJwkFactory<ECPublicKey, EcPublicJwk> 
 
         ctx.put(DefaultEcPublicJwk.CRV.getId(), curveId);
 
-        int fieldSize = curve.getField().getFieldSize();
-        String x = toOctetString(fieldSize, point.getAffineX());
+        String x = toOctetString(curve, point.getAffineX());
         ctx.put(DefaultEcPublicJwk.X.getId(), x);
 
-        String y = toOctetString(fieldSize, point.getAffineY());
+        String y = toOctetString(curve, point.getAffineY());
         ctx.put(DefaultEcPublicJwk.Y.getId(), y);
 
         return new DefaultEcPublicJwk(ctx);

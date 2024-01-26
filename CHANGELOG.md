@@ -8,6 +8,12 @@ This patch release:
   `java.io.Reader` instance. [Issue 882](https://github.com/jwtk/jjwt/issues/882).
 * Ensures a single string `aud` (Audience) claim is retained (without converting it to a `Set`) when copying/applying a 
   source Claims instance to a destination Claims builder. [Issue 890](https://github.com/jwtk/jjwt/issues/890).
+* Ensures P-256, P-384 and P-521 Elliptic Curve JWKs zero-pad their field element (`x`, `y`, and `d`) byte array values
+  if necessary before Base64Url-encoding per [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518), Sections 
+  [6.2.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2), 
+  [6.2.1.3](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3), and
+  [6.2.2.1](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.2.1), respectively. 
+  [Issue 901](https://github.com/jwtk/jjwt/issues/901).
 
 ### 0.12.3
 
