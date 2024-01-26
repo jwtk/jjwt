@@ -12,7 +12,8 @@ This patch release:
   if necessary before Base64Url-encoding per [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518), Sections 
   [6.2.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2), 
   [6.2.1.3](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3), and
-  [6.2.2.1](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.2.1), respectively.
+  [6.2.2.1](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.2.1), respectively. 
+  [Issue 901](https://github.com/jwtk/jjwt/issues/901).
 
 ### 0.12.3
 
