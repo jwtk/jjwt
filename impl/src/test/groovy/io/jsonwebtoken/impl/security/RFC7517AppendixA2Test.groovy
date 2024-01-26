@@ -23,6 +23,7 @@ import org.junit.Test
 
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.RSAPrivateCrtKey
+import java.security.spec.EllipticCurve
 
 import static org.junit.Assert.*
 
@@ -31,8 +32,8 @@ import static org.junit.Assert.*
  */
 class RFC7517AppendixA2Test {
 
-    private static final String ecEncode(int fieldSize, BigInteger coord) {
-        return AbstractEcJwkFactory.toOctetString(fieldSize, coord)
+    private static final String ecEncode(EllipticCurve curve, BigInteger coord) {
+        return AbstractEcJwkFactory.toOctetString(curve, coord)
     }
 
     private static final String rsaEncode(BigInteger i) {
@@ -90,17 +91,17 @@ class RFC7517AppendixA2Test {
         def m = keys[0]
         def jwk = Jwks.builder().add(m).build() as EcPrivateJwk
         def key = jwk.toKey()
-        int fieldSize = key.params.curve.field.fieldSize
+        def curve = key.params.curve
         assertTrue key instanceof ECPrivateKey
         assertEquals m.size(), jwk.size()
         assertEquals m.kty, jwk.getType()
         assertEquals m.crv, jwk.get('crv')
         assertEquals m.x, jwk.get('x')
-        assertEquals m.x, ecEncode(fieldSize, jwk.toPublicJwk().toKey().w.affineX)
+        assertEquals m.x, ecEncode(curve, jwk.toPublicJwk().toKey().w.affineX)
         assertEquals m.y, jwk.get('y')
-        assertEquals m.y, ecEncode(fieldSize, jwk.toPublicJwk().toKey().w.affineY)
+        assertEquals m.y, ecEncode(curve, jwk.toPublicJwk().toKey().w.affineY)
         assertEquals m.d, jwk.get('d').get()
-        assertEquals m.d, ecEncode(fieldSize, key.s)
+        assertEquals m.d, ecEncode(curve, key.s)
         assertEquals m.use, jwk.getPublicKeyUse()
         assertEquals m.kid, jwk.getId()
 
