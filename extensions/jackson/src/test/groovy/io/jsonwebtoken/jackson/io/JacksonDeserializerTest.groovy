@@ -147,6 +147,64 @@ class JacksonDeserializerTest {
     }
 
     /**
+     * Asserts https://github.com/jwtk/jjwt/issues/893
+     */
+    @Test
+    void testIgnoreUnknownPropertiesWhenDeserializeWithCustomObject() {
+        
+        long currentTime = System.currentTimeMillis()
+
+        String json = """
+             {
+                "oneKey":"oneValue", 
+                "custom": {
+                    "stringValue": "s-value",
+                    "intValue": "11",
+                    "dateValue": ${currentTime},
+                    "shortValue": 22,
+                    "longValue": 33,
+                    "byteValue": 15,
+                    "byteArrayValue": "${base64('bytes')}",
+                    "unknown": "unknown",
+                    "nestedValue": {
+                        "stringValue": "nested-value",
+                        "intValue": "111",
+                        "dateValue": ${currentTime + 1},
+                        "shortValue": 222,
+                        "longValue": 333,
+                        "byteValue": 10,
+                        "byteArrayValue": "${base64('bytes2')}",
+                        "unknown": "unknown"
+                    }
+                }
+            }
+            """
+
+        CustomBean expectedCustomBean = new CustomBean()
+                .setByteArrayValue("bytes".getBytes("UTF-8"))
+                .setByteValue(0xF as byte)
+                .setDateValue(new Date(currentTime))
+                .setIntValue(11)
+                .setShortValue(22 as short)
+                .setLongValue(33L)
+                .setStringValue("s-value")
+                .setNestedValue(new CustomBean()
+                        .setByteArrayValue("bytes2".getBytes("UTF-8"))
+                        .setByteValue(0xA as byte)
+                        .setDateValue(new Date(currentTime + 1))
+                        .setIntValue(111)
+                        .setShortValue(222 as short)
+                        .setLongValue(333L)
+                        .setStringValue("nested-value")
+                )
+
+        def expected = [oneKey: "oneValue", custom: expectedCustomBean]
+        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build())
+                .deserialize(new StringReader(json))
+        assertEquals expected, result
+    }
+
+    /**
      * For: https://github.com/jwtk/jjwt/issues/564
      */
     @Test
