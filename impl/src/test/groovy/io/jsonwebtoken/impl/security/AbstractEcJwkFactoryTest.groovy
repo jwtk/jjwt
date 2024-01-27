@@ -63,14 +63,18 @@ class AbstractEcJwkFactoryTest {
             def y = Decoders.BASE64URL.decode(ys)
             def d = Decoders.BASE64URL.decode(ds)
 
-            // most important part of the test: the decoded byte arrays must have a length equal to the curve
-            // field size (in bytes):
+            // most important part of the test: 'x' and 'y' decoded byte arrays must have a length equal to the curve
+            // field size (in bytes) per https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2 and
+            // https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3
             int fieldSizeInBits = key.getParams().getCurve().getField().getFieldSize()
             int fieldSizeInBytes = Bytes.length(fieldSizeInBits)
-
             assertEquals fieldSizeInBytes, x.length
             assertEquals fieldSizeInBytes, y.length
-            assertEquals fieldSizeInBytes, d.length
+
+            // and 'd' must have a length equal to the curve order size in bytes per
+            // https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.2.1
+            int orderSizeInBytes = Bytes.length(key.params.order.bitLength())
+            assertEquals orderSizeInBytes, d.length
         }
     }
 }
