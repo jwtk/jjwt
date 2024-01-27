@@ -321,7 +321,7 @@ If you would like to help, but don't know where to start, please visit the
 ones there, and we'll be happy to discuss and answer questions in the issue comments.
 
 If any of those don't appeal to you, no worries! Any help you would like to offer would be 
-appreciated based on the above caveats concerning [contributing pull reqeuests](#contributing-pull-requests). Feel free
+appreciated based on the above caveats concerning [contributing pull requests](#contributing-pull-requests). Feel free
 to [discuss or ask questions first](https://github.com/jwtk/jjwt/discussions) if you're not sure. :)
 
 <a name="overview"></a>
@@ -2282,7 +2282,7 @@ During JWE creation, these algorithms:
 
 * Obtain the Content Encryption Key (CEK) used to encrypt the JWE payload as follows:
   * Inspect the JWE recipient's Elliptic Curve public key and determine its Curve.
-  * Generate a new secure-random ephemeral Ellipic Curve public/private key pair on this same Curve.
+  * Generate a new secure-random ephemeral Elliptic Curve public/private key pair on this same Curve.
   * Add the ephemeral EC public key to the JWE 
     [epk header](https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1) for inclusion in the final JWE.
   * Produce an ECDH shared secret with the ECDH Key Agreement algorithm using the JWE recipient's EC public key
@@ -2628,7 +2628,7 @@ OctetPrivateJwk edEcPrivJwk = Jwks.builder().octetKeyPair(edEcKeyPair).build();
 ```
 
 Note that:
-* An exception will thrown when calling `rsaKeyPair` if the specified `KeyPair` instance does not contain
+* An exception will be thrown when calling `rsaKeyPair` if the specified `KeyPair` instance does not contain
 `RSAPublicKey` and `RSAPrivateKey` instances.  
 * Similarly, an exception will be thrown when calling `ecKeyPair` if
 the `KeyPair` instance does not contain `ECPublicKey` and `ECPrivateKey` instances.  
@@ -2766,7 +2766,7 @@ For example, consider the following Secret JWK JSON example from
 }
 ```
 
-The `k` value (`AyAyM1SysPpby...`) reflects secure key material and should never be accidentially
+The `k` value (`AyAyM1SysPpby...`) reflects secure key material and should never be accidentally
 exposed.
 
 If you were to parse this JSON as a `Jwk`, calling `toString()` will _NOT_ print this value.  It will 
@@ -2992,7 +2992,7 @@ Jwts.parser()
 <a name="json-jackson-custom-types"></a>
 #### Parsing of Custom Claim Types
 
-By default JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to 
+By default, JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to 
 deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in 
 through a constructor. For example:
 
@@ -3211,7 +3211,7 @@ characters at the end of a Base64 string may not work and can often result in an
 ##### Adding Invalid Characters
 
 JJWT's default Base64/Base64URL decoders automatically ignore illegal Base64 characters located in the beginning and 
-end of an encoded string. Therefore prepending or appending invalid characters like `{` or `]` or similar will also 
+end of an encoded string. Therefore, prepending or appending invalid characters like `{` or `]` or similar will also 
 not fail JJWT's signature checks either.  Why?
 
 Because such edits - whether changing a trailing character or two, or appending invalid characters - do not actually 
@@ -3524,7 +3524,7 @@ assert "me".equals(issuer);
 <a name="example-jwe-ecdhes"></a>
 ### JWT Encrypted with ECDH-ES
 
-This is an example showing how to encrypt and decrypt a JWT using Elliptic Curve Diffie-Hellman Ephmeral Static 
+This is an example showing how to encrypt and decrypt a JWT using Elliptic Curve Diffie-Hellman Ephemeral Static 
 Key Agreement (ECDH-ES) algorithms.
 
 These algorithms use ECDH-ES to encrypt and decrypt a secure-random key, and that 
