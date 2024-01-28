@@ -2835,9 +2835,9 @@ You create a JWK Set as follows:
 For example:
 
 ```java
-Jwk<?> jwk1 = Jwks.builder()./* ... */.build();
+Jwk<?> jwk = Jwks.builder()/* ... */.build();
 SecretJwk = Jwks.set()              // 1
-    .add(jwk1)                      // 2, appends a key
+    .add(jwk)                       // 2, appends a key
     //.add(aCollection)             //    append multiple keys
     //.keys(allJwks)                //    sets/replaces all keys
     //.add("aName", "aValue")       // 3, optional
