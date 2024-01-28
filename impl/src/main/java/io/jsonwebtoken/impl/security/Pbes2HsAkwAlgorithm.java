@@ -16,9 +16,11 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
+import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Assert;
@@ -50,11 +52,13 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
             "[JWA RFC 7518, Section 4.8.1.2](https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2) " +
                     "recommends password-based-encryption iterations be greater than or equal to " +
                     MIN_RECOMMENDED_ITERATIONS + ". Provided: ";
+    private static final double MAX_ITERATIONS_FACTOR = 2.5;
 
     private final int HASH_BYTE_LENGTH;
     private final int DERIVED_KEY_BIT_LENGTH;
     private final byte[] SALT_PREFIX;
     private final int DEFAULT_ITERATIONS;
+    private final int MAX_ITERATIONS;
     private final KeyAlgorithm<SecretKey, SecretKey> wrapAlg;
 
     private static byte[] toRfcSaltPrefix(byte[] bytes) {
@@ -106,6 +110,7 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         } else {
             DEFAULT_ITERATIONS = DEFAULT_SHA256_ITERATIONS;
         }
+        MAX_ITERATIONS = (int) (DEFAULT_ITERATIONS * MAX_ITERATIONS_FACTOR); // upper bound to help mitigate DoS attacks
 
         // https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8, 2nd paragraph, last sentence:
         // "Their derived-key lengths respectively are 16, 24, and 32 octets." :
@@ -184,7 +189,16 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final Password key = Assert.notNull(request.getKey(), "Decryption Password cannot be null.");
         ParameterReadable reader = new RequiredParameterReader(header);
         final byte[] inputSalt = reader.get(DefaultJweHeader.P2S);
-        final int iterations = reader.get(DefaultJweHeader.P2C);
+
+        Parameter<Integer> param = DefaultJweHeader.P2C;
+        final int iterations = reader.get(param);
+        if (iterations > MAX_ITERATIONS) {
+            String msg = "JWE Header " + param + " value " + iterations + " exceeds " + getId() + " maximum " +
+                    "allowed value " + MAX_ITERATIONS + ". The larger value is rejected to help mitigate " +
+                    "potential Denial of Service attacks.";
+            throw new UnsupportedJwtException(msg);
+        }
+
         final byte[] rfcSalt = Bytes.concat(SALT_PREFIX, inputSalt);
         final char[] password = key.toCharArray(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);

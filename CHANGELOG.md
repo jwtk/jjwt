@@ -67,6 +67,9 @@ This release also:
   [Issue 901](https://github.com/jwtk/jjwt/issues/901).
 * Ensures that Secret JWKs for HMAC-SHA algorithms with `k` sizes larger than the algorithm minimum can
   be parsed/used as expected. See [Issue #905](https://github.com/jwtk/jjwt/issues/905) 
+* Ensures there is an upper bound (maximum) iterations enforced for PBES2 decryption to help mitigate potential DoS 
+  attacks. Many thanks to Jingcheng Yang and Jianjun Chen from Sichuan University and Zhongguancun Lab for their 
+  work on this.
 * Fixes various typos in documentation and JavaDoc. Thanks to those contributing pull requests for these!
 
 ### 0.12.3
