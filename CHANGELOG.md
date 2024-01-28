@@ -65,6 +65,8 @@ This release also:
   [6.2.1.3](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3), and
   [6.2.2.1](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.2.1), respectively. 
   [Issue 901](https://github.com/jwtk/jjwt/issues/901).
+* Ensures that Secret JWKs for HMAC-SHA algorithms with `k` sizes larger than the algorithm minimum can
+  be parsed/used as expected. See [Issue #905](https://github.com/jwtk/jjwt/issues/905) 
 * Fixes various typos in documentation and JavaDoc. Thanks to those contributing pull requests for these!
 
 ### 0.12.3

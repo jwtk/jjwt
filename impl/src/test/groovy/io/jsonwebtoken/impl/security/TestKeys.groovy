@@ -21,6 +21,7 @@ import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.Jwks
 
 import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 import java.security.KeyPair
 import java.security.PrivateKey
 import java.security.Provider
@@ -42,6 +43,11 @@ class TestKeys {
     static SecretKey HS512 = Jwts.SIG.HS512.key().build()
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
+    static SecretKey NA256 = new SecretKeySpec(HS256.encoded, "NONE")
+    static SecretKey NA384 = new SecretKeySpec(HS384.encoded, "NONE")
+    static SecretKey NA512 = new SecretKeySpec(HS512.encoded, "NONE")
+    static Collection<SecretKey> NA = [NA256, NA384, NA512]
+
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static Collection<SecretKey> AGCM
     static {
@@ -59,6 +65,7 @@ class TestKeys {
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()
     static {
         SECRET.addAll(HS)
+        SECRET.addAll(NA)
         SECRET.addAll(AGCM)
         SECRET.addAll(ACBC)
     }
