@@ -123,6 +123,7 @@ class JacksonDeserializerTest {
 
     /**
      * Asserts https://github.com/jwtk/jjwt/issues/877
+     * @since 0.12.4
      */
     @Test
     void testStrictDuplicateDetection() {

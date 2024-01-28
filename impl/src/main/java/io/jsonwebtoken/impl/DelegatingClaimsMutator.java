@@ -47,7 +47,7 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
         return self();
     }
 
-    @Override
+    @Override // override starting in 0.12.4
     public Object put(String key, Object value) {
         if (AUDIENCE_STRING.getId().equals(key)) { // https://github.com/jwtk/jjwt/issues/890
             if (value instanceof String) {
@@ -63,7 +63,7 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
         return super.put(key, value);
     }
 
-    @Override
+    @Override // overridden starting in 0.12.4
     public void putAll(Map<? extends String, ?> m) {
         if (m == null) return;
         for (Map.Entry<? extends String, ?> entry : m.entrySet()) {

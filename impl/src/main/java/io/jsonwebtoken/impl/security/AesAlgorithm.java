@@ -55,6 +55,11 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     protected final int tagBitLength;
     protected final boolean gcm;
 
+    /**
+     * Ensures {@code keyBitLength is a valid AES key length}
+     * @param keyBitLength the key length (in bits) to check
+     * @since 0.12.4
+     */
     static void assertKeyBitLength(int keyBitLength) {
         if (keyBitLength == 128 || keyBitLength == 192 || keyBitLength == 256) return; // valid
         String msg = "Invalid AES key length: " + Bytes.bitsMsg(keyBitLength) + ". AES only supports " +

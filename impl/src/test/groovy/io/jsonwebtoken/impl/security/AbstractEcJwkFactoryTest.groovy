@@ -44,6 +44,7 @@ class AbstractEcJwkFactoryTest {
 
     /**
      * Asserts correct behavior per https://github.com/jwtk/jjwt/issues/901
+     * @since 0.12.4
      */
     @Test
     void fieldElementByteArrayLength() {
