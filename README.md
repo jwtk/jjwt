@@ -125,6 +125,9 @@ JJWT is open source under the terms of the [Apache 2.0 License](http://www.apach
     * [JWK Thumbprint URI](#jwk-thumbprint-uri)
   * [JWK Security Considerations](#jwk-security)
     * [JWK `toString()` Safety](#jwk-tostring)
+* [JWK Sets](#jwkset)
+  * [Create a JWK Set](#jwkset-create)
+  * [Read a JWK Set](#jwkset-read)
 * [Compression](#compression)
   * [Custom Compression Algorithm](#compression-custom)
 * [JSON Processor](#json)
@@ -2787,6 +2790,91 @@ This code would print the following string literal to the System console:
 
 This is true for all secret or private key members in `SecretJwk` and `PrivateJwk` (e.g. `RsaPrivateJwk`, 
 `EcPrivateJwk`, etc) instances.
+
+<a name="jwkset"></a>
+## JWK Sets
+
+The JWK specification specification also defines the concept of a
+[JWK Set](https://datatracker.ietf.org/doc/html/rfc7517#section-5):
+
+    A JWK Set is a JSON object that represents a set of JWKs.  The JSON
+    object MUST have a "keys" member, with its value being an array of
+    JWKs.
+
+For example:
+
+```json
+{
+  "keys": [jwk1, jwk2, ...]
+}
+```
+Where `jwk1`, `jwk2`, etc., are each a single [JWK](#jwk) JSON Object.
+
+A JWK Set _may_ have other members that are peers to the `keys` member, but the JWK specification does not define any
+others - any such additional members would be custom or unique based on an application's needs or preferences.
+
+A JWK Set can be useful for conveying multiple keys simultaneously.  For example, an identity web service could expose
+all of its RSA or Elliptic Curve public keys that might be used for various purposes or different algorithms to
+3rd parties or API clients as a single JWK Set JSON Object or document.  An API client can then parse the JWK Set
+to obtain the keys that might be used to verify or decrypt JWTs sent by the web service.
+
+JWK Sets are (mostly) simple collections of JWKs, and they are easily supported by JJWT with parallel builder/parser
+concepts we've seen above.
+
+<a name="jwkset-create"></a>
+### Create a JWK Set
+
+You create a JWK Set as follows:
+
+1. Use the `Jwks.set()` method to create a `JwkSetBuilder` instance.
+2. Call the `add(Jwk)` method any number of times to add one or more JWKs to the set.
+3. Call builder methods to set any additional JSON members if desired, or the `operationPolicy(KeyOperationPolicy)`
+   builder method to control what key operations may be assigned to any given JWK added to the set.
+4. Call the `build()` method to produce the resulting JWK Set.
+
+For example:
+
+```java
+Jwk<?> jwk1 = Jwks.builder()./* ... */.build();
+SecretJwk = Jwks.set()              // 1
+    .add(jwk1)                      // 2, appends a key
+    //.add(aCollection)             //    append multiple keys
+    //.keys(allJwks)                //    sets/replaces all keys
+    //.add("aName", "aValue")       // 3, optional
+    //.operationPolicy(Jwks.OP      // 3, optional
+    //     .policy()
+    //     /* etc... */
+    //     .build())               
+    //.provider(aJcaProvider)       //    optional
+    .build();                       // (4)
+```
+
+As shown, you can optionally configure the `.operationPolicy(KeyOperationPolicy)` method using a 
+`Jwts.OP.policy()` builder.  A `KeyOperationPolicy` allows you control what operations are allowed for any JWK
+before being added to the JWK Set; any JWK that does not match the policy will be rejected and not added to the set. 
+JJWT internally defaults to a standard RFC-compliant policy, but you can create a 
+policy to override the default if desired using the `Jwks.OP.policy()` builder method.
+
+<a name="jwkset-read"></a>
+### Read a JWK Set
+
+You can read/parse a JWK Set by building a JWK Set `Parser` and parsing the JWK Set JSON with one of its various 
+`parse` methods:
+
+```java
+JwkSet jwkSet = Jwks.setParser()
+    //.provider(aJcaProvider)      // optional
+    //.deserializer(deserializer)  // optional
+    //.policy(aKeyOperationPolicy) // optional
+    .build()                       // create the parser
+    .parse(json);                  // actually parse JSON String, InputStream, Reader, etc.
+
+jwkSet.forEach(jwk -> System.out.println(jwk));
+```
+
+As shown above, you can specify a custom JCA Provider, [JSON deserializer](#json) or `KeyOperationPolicy` in the 
+same way as the `JwkSetBuilder`. Any JWK that does not match the default (or configured) policy will be 
+rejected. You can create a policy to override the default if desired using the `Jwks.OP.policy()` builder method.
 
 <a name="compression"></a>
 ## Compression
