@@ -30,6 +30,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
@@ -54,9 +55,22 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     protected final int tagBitLength;
     protected final boolean gcm;
 
+    static void assertKeyBitLength(int keyBitLength) {
+        if (keyBitLength == 128 || keyBitLength == 192 || keyBitLength == 256) return; // valid
+        String msg = "Invalid AES key length: " + Bytes.bitsMsg(keyBitLength) + ". AES only supports " +
+                "128, 192, or 256 bit keys.";
+        throw new IllegalArgumentException(msg);
+    }
+
+    static SecretKey keyFor(byte[] bytes) {
+        int bitlen = (int) Bytes.bitLength(bytes);
+        assertKeyBitLength(bitlen);
+        return new SecretKeySpec(bytes, KEY_ALG_NAME);
+    }
+
     AesAlgorithm(String id, final String jcaTransformation, int keyBitLength) {
         super(id, jcaTransformation);
-        Assert.isTrue(keyBitLength == 128 || keyBitLength == 192 || keyBitLength == 256, "Invalid AES key length: it must equal 128, 192, or 256.");
+        assertKeyBitLength(keyBitLength);
         this.keyBitLength = keyBitLength;
         this.gcm = jcaTransformation.startsWith("AES/GCM");
         this.ivBitLength = jcaTransformation.equals("AESWrap") ? 0 : (this.gcm ? GCM_IV_SIZE : BLOCK_SIZE);

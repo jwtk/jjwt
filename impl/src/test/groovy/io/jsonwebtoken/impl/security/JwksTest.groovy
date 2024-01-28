@@ -40,7 +40,7 @@ import static org.junit.Assert.*
 
 class JwksTest {
 
-    private static final SecretKey SKEY = Jwts.SIG.HS256.key().build()
+    private static final SecretKey SKEY = TestKeys.NA256
     private static final java.security.KeyPair EC_PAIR = Jwts.SIG.ES256.keyPair().build()
 
     private static String srandom() {
@@ -172,7 +172,7 @@ class JwksTest {
     @Test
     void testOperations() {
         def val = [Jwks.OP.SIGN, Jwks.OP.VERIFY] as Set<KeyOperation>
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(val).and().build()
+        def jwk = Jwks.builder().key(TestKeys.NA256).operations().add(val).and().build()
         assertEquals val, jwk.getOperations()
     }
 

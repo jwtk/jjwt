@@ -29,10 +29,8 @@ import static org.junit.Assert.*
 
 class AbstractJwkBuilderTest {
 
-    private static final SecretKey SKEY = TestKeys.A256GCM
-
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder) Jwks.builder().key(SKEY)
+        return (AbstractJwkBuilder) Jwks.builder().key(TestKeys.NA256)
     }
 
     @Test

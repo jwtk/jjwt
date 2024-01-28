@@ -97,7 +97,7 @@ class JwkSerializationTest {
 
     static void testSecretJwk(Serializer ser, Deserializer des) {
 
-        def key = TestKeys.A128GCM
+        def key = TestKeys.NA256
         def jwk = Jwks.builder().key(key).id('id').build()
         assertWrapped(jwk, ['k'])
 
