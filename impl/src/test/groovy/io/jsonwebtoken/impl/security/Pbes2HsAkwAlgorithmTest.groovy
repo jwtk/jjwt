@@ -53,6 +53,9 @@ class Pbes2HsAkwAlgorithmTest {
         }
     }
 
+    /**
+     * @since 0.12.4
+     */
     @Test
     void testExceedsMaxIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {

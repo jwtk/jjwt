@@ -65,6 +65,7 @@ public final class Services {
      * @param <T> The type of the SPI
      * @return The first available instance of the service.
      * @throws UnavailableImplementationException When no implementation of the SPI class can be found.
+     * @since 0.12.4
      */
     public static <T> T get(Class<T> spi) {
         // TODO: JDK8, replace this find/putIfAbsent logic with ConcurrentMap.computeIfAbsent

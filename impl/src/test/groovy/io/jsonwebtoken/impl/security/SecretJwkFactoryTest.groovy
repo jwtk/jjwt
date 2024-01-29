@@ -131,6 +131,9 @@ class SecretJwkFactoryTest {
         assertEquals 'AES', result.toKey().getAlgorithm()
     }
 
+    /**
+     * @since 0.12.4
+     */
     @Test
     // 'oct' type, but 'alg' value is not a secret key algorithm (and therefore malformed)
     void testMismatchedAlgorithm() {
@@ -176,6 +179,7 @@ class SecretJwkFactoryTest {
      *
      * This test asserts this allowed behavior per https://github.com/jwtk/jjwt/issues/905
      * @see <a href="https://github.com/jwtk/jjwt/issues/905">JJWT Issue 905</a>
+     * @since 0.12.4
      */
     @Test
     void testAllowedKeyLengths() {
