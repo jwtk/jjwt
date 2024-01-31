@@ -130,12 +130,12 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
             @Override
             public T single(String audience) {
                 return audienceSingle(audience);
+                // DO NOT call changed() here - we don't want to replace the value with a collection
             }
 
             @Override
-            public T and() {
+            protected void changed() {
                 put(DefaultClaims.AUDIENCE, Collections.asSet(getCollection()));
-                return super.and();
             }
         };
     }

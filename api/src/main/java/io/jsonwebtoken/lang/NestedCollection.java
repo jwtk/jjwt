@@ -17,7 +17,12 @@ package io.jsonwebtoken.lang;
 
 /**
  * A {@link CollectionMutator} that can return access to its parent via the {@link Conjunctor#and() and()} method for
- * continued configuration.
+ * continued configuration.  For example:
+ * <blockquote><pre>
+ * builder
+ *     .aNestedCollection()// etc...
+ *     <b>.and() // return parent</b>
+ * // resume parent configuration...</pre></blockquote>
  *
  * @param <E> the type of elements in the collection
  * @param <P> the parent to return

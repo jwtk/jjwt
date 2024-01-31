@@ -48,6 +48,22 @@ class DefaultJwtParserBuilderTest {
         assertTrue builder.@critical.isEmpty()
     }
 
+    /**
+     * Asserts that if a .critical() builder is used, and its .and() method is not called, the change to the
+     * crit collection is still applied when building the parser.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testCriticalWithoutConjunction() {
+        builder.critical().add('foo') // no .and() call
+        assertFalse builder.@critical.isEmpty()
+        assertTrue builder.@critical.contains('foo')
+        def parser = builder.build()
+        assertFalse parser.@critical.isEmpty()
+        assertTrue parser.@critical.contains('foo')
+    }
+
     @Test
     void testSetProvider() {
         Provider provider = createMock(Provider)
@@ -173,6 +189,21 @@ class DefaultJwtParserBuilderTest {
         assertSame codec, parser.zipAlgs.locate(header)
     }
 
+    /**
+     * Asserts that if a .zip() builder is used, and its .and() method is not called, the change to the
+     * compression algorithm collection is still applied when building the parser.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testAddCompressionAlgorithmWithoutConjunction() {
+        def codec = new TestCompressionCodec(id: 'test')
+        builder.zip().add(codec) // no .and() call
+        def parser = builder.build()
+        def header = Jwts.header().add('zip', codec.getId()).build()
+        assertSame codec, parser.zipAlgs.locate(header)
+    }
+
     @Test
     void testAddCompressionAlgorithmsOverrideDefaults() {
         def header = Jwts.header().add('zip', 'DEF').build()
@@ -211,6 +242,21 @@ class DefaultJwtParserBuilderTest {
         assertSame custom, parser.encAlgs.apply(header) // custom one, not standard impl
     }
 
+    /**
+     * Asserts that if an .enc() builder is used, and its .and() method is not called, the change to the
+     * encryption algorithm collection is still applied when building the parser.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testAddEncryptionAlgorithmWithoutConjunction() {
+        def alg = new TestAeadAlgorithm(id: 'test')
+        builder.enc().add(alg) // no .and() call
+        def parser = builder.build() as DefaultJwtParser
+        def header = Jwts.header().add('alg', 'foo').add('enc', alg.getId()).build() as JweHeader
+        assertSame alg, parser.encAlgs.apply(header)
+    }
+
     @Test
     void testCaseSensitiveEncryptionAlgorithm() {
         def alg = Jwts.ENC.A256GCM
@@ -237,6 +283,23 @@ class DefaultJwtParserBuilderTest {
         def custom = new TestKeyAlgorithm(id: standardId) // custom impl with standard identifier
         parser = builder.key().add(custom).and().build()
         assertSame custom, parser.keyAlgs.apply(header) // custom one, not standard impl
+    }
+
+    /**
+     * Asserts that if an .key() builder is used, and its .and() method is not called, the change to the
+     * key algorithm collection is still applied when building the parser.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testAddKeyAlgorithmWithoutConjunction() {
+        def alg = new TestKeyAlgorithm(id: 'test')
+        builder.key().add(alg) // no .and() call
+        def parser = builder.build() as DefaultJwtParser
+        def header = Jwts.header()
+                .add('enc', 'foo')
+                .add('alg', alg.getId()).build() as JweHeader
+        assertSame alg, parser.keyAlgs.apply(header)
     }
 
     @Test
@@ -266,6 +329,21 @@ class DefaultJwtParserBuilderTest {
         def custom = new TestMacAlgorithm(id: standardId) // custom impl with standard identifier
         parser = builder.sig().add(custom).and().build()
         assertSame custom, parser.sigAlgs.apply(header) // custom one, not standard impl
+    }
+
+    /**
+     * Asserts that if an .sig() builder is used, and its .and() method is not called, the change to the
+     * signature algorithm collection is still applied when building the parser.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since JJWT_RELEASE_VERSION
+     */
+    @Test
+    void testAddSignatureAlgorithmWithoutConjunction() {
+        def alg = new TestMacAlgorithm(id: 'test')
+        builder.sig().add(alg) // no .and() call
+        def parser = builder.build() as DefaultJwtParser
+        def header = Jwts.header().add('alg', alg.getId()).build() as JwsHeader
+        assertSame alg, parser.sigAlgs.apply(header)
     }
 
     @Test

@@ -33,9 +33,11 @@ public interface ProtectedHeaderMutator<T extends ProtectedHeaderMutator<T>> ext
     /**
      * Configures names of header parameters used by JWT or JWA specification extensions that <em>MUST</em> be
      * understood and supported by the JWT recipient. When finished, use the collection's
-     * {@link Conjunctor#and() and()} method to return to the header builder, for example:
+     * {@link Conjunctor#and() and()} method to continue header configuration, for example:
      * <blockquote><pre>
-     * builder.critical().add("headerName").{@link Conjunctor#and() and()} // etc...</pre></blockquote>
+     * headerBuilder
+     *     .critical().add("headerName").<b>{@link Conjunctor#and() and()} // return parent</b>
+     * // resume header configuration...</pre></blockquote>
      *
      * @return the {@link NestedCollection} to use for {@code crit} configuration.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11">JWS <code>crit</code> (Critical) Header Parameter</a>
