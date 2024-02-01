@@ -795,7 +795,7 @@ class DefaultJwtBuilderTest {
      * Asserts that if a .audience() builder is used, and its .and() method is not called, the change to the
      * audience is still applied when building the JWT.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testAudienceWithoutConjunction() {
@@ -813,7 +813,7 @@ class DefaultJwtBuilderTest {
      * Asserts that if a .header().critical() builder is used, and its .and() method is not called, the change to the
      * crit collection is still applied when building the header.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testCritWithoutConjunction() {

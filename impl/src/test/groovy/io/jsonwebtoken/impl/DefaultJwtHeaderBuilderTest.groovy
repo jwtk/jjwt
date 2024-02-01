@@ -511,7 +511,7 @@ class DefaultJwtHeaderBuilderTest {
      * Asserts that if a .critical() builder is used, and its .and() method is not called, the change to the
      * crit collection is still applied when building the header.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testCritWithoutConjunction() {
