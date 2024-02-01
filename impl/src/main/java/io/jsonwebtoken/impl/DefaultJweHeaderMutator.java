@@ -107,9 +107,8 @@ public class DefaultJweHeaderMutator<T extends JweHeaderMutator<T>>
     public NestedCollection<String, T> critical() {
         return new DefaultNestedCollection<String, T>(self(), this.DELEGATE.get(DefaultProtectedHeader.CRIT)) {
             @Override
-            public T and() {
+            protected void changed() {
                 put(DefaultProtectedHeader.CRIT, Collections.asSet(getCollection()));
-                return super.and();
             }
         };
     }

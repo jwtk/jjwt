@@ -993,7 +993,7 @@ String jws = Jwts.builder()
 
     .issuer("me")
     .subject("Bob")
-    .audience("you")
+    .audience().add("you").and()    
     .expiration(expiration) //a java.util.Date
     .notBefore(notBefore) //a java.util.Date 
     .issuedAt(new Date()) // for example, now

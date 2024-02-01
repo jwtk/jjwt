@@ -111,11 +111,10 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
     public NestedCollection<KeyOperation, T> operations() {
         return new DefaultNestedCollection<KeyOperation, T>(self(), this.DELEGATE.getOperations()) {
             @Override
-            public T and() {
+            protected void changed() {
                 Collection<? extends KeyOperation> c = getCollection();
                 opsPolicy.validate(c);
                 DELEGATE.setOperations(c);
-                return super.and();
             }
         };
     }

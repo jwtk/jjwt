@@ -1,5 +1,31 @@
 ## Release Notes
 
+### 0.12.5
+
+This patch release:
+
+* Ensures that builders' `NestedCollection` changes are applied to the collection immediately as mutation methods are called, no longer
+  requiring application developers to call `.and()` to 'commit' or apply a change.  For example, prior to this release,
+  the following code did not apply changes:
+  ```java
+  JwtBuilder builder = Jwts.builder();
+  builder.audience().add("an-audience"); // no .and() call
+  builder.compact(); // would not keep 'an-audience'
+  ```
+  Now this code works as expected and all other `NestedCollection` instances like it apply changes immediately (e.g. when calling
+  `.add(value)`).
+  
+  However, standard fluent builder chains are still recommended for readability when feasible, e.g.
+  
+  ```java
+  Jwts.builder()
+      .audience().add("an-audience").and() // allows fluent chaining
+      .subject("Joe")
+      // etc...
+      .compact()
+  ```
+  See [Issue 916](https://github.com/jwtk/jjwt/issues/916).
+
 ### 0.12.4
 
 This patch release includes various changes listed below.
