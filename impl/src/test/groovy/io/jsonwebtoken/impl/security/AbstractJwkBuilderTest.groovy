@@ -246,7 +246,7 @@ class AbstractJwkBuilderTest {
      * Asserts that if a .operations() builder is used, and its .and() method is not called, the change to the
      * operations collection is still applied when building the JWK.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testOperationsWithoutConjunction() {

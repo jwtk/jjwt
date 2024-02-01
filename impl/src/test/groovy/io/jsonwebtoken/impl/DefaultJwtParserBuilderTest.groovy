@@ -52,7 +52,7 @@ class DefaultJwtParserBuilderTest {
      * Asserts that if a .critical() builder is used, and its .and() method is not called, the change to the
      * crit collection is still applied when building the parser.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testCriticalWithoutConjunction() {
@@ -193,7 +193,7 @@ class DefaultJwtParserBuilderTest {
      * Asserts that if a .zip() builder is used, and its .and() method is not called, the change to the
      * compression algorithm collection is still applied when building the parser.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testAddCompressionAlgorithmWithoutConjunction() {
@@ -246,7 +246,7 @@ class DefaultJwtParserBuilderTest {
      * Asserts that if an .enc() builder is used, and its .and() method is not called, the change to the
      * encryption algorithm collection is still applied when building the parser.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testAddEncryptionAlgorithmWithoutConjunction() {
@@ -289,7 +289,7 @@ class DefaultJwtParserBuilderTest {
      * Asserts that if an .key() builder is used, and its .and() method is not called, the change to the
      * key algorithm collection is still applied when building the parser.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testAddKeyAlgorithmWithoutConjunction() {
@@ -335,7 +335,7 @@ class DefaultJwtParserBuilderTest {
      * Asserts that if an .sig() builder is used, and its .and() method is not called, the change to the
      * signature algorithm collection is still applied when building the parser.
      * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
-     * @since JJWT_RELEASE_VERSION
+     * @since 0.12.5
      */
     @Test
     void testAddSignatureAlgorithmWithoutConjunction() {
