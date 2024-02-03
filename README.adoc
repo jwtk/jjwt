@@ -1609,9 +1609,9 @@ key algorithms:
 | `EdDSA`
 | Edwards-Curve Digital Signature Algorithm (EdDSA)^*2*^
 |===
-+
+
 ^*1*.{sp}{fn-require-java15-plus}^
-+
+
 ^*2*.{sp}{fn-require-java15-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry class.
