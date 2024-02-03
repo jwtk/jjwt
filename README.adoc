@@ -1,11 +1,28 @@
 :doctype: book
+= Java JWT: JSON Web Token for Java and Android
+:project-version: 0.12.5
+:toc:
+:toc-title:
+:toc-placement!:
+:toclevels: 4
+
+ifdef::env-github[]
+:tip-caption: Tip
+:note-caption: NOTE
+:important-caption: IMPORTANT
+:caution-caption: CAUTION
+:warning-caption: WARNING
+endif::[]
+
+// Macros
+:fn-require-java8-plus: Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.
+:fn-require-java11-plus: Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.
+:fn-require-java15-plus: Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.
 
 image:https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=master[Build Status,link=https://github.com/jwtk/jjwt/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master[Coverage Status,link=https://coveralls.io/github/jwtk/jjwt?branch=master]
 image:https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg[Vuln score,link=https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg]
 image:https://snyk.io/test/github/jwtk/jjwt/badge.svg[Known Vulns,link=https://snyk.io/test/github/jwtk/jjwt/badge.svg]
-
-= Java JWT: JSON Web Token for Java and Android
 
 JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) and
 JSON Web Keys (JWKs) on the JVM and Android.
@@ -28,136 +45,12 @@ and is supported and maintained by a https://github.com/jwtk/jjwt/graphs/contrib
 
 JJWT is open source under the terms of the http://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 License].
 
+====
+[discrete]
 == Table of Contents
-
-* <<features,Features>>
- ** <<features-unsupported,Currently Unsupported Features>>
-* <<community,Community>>
- ** <<help,Getting Help>>
-  *** <<help-questions,Questions>>
-  *** <<help-issues,Bugs and Feature Requests>>
- ** <<contributing,Contributing>>
-  *** <<contributing-pull-requests,Pull Requests>>
-  *** <<contributing-help-wanted,Help Wanted>>
-* <<overview,What is a JSON Web Token?>>
- ** <<overview-example-jwt,JWT Example>>
- ** <<overview-example-jws,JWS Example>>
- ** <<overview-example-jwe,JWE Example>>
-* <<install,Installation>>
- ** <<install-jdk,JDK Projects>>
-  *** <<install-jdk-maven,Maven>>
-  *** <<install-jdk-gradle,Gradle>>
- ** <<install-android,Android Projects>>
-  *** <<install-android-dependencies,Dependencies>>
-  *** <<install-android-proguard,Proguard Exclusions>>
-  *** <<install-android-bc,Bouncy Castle>>
- ** <<install-understandingdependencies,Understanding JJWT Dependencies>>
-* <<quickstart,Quickstart>>
-* <<jwt-create,Create a JWT>>
- ** <<jwt-header,Header>>
-  *** <<jwt-header-builder,Header Builder>>
-  *** <<jwt-header-params,Header Parameters>>
-  *** <<jwt-header-map,Header Map>>
- ** <<jwt-payload,Payload>>
-  *** <<jwt-content,Arbitrary Content>>
-  *** <<jwt-claims,Claims>>
-   **** <<jwt-claims-standard,Standard Claims>>
-   **** <<jwt-claims-custom,Custom Claims>>
-   **** <<jwt-claims-instance,Claims Instance>>
-   **** <<jwt-claims-map,Claims Map>>
- ** <<jwt-compression,Compression>>
-* <<jwt-read,Read a JWT>>
- ** <<jwt-read-key,Static Parsing Key>>
- ** <<key-locator,Dynamic Parsing Key Lookup>>
-  *** <<key-locator-custom,Custom Key Locator>>
-  *** <<key-locator-strategy,Key Locator Strategy>>
-  *** <<key-locator-retvals,Key Locator Return Values>>
-  *** <<key-locator-provider,Provider-constrained Keys (PKCS11, HSM, etc)>>
- ** <<jwt-read-claims,Claim Assertions>>
- ** <<jwt-read-clock,Accounting for Clock Skew>>
-  *** <<jwt-read-clock-custom,Custom Clock Support>>
- ** <<jwt-read-decompression,Decompression>>
-* <<jws,Signed JWTs>>
- ** <<jws-alg,Standard Signature Algorithms>>
- ** <<jws-key,Signature Algorithm Keys>>
-  *** <<jws-key-hmacsha,HMAC-SHA>>
-  *** <<jws-key-rsa,RSA>>
-  *** <<jws-key-ecdsa,Elliptic Curve>>
-  *** <<jws-key-create,Creating Safe Keys>>
-   **** <<jws-key-create-secret,Secret Keys>>
-   **** <<jws-key-create-asym,Asymetric Keys>>
- ** <<jws-create,Create a JWS>>
-  *** <<jws-create-key,Signing Key>>
-   **** <<jws-create-key-secret,SecretKey Formats>>
-   **** <<jws-create-key-algoverride,Signature Algorithm Override>>
-  *** <<jws-create-compression,Compression>>
- ** <<jws-read,Read a JWS>>
-  *** <<jws-read-key,Verification Key>>
-  *** <<jws-read-key-locator,Verification Key Locator>>
-  *** <<jws-read-decompression,Decompression>>
- ** <<jws-unencoded,Unencoded Payload Option>>
-  *** <<jws-unencoded-detached,Detached Payload Example>>
-  *** <<jws-unencoded-nondetached,Non-Detached Payload Example>>
-* <<jwe,Encrypted JWTs>>
- ** <<jwe-enc,JWE Encryption Algorithms>>
-  *** <<jwe-enc-symmetric,JWE Symmetric Encryption>>
- ** <<jwe-alg,JWE Key Management Algorithms>>
-  *** <<jwe-alg-standard,JWE Standard Key Management Algorithms>>
-   **** <<jwe-alg-rsa,JWE RSA Key Encryption>>
-   **** <<jwe-alg-aes,JWE AES Key Encryption>>
-   **** <<jwe-alg-dir,JWE Direct Key Encryption>>
-   **** <<jwe-alg-pbes2,JWE Password-based Key Encryption>>
-   **** <<jwe-alg-ecdhes,JWE Elliptic Curve Diffie-Hellman Ephemeral Static Key Agreement>>
- ** <<jwe-create,Create a JWE>>
-  *** <<jwe-compression,JWE Compression>>
- ** <<jwe-read,Read a JWE>>
-  *** <<jwe-read-key,JWE Decryption Key>>
-  *** <<jwe-key-locator,JWE Decryption Key Locator>>
-  *** <<jwe-key-pkcs11,ECDH-ES Decryption with PKCS11 PrivateKeys>>
-  *** <<jwe-read-decompression,JWE Decompression>>
-* <<jwk,JSON Web Keys (JWKs)>>
- ** <<jwk-create,Create a JWK>>
- ** <<jwk-read,Read a JWK>>
- ** <<jwk-private,PrivateKey JWKs>>
-  *** <<jwk-private-public,Private JWK `PublicKey`>>
-  *** <<jwk-private-keypair,Private JWK from `KeyPair`>>
-  *** <<jwk-private-topub,Private JWK Public Conversion>>
- ** <<jwk-thumbprint,JWK Thumbprints>>
-  *** link:jwk-thumbprint-kid[JWK Thumbprint as Key ID]
-  *** <<jwk-thumbprint-uri,JWK Thumbprint URI>>
- ** <<jwk-security,JWK Security Considerations>>
-  *** <<jwk-tostring,JWK `toString()` Safety>>
-* <<jwkset,JWK Sets>>
- ** <<jwkset-create,Create a JWK Set>>
- ** <<jwkset-read,Read a JWK Set>>
-* <<compression,Compression>>
- ** <<compression-custom,Custom Compression Algorithm>>
-* <<json,JSON Processor>>
- ** <<json-custom,Custom JSON Processor>>
- ** <<json-jackson,Jackson ObjectMapper>>
-  *** <<json-jackson-custom-types,Custom Claim Types>>
- ** <<json-gson,Gson>>
-* <<base64,Base64 Support>>
- ** <<base64-security,Base64 in Security Contexts>>
-  *** <<base64-not-encryption,Base64 is not Encryption>>
-  *** <<base64-changing-characters,Changing Base64 Characters>>
- ** <<base64-custom,Custom Base64 Codec>>
-* <<examples,Examples>>
- ** <<example-jws-hs,JWS Signed with HMAC>>
- ** <<example-jws-rsa,JWS Signed with RSA>>
- ** <<example-jws-ecdsa,JWS Signed with ECDSA>>
- ** <<example-jwe-dir,JWE Encrypted Directly with a SecretKey>>
- ** <<example-jwe-rsa,JWE Encrypted with RSA>>
- ** <<example-jwe-aeskw,JWE Encrypted with AES Key Wrap>>
- ** <<example-jwe-ecdhes,JWE Encrypted with ECDH-ES>>
- ** <<example-jwe-password,JWE Encrypted with a Password>>
- ** <<example-jwk-secret,SecretKey JWK>>
- ** <<example-jwk-rsapub,RSA Public JWK>>
- ** <<example-jwk-rsapriv,RSA Private JWK>>
- ** <<example-jwk-ecpub,Elliptic Curve Public JWK>>
- ** <<example-jwk-ecpriv,Elliptic Curve Private JWK>>
- ** <<example-jwk-edpub,Edwards Elliptic Curve Public JWK>>
- ** <<example-jwk-edpriv,Edwards Elliptic Curve Private JWK>>
+---
+toc::[]
+====
 
 +++<a name="features">++++++</a>+++
 
@@ -674,23 +567,23 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ==== Maven
 
-[,xml]
+[,xml,subs="+attributes"]
 ----
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.12.5</version>
+    <version>{project-version}</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.12.5</version>
+    <version>{project-version}</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-    <version>0.12.5</version>
+    <version>{project-version}</version>
     <scope>runtime</scope>
 </dependency>
 <!-- Uncomment this next dependency if you are using:
@@ -711,12 +604,12 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 
 ==== Gradle
 
-[,groovy]
+[,groovy,subs="+attributes"]
 ----
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5' // or 'io.jsonwebtoken:jjwt-gson:0.12.5' for gson
+    implementation 'io.jsonwebtoken:jjwt-api:{project-version}'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:{project-version}'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:{project-version}' // or 'io.jsonwebtoken:jjwt-gson:{project-version}' for gson
     /*
       Uncomment this next dependency if you are using:
        - JDK 10 or earlier, and you want to use RSASSA-PSS (PS256, PS384, PS512) signature algorithms.
@@ -741,12 +634,12 @@ BouncyCastle `Provider`:
 
 Add the dependencies to your project:
 
-[,groovy]
+[,groovy,subs="+attributes"]
 ----
 dependencies {
-    api('io.jsonwebtoken:jjwt-api:0.12.5')
-    runtimeOnly('io.jsonwebtoken:jjwt-impl:0.12.5')
-    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.12.5') {
+    api('io.jsonwebtoken:jjwt-api:{project-version}')
+    runtimeOnly('io.jsonwebtoken:jjwt-impl:{project-version}')
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:{project-version}') {
         exclude(group: 'org.json', module: 'json') //provided by Android natively
     }
     /*
@@ -3481,22 +3374,22 @@ scope which is the typical JJWT default).  That is:
 
 *Maven*
 
-[,xml]
+[,xmlm,subs="+attributes"]
 ----
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.12.5</version>
+    <version>{project-version}</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ----
 
 *Gradle or Android*
 
-[,groovy]
+[,groovy,subs="+attributes"]
 ----
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:{project-version}'
 }
 ----
 
@@ -3610,22 +3503,22 @@ scope which is the typical JJWT default).  That is:
 
 *Maven*
 
-[,xml]
+[,xml,subs="+attributes"]
 ----
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-gson</artifactId>
-    <version>0.12.5</version>
+    <version>{project-version}</version>
     <scope>compile</scope> <!-- Not runtime -->
 </dependency>
 ----
 
 *Gradle or Android*
 
-[,groovy]
+[,groovy,subs="+attributes"]
 ----
 dependencies {
-    implementation 'io.jsonwebtoken:jjwt-gson:0.12.5'
+    implementation 'io.jsonwebtoken:jjwt-gson:{project-version}'
 }
 ----
 
