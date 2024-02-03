@@ -712,13 +712,12 @@ your applications and all other internal implementation details - that can chang
 runtime-only dependencies.  This is an extremely important point if you want to ensure stable JJWT usage and
 upgrades over time:
 
-____
-*Warning*
-
-*JJWT guarantees semantic versioning compatibility for all of its artifacts _except_ the `jjwt-impl` .jar.  No such
+[WARNING]
+====
+JJWT guarantees semantic versioning compatibility for all of its artifacts _except_ the `jjwt-impl` .jar.  No such
 guarantee is made for the `jjwt-impl` .jar and internal changes in that .jar can happen at any time.  Never add the
-`jjwt-impl` .jar to your project with `compile` scope - always declare it with `runtime` scope.*
-____
+`jjwt-impl` .jar to your project with `compile` scope - always declare it with `runtime` scope.
+====
 
 This is done to benefit you: great care goes into curating the `jjwt-api` .jar and ensuring it contains what you need
 and remains backwards compatible as much as is possible so you can depend on that safely with compile scope.  The
@@ -774,12 +773,11 @@ fails to verify the JWT, a `SignatureException` (which extends `JwtException`) i
 verified, we parse the claims and assert that that subject is set to `Joe`.  You have to love code one-liners
 that pack a punch!
 
-____
-*Note*
-
+[NOTE]
+====
 *Type-safe JWTs:* To get a type-safe `Claims` JWT result, call the `parseSignedClaims` method (since there are many
 similar methods available). You will get an `UnsupportedJwtException` if you parse your JWT with wrong method.
-____
+====
 
 But what if parsing or signature validation failed?  You can catch `JwtException` and react accordingly:
 
@@ -834,13 +832,12 @@ String jwt = Jwts.builder()                     // (1)
 (such as `subject`, `claims`, etc), but not both.
 * Either digital signatures (`signWith`) or encryption (`encryptWith`) may be used, but not both.
 
-____
-*Warning*
-
+[WARNING]
+====
 *Unprotected JWTs*: If you do not use the `signWith` or `encryptWith` builder methods, *an Unprotected JWT will be
 created, which offers no security protection at all*.  If you need security protection, consider either
 <<jws,digitally signing>> or <<jwe,encrypting>> the JWT before calling the `compact()` builder method.
-____
+====
 
 +++<a name="jwt-header">++++++</a>++++++<a name="jws-create-header">++++++</a>+++
 // legacy anchors for old links
@@ -880,12 +877,11 @@ String jwt = Jwts.builder()
 The `JwtBuilder` `header()` builder also supports automatically calculating X.509 thumbprints and other builder-style benefits that
 a simple property getter/setter object would not do.
 
-____
-*Note*
-
+[NOTE]
+====
 *Automatic Headers*: You do not need to set the `alg`, `enc` or `zip` headers - JJWT will always set them
 automatically as needed.
-____
+====
 
 +++<a name="jwt-header-params">++++++</a>+++
 
@@ -1168,16 +1164,15 @@ catch (JwtException ex) {   // (5)
 }
 ----
 
-____
-*Note*
-
+[NOTE]
+====
 *Type-safe JWTs:* If you are certain your parser will only ever encounter a specific kind of JWT (for example, you only
 ever use signed JWTs with `Claims` payloads, or encrypted JWTs with `byte[]` content payloads, etc), you can call the
 associated type-safe `parseSignedClaims`, `parseEncryptedClaims`, (etc) method variant instead of the generic `parse` method.
 
 These `parse*` methods will return the type-safe JWT you are expecting, for example, a `Jws<Claims>` or `Jwe<byte[]>`
 instead of a generic `Jwt<?,?>` instance.
-____
+====
 
 +++<a name="jwt-read-key">++++++</a>+++
 
@@ -1375,14 +1370,13 @@ public class MyKeyLocator extends LocatorAdapter<Key> {
 }
 ----
 
-____
-*Note*
-
+[NOTE]
+====
 *Simpler Lookup*: If possible, try to keep the key lookup strategy the same between JWSs and JWEs (i.e. using
 only `locate(ProtectedHeader<?>)`), preferably using only
 the `kid` (Key ID) header value or perhaps a public key thumbprint.  You will find the implementation is much
 simpler and easier to maintain over time, and also creates smaller headers for compact transmission.
-____
+====
 
 +++<a name="key-locator-retvals">++++++</a>+++
 
@@ -1754,9 +1748,8 @@ KeyPair keyPair = Jwts.SIG.RS256.keyPair().build(); //or RS384, RS512, PS256, et
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the
 public key (`keyPair.getPublic()`) to parse/verify a JWS.
 
-____
-*Note*
-
+[NOTE]
+====
 * *The `PS256`, `PS384`, and `PS512` algorithms require JDK 11 or a compatible JCA Provider
 (like BouncyCastle) in the runtime classpath.*
 * *The `EdDSA` algorithms requires JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.*
@@ -1764,7 +1757,7 @@ ____
 If you want to use either set of algorithms, and you are on an earlier JDK that does not support them,
 see the <<Installation,Installation>> section to see how to enable BouncyCastle.  All other algorithms are
 natively supported by the JDK.
-____
+====
 
 +++<a name="jws-create">++++++</a>+++
 
@@ -1819,12 +1812,11 @@ algorithm and automatically set the `alg` header to `RS512`.
 
 The same selection logic applies for Elliptic Curve ``PrivateKey``s.
 
-____
-*Note*
-
+[NOTE]
+====
 *You cannot sign JWTs with ``PublicKey``s as this is always insecure.* JJWT will reject any specified
 `PublicKey` for signing with an `InvalidKeyException`.
-____
+====
 
 +++<a name="jws-create-key-secret">++++++</a>+++
 
@@ -1864,14 +1856,13 @@ SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretString));
 Password key = Keys.password(secretString.toCharArray());
 ----
 
-____
-*Warning*
-
+[WARNING]
+====
 It is almost always incorrect to call any variant of `secretString.getBytes` in any cryptographic context. +
 Safe cryptographic keys are never represented as direct (unencoded) strings.  If you have a password that should
 be represented as a `Key` for `HMAC-SHA` algorithms, it is _strongly_ recommended to use a key derivation
 algorithm to derive a cryptographically-strong `Key` from the password, and never use the password directly.
-____
+====
 
 +++<a name="jws-create-key-algoverride">++++++</a>+++
 
@@ -1905,14 +1896,13 @@ used for that algorithm when possible according to the JWT specification require
 If your JWT payload is large (contains a lot of data), and you are certain that JJWT will also be the same library
 that reads/parses your JWS, you might want to compress the JWS to reduce its size.
 
-____
-*Warning*
-
+[WARNING]
+====
 *Not Standard for JWS*: JJWT supports compression for JWS, but it is not a standard feature for JWS.  The
 JWT RFC specifications standardize this _only_ for JWEs, and it is not likely to be supported by other JWT libraries
 for JWS.  Use JWS compression only if you are certain that JJWT (or another library that supports JWS compression)
-will be parsing the JWS
-____
+will be parsing the JWS.
+====
 
 Please see the main <<compression,Compression>> section to see how to compress and decompress JWTs.
 
@@ -1952,14 +1942,13 @@ catch (JwtException ex) {          // (5)
 }
 ----
 
-____
-*Note*
-
-*Type-safe JWSs:*
+[NOTE]
+====
+.Type-safe JWSs
 
 * If you are expecting a JWS with a Claims `payload`, call the ``JwtParser``'s `parseSignedClaims` method.
 * If you are expecting a JWS with a content `payload`, call the ``JwtParser``'s `parseSignedContent` method.
-____
+====
 
 +++<a name="jws-read-key">++++++</a>+++
 
@@ -2052,14 +2041,13 @@ period (`.`) character anywhere in the payload.  The JWS recipient will experien
 Before attempting to use this option, one should be aware of the RFC's
 https://www.rfc-editor.org/rfc/rfc7797.html#section-8[security considerations] first.
 
-____
-*Note*
-
-*Protected JWS Only*
+[NOTE]
+====
+.Protected JWS Only
 
 The RFC specification defines the Unencoded Payload option for use only with JWSs. It may not be used with
 with unprotected JWTs or encrypted JWEs.
-____
+====
 
 +++<a name="jws-unencoded-detached">++++++</a>+++
 
@@ -2417,13 +2405,12 @@ During JWE decryption, these algorithms:
 producing the decrypted Content Encryption Key (CEK).
 * Decrypt the JWE ciphertext payload with the JWE's identified <<jwe-enc,encryption algorithm>> using the decrypted CEK.
 
-____
-*Warning*
-
+[WARNING]
+====
 RFC 7518 Sections https://www.rfc-editor.org/rfc/rfc7518.html#section-4.2[4.2] and
 https://www.rfc-editor.org/rfc/rfc7518.html#section-4.3[4.3] _require_ (mandate) that RSA keys >= 2048 bits
 MUST be used with these algorithms. JJWT will throw an exception if it detects weaker keys being used.
-____
+====
 
 +++<a name="jwe-alg-aes">++++++</a>+++
 
@@ -2457,12 +2444,11 @@ During JWE decryption, these algorithms:
 * Decrypt the encrypted CEK with the discovered AES key algorithm using the symmetric secret key.
 * Decrypt the JWE ciphertext payload with the JWE's identified <<jwe-enc,encryption algorithm>> using the decrypted CEK.
 
-____
-*Warning*
-
+[WARNING]
+====
 The symmetric key used for the AES key algorithms MUST be 128, 192 or 256 bits as required by the specific AES
 key algorithm.  JJWT will throw an exception if it detects weaker keys than what is required.
-____
+====
 
 +++<a name="jwe-alg-dir">++++++</a>+++
 
@@ -2489,13 +2475,12 @@ resulting JWE.
 During JWE decryption, this algorithm decrypts the JWE ciphertext payload with the JWE's
 identified <<jwe-enc,encryption algorithm>> directly using the symmetric secret key.  No encrypted CEK is used.
 
-____
-*Warning*
-
+[WARNING]
+====
 The symmetric secret key MUST be 128, 192 or 256 bits as required by the associated
 <<jwe-enc,AEAD encryption algorithm>> used to encrypt the payload. JJWT will throw an exception if it detects
 weaker keys than what is required.
-____
+====
 
 +++<a name="jwe-alg-pbes2">++++++</a>+++
 
@@ -2523,14 +2508,15 @@ number of computational iterations, and a secure-random salt value.
 * Encrypt the generated CEK with the corresponding AES Key Wrap algorithm using the password-derived KEK.
 * Embed the payload ciphertext and encrypted CEK in the resulting JWE.
 
-____
-*Note*
+[NOTE]
+====
+.Secure defaults
 
-*Secure defaults*: When using these algorithms, if you do not specify a work factor (i.e. number of computational
+When using these algorithms, if you do not specify a work factor (i.e. number of computational
 iterations), JJWT will automatically use an
 https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2[OWASP PBKDF2 recommended]
 default appropriate for the specified `PBES2` algorithm.
-____
+====
 
 During JWE decryption, these algorithms:
 
@@ -2668,14 +2654,13 @@ catch (JwtException ex) {             // (5)
 }
 ----
 
-____
-*Note*
-
-*Type-safe JWEs:*
+[NOTE]
+====
+.Type-safe JWEs
 
 * If you are expecting a JWE with a Claims `payload`, call the ``JwtParser``'s `parseEncryptedClaims` method.
 * If you are expecting a JWE with a content `payload`, call the ``JwtParser``'s `parseEncryptedContent` method.
-____
+====
 
 +++<a name="jwe-read-key">++++++</a>+++
 
@@ -3205,11 +3190,11 @@ rejected. You can create a policy to override the default if desired using the `
 
 == Compression
 
-____
-*Warning*
-
-*The JWT specification standardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
-(Signed JWTs) as well*.
+[WARNING]
+====
+The JWT specification standardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
+(Signed JWTs) as well.
+====
 
 If you are positive that a JWS you create with JJWT will _also_ be parsed with JJWT,
 you can use this feature with both JWEs and JWSs, otherwise it is best to only use it for JWEs.
@@ -3307,13 +3292,12 @@ Gson also supports POJOs as claims with full marshaling/unmarshaling as necessar
 . JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a
 project runtime dependency.
 +
-____
-*Note*
-
+[NOTE]
+====
 `org.json` APIs are natively enabled in Android environments so this is the recommended JSON processor for
 Android applications _unless_ you want to use POJOs as claims.  The `org.json` library supports simple
 Object-to-JSON marshaling, but it _does not_ support JSON-to-Object unmarshalling.
-____
+====
 
 *If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or
 `io.jsonwebtoken:jjwt-gson` dependency* (or implement your own Serializer and Deserializer if desired). *But beware*,
@@ -3463,14 +3447,13 @@ Jwts.parser()
     .get("user", User.class); // <-----
 ----
 
-____
-*Note*
-
+[NOTE]
+====
 Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor
 <<json-jackson,described above>>. This is because JJWT configures an `ObjectMapper` directly and could have negative
 consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced
 parsing options, <<json-jackson,configure the mapper directly>>.
-____
+====
 
 +++<a name="json-gson">++++++</a>+++
 
@@ -3841,11 +3824,11 @@ This is an example showing how to digitally sign and verify a JWT using the
 https://www.rfc-editor.org/rfc/rfc8032[Edwards Curve Digital Signature Algorithm] using
 `Ed25519` or `Ed448` keys.
 
-____
-*Note*
-
-*The `Ed25519` and `Ed448` algorithms require JDK 15 or a compatible JCA Provider
-(like BouncyCastle) in the runtime classpath.*
+[NOTE]
+====
+The `Ed25519` and `Ed448` algorithms require JDK 15 or a compatible JCA Provider
+(like BouncyCastle) in the runtime classpath.
+====
 
 If you are using JDK 14 or earlier and you want to use them, see
 the <<Installation,Installation>> section to see how to enable BouncyCastle.
