@@ -192,7 +192,7 @@ and conditional branch variant in the entire codebase is tested and required to 
 | `PBES2-HS384+A192KW`
 | PBES2 with HMAC SHA-384 and "A192KW" wrapping^*1*^
 
-| `+PBES2‑HS512&plus;A256KW+`
+| `PBES2‑HS512+A256KW`
 | PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
 |===
 +
@@ -2383,7 +2383,7 @@ Content Encryption Key (CEK):
 | `PBES2-HS384+A192KW`
 | PBES2 with HMAC SHA-384 and "A192KW" wrapping^*1*^
 
-| `+PBES2‑HS512&plus;A256KW+`
+| `PBES2‑HS512+A256KW`
 | PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
 |===
 +
