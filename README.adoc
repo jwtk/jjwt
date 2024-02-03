@@ -109,9 +109,9 @@ and conditional branch variant in the entire codebase is tested and required to 
 | Edwards-curve Digital Signature Algorithm^*2*^
 |===
 +
-^*1*. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
+^*1.*{sp}{fn-require-java11-plus}^
 +
-^*2*. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
+^*2*.{sp}{fn-require-java15-plus}^
 
 * Creating, parsing and decrypting encrypted compact JWTs (aka JWEs) with all standard JWE encryption algorithms:
 +
@@ -128,16 +128,16 @@ and conditional branch variant in the entire codebase is tested and required to 
 | https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.5[AES_256_CBC_HMAC_SHA_512] authenticated encryption algorithm
 
 | `A128GCM`
-| AES GCM using 128-bit key^*3*^
+| AES GCM using 128-bit key^*1*^
 
 | `A192GCM`
-| AES GCM using 192-bit key^*3*^
+| AES GCM using 192-bit key^*1*^
 
 | `A256GCM`
-| AES GCM using 256-bit key^*3*^
+| AES GCM using 256-bit key^*1*^
 |===
 +
-^*3*. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
+^*1*.{sp}{fn-require-java8-plus}^
 
 * All Key Management Algorithms for obtaining JWE encryption and decryption keys:
 +
@@ -178,25 +178,25 @@ and conditional branch variant in the entire codebase is tested and required to 
 | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"
 
 | `A128GCMKW`
-| Key wrapping with AES GCM using 128-bit key^*4*^
+| Key wrapping with AES GCM using 128-bit key^*1*^
 
 | `A192GCMKW`
-| Key wrapping with AES GCM using 192-bit key^*4*^
+| Key wrapping with AES GCM using 192-bit key^*1*^
 
 | `A256GCMKW`
-| Key wrapping with AES GCM using 256-bit key^*4*^
+| Key wrapping with AES GCM using 256-bit key^*1*^
 
 | `PBES2-HS256+A128KW`
-| PBES2 with HMAC SHA-256 and "A128KW" wrapping^*4*^
+| PBES2 with HMAC SHA-256 and "A128KW" wrapping^*1*^
 
 | `PBES2-HS384+A192KW`
-| PBES2 with HMAC SHA-384 and "A192KW" wrapping^*4*^
+| PBES2 with HMAC SHA-384 and "A192KW" wrapping^*1*^
 
 | `+PBES2‑HS512&plus;A256KW+`
-| PBES2 with HMAC SHA-512 and "A256KW" wrapping^*4*^
+| PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
 |===
 +
-^*4*. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
+^*1*.{sp}{fn-require-java8-plus}^
 
 * Creating, parsing and verifying JSON Web Keys (JWKs) in all standard JWA key formats using native Java `Key` types:
 +
@@ -224,25 +224,25 @@ and conditional branch variant in the entire codebase is tested and required to 
 | `RsaPrivateJwk`
 
 | XDH Private Key
-| `XECPublicKey`^*5*^
+| `XECPublicKey`^*1*^
 | `OctetPublicJwk`
 
 | XDH Private Key
-| `XECPrivateKey`^*5*^
+| `XECPrivateKey`^*1*^
 | `OctetPrivateJwk`
 
 | EdDSA Public Key
-| `EdECPublicKey`^*6*^
+| `EdECPublicKey`^*2*^
 | `OctetPublicJwk`
 
 | EdDSA Private Key
-| `EdECPublicKey`^*6*^
+| `EdECPublicKey`^*2*^
 | `OctetPrivateJwk`
 |===
 +
-^*5*. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
+^*1*.{sp}{fn-require-java15-plus}^
 +
-^*6*. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
+^*2*.{sp}{fn-require-java15-plus}^
 
 * Convenience enhancements beyond the specification such as
  ** Payload compression for any large JWT, not just JWEs
@@ -1615,10 +1615,10 @@ key algorithms:
 | `EdDSA`
 | Edwards-Curve Digital Signature Algorithm (EdDSA)^*2*^
 |===
-
-^*1*. Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
-
-^*2*. Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
++
+^*1*.{sp}{fn-require-java15-plus}^
++
+^*2*.{sp}{fn-require-java15-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry class.
 
@@ -2239,8 +2239,8 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 | 256
 | AES GCM using 256-bit key^*1*^
 |===
-
-^+++<b>+++1. +++</b>+++Requires Java 8+ or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
++
+^*1*.{sp}{fn-require-java8-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.ENC` registry singleton as
 implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
@@ -2369,25 +2369,25 @@ Content Encryption Key (CEK):
 | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"
 
 | `A128GCMKW`
-| Key wrapping with AES GCM using 128-bit key^*3*^
+| Key wrapping with AES GCM using 128-bit key^*1*^
 
 | `A192GCMKW`
-| Key wrapping with AES GCM using 192-bit key^*3*^
+| Key wrapping with AES GCM using 192-bit key^*1*^
 
 | `A256GCMKW`
-| Key wrapping with AES GCM using 256-bit key^*3*^
+| Key wrapping with AES GCM using 256-bit key^*1*^
 
 | `PBES2-HS256+A128KW`
-| PBES2 with HMAC SHA-256 and "A128KW" wrapping^*3*^
+| PBES2 with HMAC SHA-256 and "A128KW" wrapping^*1*^
 
 | `PBES2-HS384+A192KW`
-| PBES2 with HMAC SHA-384 and "A192KW" wrapping^*3*^
+| PBES2 with HMAC SHA-384 and "A192KW" wrapping^*1*^
 
 | `+PBES2‑HS512&plus;A256KW+`
-| PBES2 with HMAC SHA-512 and "A256KW" wrapping^*3*^
+| PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
 |===
-
-^*3*. Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.^
++
+^*1*.{sp}{fn-require-java8-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.KEY` registry singleton as
 implementations of the `io.jsonwebtoken.security.KeyAlgorithm` interface.
