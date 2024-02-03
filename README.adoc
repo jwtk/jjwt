@@ -2227,7 +2227,7 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 | 256
 | AES GCM using 256-bit key^*1*^
 |===
-+
+
 ^*1*.{sp}{fn-require-java8-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.ENC` registry singleton as
@@ -2374,7 +2374,7 @@ Content Encryption Key (CEK):
 | `PBES2‑HS512+A256KW`
 | PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
 |===
-+
+
 ^*1*.{sp}{fn-require-java8-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.KEY` registry singleton as
