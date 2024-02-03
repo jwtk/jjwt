@@ -7,7 +7,7 @@
 :toclevels: 4
 
 ifdef::env-github[]
-:tip-caption: Tip
+:tip-caption: TIP
 :note-caption: NOTE
 :important-caption: IMPORTANT
 :caution-caption: CAUTION
@@ -3107,7 +3107,7 @@ https://datatracker.ietf.org/doc/html/rfc7517#section-5[JWK Set]:
 
 For example:
 
-[,json]
+[,txt]
 ----
 {
   "keys": [jwk1, jwk2, ...]
@@ -3194,11 +3194,10 @@ rejected. You can create a policy to override the default if desired using the `
 ====
 The JWT specification standardizes compression for JWEs (Encrypted JWTs) ONLY, however JJWT supports it for JWS
 (Signed JWTs) as well.
-====
 
 If you are positive that a JWS you create with JJWT will _also_ be parsed with JJWT,
 you can use this feature with both JWEs and JWSs, otherwise it is best to only use it for JWEs.
-____
+====
 
 If a JWT's `payload` is sufficiently large - that is, it is a large content byte array or JSON with a lot of
 name/value pairs (or individual values are very large or verbose) - you can reduce the size of the compact JWT by
