@@ -3827,11 +3827,10 @@ https://www.rfc-editor.org/rfc/rfc8032[Edwards Curve Digital Signature Algorithm
 ====
 The `Ed25519` and `Ed448` algorithms require JDK 15 or a compatible JCA Provider
 (like BouncyCastle) in the runtime classpath.
-====
 
 If you are using JDK 14 or earlier and you want to use them, see
 the <<Installation,Installation>> section to see how to enable BouncyCastle.
-____
+====
 
 The `EdDSA` signature algorithm is defined for JWS in https://www.rfc-editor.org/rfc/rfc8037#section-3.1[RFC 8037, Section 3.1]
 using keys for two Edwards curves:
