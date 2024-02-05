@@ -7,11 +7,11 @@
 :toclevels: 4
 
 ifdef::env-github[]
-:tip-caption: TIP
-:note-caption: NOTE
-:important-caption: IMPORTANT
-:caution-caption: CAUTION
-:warning-caption: WARNING
+:tip-caption: ✏️TIP
+:note-caption: ℹ️NOTE
+:important-caption: ‼️IMPORTANT
+:caution-caption: ⛔️CAUTION
+:warning-caption: ⚠️WARNING
 endif::[]
 
 // Macros
