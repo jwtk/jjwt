@@ -325,6 +325,7 @@
                                     <exclude>.gitattributes</exclude>
                                     <exclude>**/genkeys</exclude>
                                     <exclude>**/softhsm</exclude>
+                                    <exclude>**.adoc</exclude>
                                 </excludes>
                             </licenseSet>
                         </licenseSets>
