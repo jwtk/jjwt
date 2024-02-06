@@ -8,7 +8,7 @@
 
 ifdef::env-github[]
 :tip-caption: ✏️TIP
-:note-caption: ℹ️NOTE
+:note-caption: ℹ️ NOTE
 :important-caption: ‼️IMPORTANT
 :caution-caption: ⛔️CAUTION
 :warning-caption: ⚠️WARNING
@@ -3357,7 +3357,7 @@ scope which is the typical JJWT default).  That is:
 
 *Maven*
 
-[,xmlm,subs="+attributes"]
+[,xml,subs="+attributes"]
 ----
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
@@ -3623,16 +3623,21 @@ Stackoverflow https://stackoverflow.com/questions/33663113/multiple-strings-base
 and https://github.com/jwtk/jjwt/issues/211#issuecomment-283076269[JJWT issue comments] that explain this in detail.
 Here's one https://stackoverflow.com/questions/29941270/why-do-base64-decode-produce-same-byte-array-for-different-strings[good answer]:
 
-____
+[IMPORTANT]
+====
 Remember that Base64 encodes each 8 bit entity into 6 bit chars. The resulting string then needs exactly
 11 * 8 / 6 bytes, or 14 2/3 chars. But you can't write partial characters. Only the first 4 bits (or 2/3 of the
 last char) are significant. The last two bits are not decoded. Thus all of:
 
- dGVzdCBzdHJpbmo
- dGVzdCBzdHJpbmp
- dGVzdCBzdHJpbmq
- dGVzdCBzdHJpbmr All decode to the same 11 bytes (116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 106).
-____
+[,text]
+----
+dGVzdCBzdHJpbmo
+dGVzdCBzdHJpbmp
+dGVzdCBzdHJpbmq
+dGVzdCBzdHJpbmr 
+----
+All decode to the same 11 bytes (116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 106).
+====
 
 As you can see by the above 4 examples, they all decode to the same exact 11 bytes.  So just changing one or two
 characters at the end of a Base64 string may not work and can often result in an invalid test.
