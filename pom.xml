@@ -89,6 +89,8 @@
 
     <properties>
 
+        <!-- This date is automatically updated by the release and versions plugins -->
+        <project.build.outputTimestamp>2024-02-17T00:00:00Z</project.build.outputTimestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <arguments />
 
@@ -105,6 +107,7 @@
         <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
         <maven.license.version>4.2.rc3</maven.license.version>
         <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
+        <felix.version>5.1.9</felix.version>
 
         <jdk.version>7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
@@ -466,7 +469,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.2.3</version>
                     <configuration>
                         <shadedClassifierName>deprecated</shadedClassifierName>
                         <shadedArtifactAttached>true</shadedArtifactAttached>
@@ -640,9 +643,38 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version> <!-- TODO: We can update version after dropping support for Java 7 -->
+                <executions>
+                    <execution>
+                        <!-- Rebuilding the manifest with the maven-bundle-plugin produces different results
+                             https://issues.apache.org/jira/browse/FELIX-6603
+                             Deleting the previously generated manifest is a temporary workaround.
+                             -->
+                        <id>bundle-manifest-fix</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.build.outputDirectory}</directory>
+                                    <includes>
+                                        <include>META-INF/MANIFEST.MF</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>${felix.version}</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -678,6 +710,7 @@
             <properties>
                 <maven.jar.version>3.2.2</maven.jar.version>
                 <maven.compiler.version>3.8.1</maven.compiler.version>
+                <felix.version>3.5.1</felix.version>
                 <orgjson.version>20230618</orgjson.version>
                 <bcprov.artifactId>bcprov-jdk15to18</bcprov.artifactId>
                 <bcpkix.artifactId>bcpkix-jdk15to18</bcpkix.artifactId>
