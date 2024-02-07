@@ -1,0 +1,16 @@
+on:
+  # Reusable GitHub Action
+  workflow_call:
+
+jobs:
+  setup_env:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install softhsm2
+      run: sudo apt-get install -y softhsm2
+    - name: Install opensc
+      run: sudo apt-get install -y opensc
+    - name: Ensure SoftHSM user configuration
+      run: impl/src/test/scripts/softhsm configure
+    - name: Populate SoftHSM with JJWT test keys
+      run: impl/src/test/scripts/softhsm import
