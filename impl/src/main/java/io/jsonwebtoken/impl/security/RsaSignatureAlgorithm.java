@@ -61,7 +61,7 @@ final class RsaSignatureAlgorithm extends AbstractSignatureAlgorithm {
     private static final Set<String> KEY_ALG_NAMES =
             Collections.setOf("RSA", PSS_JCA_NAME, PSS_OID, RS256_OID, RS384_OID, RS512_OID);
 
-    private static final int MIN_KEY_BIT_LENGTH = 2048;
+    private static final int MIN_KEY_BIT_LENGTH = 1024;
 
     private static AlgorithmParameterSpec pssParamSpec(int digestBitLength) {
         MGF1ParameterSpec ps = new MGF1ParameterSpec("SHA-" + digestBitLength);
