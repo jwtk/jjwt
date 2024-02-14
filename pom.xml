@@ -106,7 +106,7 @@
         <maven.license.version>4.2.rc3</maven.license.version>
         <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
-        <jdk.version>7</jdk.version>
+        <jdk.version>8</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.12.7.1</jackson.version>
