@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
@@ -67,7 +68,7 @@ class JwtsTest {
     }
 
     static def toJson(def o) {
-        def serializer = Services.loadFirst(Serializer)
+        def serializer = Services.get(Serializer)
         def out = new ByteArrayOutputStream()
         serializer.serialize(o, out)
         return Strings.utf8(out.toByteArray())
@@ -1158,6 +1159,36 @@ class JwtsTest {
         Jwts.parser().setSigningKey(key)
                 .require("foo", 42L) //require a long, but jws contains int, should still work
                 .build().parseSignedClaims(jws)
+    }
+
+    /**
+     * Asserts that if a {@link Jwts#claims()} builder is used to set a single string Audience value, and the
+     * resulting constructed {@link Claims} instance is used on a {@link Jwts#builder()}, that the resulting JWT
+     * retains a single-string Audience value (and it is not automatically coerced to a {@code Set<String>}).
+     *
+     * @since 0.12.4
+     * @see <a href="https://github.com/jwtk/jjwt/issues/890">JJWT Issue 890</a>
+     */
+    @Test
+    void testClaimsBuilderSingleStringAudienceThenJwtBuilder() {
+
+        def key = TestKeys.HS256
+        def aud = 'foo'
+        def claims = Jwts.claims().audience().single(aud).build()
+        def jws = Jwts.builder().claims(claims).signWith(key).compact()
+
+        // we can't use a JwtParser here because that will automatically normalize a single String value as a
+        // Set<String> for app developer convenience.  So we assert that the JWT looks as expected by simple
+        // json parsing and map inspection
+
+        int i = jws.indexOf('.')
+        int j = jws.lastIndexOf('.')
+        def b64 = jws.substring(i, j)
+        def json = Strings.utf8(Decoders.BASE64URL.decode(b64))
+        def deser = Services.get(Deserializer)
+        def m = deser.deserialize(new StringReader(json)) as Map<String,?>
+
+        assertEquals aud, m.get('aud') // single string value
     }
 
     //Asserts correct/expected behavior discussed in https://github.com/jwtk/jjwt/issues/20

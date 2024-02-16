@@ -16,6 +16,7 @@
 //file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.jackson.io
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
@@ -110,6 +111,90 @@ class JacksonDeserializerTest {
                         .setByteArrayValue("bytes2".getBytes("UTF-8"))
                         .setByteValue(0xA as byte)
                         .setInstantValue(Instant.ofEpochMilli(currentTime + 1))
+                        .setIntValue(111)
+                        .setShortValue(222 as short)
+                        .setLongValue(333L)
+                        .setStringValue("nested-value")
+                )
+
+        def expected = [oneKey: "oneValue", custom: expectedCustomBean]
+        def result = new JacksonDeserializer(Maps.of("custom", CustomBean).build())
+                .deserialize(new StringReader(json))
+        assertEquals expected, result
+    }
+
+    /**
+     * Asserts https://github.com/jwtk/jjwt/issues/877
+     * @since 0.12.4
+     */
+    @Test
+    void testStrictDuplicateDetection() {
+        // 'bKey' is repeated twice:
+        String json = """
+             {
+                "aKey":"oneValue", 
+                "bKey": 15,
+                "bKey": "hello"
+             }
+            """
+        try {
+            new JacksonDeserializer<>().deserialize(new StringReader(json))
+            fail()
+        } catch (DeserializationException expected) {
+            String causeMsg = "Duplicate field 'bKey'\n at [Source: (StringReader); line: 5, column: 23]"
+            String msg = "Unable to deserialize: $causeMsg"
+            assertEquals msg, expected.getMessage()
+            assertTrue expected.getCause() instanceof JsonParseException
+            assertEquals causeMsg, expected.getCause().getMessage()
+        }
+    }
+
+    /**
+     * Asserts https://github.com/jwtk/jjwt/issues/893
+     */
+    @Test
+    void testIgnoreUnknownPropertiesWhenDeserializeWithCustomObject() {
+        
+        long currentTime = System.currentTimeMillis()
+
+        String json = """
+             {
+                "oneKey":"oneValue", 
+                "custom": {
+                    "stringValue": "s-value",
+                    "intValue": "11",
+                    "dateValue": ${currentTime},
+                    "shortValue": 22,
+                    "longValue": 33,
+                    "byteValue": 15,
+                    "byteArrayValue": "${base64('bytes')}",
+                    "unknown": "unknown",
+                    "nestedValue": {
+                        "stringValue": "nested-value",
+                        "intValue": "111",
+                        "dateValue": ${currentTime + 1},
+                        "shortValue": 222,
+                        "longValue": 333,
+                        "byteValue": 10,
+                        "byteArrayValue": "${base64('bytes2')}",
+                        "unknown": "unknown"
+                    }
+                }
+            }
+            """
+
+        CustomBean expectedCustomBean = new CustomBean()
+                .setByteArrayValue("bytes".getBytes("UTF-8"))
+                .setByteValue(0xF as byte)
+                .setDateValue(new Date(currentTime))
+                .setIntValue(11)
+                .setShortValue(22 as short)
+                .setLongValue(33L)
+                .setStringValue("s-value")
+                .setNestedValue(new CustomBean()
+                        .setByteArrayValue("bytes2".getBytes("UTF-8"))
+                        .setByteValue(0xA as byte)
+                        .setDateValue(new Date(currentTime + 1))
                         .setIntValue(111)
                         .setShortValue(222 as short)
                         .setLongValue(333L)

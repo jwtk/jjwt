@@ -530,7 +530,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         if (this.serializer == null) { // try to find one based on the services available
             //noinspection unchecked
-            json(Services.loadFirst(Serializer.class));
+            json(Services.get(Serializer.class));
         }
 
         if (!Collections.isEmpty(claims)) { // normalize so we have one object to deal with:

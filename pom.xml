@@ -50,8 +50,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/jwtk/jjwt.git</connection>
-        <developerConnection>scm:git:git@github.com:jwtk/jjwt.git</developerConnection>
-        <url>git@github.com:jwtk/jjwt.git</url>
+        <developerConnection>scm:git:https://github.com/jwtk/jjwt.git</developerConnection>
+        <url>https://github.com/jwtk/jjwt.git</url>
         <tag>HEAD</tag>
     </scm>
     <issueManagement>
@@ -331,6 +331,7 @@
                                     <exclude>.gitattributes</exclude>
                                     <exclude>**/genkeys</exclude>
                                     <exclude>**/softhsm</exclude>
+                                    <exclude>**.adoc</exclude>
                                 </excludes>
                             </licenseSet>
                         </licenseSets>

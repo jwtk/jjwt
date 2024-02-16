@@ -96,6 +96,17 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.3"><code>aud</code></a> (audience) Claim
      * set, quietly ignoring any null, empty, whitespace-only, or existing value already in the set.
      *
+     * <p>When finished, the {@code audience} collection's {@link AudienceCollection#and() and()} method may be used
+     * to continue configuration. For example:</p>
+     * <blockquote><pre>
+     *  Jwts.builder() // or Jwts.claims()
+     *
+     *     .audience().add("anAudience")<b>.and() // return parent</b>
+     *
+     *  .subject("Joe") // resume configuration...
+     *  // etc...
+     * </pre></blockquote>
+     *
      * @return the {@link AudienceCollection AudienceCollection} to use for {@code aud} configuration.
      * @see AudienceCollection AudienceCollection
      * @see AudienceCollection#single(String) AudienceCollection.single(String)
@@ -220,6 +231,16 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
     /**
      * A {@code NestedCollection} for setting {@link #audience()} values that also allows overriding the collection
      * to be a {@link #single(String) single string value} for legacy JWT recipients if necessary.
+     *
+     * <p>Because this interface extends {@link NestedCollection}, the {@link #and()} method may be used to continue
+     * parent configuration. For example:</p>
+     * <blockquote><pre>
+     *  Jwts.builder() // or Jwts.claims()
+     *
+     *     .audience().add("anAudience")<b>.and() // return parent</b>
+     *
+     *  .subject("Joe") // resume parent configuration...
+     *  // etc...</pre></blockquote>
      *
      * @param <P> the type of ClaimsMutator to return for method chaining.
      * @see #single(String)

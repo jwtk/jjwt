@@ -37,36 +37,50 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
         return (M) this;
     }
 
-    @Override
-    public M add(E e) {
-        if (Objects.isEmpty(e)) return self();
+    private boolean doAdd(E e) {
+        if (Objects.isEmpty(e)) return false;
         if (e instanceof Identifiable && !Strings.hasText(((Identifiable) e).getId())) {
             String msg = e.getClass() + " getId() value cannot be null or empty.";
             throw new IllegalArgumentException(msg);
         }
-        this.collection.remove(e);
-        this.collection.add(e);
+        return this.collection.add(e);
+    }
+
+    @Override
+    public M add(E e) {
+        if (doAdd(e)) changed();
         return self();
     }
 
     @Override
     public M remove(E e) {
-        this.collection.remove(e);
+        if (this.collection.remove(e)) changed();
         return self();
     }
 
     @Override
     public M add(Collection<? extends E> c) {
+        boolean changed = false;
         for (E element : Collections.nullSafe(c)) {
-            add(element);
+            changed = doAdd(element) || changed;
         }
+        if (changed) changed();
         return self();
     }
 
     @Override
     public M clear() {
+        boolean changed = !Collections.isEmpty(this.collection);
         this.collection.clear();
+        if (changed) changed();
         return self();
+    }
+
+    /**
+     * Callback for subclasses that wish to be notified if the internal collection has changed via builder mutation
+     * methods.
+     */
+    protected void changed() {
     }
 
     protected Collection<E> getCollection() {

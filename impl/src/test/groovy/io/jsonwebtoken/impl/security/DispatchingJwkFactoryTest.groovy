@@ -109,9 +109,9 @@ class DispatchingJwkFactoryTest {
         assertTrue jwk instanceof EcPrivateJwk
         def key = jwk.toKey()
         assertTrue key instanceof ECPrivateKey
-        String x = AbstractEcJwkFactory.toOctetString(key.params.curve.field.fieldSize, jwk.toPublicJwk().toKey().w.affineX)
-        String y = AbstractEcJwkFactory.toOctetString(key.params.curve.field.fieldSize, jwk.toPublicJwk().toKey().w.affineY)
-        String d = AbstractEcJwkFactory.toOctetString(key.params.curve.field.fieldSize, key.s)
+        String x = AbstractEcJwkFactory.toOctetString(key.params.curve, jwk.toPublicJwk().toKey().w.affineX)
+        String y = AbstractEcJwkFactory.toOctetString(key.params.curve, jwk.toPublicJwk().toKey().w.affineY)
+        String d = AbstractEcJwkFactory.toOctetString(key.params.curve, key.s)
         assertEquals jwk.d.get(), d
 
         //remove the 'd' mapping to represent only a public key:

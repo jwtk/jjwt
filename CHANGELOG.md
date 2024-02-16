@@ -1,5 +1,103 @@
 ## Release Notes
 
+### 0.12.5
+
+This patch release:
+
+* Ensures that builders' `NestedCollection` changes are applied to the collection immediately as mutation methods are called, no longer
+  requiring application developers to call `.and()` to 'commit' or apply a change.  For example, prior to this release,
+  the following code did not apply changes:
+  ```java
+  JwtBuilder builder = Jwts.builder();
+  builder.audience().add("an-audience"); // no .and() call
+  builder.compact(); // would not keep 'an-audience'
+  ```
+  Now this code works as expected and all other `NestedCollection` instances like it apply changes immediately (e.g. when calling
+  `.add(value)`).
+  
+  However, standard fluent builder chains are still recommended for readability when feasible, e.g.
+  
+  ```java
+  Jwts.builder()
+      .audience().add("an-audience").and() // allows fluent chaining
+      .subject("Joe")
+      // etc...
+      .compact()
+  ```
+  See [Issue 916](https://github.com/jwtk/jjwt/issues/916).
+
+### 0.12.4
+
+This patch release includes various changes listed below.
+
+#### Jackson Default Parsing Behavior
+
+This release makes two behavioral changes to JJWT's default Jackson `ObjectMapper` parsing settings:
+
+1. In the interest of having stronger standards to reject potentially malformed/malicious/accidental JSON that could
+   have undesirable effects on an application, JJWT's default `ObjectMapper `is now configured to explicitly reject/fail 
+   parsing JSON (JWT headers and/or Claims) if/when that JSON contains duplicate JSON member names. 
+   
+   For example, now the following JSON, if parsed, would fail (be rejected) by default:
+   ```json
+   {
+     "hello": "world",
+     "thisWillFail": 42,
+     "thisWillFail": "test"
+   }
+    ```
+   
+   Technically, the JWT RFCs _do allow_ duplicate named fields as long as the last parsed member is the one used
+   (see [JWS RFC 7515, Section 4](https://datatracker.ietf.org/doc/html/rfc7515#section-4)), so this is allowed.
+   However, because JWTs often reflect security concepts, it's usually better to be defensive and reject these 
+   unexpected scenarios by default. The RFC later supports this position/preference in 
+   [Section 10.12](https://datatracker.ietf.org/doc/html/rfc7515#section-10.12):
+       
+       Ambiguous and potentially exploitable situations
+       could arise if the JSON parser used does not enforce the uniqueness
+       of member names or returns an unpredictable value for duplicate
+       member names.
+       
+   Finally, this is just a default, and the RFC does indeed allow duplicate member names if the last value is used,
+   so applications that require duplicates to be allowed can simply configure their own `ObjectMapper` and use
+   that with JJWT instead of assuming this (new) JJWT default. See 
+   [Issue #877](https://github.com/jwtk/jjwt/issues/877) for more.
+2. If using JJWT's support to use Jackson to parse 
+   [Custom Claim Types](https://github.com/jwtk/jjwt#json-jackson-custom-types) (for example, a Claim that should be
+   unmarshalled into a POJO), and the JSON for that POJO contained a member that is not represented in the specified
+   class, Jackson would fail parsing by default.  Because POJOs and JSON data models can sometimes be out of sync
+   due to different class versions, the default behavior has been changed to ignore these unknown JSON members instead 
+   of failing (i.e. the `ObjectMapper`'s  `DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES` is now set to `false`)
+   by default.
+   
+   Again, if you prefer the stricter behavior of rejecting JSON with extra or unknown properties, you can configure
+   `true` on your own `ObjectMapper` instance and use that instance with the `Jwts.parser()` builder.
+
+#### Additional Changes
+
+This release also:
+
+* Fixes a thread-safety issue when using `java.util.ServiceLoader` to dynamically lookup/instantiate pluggable 
+  implementations of JJWT interfaces (e.g. JSON parsers, etc).  See 
+  [Issue #873](https://github.com/jwtk/jjwt/issues/873) and its documented fix in 
+  [PR #893](https://github.com/jwtk/jjwt/pull/892).
+* Ensures Android environments and older `org.json` library usages can parse JSON from a `JwtBuilder`-provided
+  `java.io.Reader` instance. [Issue 882](https://github.com/jwtk/jjwt/issues/882).
+* Ensures a single string `aud` (Audience) claim is retained (without converting it to a `Set`) when copying/applying a 
+  source Claims instance to a destination Claims builder. [Issue 890](https://github.com/jwtk/jjwt/issues/890).
+* Ensures P-256, P-384 and P-521 Elliptic Curve JWKs zero-pad their field element (`x`, `y`, and `d`) byte array values
+  if necessary before Base64Url-encoding per [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518), Sections 
+  [6.2.1.2](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2), 
+  [6.2.1.3](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3), and
+  [6.2.2.1](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.2.1), respectively. 
+  [Issue 901](https://github.com/jwtk/jjwt/issues/901).
+* Ensures that Secret JWKs for HMAC-SHA algorithms with `k` sizes larger than the algorithm minimum can
+  be parsed/used as expected. See [Issue #905](https://github.com/jwtk/jjwt/issues/905) 
+* Ensures there is an upper bound (maximum) iterations enforced for PBES2 decryption to help mitigate potential DoS 
+  attacks. Many thanks to Jingcheng Yang and Jianjun Chen from Sichuan University and Zhongguancun Lab for their 
+  work on this. See [PR 911](https://github.com/jwtk/jjwt/pull/911).
+* Fixes various typos in documentation and JavaDoc. Thanks to those contributing pull requests for these!
+
 ### 0.12.3
 
 This patch release:

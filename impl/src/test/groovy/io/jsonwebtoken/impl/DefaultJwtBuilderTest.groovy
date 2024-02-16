@@ -45,7 +45,7 @@ class DefaultJwtBuilderTest {
     private DefaultJwtBuilder builder
 
     private static byte[] serialize(Map<String, ?> map) {
-        def serializer = Services.loadFirst(Serializer)
+        def serializer = Services.get(Serializer)
         ByteArrayOutputStream out = new ByteArrayOutputStream(512)
         serializer.serialize(map, out)
         return out.toByteArray()
@@ -53,7 +53,7 @@ class DefaultJwtBuilderTest {
 
     private static Map<String, ?> deser(byte[] data) {
         def reader = Streams.reader(data)
-        Map<String, ?> m = Services.loadFirst(Deserializer).deserialize(reader) as Map<String, ?>
+        Map<String, ?> m = Services.get(Deserializer).deserialize(reader) as Map<String, ?>
         return m
     }
 
@@ -749,7 +749,7 @@ class DefaultJwtBuilderTest {
         // so we need to check the raw payload:
         def encoded = new JwtTokenizer().tokenize(Streams.reader(jwt)).getPayload()
         byte[] bytes = Decoders.BASE64URL.decode(encoded)
-        def claims = Services.loadFirst(Deserializer).deserialize(Streams.reader(bytes))
+        def claims = Services.get(Deserializer).deserialize(Streams.reader(bytes))
 
         assertEquals two, claims.aud
     }
@@ -789,6 +789,49 @@ class DefaultJwtBuilderTest {
         def claims = deser(bytes)
 
         assertEquals three, claims.aud
+    }
+
+    /**
+     * Asserts that if a .audience() builder is used, and its .and() method is not called, the change to the
+     * audience is still applied when building the JWT.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since 0.12.5
+     */
+    @Test
+    void testAudienceWithoutConjunction() {
+        def aud = 'my-web'
+        def builder = Jwts.builder()
+        builder.audience().add(aud) // no .and() call
+        def jwt = builder.compact()
+
+        // assert that the resulting claims has the audience array set as expected:
+        def parsed = Jwts.parser().unsecured().build().parseUnsecuredClaims(jwt)
+        assertEquals aud, parsed.payload.getAudience()[0]
+    }
+
+    /**
+     * Asserts that if a .header().critical() builder is used, and its .and() method is not called, the change to the
+     * crit collection is still applied when building the header.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since 0.12.5
+     */
+    @Test
+    void testCritWithoutConjunction() {
+        def crit = 'test'
+        def builder = Jwts.builder().issuer('me')
+        def headerBuilder = builder.header()
+        headerBuilder.critical().add(crit) // no .and() method
+        headerBuilder.add(crit, 'foo') // no .and() method
+        builder.signWith(TestKeys.HS256)
+        def jwt = builder.compact()
+
+        def headerBytes = Decoders.BASE64URL.decode(jwt.split('\\.')[0])
+        def headerMap = Services.get(Deserializer).deserialize(Streams.reader(headerBytes)) as Map<String, ?>
+
+        def expected = [crit] as Set<String>
+        def val = headerMap.get('crit') as Set<String>
+        assertNotNull val
+        assertEquals expected, val
     }
 
 }

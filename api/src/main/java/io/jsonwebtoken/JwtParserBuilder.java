@@ -101,11 +101,24 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * the parser encounters a Protected JWT that {@link ProtectedHeader#getCritical() requires} extensions, and
      * those extensions' header names are not specified via this method, the parser will reject that JWT.
      *
+     * <p>The collection's {@link Conjunctor#and() and()} method returns to the builder for continued parser
+     * configuration, for example:</p>
+     * <blockquote><pre>
+     * parserBuilder.critical().add("headerName")<b>.{@link Conjunctor#and() and()} // etc...</b></pre></blockquote>
+     *
      * <p><b>Extension Behavior</b></p>
      *
      * <p>The {@code critical} collection only identifies header parameter names that are used in extensions supported
      * by the application. <b>Application developers, <em>not JJWT</em>, MUST perform the associated extension behavior
      * using the parsed JWT</b>.</p>
+     *
+     * <p><b>Continued Parser Configuration</b></p>
+     * <p>When finished, use the collection's
+     * {@link Conjunctor#and() and()} method to continue parser configuration, for example:
+     * <blockquote><pre>
+     * Jwts.parser()
+     *     .critical().add("headerName").<b>{@link Conjunctor#and() and()} // return parent</b>
+     * // resume parser configuration...</pre></blockquote>
      *
      * @return the {@link NestedCollection} to use for {@code crit} configuration.
      * @see ProtectedHeader#getCritical()
@@ -557,7 +570,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>The collection's {@link Conjunctor#and() and()} method returns to the builder for continued parser
      * configuration, for example:</p>
      * <blockquote><pre>
-     * parserBuilder.enc().add(anAeadAlgorithm).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
+     * parserBuilder.enc().add(anAeadAlgorithm)<b>.{@link Conjunctor#and() and()} // etc...</b></pre></blockquote>
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
@@ -597,7 +610,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>The collection's {@link Conjunctor#and() and()} method returns to the builder for continued parser
      * configuration, for example:</p>
      * <blockquote><pre>
-     * parserBuilder.key().add(aKeyAlgorithm).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
+     * parserBuilder.key().add(aKeyAlgorithm)<b>.{@link Conjunctor#and() and()} // etc...</b></pre></blockquote>
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
@@ -639,7 +652,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>The collection's {@link Conjunctor#and() and()} method returns to the builder for continued parser
      * configuration, for example:</p>
      * <blockquote><pre>
-     * parserBuilder.sig().add(aSignatureAlgorithm).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
+     * parserBuilder.sig().add(aSignatureAlgorithm)<b>.{@link Conjunctor#and() and()} // etc...</b></pre></blockquote>
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
@@ -680,7 +693,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * <p>The collection's {@link Conjunctor#and() and()} method returns to the builder for continued parser
      * configuration, for example:</p>
      * <blockquote><pre>
-     * parserBuilder.zip().add(aCompressionAlgorithm).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
+     * parserBuilder.zip().add(aCompressionAlgorithm)<b>.{@link Conjunctor#and() and()} // etc...</b></pre></blockquote>
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *

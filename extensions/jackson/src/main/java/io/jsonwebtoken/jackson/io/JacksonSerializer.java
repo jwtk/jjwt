@@ -16,6 +16,8 @@
 package io.jsonwebtoken.jackson.io;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -42,7 +44,27 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
         MODULE = module;
     }
 
-    static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper().registerModule(MODULE).registerModule(new JavaTimeModule());
+    static final ObjectMapper DEFAULT_OBJECT_MAPPER = newObjectMapper();
+
+    /**
+     * Creates and returns a new ObjectMapper with the {@code jjwt-jackson} module registered and
+     * {@code JsonParser.Feature.STRICT_DUPLICATE_DETECTION} enabled (set to true) and
+     * {@code DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} disabled (set to false).
+     *
+     * @return a new ObjectMapper with the {@code jjwt-jackson} module registered and
+     * {@code JsonParser.Feature.STRICT_DUPLICATE_DETECTION} enabled (set to true) and
+     * {@code DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} disabled (set to false).
+     *
+     * @since 0.12.4
+     */
+    // package protected on purpose, do not expose to the public API
+    static ObjectMapper newObjectMapper() {
+        return new ObjectMapper()
+                .registerModule(MODULE)
+                .registerModule(new JavaTimeModule())
+                .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true) // https://github.com/jwtk/jjwt/issues/877
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // https://github.com/jwtk/jjwt/issues/893
+    }
 
     protected final ObjectMapper objectMapper;
 
