@@ -33,6 +33,6 @@ class JwtDateConverterTest {
 
     @Test
     void testToDateWithNull() {
-        assertNull JwtDateConverter.toDate(null)
+        assertNull JwtDateConverter.toInstant(null)
     }
 }

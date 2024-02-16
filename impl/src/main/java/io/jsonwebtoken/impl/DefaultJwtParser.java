@@ -85,8 +85,9 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.time.Instant;
+import java.time.temporal.ChronoField;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -659,22 +660,18 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
         //since 0.3:
         if (claims != null) {
-
-            final Date now = this.clock.now();
-            long nowTime = now.getTime();
+            final Instant now = this.clock.now();
 
             // https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4
             // token MUST NOT be accepted on or after any specified exp time:
-            Date exp = claims.getExpiration();
+            Instant exp = claims.getExpiration();
             if (exp != null) {
-
-                long maxTime = nowTime - this.allowedClockSkewMillis;
-                Date max = allowSkew ? new Date(maxTime) : now;
-                if (max.after(exp)) {
+                Instant max = allowSkew ? now.minus(this.allowedClockSkewMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit()) : now;
+                if (max.isAfter(exp)) {
                     String expVal = DateFormats.formatIso8601(exp, true);
                     String nowVal = DateFormats.formatIso8601(now, true);
 
-                    long differenceMillis = nowTime - exp.getTime();
+                    long differenceMillis = now.toEpochMilli() - exp.toEpochMilli();
 
                     String msg = "JWT expired " + differenceMillis + " milliseconds ago at " + expVal + ". " +
                             "Current time: " + nowVal + ". Allowed clock skew: " +
@@ -685,16 +682,14 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
             // https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5
             // token MUST NOT be accepted before any specified nbf time:
-            Date nbf = claims.getNotBefore();
+            Instant nbf = claims.getNotBefore();
             if (nbf != null) {
-
-                long minTime = nowTime + this.allowedClockSkewMillis;
-                Date min = allowSkew ? new Date(minTime) : now;
-                if (min.before(nbf)) {
+                Instant min = allowSkew ? now.plus(this.allowedClockSkewMillis, ChronoField.MILLI_OF_SECOND.getBaseUnit()) : now;
+                if (min.isBefore(nbf)) {
                     String nbfVal = DateFormats.formatIso8601(nbf, true);
                     String nowVal = DateFormats.formatIso8601(now, true);
 
-                    long differenceMillis = nbf.getTime() - nowTime;
+                    long differenceMillis = nbf.toEpochMilli() - now.toEpochMilli();
 
                     String msg = "JWT early by " + differenceMillis + " milliseconds before " + nbfVal +
                             ". Current time: " + nowVal + ". Allowed clock skew: " +
@@ -728,12 +723,12 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             Object expectedClaimValue = normalize(expected.get(expectedClaimName));
             Object actualClaimValue = normalize(claims.get(expectedClaimName));
 
-            if (expectedClaimValue instanceof Date) {
+            if (expectedClaimValue instanceof Instant) {
                 try {
-                    actualClaimValue = claims.get(expectedClaimName, Date.class);
+                    actualClaimValue = claims.get(expectedClaimName, Instant.class);
                 } catch (Exception e) {
-                    String msg = "JWT Claim '" + expectedClaimName + "' was expected to be a Date, but its value " +
-                            "cannot be converted to a Date using current heuristics.  Value: " + actualClaimValue;
+                    String msg = "JWT Claim '" + expectedClaimName + "' was expected to be an Instant, but its value " +
+                            "cannot be converted to an Instant using current heuristics.  Value: " + actualClaimValue;
                     throw new IncorrectClaimException(header, claims, expectedClaimName, expectedClaimValue, msg);
                 }
             }
