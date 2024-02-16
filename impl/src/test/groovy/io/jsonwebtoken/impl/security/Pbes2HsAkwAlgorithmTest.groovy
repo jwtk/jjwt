@@ -16,8 +16,11 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeaderMutator
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
+import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.KeyRequest
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.Password
@@ -46,6 +49,39 @@ class Pbes2HsAkwAlgorithmTest {
                 fail()
             } catch (IllegalArgumentException iae) {
                 assertEquals Pbes2HsAkwAlgorithm.MIN_ITERATIONS_MSG_PREFIX + iterations, iae.getMessage()
+            }
+        }
+    }
+
+    /**
+     * @since 0.12.4
+     */
+    @Test
+    void testExceedsMaxIterations() {
+        for (Pbes2HsAkwAlgorithm alg : ALGS) {
+            def password = Keys.password('correct horse battery staple'.toCharArray())
+            def iterations = alg.MAX_ITERATIONS + 1
+            // we make the JWE string directly from JSON here (instead of using Jwts.builder()) to avoid
+            // the computational time it would take to create such JWEs with excessive iterations as well as
+            // avoid the builder throwing any exceptions (and this is what a potential attacker would do anyway):
+            def headerJson = """
+            {
+              "p2c": ${iterations},
+              "p2s": "831BG_z_ZxkN7Rnt5v1iYm1A0bn6VEuxpW4gV7YBMoE",
+              "alg": "${alg.id}",
+              "enc": "A256GCM"
+            }"""
+            def jwe = Encoders.BASE64URL.encode(Strings.utf8(headerJson)) +
+                    '.OSAhMk3FtaCeZ5v1c8bWBgssEVqx2mCPUEnJUsg4hwIQyrUP-LCYkg.' +
+                    'K4R_-zb4qaZ3R0W8.sGS4mcT_xBhZC1d7G-g.kWqd_4sEsaKrWE_hMZ5HmQ'
+            try {
+                Jwts.parser().decryptWith(password).build().parse(jwe)
+            } catch (UnsupportedJwtException expected) {
+                String msg = "JWE Header 'p2c' (PBES2 Count) value ${iterations} exceeds ${alg.id} maximum allowed " +
+                        "value ${alg.MAX_ITERATIONS}. The larger value is rejected to help mitigate potential " +
+                        "Denial of Service attacks."
+                //println msg
+                assertEquals msg, expected.message
             }
         }
     }

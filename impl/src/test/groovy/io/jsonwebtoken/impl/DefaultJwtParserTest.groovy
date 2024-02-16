@@ -55,7 +55,7 @@ class DefaultJwtParserTest {
     }
 
     private static byte[] serialize(Map<String, ?> map) {
-        def serializer = Services.loadFirst(Serializer)
+        def serializer = Services.get(Serializer)
         ByteArrayOutputStream out = new ByteArrayOutputStream(512)
         serializer.serialize(map, out)
         return out.toByteArray()

@@ -35,7 +35,8 @@ import java.security.spec.InvalidKeySpecException;
 
 class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJwk> {
 
-    private static final String ECPUBKEY_ERR_MSG = "JwkContext publicKey must be an " + ECPublicKey.class.getName() + " instance.";
+    private static final String ECPUBKEY_ERR_MSG = "JwkContext publicKey must be an " + ECPublicKey.class.getName() +
+            " instance.";
 
     private static final EcPublicJwkFactory PUB_FACTORY = EcPublicJwkFactory.INSTANCE;
 
@@ -96,8 +97,7 @@ class EcPrivateJwkFactory extends AbstractEcJwkFactory<ECPrivateKey, EcPrivateJw
             ctx.setId(pubJwk.getId());
         }
 
-        int fieldSize = key.getParams().getCurve().getField().getFieldSize();
-        String d = toOctetString(fieldSize, key.getS());
+        String d = toOctetString(key.getParams().getCurve(), key.getS());
         ctx.put(DefaultEcPrivateJwk.D.getId(), d);
 
         return new DefaultEcPrivateJwk(ctx, pubJwk);

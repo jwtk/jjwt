@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.io.Encoders;
@@ -24,6 +25,7 @@ import io.jsonwebtoken.security.UnsupportedKeyException;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.interfaces.ECKey;
+import java.security.spec.EllipticCurve;
 import java.util.Set;
 
 abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> extends AbstractFamilyJwkFactory<K, J> {
@@ -41,19 +43,16 @@ abstract class AbstractEcJwkFactory<K extends Key & ECKey, J extends Jwk<K>> ext
      * https://tools.ietf.org/html/rfc7518#section-6.2.1.2 indicates that this algorithm logic is defined in
      * http://www.secg.org/sec1-v2.pdf Section 2.3.5.
      *
-     * @param fieldSize  EC field size
-     * @param coordinate EC point coordinate (e.g. x or y)
+     * @param curve      EllipticCurve
+     * @param coordinate EC point coordinate (e.g. x or y) on the {@code curve}
      * @return A base64Url-encoded String representing the EC field element per the RFC format
      */
     // Algorithm defined in http://www.secg.org/sec1-v2.pdf Section 2.3.5
-    static String toOctetString(int fieldSize, BigInteger coordinate) {
+    static String toOctetString(EllipticCurve curve, BigInteger coordinate) {
         byte[] bytes = Converters.BIGINT_UBYTES.applyTo(coordinate);
-        int mlen = (int) Math.ceil(fieldSize / 8d);
-        if (mlen > bytes.length) {
-            byte[] m = new byte[mlen];
-            System.arraycopy(bytes, 0, m, mlen - bytes.length, bytes.length);
-            bytes = m;
-        }
+        int fieldSizeInBits = curve.getField().getFieldSize();
+        int mlen = Bytes.length(fieldSizeInBits);
+        bytes = Bytes.prepad(bytes, mlen);
         return Encoders.BASE64URL.encode(bytes);
     }
 

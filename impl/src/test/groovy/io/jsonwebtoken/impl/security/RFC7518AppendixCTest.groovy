@@ -43,7 +43,7 @@ class RFC7518AppendixCTest {
     }
 
     private static final Map<String, ?> fromJson(String s) {
-        return Services.loadFirst(Deserializer).deserialize(new StringReader(s)) as Map<String, ?>
+        return Services.get(Deserializer).deserialize(new StringReader(s)) as Map<String, ?>
     }
 
     private static EcPrivateJwk readJwk(String json) {

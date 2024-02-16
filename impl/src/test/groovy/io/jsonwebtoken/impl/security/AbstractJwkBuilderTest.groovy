@@ -29,10 +29,8 @@ import static org.junit.Assert.*
 
 class AbstractJwkBuilderTest {
 
-    private static final SecretKey SKEY = TestKeys.A256GCM
-
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder) Jwks.builder().key(SKEY)
+        return (AbstractJwkBuilder) Jwks.builder().key(TestKeys.NA256)
     }
 
     @Test
@@ -241,7 +239,21 @@ class AbstractJwkBuilderTest {
                 .related(Jwks.OP.VERIFY.id).build()
         def builder = builder().operationPolicy(Jwks.OP.policy().add(op).build())
         def jwk = builder.operations().add(Collections.setOf(op, Jwks.OP.VERIFY)).and().build() as Jwk
-        assertSame op, jwk.getOperations().find({it.id == 'sign'})
+        assertSame op, jwk.getOperations().find({ it.id == 'sign' })
+    }
+
+    /**
+     * Asserts that if a .operations() builder is used, and its .and() method is not called, the change to the
+     * operations collection is still applied when building the JWK.
+     * @see <a href="https://github.com/jwtk/jjwt/issues/916">JJWT Issue 916</a>
+     * @since 0.12.5
+     */
+    @Test
+    void testOperationsWithoutConjunction() {
+        def builder = builder()
+        builder.operations().clear().add(Jwks.OP.DERIVE_BITS) // no .and() call
+        def jwk = builder.build()
+        assertEquals(Jwks.OP.DERIVE_BITS, jwk.getOperations()[0])
     }
 
     @Test

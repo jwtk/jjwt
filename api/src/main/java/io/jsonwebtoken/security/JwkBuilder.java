@@ -109,9 +109,9 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * the key is intended to be used. When finished, use the collection's {@link Conjunctor#and() and()} method to
      * return to the JWK builder, for example:
      * <blockquote><pre>
-     * jwkBuilder.operations().add(aKeyOperation).{@link Conjunctor#and() and()} // etc...</pre></blockquote>
+     * jwkBuilder.operations().add(aKeyOperation)<b>.{@link Conjunctor#and() and()} // etc...</b></pre></blockquote>
      *
-     * <p>The {@code and()} method will throw an {@link IllegalArgumentException} if any of the specified
+     * <p>The {@code add()} method(s) will throw an {@link IllegalArgumentException} if any of the specified
      * {@code KeyOperation}s are not permitted by the JWK's
      * {@link #operationPolicy(KeyOperationPolicy) operationPolicy}. See that documentation for more
      * information on security vulnerabilities when using the same key with multiple algorithms.</p>

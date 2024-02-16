@@ -220,9 +220,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public NestedCollection<String, JwtParserBuilder> critical() {
         return new DefaultNestedCollection<String, JwtParserBuilder>(this, this.critical) {
             @Override
-            public JwtParserBuilder and() {
+            protected void changed() {
                 critical = Collections.asSet(getCollection());
-                return super.and();
             }
         };
     }
@@ -304,9 +303,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public NestedCollection<CompressionAlgorithm, JwtParserBuilder> zip() {
         return new DefaultNestedCollection<CompressionAlgorithm, JwtParserBuilder>(this, this.zipAlgs.values()) {
             @Override
-            public JwtParserBuilder and() {
+            protected void changed() {
                 zipAlgs = new IdRegistry<>(StandardCompressionAlgorithms.NAME, getCollection());
-                return super.and();
             }
         };
     }
@@ -315,9 +313,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public NestedCollection<AeadAlgorithm, JwtParserBuilder> enc() {
         return new DefaultNestedCollection<AeadAlgorithm, JwtParserBuilder>(this, this.encAlgs.values()) {
             @Override
-            public JwtParserBuilder and() {
+            public void changed() {
                 encAlgs = new IdRegistry<>(StandardEncryptionAlgorithms.NAME, getCollection());
-                return super.and();
             }
         };
     }
@@ -326,9 +323,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public NestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder> sig() {
         return new DefaultNestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder>(this, this.sigAlgs.values()) {
             @Override
-            public JwtParserBuilder and() {
+            public void changed() {
                 sigAlgs = new IdRegistry<>(StandardSecureDigestAlgorithms.NAME, getCollection());
-                return super.and();
             }
         };
     }
@@ -337,9 +333,8 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     public NestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder> key() {
         return new DefaultNestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder>(this, this.keyAlgs.values()) {
             @Override
-            public JwtParserBuilder and() {
+            public void changed() {
                 keyAlgs = new IdRegistry<>(StandardKeyAlgorithms.NAME, getCollection());
-                return super.and();
             }
         };
     }
@@ -370,7 +365,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
         if (this.deserializer == null) {
             //noinspection unchecked
-            json(Services.loadFirst(Deserializer.class));
+            json(Services.get(Deserializer.class));
         }
         if (this.signingKeyResolver != null && this.signatureVerificationKey != null) {
             String msg = "Both a 'signingKeyResolver and a 'verifyWith' key cannot be configured. " +
