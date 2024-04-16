@@ -135,9 +135,9 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
             throw new InvalidKeyException(msg);
         }
 
-        // We can ignore PKCS11 key name assertions because HSM module key algorithm names don't always align with
-        // JCA standard algorithm names:
-        boolean pkcs11Key = KeysBridge.isSunPkcs11GenericSecret(key);
+        // We can ignore key name assertions for generic secrets, because HSM module key algorithm names
+        // don't always align with JCA standard algorithm names:
+        boolean pkcs11Key = KeysBridge.isGenericSecret(key);
 
         //assert key's jca name is valid if it's a JWA standard algorithm:
         if (!pkcs11Key && isJwaStandard() && !isJwaStandardJcaName(name)) {

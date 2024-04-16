@@ -17,9 +17,13 @@ package io.jsonwebtoken.impl.security
 
 import org.junit.Test
 
+import javax.crypto.SecretKey
 import java.security.Key
+import java.security.PrivateKey
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 
 class KeysBridgeTest {
 
@@ -55,5 +59,47 @@ class KeysBridgeTest {
     @Test
     void testToStringPassword() {
         testFormattedOutput(new PasswordSpec("foo".toCharArray()))
+    }
+
+    @Test
+    void testIsGenericSecret() {
+        def genericSecret = new SecretKey() {
+            @Override
+            String getAlgorithm() {
+                return "GenericSecret" ;
+            }
+
+            @Override
+            String getFormat() {
+                return null
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return null;
+            }
+        };
+
+        def genericPrivateKey = new PrivateKey() {
+            @Override
+            String getAlgorithm() {
+                return "GenericSecret";
+            }
+
+            @Override
+            String getFormat() {
+                return null
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return new byte[0]
+            }
+        }
+
+        assertTrue KeysBridge.isGenericSecret(genericSecret)
+        assertFalse KeysBridge.isGenericSecret(TestKeys.HS256)
+        assertFalse KeysBridge.isGenericSecret(TestKeys.A256GCM)
+        assertFalse KeysBridge.isGenericSecret(genericPrivateKey)
     }
 }
