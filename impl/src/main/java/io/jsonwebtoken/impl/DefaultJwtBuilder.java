@@ -693,14 +693,13 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
 
-        InputStream plaintext;
+        ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
         if (content.isClaims()) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
             writeAndClose("JWE Claims", content, out);
-            plaintext = Streams.of(out.toByteArray());
         } else {
-            plaintext = content.toInputStream();
+            writeAndClose("JWE Content", content, out);
         }
+        InputStream plaintext = Streams.of(out.toByteArray());
 
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
