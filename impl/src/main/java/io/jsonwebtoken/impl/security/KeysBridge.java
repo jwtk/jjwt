@@ -34,9 +34,9 @@ import java.security.interfaces.RSAKey;
 @SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
 
-    private static final String SUNPKCS11_GENERIC_SECRET_CLASSNAME = "sun.security.pkcs11.P11Key$P11SecretKey";
-    private static final String SUNPKCS11_GENERIC_SECRET_ALGNAME = "Generic Secret"; // https://github.com/openjdk/jdk/blob/4f90abaf17716493bad740dcef76d49f16d69379/src/jdk.crypto.cryptoki/share/classes/sun/security/pkcs11/P11KeyStore.java#L1292
-    private static final String GENERIC_SECRET_ALGNAME = "GenericSecret"; // AWS CloudHSM JCE provider and possibly other HSMs
+     // Some HSMs use generic secrets. This prefix matches the generic secret algorithm name
+     // used by SUN PKCS#11 provider, AWS CloudHSM JCE provider and possibly other HSMs
+    private static final String GENERIC_SECRET_ALG_PREFIX = "Generic";
 
     // prevent instantiation
     private KeysBridge() {
@@ -99,12 +99,10 @@ public final class KeysBridge {
     public static boolean isGenericSecret(Key key) {
         if (!(key instanceof SecretKey)) {
             return false;
-        } else if (key.getClass().getName().equals(SUNPKCS11_GENERIC_SECRET_CLASSNAME) &&
-                SUNPKCS11_GENERIC_SECRET_ALGNAME.equals(key.getAlgorithm())) {
-            return true;
-        } else {
-            return GENERIC_SECRET_ALGNAME.equals(key.getAlgorithm());
         }
+
+        String algName = Assert.hasText(key.getAlgorithm(), "Key algorithm cannot be null or empty.");
+        return algName.startsWith(GENERIC_SECRET_ALG_PREFIX);
     }
 
     /**

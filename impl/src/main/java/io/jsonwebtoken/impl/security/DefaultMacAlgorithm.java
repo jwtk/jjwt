@@ -136,11 +136,11 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         }
 
         // We can ignore key name assertions for generic secrets, because HSM module key algorithm names
-        // don't always align with JCA standard algorithm names:
-        boolean pkcs11Key = KeysBridge.isGenericSecret(key);
+        // don't always align with JCA standard algorithm names
+        boolean generic = KeysBridge.isGenericSecret(key);
 
         //assert key's jca name is valid if it's a JWA standard algorithm:
-        if (!pkcs11Key && isJwaStandard() && !isJwaStandardJcaName(name)) {
+        if (!generic && isJwaStandard() && !isJwaStandardJcaName(name)) {
             throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + name +
                     "' does not equal a valid HmacSHA* algorithm name or PKCS12 OID and cannot be used with " +
                     getId() + ".");

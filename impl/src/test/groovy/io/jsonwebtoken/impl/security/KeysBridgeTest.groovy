@@ -63,32 +63,34 @@ class KeysBridgeTest {
 
     @Test
     void testIsGenericSecret() {
-        def genericSecret = new SecretKey() {
+        def secretKeyWithAlg = { alg ->
+            new SecretKey() {
+                @Override
+                String getAlgorithm() {
+                    return alg
+                }
+
+                @Override
+                String getFormat() {
+                    return 'RAW'
+                }
+
+                @Override
+                byte[] getEncoded() {
+                    return new byte[0]
+                }
+            }
+        }
+
+        PrivateKey genericPrivateKey = new PrivateKey() {
             @Override
             String getAlgorithm() {
-                return "GenericSecret" ;
+                return "Generic"
             }
 
             @Override
             String getFormat() {
-                return null
-            }
-
-            @Override
-            byte[] getEncoded() {
-                return null;
-            }
-        };
-
-        def genericPrivateKey = new PrivateKey() {
-            @Override
-            String getAlgorithm() {
-                return "GenericSecret";
-            }
-
-            @Override
-            String getFormat() {
-                return null
+                return "RAW"
             }
 
             @Override
@@ -97,7 +99,9 @@ class KeysBridgeTest {
             }
         }
 
-        assertTrue KeysBridge.isGenericSecret(genericSecret)
+        assertTrue KeysBridge.isGenericSecret(secretKeyWithAlg("GenericSecret"))
+        assertTrue KeysBridge.isGenericSecret(secretKeyWithAlg("Generic Secret"))
+        assertFalse KeysBridge.isGenericSecret(secretKeyWithAlg(" Generic"))
         assertFalse KeysBridge.isGenericSecret(TestKeys.HS256)
         assertFalse KeysBridge.isGenericSecret(TestKeys.A256GCM)
         assertFalse KeysBridge.isGenericSecret(genericPrivateKey)
