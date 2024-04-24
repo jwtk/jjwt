@@ -595,7 +595,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
             // Next, b64 extension requires the raw (non-encoded) payload to be included directly in the signing input,
             // so we ensure we have an input stream for that:
-            payloadStream = convertPayloadToInputStream(payload);
+            payloadStream = toInputStream("JWS Unencoded Payload", payload);
 
             if (!payload.isClaims()) {
                 payloadStream = new CountingInputStream(payloadStream); // we'll need to assert if it's empty later
@@ -687,7 +687,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
 
-        InputStream plaintext = convertPayloadToInputStream(content);
+        InputStream plaintext = toInputStream("JWE Unencoded Payload", content);
 
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
@@ -807,10 +807,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Streams.writeAndClose(out, data, "Unable to write bytes");
     }
 
-    private InputStream convertPayloadToInputStream(Payload payload) {
+    private InputStream toInputStream(final String name, Payload payload) {
         if (payload.isClaims() || payload.isCompressed()) {
             ByteArrayOutputStream claimsOut = new ByteArrayOutputStream(8192);
-            writeAndClose("JWS Unencoded Payload", payload, claimsOut);
+            writeAndClose(name, payload, claimsOut);
             return Streams.of(claimsOut.toByteArray());
         } else {
             // No claims and not compressed, so just get the direct InputStream:
