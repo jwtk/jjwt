@@ -595,14 +595,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
             // Next, b64 extension requires the raw (non-encoded) payload to be included directly in the signing input,
             // so we ensure we have an input stream for that:
-            if (payload.isClaims() || payload.isCompressed()) {
-                ByteArrayOutputStream claimsOut = new ByteArrayOutputStream(8192);
-                writeAndClose("JWS Unencoded Payload", payload, claimsOut);
-                payloadStream = Streams.of(claimsOut.toByteArray());
-            } else {
-                // No claims and not compressed, so just get the direct InputStream:
-                payloadStream = Assert.stateNotNull(payload.toInputStream(), "Payload InputStream cannot be null.");
-            }
+            payloadStream = toInputStream("JWS Unencoded Payload", payload);
+
             if (!payload.isClaims()) {
                 payloadStream = new CountingInputStream(payloadStream); // we'll need to assert if it's empty later
             }
@@ -693,14 +687,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(keyAlgFunction, "KeyAlgorithm function cannot be null.");
         assertPayloadEncoding("JWE");
 
-        InputStream plaintext;
-        if (content.isClaims()) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
-            writeAndClose("JWE Claims", content, out);
-            plaintext = Streams.of(out.toByteArray());
-        } else {
-            plaintext = content.toInputStream();
-        }
+        InputStream plaintext = toInputStream("JWE Payload", content);
 
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
@@ -818,6 +805,17 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private void encodeAndWrite(String name, byte[] data, OutputStream out) {
         out = encode(out, name);
         Streams.writeAndClose(out, data, "Unable to write bytes");
+    }
+
+    private InputStream toInputStream(final String name, Payload payload) {
+        if (payload.isClaims() || payload.isCompressed()) {
+            ByteArrayOutputStream claimsOut = new ByteArrayOutputStream(8192);
+            writeAndClose(name, payload, claimsOut);
+            return Streams.of(claimsOut.toByteArray());
+        } else {
+            // No claims and not compressed, so just get the direct InputStream:
+            return Assert.stateNotNull(payload.toInputStream(), "Payload InputStream cannot be null.");
+        }
     }
 
 }
