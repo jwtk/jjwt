@@ -116,7 +116,7 @@
         <maven.javadoc.additionalOptions />
 
         <!-- Optional Runtime Dependencies: -->
-        <bouncycastle.version>1.76</bouncycastle.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
         <bcprov.artifactId>bcprov-jdk18on</bcprov.artifactId>
         <bcpkix.artifactId>bcpkix-jdk18on</bcpkix.artifactId>
 
