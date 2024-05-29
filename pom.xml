@@ -507,7 +507,7 @@
                                 <bannedDependencies>
                                     <searchTransitive>true</searchTransitive>
                                     <excludes>
-                                        <exclude>commons-logging</exclude>
+                                        <exclude>commons-logging:commons-logging:(,1.3)</exclude>
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
