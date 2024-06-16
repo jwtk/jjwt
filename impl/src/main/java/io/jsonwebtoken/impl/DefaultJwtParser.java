@@ -637,7 +637,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
                     // consumable, but not claims, so convert to byte array:
                     payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
                 }
-            } finally {
+            } finally { // always ensure closed per https://github.com/jwtk/jjwt/issues/949
                 Objects.nullSafeClose(in);
             }
         }
