@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 0.12.6
+
+* Fixed GZIPInputStream memory leak surfaced in the 0.12.0 release. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
+
 ### 0.12.5
 
 This patch release:
