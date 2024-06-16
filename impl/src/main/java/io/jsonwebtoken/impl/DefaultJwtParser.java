@@ -265,8 +265,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         return header != null && Strings.hasText(header.getContentType());
     }
 
-    private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
-                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, Payload payload) {
+    private byte[] verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
+                                   @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, Payload payload) {
 
         Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
 
@@ -354,6 +354,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         } finally {
             Streams.reset(payloadStream);
         }
+
+        return signature;
     }
 
     @Override
@@ -485,7 +487,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         }
 
         byte[] iv = null;
-        byte[] tag = null;
+        byte[] digest = null; // either JWE AEAD tag or JWS signature after Base64Url-decoding
         if (tokenized instanceof TokenizedJwe) {
 
             TokenizedJwe tokenizedJwe = (TokenizedJwe) tokenized;
@@ -521,8 +523,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             base64Url = base64UrlDigest;
             //guaranteed to be non-empty via the `alg` + digest check above:
             Assert.hasText(base64Url, "JWE AAD Authentication Tag cannot be null or empty.");
-            tag = decode(base64Url, "JWE AAD Authentication Tag");
-            if (Bytes.isEmpty(tag)) {
+            digest = decode(base64Url, "JWE AAD Authentication Tag");
+            if (Bytes.isEmpty(digest)) {
                 String msg = "Compact JWE strings must always contain an AAD Authentication Tag.";
                 throw new MalformedJwtException(msg);
             }
@@ -564,7 +566,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // TODO: add encProvider(Provider) builder method that applies to this request only?
             InputStream ciphertext = payload.toInputStream();
             ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
-            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, tag);
+            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, digest);
             encAlg.decrypt(dreq, plaintext);
             payload = new Payload(plaintext.toByteArray(), header.getContentType());
 
@@ -574,7 +576,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // not using a signing key resolver, so we can verify the signature before reading the payload, which is
             // always safer:
             JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
-            verifySignature(tokenized, jwsHeader, alg, new LocatingKeyResolver(this.keyLocator), null, payload);
+            digest = verifySignature(tokenized, jwsHeader, alg, new LocatingKeyResolver(this.keyLocator), null, payload);
             integrityVerified = true; // no exception means signature verified
         }
 
@@ -635,24 +637,26 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             }
         }
 
-        Jwt<?, ?> jwt;
-        Object body = claims != null ? claims : payloadBytes;
-        if (header instanceof JweHeader) {
-            jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
-        } else if (hasDigest) {
-            JwsHeader jwsHeader = Assert.isInstanceOf(JwsHeader.class, header, "JwsHeader required.");
-            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest.toString());
-        } else {
-            //noinspection rawtypes
-            jwt = new DefaultJwt(header, body);
-        }
-
-        // =============== Signature =================
+        // =============== Post-SKR Signature Check =================
         if (hasDigest && signingKeyResolver != null) { // TODO: remove for 1.0
             // A SigningKeyResolver has been configured, and due to it's API, we have to verify the signature after
             // parsing the body.  This can be a security risk, so it needs to be removed before 1.0
             JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
-            verifySignature(tokenized, jwsHeader, alg, this.signingKeyResolver, claims, payload);
+            digest = verifySignature(tokenized, jwsHeader, alg, this.signingKeyResolver, claims, payload);
+            //noinspection UnusedAssignment
+            integrityVerified = true; // no exception means verified successfully
+        }
+
+        Jwt<?, ?> jwt;
+        Object body = claims != null ? claims : payloadBytes;
+        if (header instanceof JweHeader) {
+            jwt = new DefaultJwe<>((JweHeader) header, body, iv, digest);
+        } else if (hasDigest) {
+            JwsHeader jwsHeader = Assert.isInstanceOf(JwsHeader.class, header, "JwsHeader required.");
+            jwt = new DefaultJws<>(jwsHeader, body, digest, base64UrlDigest.toString());
+        } else {
+            //noinspection rawtypes
+            jwt = new DefaultJwt(header, body);
         }
 
         final boolean allowSkew = this.allowedClockSkewMillis > 0;

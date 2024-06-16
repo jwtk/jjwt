@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtVisitor;
-import io.jsonwebtoken.io.Decoders;
 
 public class DefaultJws<P> extends DefaultProtectedJwt<JwsHeader, P> implements Jws<P> {
 
@@ -26,9 +25,9 @@ public class DefaultJws<P> extends DefaultProtectedJwt<JwsHeader, P> implements 
 
     private final String signature;
 
-    public DefaultJws(JwsHeader header, P payload, String signature) {
-        super(header, payload, Decoders.BASE64URL.decode(signature), DIGEST_NAME);
-        this.signature = signature;
+    public DefaultJws(JwsHeader header, P payload, byte[] signature, String b64UrlSig) {
+        super(header, payload, signature, DIGEST_NAME);
+        this.signature = b64UrlSig;
     }
 
     @Override

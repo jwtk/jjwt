@@ -1,5 +1,13 @@
 ## Release Notes
 
+### 0.12.6
+
+This patch release:
+
+* Ensures that after successful JWS signature verification, an application-configured Base64Url `Decoder` output is
+  used to construct a `Jws` instance (instead of JJWT's default decoder). See
+  [Issue 947](https://github.com/jwtk/jjwt/issues/947).
+
 ### 0.12.5
 
 This patch release:
