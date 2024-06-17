@@ -597,43 +597,48 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         Claims claims = null;
         byte[] payloadBytes = payload.getBytes();
         if (payload.isConsumable()) {
+            InputStream in = null;
+            try {
+                in = payload.toInputStream();
 
-            InputStream in = payload.toInputStream();
-
-            if (!hasContentType(header)) {   // If there is a content type set, then the application using JJWT is expected
-                //                          to convert the byte payload themselves based on this content type
-                //                          https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
-                //
-                //                          "This parameter is ignored by JWS implementations; any processing of this
-                //                          parameter is performed by the JWS application."
-                //
-                Map<String, ?> claimsMap = null;
-                try {
-                    // if deserialization fails, we'll need to rewind to convert to a byte array.  So if
-                    // mark/reset isn't possible, we'll need to buffer:
-                    if (!in.markSupported()) {
-                        in = new BufferedInputStream(in);
-                        in.mark(0);
-                    }
-                    claimsMap = deserialize(new UncloseableInputStream(in) /* Don't close in case we need to rewind */, "claims");
-                } catch (DeserializationException | MalformedJwtException ignored) { // not JSON, treat it as a byte[]
+                if (!hasContentType(header)) {   // If there is a content type set, then the application using JJWT is expected
+                    //                          to convert the byte payload themselves based on this content type
+                    //                          https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
+                    //
+                    //                          "This parameter is ignored by JWS implementations; any processing of this
+                    //                          parameter is performed by the JWS application."
+                    //
+                    Map<String, ?> claimsMap = null;
+                    try {
+                        // if deserialization fails, we'll need to rewind to convert to a byte array.  So if
+                        // mark/reset isn't possible, we'll need to buffer:
+                        if (!in.markSupported()) {
+                            in = new BufferedInputStream(in);
+                            in.mark(0);
+                        }
+                        claimsMap = deserialize(new UncloseableInputStream(in) /* Don't close in case we need to rewind */, "claims");
+                    } catch (DeserializationException |
+                             MalformedJwtException ignored) { // not JSON, treat it as a byte[]
 //                String msg = "Invalid claims: " + e.getMessage();
 //                throw new MalformedJwtException(msg, e);
-                } finally {
-                    Streams.reset(in);
-                }
-                if (claimsMap != null) {
-                    try {
-                        claims = new DefaultClaims(claimsMap);
-                    } catch (Throwable t) {
-                        String msg = "Invalid claims: " + t.getMessage();
-                        throw new MalformedJwtException(msg);
+                    } finally {
+                        Streams.reset(in);
+                    }
+                    if (claimsMap != null) {
+                        try {
+                            claims = new DefaultClaims(claimsMap);
+                        } catch (Throwable t) {
+                            String msg = "Invalid claims: " + t.getMessage();
+                            throw new MalformedJwtException(msg);
+                        }
                     }
                 }
-            }
-            if (claims == null) {
-                // consumable, but not claims, so convert to byte array:
-                payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
+                if (claims == null) {
+                    // consumable, but not claims, so convert to byte array:
+                    payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
+                }
+            } finally { // always ensure closed per https://github.com/jwtk/jjwt/issues/949
+                Objects.nullSafeClose(in);
             }
         }
 
