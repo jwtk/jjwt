@@ -7,8 +7,7 @@ This patch release:
 * Ensures that after successful JWS signature verification, an application-configured Base64Url `Decoder` output is
   used to construct a `Jws` instance (instead of JJWT's default decoder). See
   [Issue 947](https://github.com/jwtk/jjwt/issues/947).
-* Fixes a GZIPInputStream decompression memory leak introduced in 0.12.0 that surfaces only in 
-  concurrent/multi-threaded environments (when decompressing JWTs with `zip` header of `GZIP`). See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
+* Fixes a decompression memory leak in concurrent/multi-threaded environments introduced in 0.12.0 when decompressing JWTs with a `zip` header of `GZIP`. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
 
 ### 0.12.5
 
