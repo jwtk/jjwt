@@ -8,6 +8,7 @@ This patch release:
   used to construct a `Jws` instance (instead of JJWT's default decoder). See
   [Issue 947](https://github.com/jwtk/jjwt/issues/947).
 * Fixes a decompression memory leak in concurrent/multi-threaded environments introduced in 0.12.0 when decompressing JWTs with a `zip` header of `GZIP`. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
+* Upgrades BouncyCastle to 1.78.
 
 ### 0.12.5
 
