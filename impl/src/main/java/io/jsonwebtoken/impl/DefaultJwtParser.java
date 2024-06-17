@@ -265,8 +265,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         return header != null && Strings.hasText(header.getContentType());
     }
 
-    private void verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
-                                 @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, Payload payload) {
+    private byte[] verifySignature(final TokenizedJwt tokenized, final JwsHeader jwsHeader, final String alg,
+                                   @SuppressWarnings("deprecation") SigningKeyResolver resolver, Claims claims, Payload payload) {
 
         Assert.notNull(resolver, "SigningKeyResolver instance cannot be null.");
 
@@ -354,6 +354,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         } finally {
             Streams.reset(payloadStream);
         }
+
+        return signature;
     }
 
     @Override
@@ -485,7 +487,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         }
 
         byte[] iv = null;
-        byte[] tag = null;
+        byte[] digest = null; // either JWE AEAD tag or JWS signature after Base64Url-decoding
         if (tokenized instanceof TokenizedJwe) {
 
             TokenizedJwe tokenizedJwe = (TokenizedJwe) tokenized;
@@ -521,8 +523,8 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             base64Url = base64UrlDigest;
             //guaranteed to be non-empty via the `alg` + digest check above:
             Assert.hasText(base64Url, "JWE AAD Authentication Tag cannot be null or empty.");
-            tag = decode(base64Url, "JWE AAD Authentication Tag");
-            if (Bytes.isEmpty(tag)) {
+            digest = decode(base64Url, "JWE AAD Authentication Tag");
+            if (Bytes.isEmpty(digest)) {
                 String msg = "Compact JWE strings must always contain an AAD Authentication Tag.";
                 throw new MalformedJwtException(msg);
             }
@@ -564,7 +566,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // TODO: add encProvider(Provider) builder method that applies to this request only?
             InputStream ciphertext = payload.toInputStream();
             ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
-            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, tag);
+            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, digest);
             encAlg.decrypt(dreq, plaintext);
             payload = new Payload(plaintext.toByteArray(), header.getContentType());
 
@@ -574,7 +576,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // not using a signing key resolver, so we can verify the signature before reading the payload, which is
             // always safer:
             JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
-            verifySignature(tokenized, jwsHeader, alg, new LocatingKeyResolver(this.keyLocator), null, payload);
+            digest = verifySignature(tokenized, jwsHeader, alg, new LocatingKeyResolver(this.keyLocator), null, payload);
             integrityVerified = true; // no exception means signature verified
         }
 
@@ -595,64 +597,71 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         Claims claims = null;
         byte[] payloadBytes = payload.getBytes();
         if (payload.isConsumable()) {
+            InputStream in = null;
+            try {
+                in = payload.toInputStream();
 
-            InputStream in = payload.toInputStream();
-
-            if (!hasContentType(header)) {   // If there is a content type set, then the application using JJWT is expected
-                //                          to convert the byte payload themselves based on this content type
-                //                          https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
-                //
-                //                          "This parameter is ignored by JWS implementations; any processing of this
-                //                          parameter is performed by the JWS application."
-                //
-                Map<String, ?> claimsMap = null;
-                try {
-                    // if deserialization fails, we'll need to rewind to convert to a byte array.  So if
-                    // mark/reset isn't possible, we'll need to buffer:
-                    if (!in.markSupported()) {
-                        in = new BufferedInputStream(in);
-                        in.mark(0);
-                    }
-                    claimsMap = deserialize(new UncloseableInputStream(in) /* Don't close in case we need to rewind */, "claims");
-                } catch (DeserializationException | MalformedJwtException ignored) { // not JSON, treat it as a byte[]
+                if (!hasContentType(header)) {   // If there is a content type set, then the application using JJWT is expected
+                    //                          to convert the byte payload themselves based on this content type
+                    //                          https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.10 :
+                    //
+                    //                          "This parameter is ignored by JWS implementations; any processing of this
+                    //                          parameter is performed by the JWS application."
+                    //
+                    Map<String, ?> claimsMap = null;
+                    try {
+                        // if deserialization fails, we'll need to rewind to convert to a byte array.  So if
+                        // mark/reset isn't possible, we'll need to buffer:
+                        if (!in.markSupported()) {
+                            in = new BufferedInputStream(in);
+                            in.mark(0);
+                        }
+                        claimsMap = deserialize(new UncloseableInputStream(in) /* Don't close in case we need to rewind */, "claims");
+                    } catch (DeserializationException |
+                             MalformedJwtException ignored) { // not JSON, treat it as a byte[]
 //                String msg = "Invalid claims: " + e.getMessage();
 //                throw new MalformedJwtException(msg, e);
-                } finally {
-                    Streams.reset(in);
-                }
-                if (claimsMap != null) {
-                    try {
-                        claims = new DefaultClaims(claimsMap);
-                    } catch (Throwable t) {
-                        String msg = "Invalid claims: " + t.getMessage();
-                        throw new MalformedJwtException(msg);
+                    } finally {
+                        Streams.reset(in);
+                    }
+                    if (claimsMap != null) {
+                        try {
+                            claims = new DefaultClaims(claimsMap);
+                        } catch (Throwable t) {
+                            String msg = "Invalid claims: " + t.getMessage();
+                            throw new MalformedJwtException(msg);
+                        }
                     }
                 }
+                if (claims == null) {
+                    // consumable, but not claims, so convert to byte array:
+                    payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
+                }
+            } finally { // always ensure closed per https://github.com/jwtk/jjwt/issues/949
+                Objects.nullSafeClose(in);
             }
-            if (claims == null) {
-                // consumable, but not claims, so convert to byte array:
-                payloadBytes = Streams.bytes(in, "Unable to convert payload to byte array.");
-            }
+        }
+
+        // =============== Post-SKR Signature Check =================
+        if (hasDigest && signingKeyResolver != null) { // TODO: remove for 1.0
+            // A SigningKeyResolver has been configured, and due to it's API, we have to verify the signature after
+            // parsing the body.  This can be a security risk, so it needs to be removed before 1.0
+            JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
+            digest = verifySignature(tokenized, jwsHeader, alg, this.signingKeyResolver, claims, payload);
+            //noinspection UnusedAssignment
+            integrityVerified = true; // no exception means verified successfully
         }
 
         Jwt<?, ?> jwt;
         Object body = claims != null ? claims : payloadBytes;
         if (header instanceof JweHeader) {
-            jwt = new DefaultJwe<>((JweHeader) header, body, iv, tag);
+            jwt = new DefaultJwe<>((JweHeader) header, body, iv, digest);
         } else if (hasDigest) {
             JwsHeader jwsHeader = Assert.isInstanceOf(JwsHeader.class, header, "JwsHeader required.");
-            jwt = new DefaultJws<>(jwsHeader, body, base64UrlDigest.toString());
+            jwt = new DefaultJws<>(jwsHeader, body, digest, base64UrlDigest.toString());
         } else {
             //noinspection rawtypes
             jwt = new DefaultJwt(header, body);
-        }
-
-        // =============== Signature =================
-        if (hasDigest && signingKeyResolver != null) { // TODO: remove for 1.0
-            // A SigningKeyResolver has been configured, and due to it's API, we have to verify the signature after
-            // parsing the body.  This can be a security risk, so it needs to be removed before 1.0
-            JwsHeader jwsHeader = Assert.stateIsInstance(JwsHeader.class, header, "Not a JwsHeader. ");
-            verifySignature(tokenized, jwsHeader, alg, this.signingKeyResolver, claims, payload);
         }
 
         final boolean allowSkew = this.allowedClockSkewMillis > 0;
