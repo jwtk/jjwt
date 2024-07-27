@@ -90,7 +90,7 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments />
+        <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
@@ -109,11 +109,11 @@
         <jdk.version>7</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.12.7.1</jackson.version>
+        <jackson.version>2.15.0</jackson.version>
         <orgjson.version>20231013</orgjson.version>
         <gson.version>2.9.0</gson.version>
 
-        <maven.javadoc.additionalOptions />
+        <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
         <bouncycastle.version>1.78</bouncycastle.version>
@@ -129,7 +129,7 @@
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine />
+        <surefire.argLine/>
         <test.addOpens>
             --add-opens java.base/java.lang=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
             --add-opens java.desktop/java.beans=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
@@ -477,7 +477,7 @@
                             </includes>
                         </artifactSet>
                         <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         </transformers>
                     </configuration>
                     <executions>
