@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.*
 import org.junit.Test
 
+import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import java.nio.charset.StandardCharsets
 import java.security.Key
@@ -231,5 +232,30 @@ class DefaultMacAlgorithmTest {
             def oidKey = new TestSecretKey(algorithm: alg, format: 'RAW', encoded: key.getEncoded())
             assertSame mac, DefaultMacAlgorithm.findByKey(oidKey)
         }
+    }
+
+    /**
+     * Asserts that generic secrets are accepted
+     */
+    @Test
+    void testValidateKeyAcceptsGenericSecret() {
+        def genericSecret = new SecretKey() {
+            @Override
+            String getAlgorithm() {
+                return 'GenericSecret'
+            }
+
+            @Override
+            String getFormat() {
+                return "RAW"
+            }
+
+            @Override
+            byte[] getEncoded() {
+                return Randoms.secureRandom().nextBytes(new byte[32])
+            }
+        }
+
+        newAlg().validateKey(genericSecret, true)
     }
 }

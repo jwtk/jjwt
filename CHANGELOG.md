@@ -1,5 +1,15 @@
 ## Release Notes
 
+### 0.12.6
+
+This patch release:
+
+* Ensures that after successful JWS signature verification, an application-configured Base64Url `Decoder` output is
+  used to construct a `Jws` instance (instead of JJWT's default decoder). See
+  [Issue 947](https://github.com/jwtk/jjwt/issues/947).
+* Fixes a decompression memory leak in concurrent/multi-threaded environments introduced in 0.12.0 when decompressing JWTs with a `zip` header of `GZIP`. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
+* Upgrades BouncyCastle to 1.78 via [PR 941](https://github.com/jwtk/jjwt/pull/941).
+
 ### 0.12.5
 
 This patch release:

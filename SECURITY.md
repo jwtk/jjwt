@@ -11,8 +11,8 @@ We ask that all users or security researchers upgrade to the latest stable relea
 
 | Version  | Supported          |
 | -------- | ------------------ |
-| 0.11.x   | :white_check_mark: |
-| < 0.11.0 | :x:                |
+| 0.12.x   | :white_check_mark: |
+| < 0.12.0 | :x:                |
 
 ## Reporting Security Issues
 

@@ -1,6 +1,6 @@
 :doctype: book
 = Java JWT: JSON Web Token for Java and Android
-:project-version: 0.12.5
+:project-version: 0.12.6
 :toc:
 :toc-title:
 :toc-placement!:

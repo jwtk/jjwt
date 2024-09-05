@@ -22,6 +22,7 @@ import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
+import io.jsonwebtoken.io.CompressionAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Encoders
@@ -1387,6 +1388,97 @@ class JwtsTest {
                         .build()
                         .parseEncryptedClaims(jwe)
                 assertEquals 'bar', jwt.getPayload().get('foo')
+            }
+        }
+    }
+
+    @Test
+    void testJweCompressionWithArbitraryContentString() {
+        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+
+        for (CompressionAlgorithm zip : codecs) {
+
+            for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
+
+                SecretKey key = enc.key().build()
+
+                String payload = 'hello, world!'
+
+                // encrypt and compress:
+                String jwe = Jwts.builder()
+                    .content(payload)
+                    .compressWith(zip)
+                    .encryptWith(key, enc)
+                    .compact()
+
+                //decompress and decrypt:
+                def jwt = Jwts.parser()
+                    .decryptWith(key)
+                    .build()
+                    .parseEncryptedContent(jwe)
+                assertEquals payload, new String(jwt.getPayload(), StandardCharsets.UTF_8)
+            }
+        }
+    }
+
+    @Test
+    void testJweCompressionWithArbitraryContentByteArray() {
+        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+
+        for (CompressionAlgorithm zip : codecs) {
+
+            for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
+
+                SecretKey key = enc.key().build()
+
+                byte[] payload = new byte[14];
+                Randoms.secureRandom().nextBytes(payload)
+
+                // encrypt and compress:
+                String jwe = Jwts.builder()
+                        .content(payload)
+                        .compressWith(zip)
+                        .encryptWith(key, enc)
+                        .compact()
+
+                //decompress and decrypt:
+                def jwt = Jwts.parser()
+                        .decryptWith(key)
+                        .build()
+                        .parseEncryptedContent(jwe)
+                assertArrayEquals payload, jwt.getPayload()
+            }
+        }
+    }
+
+    @Test
+    void testJweCompressionWithArbitraryContentInputStream() {
+        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+
+        for (CompressionAlgorithm zip : codecs) {
+
+            for (AeadAlgorithm enc : Jwts.ENC.get().values()) {
+
+                SecretKey key = enc.key().build()
+
+                byte[] payloadBytes = new byte[14];
+                Randoms.secureRandom().nextBytes(payloadBytes)
+
+                ByteArrayInputStream payload = new ByteArrayInputStream(payloadBytes)
+
+                // encrypt and compress:
+                String jwe = Jwts.builder()
+                        .content(payload)
+                        .compressWith(zip)
+                        .encryptWith(key, enc)
+                        .compact()
+
+                //decompress and decrypt:
+                def jwt = Jwts.parser()
+                        .decryptWith(key)
+                        .build()
+                        .parseEncryptedContent(jwe)
+                assertArrayEquals payloadBytes, jwt.getPayload()
             }
         }
     }
