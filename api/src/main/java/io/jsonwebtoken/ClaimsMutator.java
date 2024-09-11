@@ -19,6 +19,7 @@ import io.jsonwebtoken.lang.NestedCollection;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Mutation (modifications) to a {@link io.jsonwebtoken.Claims Claims} instance.
@@ -127,7 +128,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * {@link #expiration(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
-    T setExpiration(Instant exp);
+    T setExpiration(Date exp);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
@@ -155,7 +156,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * {@link #notBefore(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
-    T setNotBefore(Instant nbf);
+    T setNotBefore(Date nbf);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -183,7 +184,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * {@link #issuedAt(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
-    T setIssuedAt(Instant iat);
+    T setIssuedAt(Date iat);
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
