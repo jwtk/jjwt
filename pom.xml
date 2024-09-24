@@ -146,6 +146,7 @@
         <module>impl</module>
         <module>extensions</module>
         <module>tdjar</module>
+        <module>bom</module>
     </modules>
 
     <dependencyManagement>
