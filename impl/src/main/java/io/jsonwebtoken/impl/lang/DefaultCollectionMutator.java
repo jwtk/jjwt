@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
 
 public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> implements CollectionMutator<E, M> {
 
@@ -44,6 +45,33 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
             throw new IllegalArgumentException(msg);
         }
         return this.collection.add(e);
+    }
+
+    public M replace(E e) {
+        if (Objects.isEmpty(e)) {
+            if (e == null)  throw new NullPointerException("Cannot be null.");
+            else            throw new IllegalArgumentException("Cannot be empty.");
+        }
+
+        // Keep a copy of the original, in case remove/add fails, and need to rollback
+        E old = null;
+        for (E element : this.collection) {
+            if (element.equals(e)) {
+                old = element;
+                break;
+            }
+        }
+
+        if (old == null || !this.collection.contains(e)) {
+            String msg = this.getClass() + " does not contain " + e + ".";
+            throw new NoSuchElementException(msg);
+        }
+
+        if (this.collection.remove(e))
+            if (doAdd(e)) changed(); // removed and add successfully, notify changed()
+            else this.collection.add(old); // remove successfully but add failed, add back old (not considered a change)
+
+        return self();
     }
 
     @Override
