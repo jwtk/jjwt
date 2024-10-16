@@ -16,9 +16,13 @@
 package io.jsonwebtoken.impl.lang
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.MacAlgorithm
 import org.junit.Before
 import org.junit.Test
+
+import java.lang.reflect.Constructor
 
 import static org.junit.Assert.*
 
@@ -126,6 +130,35 @@ class DefaultCollectionMutatorTest {
     void removeMissingDoesNotTriggerChange() {
         m.remove('foo') // not in the collection, no change should be registered
         assertEquals 0, changeCount
+    }
+
+    @Test
+    void replace() {
+        Class<?> c = Class.forName("io.jsonwebtoken.impl.security.DefaultMacAlgorithm")
+        Constructor<?> ctor = c.getDeclaredConstructor(String.class, String.class, int.class)
+        ctor.setAccessible(true)
+        MacAlgorithm custom = (MacAlgorithm) ctor.newInstance('HS512', 'HmacSHA512', 80)
+
+        m.add(Jwts.SIG.HS512)
+        m.replace(custom)
+        assertEquals 2, changeCount // replace is count as one change
+        assertEquals 1, m.getCollection().size() // existing is removed as part of replacement
+        assertEquals 80, ((MacAlgorithm) m.getCollection().toArray()[0]).getKeyBitLength()
+    }
+
+    @Test(expected = NoSuchElementException)
+    void replaceMissing() {
+        m.replace('foo')
+    }
+
+    @Test(expected = NullPointerException)
+    void replaceNull() {
+        m.replace(null)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void replaceEmpty() {
+        m.replace(Strings.EMPTY)
     }
 
     @Test
