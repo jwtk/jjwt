@@ -151,7 +151,7 @@ class DefaultCollectionMutatorTest {
         m.replace('foo')
     }
 
-    @Test(expected = NullPointerException)
+    @Test(expected = IllegalArgumentException)
     void replaceNull() {
         m.replace(null)
     }

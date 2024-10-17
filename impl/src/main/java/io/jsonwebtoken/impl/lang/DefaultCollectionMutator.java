@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.CollectionMutator;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
@@ -48,10 +49,7 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
     }
 
     public M replace(E e) {
-        if (Objects.isEmpty(e)) {
-            if (e == null)  throw new NullPointerException("Cannot be null.");
-            else            throw new IllegalArgumentException("Cannot be empty.");
-        }
+        Assert.notEmpty(e, this.collection.getClass().getSimpleName() + " element cannot be null or empty.");
 
         // Keep a copy of the original, in case remove/add fails, and need to rollback
         E old = null;

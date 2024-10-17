@@ -347,6 +347,33 @@ public final class Assert {
         notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
     }
 
+    /**
+     * Assert that an Object is not <code>null</code> or empty.
+     * <pre class="code">Assert.notEmpty(object, "Object cannot be null or empty");</pre>
+     *
+     * @param object  the object to check
+     * @param message the exception message to use if the assertion fails
+     * @return the non-null, non-empty object
+     * @throws IllegalArgumentException if the object is <code>null</code> or empty
+     */
+    public static Object notEmpty(Object object, String message) {
+        if (Objects.isEmpty(object)) {
+            throw new IllegalArgumentException(message);
+        }
+        return object;
+    }
+
+    /**
+     * Assert that an Object is not <code>null</code> or empty.
+     * <pre class="code">Assert.notEmpty(object);</pre>
+     *
+     * @param object the object to check
+     * @throws IllegalArgumentException if the object is <code>null</code> or empty
+     */
+    public static void notEmpty(Object object) {
+        notEmpty(object, "[Assertion failed] - this object must not be null or empty");
+    }
+
 
     /**
      * Assert that the provided object is an instance of the provided class.
