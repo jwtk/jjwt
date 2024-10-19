@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 
@@ -62,10 +63,25 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
             throw new NoSuchElementException(msg);
         }
 
-        // FIXME: Ordering is not correct
-        if (this.collection.remove(existingElement))
-            if (doAdd(newElement))
-                changed(); // removed and add successfully, notify changed()
+        // Replacement step 1: iterate until element to replace
+        Iterator<E> it = this.collection.iterator();
+        while (it.hasNext())
+            if (it.next().equals(existingElement)) {
+                it.remove(); // step 2: remove existingElement
+                break;
+            }
+
+        // Replacement step 3: collect and remove elements after element to replace
+        Collection<E> elementsAfterExisting = new LinkedHashSet<>();
+        while (it.hasNext()) {
+            elementsAfterExisting.add(it.next());
+            it.remove();
+        }
+
+        this.doAdd(newElement); // step 4: add replacer element (position will be at the existingElement)
+        this.collection.addAll(elementsAfterExisting); // step 5: add back the elemnts found after existingElement
+
+        changed(); // trigger changed()
 
         return self();
     }
