@@ -140,7 +140,7 @@ class DefaultCollectionMutatorTest {
         MacAlgorithm custom = (MacAlgorithm) ctor.newInstance('HS512', 'HmacSHA512', 80)
 
         m.add(Jwts.SIG.HS512)
-        m.replace(custom)
+        m.replace(Jwts.SIG.HS512, custom)
         assertEquals 2, changeCount // replace is count as one change
         assertEquals 1, m.getCollection().size() // existing is removed as part of replacement
         assertEquals 80, ((MacAlgorithm) m.getCollection().toArray()[0]).getKeyBitLength()
@@ -148,17 +148,17 @@ class DefaultCollectionMutatorTest {
 
     @Test(expected = NoSuchElementException)
     void replaceMissing() {
-        m.replace('foo')
+        m.replace('foo', 'bar')
     }
 
     @Test(expected = IllegalArgumentException)
     void replaceNull() {
-        m.replace(null)
+        m.replace('foo', null)
     }
 
     @Test(expected = IllegalArgumentException)
     void replaceEmpty() {
-        m.replace(Strings.EMPTY)
+        m.replace('foo', Strings.EMPTY)
     }
 
     @Test

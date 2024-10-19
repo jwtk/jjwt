@@ -48,26 +48,18 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
         return this.collection.add(e);
     }
 
-    public M replace(E e) {
-        Assert.notEmpty(e, this.collection.getClass().getSimpleName() + " element cannot be null or empty.");
+    public M replace(E existingElement, E newElement) {
+        Assert.notEmpty(newElement, "newElement cannot be null or empty.");
 
-        // Keep a copy of the original, in case remove/add fails, and need to rollback
-        E old = null;
-        for (E element : this.collection) {
-            if (element.equals(e)) {
-                old = element;
-                break;
-            }
-        }
-
-        if (old == null || !this.collection.contains(e)) {
-            String msg = this.getClass() + " does not contain " + e + ".";
+        if (!this.collection.contains(existingElement)) {
+            String msg = this.getClass() + " does not contain " + existingElement + ".";
             throw new NoSuchElementException(msg);
         }
 
-        if (this.collection.remove(e))
-            if (doAdd(e)) changed(); // removed and add successfully, notify changed()
-            else this.collection.add(old); // remove successfully but add failed, add back old (not considered a change)
+        // FIXME: Ordering is not correct
+        if (this.collection.remove(existingElement))
+            if (doAdd(newElement))
+                changed(); // removed and add successfully, notify changed()
 
         return self();
     }
