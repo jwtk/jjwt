@@ -49,8 +49,14 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
     }
 
     public M replace(E existingElement, E newElement) {
+        Assert.notEmpty(existingElement, "existingElement cannot be null or empty.");
         Assert.notEmpty(newElement, "newElement cannot be null or empty.");
 
+        // Same item, nothing to do
+        if (existingElement.equals(newElement))
+            return self();
+
+        // Does not contain existingElement to replace
         if (!this.collection.contains(existingElement)) {
             String msg = this.getClass() + " does not contain " + existingElement + ".";
             throw new NoSuchElementException(msg);
@@ -66,7 +72,21 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
 
     @Override
     public M add(E e) {
-        if (doAdd(e)) changed();
+        E existing = null;
+        for (E item : collection) {
+            boolean bothIdentifiable = e instanceof Identifiable && item instanceof Identifiable;
+            boolean sameId = bothIdentifiable && ((Identifiable) item).getId().equals(((Identifiable) e).getId());
+            if (sameId) {
+                existing = item;
+                break;
+            }
+        }
+
+        if (Objects.isEmpty(existing)) {
+            if (doAdd(e)) changed();
+        }
+        else replace(existing, e);
+
         return self();
     }
 
