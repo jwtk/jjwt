@@ -178,6 +178,13 @@ class DefaultCollectionMutatorTest {
     }
 
     @Test
+    void replaceMaintainsOrder() {
+        m.add(['1', '2', '3'])
+        m.replace('2', 'B')
+        assertArrayEquals(new Object[] {'1', 'B', '3'}, m.collection.toArray())
+    }
+
+    @Test
     void clear() {
         m.add('one').add('two').add(['three', 'four'])
         assertEquals 4, m.getCollection().size()
