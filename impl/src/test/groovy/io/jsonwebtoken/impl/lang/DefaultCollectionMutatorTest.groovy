@@ -99,24 +99,21 @@ class DefaultCollectionMutatorTest {
 
     @Test(expected = IllegalArgumentException)
     void addIdentifiableWithNullId() {
-        def e = new Identifiable() {
-            @Override
-            String getId() {
-                return null
-            }
-        }
-        m.add(e)
+        m.add(new IdentifiableObject(null, null))
     }
 
     @Test(expected = IllegalArgumentException)
     void addIdentifiableWithEmptyId() {
-        def e = new Identifiable() {
-            @Override
-            String getId() {
-                return '  '
-            }
-        }
-        m.add(e)
+        m.add(new IdentifiableObject('  ', null))
+    }
+
+    @Test
+    void addIdentifiableWithSameIdEvictsExisting() {
+        m.add(new IdentifiableObject('sameId', 'foo'))
+        m.add(new IdentifiableObject('sameId', 'bar'))
+        assertEquals 2, changeCount
+        assertEquals 1, m.collection.size() // second 'add' should evict first
+        assertEquals 'bar', ((IdentifiableObject) m.collection.toArray()[0]).obj
     }
 
     @Test
@@ -146,6 +143,13 @@ class DefaultCollectionMutatorTest {
         assertEquals 80, ((MacAlgorithm) m.getCollection().toArray()[0]).getKeyBitLength()
     }
 
+    @Test
+    void replaceSameObject() {
+        m.add('hello')
+        m.replace('hello', 'hello') // replace with the same object, no change should be reflected
+        assertEquals 1, changeCount
+    }
+
     @Test(expected = NoSuchElementException)
     void replaceMissing() {
         m.replace('foo', 'bar')
@@ -167,5 +171,20 @@ class DefaultCollectionMutatorTest {
         assertEquals 4, m.getCollection().size()
         m.clear()
         assertTrue m.getCollection().isEmpty()
+    }
+
+    private class IdentifiableObject implements Identifiable {
+        String id
+        String obj
+
+        IdentifiableObject(String id, String obj) {
+            this.id = id
+            this.obj = obj
+        }
+
+        @Override
+        String getId() {
+            return id
+        }
     }
 }
