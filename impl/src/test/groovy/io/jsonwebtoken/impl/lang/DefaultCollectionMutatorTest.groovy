@@ -117,6 +117,20 @@ class DefaultCollectionMutatorTest {
     }
 
     @Test
+    void addSecureDigestAlgorithmWithSameIdReplacesExisting() {
+        Class<?> c = Class.forName("io.jsonwebtoken.impl.security.DefaultMacAlgorithm")
+        Constructor<?> ctor = c.getDeclaredConstructor(String.class, String.class, int.class)
+        ctor.setAccessible(true)
+        MacAlgorithm custom = (MacAlgorithm) ctor.newInstance('HS512', 'HmacSHA512', 80)
+
+        m.add(Jwts.SIG.HS512)
+        m.add(custom)
+        assertEquals 2, changeCount // replace is count as one change
+        assertEquals 1, m.getCollection().size() // existing is removed as part of replacement
+        assertEquals 80, ((MacAlgorithm) m.getCollection().toArray()[0]).getKeyBitLength()
+    }
+
+    @Test
     void remove() {
         m.add('hello').add('world')
         m.remove('hello')
@@ -131,16 +145,14 @@ class DefaultCollectionMutatorTest {
 
     @Test
     void replace() {
-        Class<?> c = Class.forName("io.jsonwebtoken.impl.security.DefaultMacAlgorithm")
-        Constructor<?> ctor = c.getDeclaredConstructor(String.class, String.class, int.class)
-        ctor.setAccessible(true)
-        MacAlgorithm custom = (MacAlgorithm) ctor.newInstance('HS512', 'HmacSHA512', 80)
+        def e1 = new IdentifiableObject('sameId', 'e1')
+        def e2 = new IdentifiableObject('sameId', 'e2')
 
-        m.add(Jwts.SIG.HS512)
-        m.replace(Jwts.SIG.HS512, custom)
+        m.add(e1)
+        m.replace(e1, e2)
         assertEquals 2, changeCount // replace is count as one change
         assertEquals 1, m.getCollection().size() // existing is removed as part of replacement
-        assertEquals 80, ((MacAlgorithm) m.getCollection().toArray()[0]).getKeyBitLength()
+        assertEquals 'e2', ((IdentifiableObject) m.getCollection().toArray()[0]).obj
     }
 
     @Test
@@ -175,9 +187,9 @@ class DefaultCollectionMutatorTest {
 
     private class IdentifiableObject implements Identifiable {
         String id
-        String obj
+        Object obj
 
-        IdentifiableObject(String id, String obj) {
+        IdentifiableObject(String id, Object obj) {
             this.id = id
             this.obj = obj
         }
