@@ -53,8 +53,16 @@ class DefaultCollectionMutatorTest {
     }
 
     @Test
+    void addNull() {
+        m.add(null)
+        assertEquals 0, changeCount
+        assertTrue m.getCollection().isEmpty() // wasn't added
+    }
+
+    @Test
     void addEmpty() {
         m.add(Strings.EMPTY)
+        assertEquals 0, changeCount
         assertTrue m.getCollection().isEmpty() // wasn't added
     }
 
@@ -117,6 +125,19 @@ class DefaultCollectionMutatorTest {
     }
 
     @Test
+    void addIdentifiableWithSameIdMaintainsOrder() {
+        IdentifiableObject e1 = new IdentifiableObject('1', 'e1')
+        IdentifiableObject e2 = new IdentifiableObject('sameId', 'e2')
+        IdentifiableObject e3 = new IdentifiableObject('3', 'e3')
+        IdentifiableObject eB = new IdentifiableObject('sameId', 'eB')
+
+        m.add([e1, e2, e3])
+        m.add(eB) // replace e2 with eB
+        assertEquals 2, changeCount
+        assertArrayEquals(new Object[] {e1, eB, e3}, m.collection.toArray())
+    }
+
+    @Test
     void addSecureDigestAlgorithmWithSameIdReplacesExisting() {
         Class<?> c = Class.forName("io.jsonwebtoken.impl.security.DefaultMacAlgorithm")
         Constructor<?> ctor = c.getDeclaredConstructor(String.class, String.class, int.class)
@@ -141,47 +162,6 @@ class DefaultCollectionMutatorTest {
     void removeMissingDoesNotTriggerChange() {
         m.remove('foo') // not in the collection, no change should be registered
         assertEquals 0, changeCount
-    }
-
-    @Test
-    void replace() {
-        def e1 = new IdentifiableObject('sameId', 'e1')
-        def e2 = new IdentifiableObject('sameId', 'e2')
-
-        m.add(e1)
-        m.replace(e1, e2)
-        assertEquals 2, changeCount // replace is count as one change
-        assertEquals 1, m.getCollection().size() // existing is removed as part of replacement
-        assertEquals 'e2', ((IdentifiableObject) m.getCollection().toArray()[0]).obj
-    }
-
-    @Test
-    void replaceSameObject() {
-        m.add('hello')
-        m.replace('hello', 'hello') // replace with the same object, no change should be reflected
-        assertEquals 1, changeCount
-    }
-
-    @Test(expected = NoSuchElementException)
-    void replaceMissing() {
-        m.replace('foo', 'bar')
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void replaceNull() {
-        m.replace('foo', null)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void replaceEmpty() {
-        m.replace('foo', Strings.EMPTY)
-    }
-
-    @Test
-    void replaceMaintainsOrder() {
-        m.add(['1', '2', '3'])
-        m.replace('2', 'B')
-        assertArrayEquals(new Object[] {'1', 'B', '3'}, m.collection.toArray())
     }
 
     @Test

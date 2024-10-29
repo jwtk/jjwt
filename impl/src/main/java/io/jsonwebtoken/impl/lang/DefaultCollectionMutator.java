@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.CollectionMutator;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
@@ -25,7 +24,6 @@ import io.jsonwebtoken.lang.Strings;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.NoSuchElementException;
 
 public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> implements CollectionMutator<E, M> {
 
@@ -49,59 +47,46 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
         return this.collection.add(e);
     }
 
-    public M replace(E existingElement, E newElement) {
-        Assert.notEmpty(existingElement, "existingElement cannot be null or empty.");
-        Assert.notEmpty(newElement, "newElement cannot be null or empty.");
-
-        // Same item, nothing to do
-        if (existingElement.equals(newElement))
-            return self();
-
-        // Does not contain existingElement to replace
-        if (!this.collection.contains(existingElement)) {
-            String msg = this.getClass() + " does not contain " + existingElement + ".";
-            throw new NoSuchElementException(msg);
-        }
-
-        // Replacement step 1: iterate until element to replace
-        Iterator<E> it = this.collection.iterator();
-        while (it.hasNext())
-            if (it.next().equals(existingElement)) {
-                it.remove(); // step 2: remove existingElement
-                break;
-            }
-
-        // Replacement step 3: collect and remove elements after element to replace
-        Collection<E> elementsAfterExisting = new LinkedHashSet<>();
-        while (it.hasNext()) {
-            elementsAfterExisting.add(it.next());
-            it.remove();
-        }
-
-        this.doAdd(newElement); // step 4: add replacer element (position will be at the existingElement)
-        this.collection.addAll(elementsAfterExisting); // step 5: add back the elemnts found after existingElement
-
-        changed(); // trigger changed()
-
-        return self();
-    }
-
     @Override
     public M add(E e) {
-        E existing = null;
-        for (E item : collection) {
+        boolean doReplace = false;
+
+        // Replacement step 1: iterate until element to replace (if any)
+        E item;
+        Iterator<E> it = this.collection.iterator();
+        while (it.hasNext()) {
+            item = it.next();
+
+            // Same item, nothing to do
+            if (item.equals(e))
+                return self();
+
             boolean bothIdentifiable = e instanceof Identifiable && item instanceof Identifiable;
             boolean sameId = bothIdentifiable && ((Identifiable) item).getId().equals(((Identifiable) e).getId());
             if (sameId) {
-                existing = item;
+                it.remove(); // step 2: remove existing item
+                doReplace = true;
                 break;
             }
         }
 
-        if (Objects.isEmpty(existing)) {
+        if (doReplace) {
+            // Replacement step 3: collect and remove elements after element to replace
+            Collection<E> elementsAfterExisting = new LinkedHashSet<>();
+            while (it.hasNext()) {
+                elementsAfterExisting.add(it.next());
+                it.remove();
+            }
+
+            this.doAdd(e); // step 4: add replacer element (position will be at the existing item)
+            this.collection.addAll(elementsAfterExisting); // step 5: add back the elements found after existing item
+
+            changed(); // trigger changed()
+        }
+        else {
+            // No replacement, do add instead
             if (doAdd(e)) changed();
         }
-        else replace(existing, e);
 
         return self();
     }
