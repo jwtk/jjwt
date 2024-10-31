@@ -92,6 +92,9 @@ public final class Collections {
      * @since 0.12.0
      */
     public static <T> Set<T> asSet(Collection<T> c) {
+        if (isEmpty(c)) {
+            return java.util.Collections.emptySet();
+        }
         return java.util.Collections.unmodifiableSet(new LinkedHashSet<T>(c));
     }
 
