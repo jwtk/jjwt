@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK
-        uses: oracle-actions/setup-java@v1
+        uses: oracle-actions/setup-java@v1.1.0
         with:
           release: ${{ matrix.java }}
       - name: Install softhsm2
