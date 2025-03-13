@@ -44,7 +44,7 @@ class DefaultJwtParserTest {
     // all whitespace chars as defined by Character.isWhitespace:
     static final String WHITESPACE_STR = ' \u0020 \u2028 \u2029 \t \n \u000B \f \r \u001C \u001D \u001E \u001F '
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
 
     private DefaultJwtParser parser
 
@@ -263,7 +263,7 @@ class DefaultJwtParserTest {
 
         long differenceMillis = 843 // arbitrary, anything > 0 is fine
         def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def later = new Date(exp.getTime() + differenceMillis)
+        def later = exp.plusMillis(differenceMillis)
         def s = Jwts.builder().expiration(exp).compact()
 
         try {
@@ -272,7 +272,7 @@ class DefaultJwtParserTest {
             def exp8601 = DateFormats.formatIso8601(exp, true)
             def later8601 = DateFormats.formatIso8601(later, true)
             String msg = "JWT expired ${differenceMillis} milliseconds ago at ${exp8601}. " +
-                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds.";
+                    "Current time: ${later8601}. Allowed clock skew: 0 milliseconds."
             assertEquals msg, expected.message
         }
     }
@@ -282,7 +282,7 @@ class DefaultJwtParserTest {
 
         long differenceMillis = 3842 // arbitrary, anything > 0 is fine
         def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def earlier = new Date(nbf.getTime() - differenceMillis)
+        def earlier = nbf.minusMillis(differenceMillis)
         def s = Jwts.builder().notBefore(nbf).compact()
 
         try {
@@ -291,7 +291,7 @@ class DefaultJwtParserTest {
             def nbf8601 = DateFormats.formatIso8601(nbf, true)
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
             String msg = "JWT early by ${differenceMillis} milliseconds before ${nbf8601}. " +
-                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds.";
+                    "Current time: ${earlier8601}. Allowed clock skew: 0 milliseconds."
             assertEquals msg, expected.message
         }
     }
