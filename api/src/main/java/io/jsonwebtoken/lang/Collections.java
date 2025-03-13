@@ -86,19 +86,16 @@ public final class Collections {
     /**
      * Returns the specified collection as a {@link Set} instance.
      *
-     * @param c   the collection to represent as a set
+     * @param c   the collection to be converted
      * @param <T> collection element type
-     * @return a type-safe immutable {@code Set} containing the specified collection elements.
+     * @return    a type-safe immutable {@code Set} containing the specified collection elements.
      * @since 0.12.0
      */
     public static <T> Set<T> asSet(Collection<T> c) {
-        if (c instanceof Set) {
-            return (Set<T>) c;
-        }
         if (isEmpty(c)) {
             return java.util.Collections.emptySet();
         }
-        return java.util.Collections.unmodifiableSet(new LinkedHashSet<>(c));
+        return java.util.Collections.unmodifiableSet(new LinkedHashSet<T>(c));
     }
 
     /**
