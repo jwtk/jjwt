@@ -9,6 +9,7 @@ This patch release:
   [Issue 947](https://github.com/jwtk/jjwt/issues/947).
 * Fixes a decompression memory leak in concurrent/multi-threaded environments introduced in 0.12.0 when decompressing JWTs with a `zip` header of `GZIP`. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
 * Upgrades BouncyCastle to 1.78 via [PR 941](https://github.com/jwtk/jjwt/pull/941).
+* Ensures that a `JwkSet`'s `keys` list member is no longer considered secret and is not redacted by default. However, each individual JWK element within the `keys` list may still have [redacted private or secret members](https://github.com/jwtk/jjwt?tab=readme-ov-file#jwk-tostring-safety) as expected. See [Issue 976](https://github.com/jwtk/jjwt/issues/976).
 
 ### 0.12.5
 
