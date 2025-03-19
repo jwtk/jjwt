@@ -278,7 +278,9 @@ class DefaultJwkSetBuilderTest {
                 key_ops: ['sign', 'encrypt'] // unrelated operations
         ]
 
-        String msg = "Invalid Map ${DefaultJwkSet.KEYS} value: <redacted>. Unable to create JWK: Unrelated key " +
+        String msg = "Invalid Map ${DefaultJwkSet.KEYS} value: " +
+                "[{kty=${badMap.kty}, k=${badMap.k}, key_ops=${badMap.key_ops}}]. " +
+                "Unable to create JWK: Unrelated key " +
                 "operations are not allowed. KeyOperation [${Jwks.OP.ENCRYPT}] is unrelated to " +
                 "[${Jwks.OP.SIGN}]."
 
