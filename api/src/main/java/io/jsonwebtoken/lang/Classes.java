@@ -21,6 +21,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Utility methods for working with {@link Class}es.
@@ -28,6 +30,9 @@ import java.net.URL;
  * @since 0.1
  */
 public final class Classes {
+
+    private static final ConcurrentMap<String, Class<?>> JJWT_CLASS_CACHE = new ConcurrentHashMap<>();
+    private static final String CLASS_NAMES_TO_CACHE = "io.jsonwebtoken.";
 
     private Classes() {
     } //prevent instantiation
@@ -69,6 +74,13 @@ public final class Classes {
     @SuppressWarnings("unchecked")
     public static <T> Class<T> forName(String fqcn) throws UnknownClassException {
 
+        if (fqcn.startsWith(CLASS_NAMES_TO_CACHE)) {
+            Class<?> clazz = JJWT_CLASS_CACHE.get(fqcn);
+            if (clazz != null) {
+                return (Class<T>) clazz;
+            }
+        }
+
         Class<?> clazz = THREAD_CL_ACCESSOR.loadClass(fqcn);
 
         if (clazz == null) {
@@ -88,6 +100,10 @@ public final class Classes {
             }
 
             throw new UnknownClassException(msg);
+        }
+
+        if (fqcn.startsWith(CLASS_NAMES_TO_CACHE)) {
+            JJWT_CLASS_CACHE.put(fqcn, clazz);
         }
 
         return (Class<T>) clazz;
@@ -369,6 +385,7 @@ public final class Classes {
      */
     private static abstract class ExceptionIgnoringAccessor implements ClassLoaderAccessor {
 
+        @Override
         public Class<?> loadClass(String fqcn) {
             Class<?> clazz = null;
             ClassLoader cl = getClassLoader();
@@ -392,6 +409,7 @@ public final class Classes {
             return url;
         }
 
+        @Override
         public InputStream getResourceStream(String name) {
             InputStream is = null;
             ClassLoader cl = getClassLoader();
@@ -413,4 +431,3 @@ public final class Classes {
         protected abstract ClassLoader doGetClassLoader() throws Throwable;
     }
 }
-
