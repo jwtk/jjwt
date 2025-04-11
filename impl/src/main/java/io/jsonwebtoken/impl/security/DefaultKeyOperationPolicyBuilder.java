@@ -44,6 +44,7 @@ public class DefaultKeyOperationPolicyBuilder extends DefaultCollectionMutator<K
 
     /**
      * @since JJWT_RELEASE_VERSION
+     * @see <a href="https://github.com/jwtk/jjwt/issues/988>Issue 988</a>
      */
     @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
     public static final class Supplier implements io.jsonwebtoken.lang.Supplier<KeyOperationPolicyBuilder> {

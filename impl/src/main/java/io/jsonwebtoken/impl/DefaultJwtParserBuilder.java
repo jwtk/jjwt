@@ -429,6 +429,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     /**
      * @since JJWT_RELEASE_VERSION
+     * @see <a href="https://github.com/jwtk/jjwt/issues/988>Issue 988</a>
      */
     @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
     public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwtParserBuilder> {

@@ -44,19 +44,19 @@ public final class Jwks {
 
     private static final String JWKS_BRIDGE_FQCN = "io.jsonwebtoken.impl.security.JwksBridge";
 
-    // @since JJWT_RELEASE_VERSION
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
     private static final Supplier<DynamicJwkBuilder<?, ?>> BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder$Supplier");
 
-    // @since JJWT_RELEASE_VERSION
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
     private static final Supplier<JwkParserBuilder> PARSER_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkParserBuilder$Supplier");
 
-    // @since JJWT_RELEASE_VERSION
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
     private static final Supplier<JwkSetBuilder> SET_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetBuilder$Supplier");
 
-    // @since JJWT_RELEASE_VERSION
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
     private static final Supplier<JwkSetParserBuilder> SET_PARSER_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder$Supplier");
 
@@ -383,9 +383,11 @@ public final class Jwks {
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
         private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
+        // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
         private static final Supplier<KeyOperationBuilder> BUILDER_SUPPLIER =
                 Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier");
 
+        // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
         private static final Supplier<KeyOperationPolicyBuilder> POLICY_BUILDER_SUPPLIER =
                 Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
 
