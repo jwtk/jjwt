@@ -426,4 +426,15 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                 encAlgs
         );
     }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
+    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwtParserBuilder> {
+        @Override
+        public JwtParserBuilder get() {
+            return new DefaultJwtParserBuilder();
+        }
+    }
 }

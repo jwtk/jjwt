@@ -52,4 +52,15 @@ public class DefaultKeyOperationBuilder implements KeyOperationBuilder {
     public KeyOperation build() {
         return new DefaultKeyOperation(this.id, this.description, this.related);
     }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
+    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<KeyOperationBuilder> {
+        @Override
+        public KeyOperationBuilder get() {
+            return new DefaultKeyOperationBuilder();
+        }
+    }
 }

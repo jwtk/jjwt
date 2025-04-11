@@ -29,4 +29,15 @@ public class DefaultJwkParserBuilder extends AbstractJwkParserBuilder<Jwk<?>, Jw
         JwkConverter<Jwk<?>> converter = new JwkConverter<>(supplier);
         return new ConvertingParser<>(deserializer, converter);
     }
+
+    /**
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
+    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwkParserBuilder> {
+        @Override
+        public JwkParserBuilder get() {
+            return new DefaultJwkParserBuilder();
+        }
+    }
 }
