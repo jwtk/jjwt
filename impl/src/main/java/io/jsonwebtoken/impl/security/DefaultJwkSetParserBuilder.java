@@ -39,10 +39,7 @@ public class DefaultJwkSetParserBuilder extends AbstractJwkParserBuilder<JwkSet,
         return new ConvertingParser<>(deserializer, converter);
     }
 
-    /**
-     * @since JJWT_RELEASE_VERSION
-     * @see <a href="https://github.com/jwtk/jjwt/issues/988>Issue 988</a>
-     */
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
     @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
     public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwkSetParserBuilder> {
         @Override

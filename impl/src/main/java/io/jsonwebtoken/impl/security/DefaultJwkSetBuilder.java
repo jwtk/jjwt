@@ -130,10 +130,7 @@ public class DefaultJwkSetBuilder extends AbstractSecurityBuilder<JwkSet, JwkSet
         return converter.applyFrom(this.map);
     }
 
-    /**
-     * @since JJWT_RELEASE_VERSION
-     * @see <a href="https://github.com/jwtk/jjwt/issues/988>Issue 988</a>
-     */
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
     @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
     public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwkSetBuilder> {
         @Override
