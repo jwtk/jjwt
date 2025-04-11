@@ -824,7 +824,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
     public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwtBuilder> {
         @Override
-        public JwtBuilder get() {
+        public JwtBuilder get() {   
             return new DefaultJwtBuilder();
         }
     }
