@@ -1,5 +1,17 @@
 ## Release Notes
 
+### 0.12.7
+
+This patch release:
+
+* Improves performance slightly by ensuring all `jjwt-api` utility methods that create `*Builder` instances (`Jwts.builder()`, `Jwts.parserBuilder()`, `Jwks.builder()`, etc) no longer use reflection.
+ 
+  Instead,`static` factories are created via reflection only once during initial `jjwt-api` classloading, and then `*Builder`s are created via standard instantiation using the `new` operator thereafter.  This also benefits certain environments that may not have ideal `ClassLoader` implementations (e.g. Tomcat in some cases).
+ 
+  **NOTE: because this changes which classes are loaded via reflection, any environments that must explicitly reference reflective class names (e.g. GraalVM applications) will need to be updated to reflect the new factory class names**.
+  
+  See [Issue 988](https://github.com/jwtk/jjwt/issues/988).
+
 ### 0.12.6
 
 This patch release:
