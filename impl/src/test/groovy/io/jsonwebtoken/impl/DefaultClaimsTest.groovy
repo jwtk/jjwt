@@ -22,6 +22,9 @@ import io.jsonwebtoken.lang.DateFormats
 import org.junit.Before
 import org.junit.Test
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+
 import static org.junit.Assert.*
 
 class DefaultClaimsTest {
@@ -172,65 +175,56 @@ class DefaultClaimsTest {
     }
 
     @Test
-    void testGetRequiredDateFromNull() {
-        Date date = claims.get("aDate", Date.class)
-        assertNull date
+    void testGetRequiredInstantFromNull() {
+        Instant instant = claims.get("anInstant", Instant.class)
+        assertNull instant
     }
 
     @Test
-    void testGetRequiredDateFromDate() {
-        def expected = new Date()
-        claims.put("aDate", expected)
-        Date result = claims.get("aDate", Date.class)
-        assertEquals expected, result
-    }
-
-    @Test
-    void testGetRequiredDateFromCalendar() {
-        def c = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        def expected = c.getTime()
-        claims.put("aDate", c)
-        Date result = claims.get('aDate', Date.class)
+    void testGetRequiredDateFromInstant() {
+        def expected = Instant.now()
+        claims.put("anInstant", expected)
+        Instant result = claims.get("anInstant", Instant.class)
         assertEquals expected, result
     }
 
     @Test
     void testGetRequiredDateFromLong() {
-        def expected = new Date()
+        def expected = Instant.now()
         // note that Long is stored in claim
-        claims.put("aDate", expected.getTime())
-        Date result = claims.get("aDate", Date.class)
+        claims.put("aLong", expected.toEpochMilli())
+        Instant result = claims.get("aLong", Instant.class)
         assertEquals expected, result
     }
 
     @Test
     void testGetRequiredDateFromIso8601String() {
-        def expected = new Date()
-        claims.put("aDate", DateFormats.formatIso8601(expected))
-        Date result = claims.get("aDate", Date.class)
+        def expected = Instant.now()
+        claims.put("aString", DateFormats.formatIso8601(expected))
+        Instant result = claims.get("aString", Instant.class)
         assertEquals expected, result
     }
 
     @Test
     void testGetRequiredDateFromIso8601MillisString() {
-        def expected = new Date()
-        claims.put("aDate", DateFormats.formatIso8601(expected, true))
-        Date result = claims.get("aDate", Date.class)
+        def expected = Instant.now()
+        claims.put("aString", DateFormats.formatIso8601(expected, true))
+        Instant result = claims.get("aString", Instant.class)
         assertEquals expected, result
     }
 
     @Test
     void testGetRequiredDateFromInvalidIso8601String() {
-        Date d = new Date()
-        String s = d.toString()
-        claims.put('aDate', s)
+        def s = "23-12-27T11:36:31Z"
+        claims.put('anInstant', s)
         try {
-            claims.get('aDate', Date.class)
+            claims.get('anInstant', Instant.class)
             fail()
         } catch (IllegalArgumentException expected) {
-            String expectedMsg = "Cannot create Date from 'aDate' value '$s'. Cause: " +
+
+            String expectedMsg = "Cannot create Instant from 'anInstant' value '$s'. Cause: " +
                     "String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics " +
-                    "exhausted. Cause: Unparseable date: \"$s\""
+                    "exhausted. Cause: Text \'$s\' could not be parsed at index 0"
             assertEquals expectedMsg, expected.getMessage()
         }
     }
@@ -247,10 +241,9 @@ class DefaultClaimsTest {
 
     @Test
     void testGetSpecDateWithLongString() {
-        Date orig = new Date()
-        long millis = orig.getTime()
-        long seconds = millis / 1000L as long
-        Date expected = new Date(seconds * 1000L)
+        Instant orig = Instant.now()
+        long seconds = orig.getEpochSecond()
+        Instant expected = orig.truncatedTo(ChronoUnit.SECONDS)
         String secondsString = '' + seconds
         claims.put(Claims.EXPIRATION, secondsString)
         claims.put(Claims.ISSUED_AT, secondsString)
@@ -265,10 +258,9 @@ class DefaultClaimsTest {
 
     @Test
     void testGetSpecDateWithLong() {
-        Date orig = new Date()
-        long millis = orig.getTime()
-        long seconds = millis / 1000L as long
-        Date expected = new Date(seconds * 1000L)
+        Instant orig = Instant.now()
+        long seconds = orig.getEpochSecond()
+        Instant expected = orig.truncatedTo(ChronoUnit.SECONDS)
         claims.put(Claims.EXPIRATION, seconds)
         claims.put(Claims.ISSUED_AT, seconds)
         claims.put(Claims.NOT_BEFORE, seconds)
@@ -282,9 +274,8 @@ class DefaultClaimsTest {
 
     @Test
     void testGetSpecDateWithIso8601String() {
-        Date orig = new Date()
-        long millis = orig.getTime()
-        long seconds = millis / 1000L as long
+        Instant orig = Instant.now()
+        long seconds = orig.getEpochSecond()
         String s = DateFormats.formatIso8601(orig)
         claims.put(Claims.EXPIRATION, s)
         claims.put(Claims.ISSUED_AT, s)
@@ -299,9 +290,8 @@ class DefaultClaimsTest {
 
     @Test
     void testGetSpecDateWithDate() {
-        Date orig = new Date()
-        long millis = orig.getTime()
-        long seconds = millis / 1000L as long
+        Instant orig = Instant.now()
+        long seconds = orig.getEpochSecond()
         claims.put(Claims.EXPIRATION, orig)
         claims.put(Claims.ISSUED_AT, orig)
         claims.put(Claims.NOT_BEFORE, orig)
@@ -314,28 +304,25 @@ class DefaultClaimsTest {
     }
 
     @Test
-    void testGetSpecDateWithCalendar() {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        Date date = cal.getTime()
-        long millis = date.getTime()
-        long seconds = millis / 1000L as long
-        claims.put(Claims.EXPIRATION, cal)
-        claims.put(Claims.ISSUED_AT, cal)
-        claims.put(Claims.NOT_BEFORE, cal)
-        assertEquals date, claims.getExpiration()
-        assertEquals date, claims.getIssuedAt()
-        assertEquals date, claims.getNotBefore()
+    void testGetSpecDateWithInstant() {
+        Instant instant = Instant.now()
+        long seconds = instant.getEpochSecond()
+        claims.put(Claims.EXPIRATION, instant)
+        claims.put(Claims.ISSUED_AT, instant)
+        claims.put(Claims.NOT_BEFORE, instant)
+        assertEquals instant, claims.getExpiration()
+        assertEquals instant, claims.getIssuedAt()
+        assertEquals instant, claims.getNotBefore()
         assertEquals seconds, claims.get(Claims.EXPIRATION)
         assertEquals seconds, claims.get(Claims.ISSUED_AT)
         assertEquals seconds, claims.get(Claims.NOT_BEFORE)
     }
 
     @Test
-    void testToSpecDateWithDate() {
-        long millis = System.currentTimeMillis()
-        Date d = new Date(millis)
-        claims.put('exp', d)
-        assertEquals d, claims.getExpiration()
+    void testToSpecDateWithInstant() {
+        Instant i = Instant.now()
+        claims.put('exp', i)
+        assertEquals i, claims.getExpiration()
     }
 
     void trySpecDateNonDate(Parameter<?> param) {
@@ -344,7 +331,7 @@ class DefaultClaimsTest {
             claims.put(param.getId(), val)
             fail()
         } catch (IllegalArgumentException iae) {
-            String msg = "Invalid JWT Claims $param value: hi. Cannot create Date from object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1."
+            String msg = "Invalid JWT Claims $param value: hi. Cannot create Instant from object of type io.jsonwebtoken.impl.DefaultClaimsTest\$1."
             assertEquals msg, iae.getMessage()
         }
     }
@@ -358,25 +345,25 @@ class DefaultClaimsTest {
 
     @Test
     void testGetClaimExpiration_Success() {
-        def now = new Date(System.currentTimeMillis())
+        def now = Instant.now()
         claims.put('exp', now)
-        Date expected = claims.get("exp", Date.class)
+        Instant expected = claims.get("exp", Instant.class)
         assertEquals(expected, claims.getExpiration())
     }
 
     @Test
     void testGetClaimIssuedAt_Success() {
-        def now = new Date(System.currentTimeMillis())
+        def now = Instant.now()
         claims.put('iat', now)
-        Date expected = claims.get("iat", Date.class)
+        Instant expected = claims.get("iat", Instant.class)
         assertEquals(expected, claims.getIssuedAt())
     }
 
     @Test
     void testGetClaimNotBefore_Success() {
-        def now = new Date(System.currentTimeMillis())
+        def now = Instant.now()
         claims.put('nbf', now)
-        Date expected = claims.get("nbf", Date.class)
+        Instant expected = claims.get("nbf", Instant.class)
         assertEquals(expected, claims.getNotBefore())
     }
 
@@ -384,7 +371,7 @@ class DefaultClaimsTest {
     void testPutWithIat() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         claims.put('iat', now) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('iat') //conversion should have happened
     }
@@ -393,7 +380,7 @@ class DefaultClaimsTest {
     void testPutAllWithIat() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         claims.putAll([iat: now]) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('iat') //conversion should have happened
     }
@@ -402,7 +389,7 @@ class DefaultClaimsTest {
     void testConstructorWithIat() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         this.claims = new DefaultClaims([iat: now]) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('iat') //conversion should have happened
     }
@@ -411,7 +398,7 @@ class DefaultClaimsTest {
     void testPutWithNbf() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         claims.put('nbf', now) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('nbf') //conversion should have happened
     }
@@ -420,7 +407,7 @@ class DefaultClaimsTest {
     void testPutAllWithNbf() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         claims.putAll([nbf: now]) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('nbf') //conversion should have happened
     }
@@ -429,7 +416,7 @@ class DefaultClaimsTest {
     void testConstructorWithNbf() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         this.claims = new DefaultClaims([nbf: now]) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('nbf') //conversion should have happened
     }
@@ -438,7 +425,7 @@ class DefaultClaimsTest {
     void testPutWithExp() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         claims.put('exp', now) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('exp') //conversion should have happened
     }
@@ -447,7 +434,7 @@ class DefaultClaimsTest {
     void testPutAllWithExp() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         claims.putAll([exp: now]) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('exp') //conversion should have happened
     }
@@ -456,7 +443,7 @@ class DefaultClaimsTest {
     void testConstructorWithExp() {
         long millis = System.currentTimeMillis()
         long seconds = millis / 1000 as long
-        Date now = new Date(millis)
+        Instant now = Instant.ofEpochMilli(millis)
         this.claims = new DefaultClaims([exp: now]) //this should convert 'now' to seconds since epoch
         assertEquals seconds, claims.get('exp') //conversion should have happened
     }

@@ -52,7 +52,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
@@ -155,14 +155,14 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     }
 
     @Override
-    public JwtParserBuilder requireIssuedAt(Date issuedAt) {
-        expectedClaims.setIssuedAt(issuedAt);
+    public JwtParserBuilder requireIssuedAt(Instant issuedAt) {
+        expectedClaims.issuedAt(issuedAt);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireIssuer(String issuer) {
-        expectedClaims.setIssuer(issuer);
+        expectedClaims.issuer(issuer);
         return this;
     }
 
@@ -174,25 +174,25 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public JwtParserBuilder requireSubject(String subject) {
-        expectedClaims.setSubject(subject);
+        expectedClaims.subject(subject);
         return this;
     }
 
     @Override
     public JwtParserBuilder requireId(String id) {
-        expectedClaims.setId(id);
+        expectedClaims.id(id);
         return this;
     }
 
     @Override
-    public JwtParserBuilder requireExpiration(Date expiration) {
-        expectedClaims.setExpiration(expiration);
+    public JwtParserBuilder requireExpiration(Instant expiration) {
+        expectedClaims.expiration(expiration);
         return this;
     }
 
     @Override
-    public JwtParserBuilder requireNotBefore(Date notBefore) {
-        expectedClaims.setNotBefore(notBefore);
+    public JwtParserBuilder requireNotBefore(Instant notBefore) {
+        expectedClaims.notBefore(notBefore);
         return this;
     }
 
