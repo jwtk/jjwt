@@ -16,9 +16,13 @@
 package io.jsonwebtoken.impl.lang
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.MacAlgorithm
 import org.junit.Before
 import org.junit.Test
+
+import java.lang.reflect.Constructor
 
 import static org.junit.Assert.*
 
@@ -49,8 +53,16 @@ class DefaultCollectionMutatorTest {
     }
 
     @Test
+    void addNull() {
+        m.add(null)
+        assertEquals 0, changeCount
+        assertTrue m.getCollection().isEmpty() // wasn't added
+    }
+
+    @Test
     void addEmpty() {
         m.add(Strings.EMPTY)
+        assertEquals 0, changeCount
         assertTrue m.getCollection().isEmpty() // wasn't added
     }
 
@@ -95,24 +107,48 @@ class DefaultCollectionMutatorTest {
 
     @Test(expected = IllegalArgumentException)
     void addIdentifiableWithNullId() {
-        def e = new Identifiable() {
-            @Override
-            String getId() {
-                return null
-            }
-        }
-        m.add(e)
+        m.add(new IdentifiableObject(null, null))
     }
 
     @Test(expected = IllegalArgumentException)
     void addIdentifiableWithEmptyId() {
-        def e = new Identifiable() {
-            @Override
-            String getId() {
-                return '  '
-            }
-        }
-        m.add(e)
+        m.add(new IdentifiableObject('  ', null))
+    }
+
+    @Test
+    void addIdentifiableWithSameIdEvictsExisting() {
+        m.add(new IdentifiableObject('sameId', 'foo'))
+        m.add(new IdentifiableObject('sameId', 'bar'))
+        assertEquals 2, changeCount
+        assertEquals 1, m.collection.size() // second 'add' should evict first
+        assertEquals 'bar', ((IdentifiableObject) m.collection.toArray()[0]).obj
+    }
+
+    @Test
+    void addIdentifiableWithSameIdMaintainsOrder() {
+        IdentifiableObject e1 = new IdentifiableObject('1', 'e1')
+        IdentifiableObject e2 = new IdentifiableObject('sameId', 'e2')
+        IdentifiableObject e3 = new IdentifiableObject('3', 'e3')
+        IdentifiableObject eB = new IdentifiableObject('sameId', 'eB')
+
+        m.add([e1, e2, e3])
+        m.add(eB) // replace e2 with eB
+        assertEquals 2, changeCount
+        assertArrayEquals(new Object[] {e1, eB, e3}, m.collection.toArray())
+    }
+
+    @Test
+    void addSecureDigestAlgorithmWithSameIdReplacesExisting() {
+        Class<?> c = Class.forName("io.jsonwebtoken.impl.security.DefaultMacAlgorithm")
+        Constructor<?> ctor = c.getDeclaredConstructor(String.class, String.class, int.class)
+        ctor.setAccessible(true)
+        MacAlgorithm custom = (MacAlgorithm) ctor.newInstance('HS512', 'HmacSHA512', 80)
+
+        m.add(Jwts.SIG.HS512)
+        m.add(custom)
+        assertEquals 2, changeCount // replace is count as one change
+        assertEquals 1, m.getCollection().size() // existing is removed as part of replacement
+        assertEquals 80, ((MacAlgorithm) m.getCollection().toArray()[0]).getKeyBitLength()
     }
 
     @Test
@@ -134,5 +170,20 @@ class DefaultCollectionMutatorTest {
         assertEquals 4, m.getCollection().size()
         m.clear()
         assertTrue m.getCollection().isEmpty()
+    }
+
+    private class IdentifiableObject implements Identifiable {
+        String id
+        Object obj
+
+        IdentifiableObject(String id, Object obj) {
+            this.id = id
+            this.obj = obj
+        }
+
+        @Override
+        String getId() {
+            return id
+        }
     }
 }
