@@ -35,7 +35,6 @@ public class DefaultJwkSet extends ParameterMap implements JwkSet {
         return Parameters.builder(JwkConverter.JWK_CLASS)
                 .setConverter(converter).set()
                 .setId("keys").setName("JSON Web Keys")
-                .setSecret(true)
                 .build();
     }
 

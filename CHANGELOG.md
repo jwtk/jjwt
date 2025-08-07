@@ -1,5 +1,17 @@
 ## Release Notes
 
+### 0.12.7
+
+This patch release:
+
+* Improves performance slightly by ensuring all `jjwt-api` utility methods that create `*Builder` instances (`Jwts.builder()`, `Jwts.parserBuilder()`, `Jwks.builder()`, etc) no longer use reflection.
+ 
+  Instead,`static` factories are created via reflection only once during initial `jjwt-api` classloading, and then `*Builder`s are created via standard instantiation using the `new` operator thereafter.  This also benefits certain environments that may not have ideal `ClassLoader` implementations (e.g. Tomcat in some cases).
+ 
+  **NOTE: because this changes which classes are loaded via reflection, any environments that must explicitly reference reflective class names (e.g. GraalVM applications) will need to be updated to reflect the new factory class names**.
+  
+  See [Issue 988](https://github.com/jwtk/jjwt/issues/988).
+
 ### 0.12.6
 
 This patch release:
@@ -9,6 +21,7 @@ This patch release:
   [Issue 947](https://github.com/jwtk/jjwt/issues/947).
 * Fixes a decompression memory leak in concurrent/multi-threaded environments introduced in 0.12.0 when decompressing JWTs with a `zip` header of `GZIP`. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
 * Upgrades BouncyCastle to 1.78 via [PR 941](https://github.com/jwtk/jjwt/pull/941).
+* Ensures that a `JwkSet`'s `keys` list member is no longer considered secret and is not redacted by default. However, each individual JWK element within the `keys` list may still have [redacted private or secret members](https://github.com/jwtk/jjwt?tab=readme-ov-file#jwk-tostring-safety) as expected. See [Issue 976](https://github.com/jwtk/jjwt/issues/976).
 
 ### 0.12.5
 

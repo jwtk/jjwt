@@ -84,4 +84,13 @@ public class DefaultJwtHeaderBuilder extends DefaultJweHeaderBuilder<Jwts.Header
             return new DefaultHeader(sanitizeCrit(m, false));
         }
     }
+
+    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
+    @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
+    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<Jwts.HeaderBuilder> {
+        @Override
+        public Jwts.HeaderBuilder get() {
+            return new DefaultJwtHeaderBuilder();
+        }
+    }
 }

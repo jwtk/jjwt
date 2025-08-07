@@ -35,7 +35,7 @@ class CollectionsTest {
     @Test
     void testAsSetFromSet() {
         def set = Collections.setOf('foo')
-        assertSame set, Collections.asSet(set)
+        assertEquals set, Collections.asSet(set)
     }
 
     @Test
