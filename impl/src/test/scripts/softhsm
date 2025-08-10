@@ -112,6 +112,9 @@ _setup() {
   platform='macos'
   globalconf='/opt/homebrew/etc/softhsm/softhsm2.conf'
   libsofthsm2='/opt/homebrew/lib/softhsm/libsofthsm2.so'
+  if [[ ! -f "${libsofthsm2}" ]]; then # backup (build softhsm from source)
+    libsofthsm2='/usr/local/lib/softhsm/libsofthsm2.so'
+  fi
   if [[ ! -f "${libsofthsm2}" ]]; then # assume CI (Ubuntu)
     platform='ubuntu'
     globalconf='/etc/softhsm/softhsm2.conf'

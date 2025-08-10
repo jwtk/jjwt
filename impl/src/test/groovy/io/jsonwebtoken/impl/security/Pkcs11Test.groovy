@@ -39,6 +39,7 @@ class Pkcs11Test {
             '/opt/homebrew/lib/softhsm/libsofthsm2.so', // macos: brew install softhsm
             '/usr/lib/softhsm/libsofthsm2.so',          // ubuntu: sudo apt-get install -y softhsm2
             '/usr/local/lib/libsofthsm2.so',            // other *nixes?
+            '/usr/local/lib/softhsm/libsofthsm2.so',
             'C:\\SoftHSM2\\lib\\softhsm2-x64.dll',      // https://github.com/disig/SoftHSM2-for-Windows
             'C:\\SoftHSM2\\lib\\softhsm2.dll'           // https://github.com/disig/SoftHSM2-for-Windows
     ]
