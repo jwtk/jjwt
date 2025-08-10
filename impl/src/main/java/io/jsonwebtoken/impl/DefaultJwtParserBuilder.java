@@ -27,6 +27,7 @@ import io.jsonwebtoken.impl.io.DelegateStringDecoder;
 import io.jsonwebtoken.impl.io.StandardCompressionAlgorithms;
 import io.jsonwebtoken.impl.lang.DefaultNestedCollection;
 import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.impl.lang.NestedIdentifiableCollection;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.ConstantKeyLocator;
 import io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms;
@@ -301,40 +302,40 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     @Override
     public NestedCollection<CompressionAlgorithm, JwtParserBuilder> zip() {
-        return new DefaultNestedCollection<CompressionAlgorithm, JwtParserBuilder>(this, this.zipAlgs.values()) {
+        return new NestedIdentifiableCollection<CompressionAlgorithm, JwtParserBuilder>(this, this.zipAlgs) {
             @Override
             protected void changed() {
-                zipAlgs = new IdRegistry<>(StandardCompressionAlgorithms.NAME, getCollection());
+                zipAlgs = new IdRegistry<>(StandardCompressionAlgorithms.NAME, getValues().values());
             }
         };
     }
 
     @Override
     public NestedCollection<AeadAlgorithm, JwtParserBuilder> enc() {
-        return new DefaultNestedCollection<AeadAlgorithm, JwtParserBuilder>(this, this.encAlgs.values()) {
+        return new NestedIdentifiableCollection<AeadAlgorithm, JwtParserBuilder>(this, this.encAlgs) {
             @Override
             public void changed() {
-                encAlgs = new IdRegistry<>(StandardEncryptionAlgorithms.NAME, getCollection());
+                encAlgs = new IdRegistry<>(StandardEncryptionAlgorithms.NAME, getValues().values());
             }
         };
     }
 
     @Override
     public NestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder> sig() {
-        return new DefaultNestedCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder>(this, this.sigAlgs.values()) {
+        return new NestedIdentifiableCollection<SecureDigestAlgorithm<?, ?>, JwtParserBuilder>(this, this.sigAlgs) {
             @Override
-            public void changed() {
-                sigAlgs = new IdRegistry<>(StandardSecureDigestAlgorithms.NAME, getCollection());
+            protected void changed() {
+                sigAlgs = new IdRegistry<>(StandardSecureDigestAlgorithms.NAME, getValues().values());
             }
         };
     }
 
     @Override
     public NestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder> key() {
-        return new DefaultNestedCollection<KeyAlgorithm<?, ?>, JwtParserBuilder>(this, this.keyAlgs.values()) {
+        return new NestedIdentifiableCollection<KeyAlgorithm<?, ?>, JwtParserBuilder>(this, this.keyAlgs) {
             @Override
             public void changed() {
-                keyAlgs = new IdRegistry<>(StandardKeyAlgorithms.NAME, getCollection());
+                keyAlgs = new IdRegistry<>(StandardKeyAlgorithms.NAME, getValues().values());
             }
         };
     }

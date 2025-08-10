@@ -222,16 +222,4 @@ final class DefaultMacAlgorithm extends AbstractSecureDigestAlgorithm<SecretKey,
         byte[] computedSignature = digest(request);
         return MessageDigest.isEqual(providedSignature, computedSignature);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof DefaultMacAlgorithm) {
-            DefaultMacAlgorithm other = (DefaultMacAlgorithm) obj;
-            return super.equals(obj) && this.minKeyBitLength == other.minKeyBitLength;
-        }
-        return false;
-    }
 }
