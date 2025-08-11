@@ -22,11 +22,7 @@ import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.*
-import io.jsonwebtoken.io.CompressionAlgorithm
-import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.io.Deserializer
-import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.io.*
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.*
 import org.junit.Test
@@ -987,7 +983,7 @@ class JwtsTest {
             Jwts.parser().build().parseEncryptedClaims(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = "Unrecognized JWE 'enc' (Encryption Algorithm) header value: foo"
+            String expected = "Unsupported JWE 'enc' (Encryption Algorithm) header value 'foo'."
             assertEquals expected, e.getMessage()
         }
     }
@@ -1007,7 +1003,7 @@ class JwtsTest {
             Jwts.parser().build().parseEncryptedClaims(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = "Unrecognized JWE 'alg' (Algorithm) header value: bar"
+            String expected = "Unsupported JWE 'alg' (Algorithm) header value 'bar'."
             assertEquals expected, e.getMessage()
         }
     }
@@ -1025,7 +1021,8 @@ class JwtsTest {
             Jwts.parser().build().parseSignedClaims(compact)
             fail()
         } catch (io.jsonwebtoken.security.SignatureException e) {
-            String expected = "Unsupported signature algorithm 'bar'"
+            String expected = "Unsupported signature algorithm 'bar': " +
+                    "Unsupported JWS 'alg' (Algorithm) header value 'bar'."
             assertEquals expected, e.getMessage()
         }
     }

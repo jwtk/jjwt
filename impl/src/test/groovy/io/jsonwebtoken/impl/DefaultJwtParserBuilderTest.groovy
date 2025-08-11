@@ -225,7 +225,7 @@ class DefaultJwtParserBuilderTest {
             parser.zipAlgs.apply(nonStandard)
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = "Unrecognized JWT ${DefaultHeader.COMPRESSION_ALGORITHM} header value: def"
+            String msg = "Unsupported JWT ${DefaultHeader.COMPRESSION_ALGORITHM} header value 'def'."
             assertEquals msg, e.getMessage()
         }
     }
@@ -268,7 +268,7 @@ class DefaultJwtParserBuilderTest {
             parser.encAlgs.apply(nonStandard) // non-standard id
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = "Unrecognized JWE ${DefaultJweHeader.ENCRYPTION_ALGORITHM} header value: ${alg.id.toLowerCase()}"
+            String msg = "Unsupported JWE ${DefaultJweHeader.ENCRYPTION_ALGORITHM} header value '${alg.id.toLowerCase()}'."
             assertEquals msg, e.getMessage()
         }
     }
@@ -314,7 +314,7 @@ class DefaultJwtParserBuilderTest {
             parser.keyAlgs.apply(nonStandard) // non-standard id
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = "Unrecognized JWE ${DefaultJweHeader.ALGORITHM} header value: ${alg.id.toLowerCase()}"
+            String msg = "Unsupported JWE ${DefaultJweHeader.ALGORITHM} header value '${alg.id.toLowerCase()}'."
             assertEquals msg, e.getMessage()
         }
     }
@@ -358,7 +358,7 @@ class DefaultJwtParserBuilderTest {
             parser.sigAlgs.apply(nonStandard) // non-standard id
             fail()
         } catch (UnsupportedJwtException e) {
-            String msg = "Unrecognized JWS ${DefaultJwsHeader.ALGORITHM} header value: ${alg.id.toLowerCase()}"
+            String msg = "Unsupported JWS ${DefaultJwsHeader.ALGORITHM} header value '${alg.id.toLowerCase()}'."
             assertEquals msg, e.getMessage()
         }
     }

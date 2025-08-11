@@ -67,7 +67,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unrecognized JWT ${TEST_PARAM} header value: foo"
+            String msg = "Unsupported JWT ${TEST_PARAM} header value 'foo'."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -78,7 +78,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unrecognized JWS ${TEST_PARAM} header value: foo"
+            String msg = "Unsupported JWS ${TEST_PARAM} header value 'foo'."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -89,7 +89,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unrecognized JWE ${TEST_PARAM} header value: foo"
+            String msg = "Unsupported JWE ${TEST_PARAM} header value 'foo'."
             assertEquals msg, expected.getMessage()
         }
     }

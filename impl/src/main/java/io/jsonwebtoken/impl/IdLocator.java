@@ -21,6 +21,7 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Parameter;
@@ -40,8 +41,7 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
         this.param = Assert.notNull(param, "Header param cannot be null.");
         this.requiredMsg = Strings.clean(requiredExceptionMessage);
         this.valueRequired = Strings.hasText(this.requiredMsg);
-        Assert.notEmpty(registry, "Registry cannot be null or empty.");
-        this.registry = registry;
+        this.registry = Assert.notNull(registry, "Registry cannot be null.");
     }
 
     private static String type(Header header) {
@@ -52,6 +52,32 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
         } else {
             return "JWT";
         }
+    }
+
+    private String emptyMsg(String algType, String behavior) {
+        return " (" + behavior + " is disabled: no " + algType + " algorithms have been configured).";
+    }
+
+    private String unsupportedMsg(Header header, String id) {
+        String msg = "Unsupported " + type(header) + " " + this.param + " header value '" + id + "'";
+        if (!this.registry.isEmpty()) {
+            msg += ".";
+            return msg;
+        }
+        // otherwise, the registry is empty, so indicate that this parser behavior has been disabled:
+        if (header instanceof JweHeader) {
+            if (DefaultJweHeader.ENCRYPTION_ALGORITHM.equals(this.param)) {
+                msg += emptyMsg("encryption", "decryption");
+            } else if (DefaultHeader.ALGORITHM.equals(this.param)) {
+                msg += emptyMsg("key management", "decryption");
+            }
+        } else if (header instanceof JwsHeader) {
+            msg += emptyMsg("mac or signature", "signature verification");
+        }
+        if (header instanceof ProtectedHeader && DefaultHeader.COMPRESSION_ALGORITHM.equals(this.param)) {
+            msg += emptyMsg("compression", "decompression");
+        }
+        return msg;
     }
 
     @Override
@@ -71,7 +97,7 @@ public class IdLocator<H extends Header, R extends Identifiable> implements Loca
         try {
             return registry.forKey(id);
         } catch (Exception e) {
-            String msg = "Unrecognized " + type(header) + " " + this.param + " header value: " + id;
+            String msg = unsupportedMsg(header, id);
             throw new UnsupportedJwtException(msg, e);
         }
     }

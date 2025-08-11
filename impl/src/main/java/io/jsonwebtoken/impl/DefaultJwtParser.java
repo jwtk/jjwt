@@ -275,7 +275,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             algorithm = (SecureDigestAlgorithm<?, Key>) sigAlgs.apply(jwsHeader);
         } catch (UnsupportedJwtException e) {
             //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
-            String msg = "Unsupported signature algorithm '" + alg + "'";
+            String msg = "Unsupported signature algorithm '" + alg + "': " + e.getMessage();
             throw new SignatureException(msg, e);
         }
         Assert.stateNotNull(algorithm, "JWS Signature Algorithm cannot be null.");

@@ -37,7 +37,7 @@ public class StringRegistry<V> extends DefaultRegistry<String, V> {
     public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, Function<String, String> caseFn) {
         super(name, keyName, values, keyFn);
         this.CASE_FN = Assert.notNull(caseFn, "Case function cannot be null.");
-        Map<String, V> m = new LinkedHashMap<>(values().size());
+        Map<String, V> m = new LinkedHashMap<>(Collections.size(values));
         for (V value : values) {
             String key = keyFn.apply(value);
             key = this.CASE_FN.apply(key);

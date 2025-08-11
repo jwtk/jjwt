@@ -29,9 +29,9 @@ public class DefaultRegistry<K, V> extends DelegatingMap<K, V, Map<K, V>> implem
     private final String qualifiedKeyName;
 
     private static <K, V> Map<K, V> toMap(Collection<? extends V> values, Function<V, K> keyFn) {
-        Assert.notEmpty(values, "Collection of values may not be null or empty.");
+        Assert.notNull(values, "Collection of values may not be null.");
         Assert.notNull(keyFn, "Key function cannot be null.");
-        Map<K, V> m = new LinkedHashMap<>(values.size());
+        Map<K, V> m = new LinkedHashMap<>(Collections.size(values));
         for (V value : values) {
             K key = Assert.notNull(keyFn.apply(value), "Key function cannot return a null value.");
             m.put(key, value);
