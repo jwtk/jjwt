@@ -17,8 +17,10 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.impl.lang.CompactMediaTypeIdConverter;
+import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
 
@@ -52,6 +54,11 @@ public class DefaultHeader extends ParameterMap implements Header {
     @Override
     public String getName() {
         return "JWT header";
+    }
+
+    static String nameOf(Header header) {
+        return Assert.hasText(Assert.isInstanceOf(Nameable.class, header).getName(),
+                "Header name cannot be null or empty.");
     }
 
     @Override

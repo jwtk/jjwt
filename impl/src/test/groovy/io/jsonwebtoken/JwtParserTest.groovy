@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
 import io.jsonwebtoken.impl.lang.JwtDateConverter
+import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
@@ -107,7 +108,9 @@ class JwtParserTest {
             Jwts.parser().setSigningKey(randomKey()).build().parse(bad)
             fail()
         } catch (SignatureException se) {
-            assertEquals se.getMessage(), "Unsupported signature algorithm '$badAlgorithmName'".toString()
+            String msg = "Unsupported signature algorithm '$badAlgorithmName': " +
+                    "Unsupported JWS header 'alg' (Algorithm) value '$badAlgorithmName'."
+            assertEquals msg, se.getMessage()
         }
     }
 
@@ -1643,6 +1646,117 @@ class JwtParserTest {
             fail()
         } catch (MalformedJwtException se) {
             assertEquals 'The JWS header references signature algorithm \'none\' yet the compact JWS string contains a signature. This is not permitted per https://tools.ietf.org/html/rfc7518#section-3.6.', se.message
+        }
+    }
+
+    /**
+     * Ensures that compression algorithms can be removed completely, thereby disabling compression entirely
+     * @see <a href="https://github.com/jwtk/jjwt/issues/996">Issue 996</a>
+     * @since 0.12.7
+     */
+    @Test
+    void testEmptyZipAlgCollection() {
+
+        // create a compressed JWE first:
+        def key = TestKeys.A256GCM
+        def jwe = Jwts.builder().claim("hello", "world")
+                .compressWith(Jwts.ZIP.DEF)
+                .encryptWith(key, Jwts.ENC.A256GCM)
+                .compact()
+
+        //now build a parser with no decompression algs (which should disable decompression)
+        def parser = Jwts.parser().zip().clear().and().decryptWith(key).build()
+
+        //parsing should fail since (de)compression is disabled:
+        try {
+            parser.parseEncryptedClaims(jwe)
+        } catch (UnsupportedJwtException e) {
+            String expected = "Unsupported JWE header 'zip' (Compression Algorithm) value 'DEF': " +
+                    "decompression is disabled (no compression algorithms have been configured)."
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * Ensures that mac/signature algorithms can be removed completely, thereby disabling JWSs entirely
+     * @see <a href="https://github.com/jwtk/jjwt/issues/996">Issue 996</a>
+     * @since 0.12.7
+     */
+    @Test
+    void testEmptySigAlgCollection() {
+
+        // create a compressed JWE first:
+        def key = TestKeys.HS256
+        def jws = Jwts.builder().claim("hello", "world")
+                .signWith(key, Jwts.SIG.HS256)
+                .compact()
+
+        //now build a parser with no signature algs, which should completely disable signature verification
+        def parser = Jwts.parser().sig().clear().and().verifyWith(key).build()
+
+        //parsing should fail since signature verification is disabled:
+        try {
+            parser.parseSignedClaims(jws)
+        } catch (SignatureException e) {
+            String expected = "Unsupported signature algorithm 'HS256': Unsupported JWS header 'alg' (Algorithm) " +
+                    "value 'HS256': signature verification is disabled (no mac or signature algorithms have been " +
+                    "configured)."
+            assertTrue e.getCause() instanceof UnsupportedJwtException
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * Ensures that encryption algorithms can be removed completely, thereby disabling JWEs entirely
+     * @see <a href="https://github.com/jwtk/jjwt/issues/996">Issue 996</a>
+     * @since 0.12.7
+     */
+    @Test
+    void testEmptyEncAlgCollection() {
+
+        // create a compressed JWE first:
+        def key = TestKeys.A256GCM
+        def jwe = Jwts.builder().claim("hello", "world")
+                .encryptWith(key, Jwts.ENC.A256GCM)
+                .compact()
+
+        //now build a parser with no encryption algs, which should completely disable decryption
+        def parser = Jwts.parser().enc().clear().and().decryptWith(key).build()
+
+        //parsing should fail since decryption is disabled:
+        try {
+            parser.parseEncryptedClaims(jwe)
+        } catch (UnsupportedJwtException e) {
+            String expected = "Unsupported JWE header 'enc' (Encryption Algorithm) value 'A256GCM': " +
+                    "decryption is disabled (no encryption algorithms have been configured)."
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    /**
+     * Ensures that key management algorithms can be removed completely, thereby disabling JWEs entirely
+     * @see <a href="https://github.com/jwtk/jjwt/issues/996">Issue 996</a>
+     * @since 0.12.7
+     */
+    @Test
+    void testEmptyKeyAlgCollection() {
+
+        // create a compressed JWE first:
+        def key = TestKeys.A256GCM
+        def jwe = Jwts.builder().claim("hello", "world")
+                .encryptWith(key, Jwts.ENC.A256GCM)
+                .compact()
+
+        //now build a parser with no key management algs, which should completely disable decryption
+        def parser = Jwts.parser().key().clear().and().decryptWith(key).build()
+
+        //parsing should fail since key management is disabled:
+        try {
+            parser.parseEncryptedClaims(jwe)
+        } catch (UnsupportedJwtException e) {
+            String expected = "Unsupported JWE header 'alg' (Algorithm) value 'dir': decryption is disabled " +
+                    "(no key management algorithms have been configured)."
+            assertEquals expected, e.getMessage()
         }
     }
 }
