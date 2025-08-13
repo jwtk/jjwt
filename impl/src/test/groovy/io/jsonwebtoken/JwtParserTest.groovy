@@ -109,7 +109,7 @@ class JwtParserTest {
             fail()
         } catch (SignatureException se) {
             String msg = "Unsupported signature algorithm '$badAlgorithmName': " +
-                    "Unsupported JWS 'alg' (Algorithm) header value '$badAlgorithmName'."
+                    "Unsupported JWS header 'alg' (Algorithm) value '$badAlgorithmName'."
             assertEquals msg, se.getMessage()
         }
     }
@@ -1671,8 +1671,8 @@ class JwtParserTest {
         try {
             parser.parseEncryptedClaims(jwe)
         } catch (UnsupportedJwtException e) {
-            String expected = "Unsupported JWE 'zip' (Compression Algorithm) header value 'DEF' (decompression is " +
-                    "disabled: no compression algorithms have been configured)."
+            String expected = "Unsupported JWE header 'zip' (Compression Algorithm) value 'DEF': " +
+                    "decompression is disabled (no compression algorithms have been configured)."
             assertEquals expected, e.getMessage()
         }
     }
@@ -1698,9 +1698,10 @@ class JwtParserTest {
         try {
             parser.parseSignedClaims(jws)
         } catch (SignatureException e) {
-            String expected = "Unsupported signature algorithm 'HS256': Unsupported JWS 'alg' (Algorithm) header " +
-                    "value 'HS256' (signature verification is disabled: no mac or signature algorithms have been " +
+            String expected = "Unsupported signature algorithm 'HS256': Unsupported JWS header 'alg' (Algorithm) " +
+                    "value 'HS256': signature verification is disabled (no mac or signature algorithms have been " +
                     "configured)."
+            assertTrue e.getCause() instanceof UnsupportedJwtException
             assertEquals expected, e.getMessage()
         }
     }
@@ -1726,8 +1727,8 @@ class JwtParserTest {
         try {
             parser.parseEncryptedClaims(jwe)
         } catch (UnsupportedJwtException e) {
-            String expected = "Unsupported JWE 'enc' (Encryption Algorithm) header value 'A256GCM' " +
-                    "(decryption is disabled: no encryption algorithms have been configured)."
+            String expected = "Unsupported JWE header 'enc' (Encryption Algorithm) value 'A256GCM': " +
+                    "decryption is disabled (no encryption algorithms have been configured)."
             assertEquals expected, e.getMessage()
         }
     }
@@ -1753,8 +1754,8 @@ class JwtParserTest {
         try {
             parser.parseEncryptedClaims(jwe)
         } catch (UnsupportedJwtException e) {
-            String expected = "Unsupported JWE 'alg' (Algorithm) header value 'dir' (decryption is disabled: " +
-                    "no key management algorithms have been configured)."
+            String expected = "Unsupported JWE header 'alg' (Algorithm) value 'dir': decryption is disabled " +
+                    "(no key management algorithms have been configured)."
             assertEquals expected, e.getMessage()
         }
     }

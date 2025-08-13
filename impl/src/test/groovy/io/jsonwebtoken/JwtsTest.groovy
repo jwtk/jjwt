@@ -983,7 +983,7 @@ class JwtsTest {
             Jwts.parser().build().parseEncryptedClaims(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = "Unsupported JWE 'enc' (Encryption Algorithm) header value 'foo'."
+            String expected = "Unsupported JWE header 'enc' (Encryption Algorithm) value 'foo'."
             assertEquals expected, e.getMessage()
         }
     }
@@ -1003,7 +1003,7 @@ class JwtsTest {
             Jwts.parser().build().parseEncryptedClaims(compact)
             fail()
         } catch (UnsupportedJwtException e) {
-            String expected = "Unsupported JWE 'alg' (Algorithm) header value 'bar'."
+            String expected = "Unsupported JWE header 'alg' (Algorithm) value 'bar'."
             assertEquals expected, e.getMessage()
         }
     }
@@ -1022,7 +1022,7 @@ class JwtsTest {
             fail()
         } catch (io.jsonwebtoken.security.SignatureException e) {
             String expected = "Unsupported signature algorithm 'bar': " +
-                    "Unsupported JWS 'alg' (Algorithm) header value 'bar'."
+                    "Unsupported JWS header 'alg' (Algorithm) value 'bar'."
             assertEquals expected, e.getMessage()
         }
     }

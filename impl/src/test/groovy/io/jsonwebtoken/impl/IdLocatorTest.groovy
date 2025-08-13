@@ -40,12 +40,12 @@ class IdLocatorTest {
         def a = new StringIdentifiable(value: 'A')
         def b = new StringIdentifiable(value: 'B')
         registry = new IdRegistry('Foo', [a, b], false)
-        locator = new IdLocator(TEST_PARAM, registry, exMsg)
+        locator = new IdLocator(TEST_PARAM, registry, 'foo', 'bar', exMsg)
     }
 
     @Test
     void unrequiredHeaderValueTest() {
-        locator = new IdLocator(TEST_PARAM, registry, null)
+        locator = new IdLocator(TEST_PARAM, registry, 'foo', 'bar', null)
         def header = Jwts.header().add('a', 'b').build()
         assertNull locator.apply(header)
     }
@@ -67,7 +67,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unsupported JWT ${TEST_PARAM} header value 'foo'."
+            String msg = "Unsupported JWT header ${TEST_PARAM} value 'foo'."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -78,7 +78,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unsupported JWS ${TEST_PARAM} header value 'foo'."
+            String msg = "Unsupported JWS header ${TEST_PARAM} value 'foo'."
             assertEquals msg, expected.getMessage()
         }
     }
@@ -89,7 +89,7 @@ class IdLocatorTest {
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
-            String msg = "Unsupported JWE ${TEST_PARAM} header value 'foo'."
+            String msg = "Unsupported JWE header ${TEST_PARAM} value 'foo'."
             assertEquals msg, expected.getMessage()
         }
     }
