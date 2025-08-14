@@ -1002,19 +1002,19 @@ public final class Jwts {
         }
     }
 
-    // @since JJWT_RELEASE_VERSION
+    // @since 0.12.7
     private static final Supplier<JwtBuilder> JWT_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder$Supplier");
 
-    // @since JJWT_RELEASE_VERSION
+    // @since 0.12.7
     private static final Supplier<JwtParserBuilder> JWT_PARSER_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier");
 
-    // @since JJWT_RELEASE_VERSION
+    // @since 0.12.7
     private static final Supplier<HeaderBuilder> HEADER_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier");
 
-    // @since JJWT_RELEASE_VERSION
+    // @since 0.12.7
     private static final Supplier<ClaimsBuilder> CLAIMS_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier");
 

@@ -210,7 +210,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         return super.build();
     }
 
-    // @since JJWT_RELEASE_VERSION per https://github.com/jwtk/jjwt/issues/988
+    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
     @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
     public static final class Supplier<K extends Key, J extends Jwk<K>> implements io.jsonwebtoken.lang.Supplier<DynamicJwkBuilder<K, J>> {
         @Override
