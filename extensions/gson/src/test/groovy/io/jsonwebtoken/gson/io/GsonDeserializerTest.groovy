@@ -91,4 +91,24 @@ class GsonDeserializerTest {
             assertSame ex, expected.cause
         }
     }
+
+    @Test
+    void testLong() {
+        def json = '{"hello":42}'
+        def m = deser(json) as Map
+        def val = m.hello
+        assertTrue val instanceof Long
+        assertEquals 42L, val
+    }
+
+    @Test
+    void testDouble() {
+        // one more than Long can handle:
+        def dval = 42.0 as double
+        def json = '{"hello":' + dval + '}'
+        def m = deser(json) as Map
+        def val = m.hello
+        assertTrue val instanceof Double
+        assertEquals(dval, ((Double) val).doubleValue(), 0)
+    }
 }
