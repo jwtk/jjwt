@@ -115,9 +115,7 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
      * @since 0.12.4
      */
-    //TODO: Make this public on a minor release
-    //      (cannot do that on a point release as that would violate semver)
-    private JacksonDeserializer(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap) {
+    public JacksonDeserializer(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap) {
         this(objectMapper);
         Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
         // register a new Deserializer on the ObjectMapper instance:
