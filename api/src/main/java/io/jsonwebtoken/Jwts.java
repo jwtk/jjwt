@@ -19,6 +19,7 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
+import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyPairBuilderSupplier;
@@ -1001,6 +1002,22 @@ public final class Jwts {
         }
     }
 
+    // @since 0.12.7
+    private static final Supplier<JwtBuilder> JWT_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder$Supplier");
+
+    // @since 0.12.7
+    private static final Supplier<JwtParserBuilder> JWT_PARSER_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier");
+
+    // @since 0.12.7
+    private static final Supplier<HeaderBuilder> HEADER_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier");
+
+    // @since 0.12.7
+    private static final Supplier<ClaimsBuilder> CLAIMS_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier");
+
     /**
      * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
      *
@@ -1018,7 +1035,7 @@ public final class Jwts {
      * @since 0.12.0
      */
     public static HeaderBuilder header() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder");
+        return HEADER_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -1029,7 +1046,7 @@ public final class Jwts {
      * the JWT payload.
      */
     public static ClaimsBuilder claims() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder");
+        return CLAIMS_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -1057,7 +1074,7 @@ public final class Jwts {
      * strings.
      */
     public static JwtBuilder builder() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder");
+        return JWT_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -1066,7 +1083,7 @@ public final class Jwts {
      * @return a new {@link JwtParser} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
      */
     public static JwtParserBuilder parser() {
-        return Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder");
+        return JWT_PARSER_BUILDER_SUPPLIER.get();
     }
 
     /**

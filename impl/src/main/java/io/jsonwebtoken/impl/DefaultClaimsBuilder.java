@@ -21,7 +21,6 @@ import io.jsonwebtoken.ClaimsBuilder;
 /**
  * @since 0.12.0
  */
-@SuppressWarnings("unused") // used via reflection via Jwts.claims()
 public final class DefaultClaimsBuilder extends DelegatingClaimsMutator<ClaimsBuilder>
         implements ClaimsBuilder {
 
@@ -33,5 +32,14 @@ public final class DefaultClaimsBuilder extends DelegatingClaimsMutator<ClaimsBu
     public Claims build() {
         // ensure a new instance is returned so that the builder may be re-used:
         return new DefaultClaims(this.DELEGATE);
+    }
+
+    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
+    @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
+    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<ClaimsBuilder> {
+        @Override
+        public ClaimsBuilder get() {
+            return new DefaultClaimsBuilder();
+        }
     }
 }

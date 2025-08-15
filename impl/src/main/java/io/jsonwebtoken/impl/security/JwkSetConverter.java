@@ -91,9 +91,6 @@ public class JwkSetConverter implements Converter<JwkSet, Object> {
             String msg = "JWK Set " + PARAM + " value cannot be null.";
             throw new MalformedKeySetException(msg);
         }
-        if (val instanceof Supplier<?>) {
-            val = ((Supplier<?>) val).get();
-        }
         if (!(val instanceof Collection)) {
             String msg = "JWK Set " + PARAM + " value must be a Collection (JSON Array). Type found: " +
                     val.getClass().getName();

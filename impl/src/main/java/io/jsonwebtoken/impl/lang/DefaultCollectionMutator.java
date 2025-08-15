@@ -15,11 +15,9 @@
  */
 package io.jsonwebtoken.impl.lang;
 
-import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.lang.CollectionMutator;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
-import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -39,10 +37,6 @@ public class DefaultCollectionMutator<E, M extends CollectionMutator<E, M>> impl
 
     private boolean doAdd(E e) {
         if (Objects.isEmpty(e)) return false;
-        if (e instanceof Identifiable && !Strings.hasText(((Identifiable) e).getId())) {
-            String msg = e.getClass() + " getId() value cannot be null or empty.";
-            throw new IllegalArgumentException(msg);
-        }
         return this.collection.add(e);
     }
 

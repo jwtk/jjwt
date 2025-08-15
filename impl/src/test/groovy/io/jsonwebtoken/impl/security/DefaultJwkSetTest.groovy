@@ -67,14 +67,17 @@ class DefaultJwkSetTest {
     }
 
     /**
-     * Asserts that the raw keys value is a RedactedSupplier and not a raw value due to potential sensitivity if
-     * the JwkSet contains secret or private JWKs.
+     * Asserts that the raw 'keys' value is not a RedactedSupplier per https://github.com/jwtk/jjwt/issues/976,
+     * but an internal secret key parameter does have a RedactedSupplier
      */
     @Test
-    void testKeysFromGetIsRedactedSupplier() {
+    void testGetKeysNotRedactedSupplier() {
         def jwk = Jwks.builder().key(TestKeys.HS256).build()
         def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
-        def result = set.get('keys')
-        assertTrue result instanceof RedactedSupplier
+        def keys = set.get('keys')
+        assertFalse keys instanceof RedactedSupplier
+        keys = keys as List
+        def element = keys[0] as Map// result is an array/list, so get first JWK in the list
+        assertTrue element.k instanceof RedactedSupplier // 'k' is a secret property, should be redacted
     }
 }

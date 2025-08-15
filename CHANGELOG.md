@@ -1,5 +1,28 @@
 ## Release Notes
 
+### 0.12.7
+
+This patch release:
+
+* Adds a new Maven BOM, useful for multi-module projects. See [Issue 967](https://github.com/jwtk/jjwt/issues/967).
+* Allows the `JwtParserBuilder` to have empty nested algorithm collections, effectively disabling the parser's associated feature:
+    - Emptying the `zip()` nested collection disables JWT decompression.
+    - Emptying the `sig()` nested collection disables JWS mac/signature verification (i.e. all JWSs will be unsupported/rejected).
+    - Emptying either the `enc()` or `key()` nested collections disables JWE decryption (i.e. all JWEs will be unsupported/rejected)
+  
+  See [Issue 996](https://github.com/jwtk/jjwt/issues/996).
+* Fixes [bug 961](https://github.com/jwtk/jjwt/issues/961) where `JwtParserBuilder` nested collection builders were not correctly replacing algorithms with the same id.
+* Ensures a `JwkSet`'s `keys` collection is no longer entirely secret/redacted by default.  This was an overzealous default that was unnecessarily restrictive; the `keys` collection itself should always be public, and each individual key within should determine which fields should be redacted when printed. See [Issue 976](https://github.com/jwtk/jjwt/issues/976).
+* Improves performance slightly by ensuring all `jjwt-api` utility methods that create `*Builder` instances (`Jwts.builder()`, `Jwts.parserBuilder()`, `Jwks.builder()`, etc) no longer use reflection.
+ 
+  Instead,`static` factories are created via reflection only once during initial `jjwt-api` classloading, and then `*Builder`s are created via standard instantiation using the `new` operator thereafter.  This also benefits certain environments that may not have ideal `ClassLoader` implementations (e.g. Tomcat in some cases).
+ 
+  **NOTE: because this changes which classes are loaded via reflection, any environments that must explicitly reference reflective class names (e.g. GraalVM applications) will need to be updated to reflect the new factory class names**.
+  
+  See [Issue 988](https://github.com/jwtk/jjwt/issues/988).
+* Upgrades the Gson dependency to `2.11.0` 
+* Upgrades the BouncyCastle dependency to `1.78.1`
+
 ### 0.12.6
 
 This patch release:
@@ -9,6 +32,7 @@ This patch release:
   [Issue 947](https://github.com/jwtk/jjwt/issues/947).
 * Fixes a decompression memory leak in concurrent/multi-threaded environments introduced in 0.12.0 when decompressing JWTs with a `zip` header of `GZIP`. See [Issue 949](https://github.com/jwtk/jjwt/issues/949).
 * Upgrades BouncyCastle to 1.78 via [PR 941](https://github.com/jwtk/jjwt/pull/941).
+* Ensures that a `JwkSet`'s `keys` list member is no longer considered secret and is not redacted by default. However, each individual JWK element within the `keys` list may still have [redacted private or secret members](https://github.com/jwtk/jjwt?tab=readme-ov-file#jwk-tostring-safety) as expected. See [Issue 976](https://github.com/jwtk/jjwt/issues/976).
 
 ### 0.12.5
 

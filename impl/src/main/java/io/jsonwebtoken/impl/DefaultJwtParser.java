@@ -241,11 +241,11 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         this.expectedClaims = Jwts.claims().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
         this.deserializer = Assert.notNull(deserializer, "JSON Deserializer cannot be null.");
-        this.sigAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, sigAlgs, MISSING_JWS_ALG_MSG);
-        this.keyAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, keyAlgs, MISSING_JWE_ALG_MSG);
-        this.encAlgs = new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, encAlgs, MISSING_ENC_MSG);
+        this.sigAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, sigAlgs, "mac or signature", "signature verification", MISSING_JWS_ALG_MSG);
+        this.keyAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, keyAlgs, "key management", "decryption", MISSING_JWE_ALG_MSG);
+        this.encAlgs = new IdLocator<>(DefaultJweHeader.ENCRYPTION_ALGORITHM, encAlgs, "encryption", "decryption", MISSING_ENC_MSG);
         this.zipAlgs = compressionCodecResolver != null ? new CompressionCodecLocator(compressionCodecResolver) :
-                new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, zipAlgs, null);
+                new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, zipAlgs, "compression", "decompression", null);
     }
 
     @Override
@@ -275,7 +275,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             algorithm = (SecureDigestAlgorithm<?, Key>) sigAlgs.apply(jwsHeader);
         } catch (UnsupportedJwtException e) {
             //For backwards compatibility.  TODO: remove this try/catch block for 1.0 and let UnsupportedJwtException propagate
-            String msg = "Unsupported signature algorithm '" + alg + "'";
+            String msg = "Unsupported signature algorithm '" + alg + "': " + e.getMessage();
             throw new SignatureException(msg, e);
         }
         Assert.stateNotNull(algorithm, "JWS Signature Algorithm cannot be null.");
@@ -459,7 +459,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         final boolean payloadBase64UrlEncoded = !(header instanceof JwsHeader) || ((JwsHeader) header).isPayloadEncoded();
         if (payloadBase64UrlEncoded) {
             // standard encoding, so decode it:
-            byte[] data = decode(tokenized.getPayload(), "payload");
+            byte[] data = decode(payloadToken, "payload");
             payload = new Payload(data, header.getContentType());
         } else {
             // The JWT uses the b64 extension, and we already know the parser supports that extension at this point
@@ -492,6 +492,13 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
             TokenizedJwe tokenizedJwe = (TokenizedJwe) tokenized;
             JweHeader jweHeader = Assert.stateIsInstance(JweHeader.class, header, "Not a JweHeader. ");
+
+            // Ensure both an 'alg' and 'enc' header value exists and is supported before spending time/effort
+            // base64Url-decoding anything:
+            final AeadAlgorithm encAlg = this.encAlgs.apply(jweHeader);
+            Assert.stateNotNull(encAlg, "JWE Encryption Algorithm cannot be null.");
+            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgs.apply(jweHeader);
+            Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
             byte[] cekBytes = Bytes.EMPTY; //ignored unless using an encrypted key algorithm
             CharSequence base64Url = tokenizedJwe.getEncryptedKey();
@@ -528,16 +535,6 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
                 String msg = "Compact JWE strings must always contain an AAD Authentication Tag.";
                 throw new MalformedJwtException(msg);
             }
-
-            String enc = jweHeader.getEncryptionAlgorithm();
-            if (!Strings.hasText(enc)) {
-                throw new MalformedJwtException(MISSING_ENC_MSG);
-            }
-            final AeadAlgorithm encAlg = this.encAlgs.apply(jweHeader);
-            Assert.stateNotNull(encAlg, "JWE Encryption Algorithm cannot be null.");
-
-            @SuppressWarnings("rawtypes") final KeyAlgorithm keyAlg = this.keyAlgs.apply(jweHeader);
-            Assert.stateNotNull(keyAlg, "JWE Key Algorithm cannot be null.");
 
             Key key = this.keyLocator.locate(jweHeader);
             if (key == null) {

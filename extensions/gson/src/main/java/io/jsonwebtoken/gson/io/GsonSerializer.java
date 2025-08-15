@@ -17,6 +17,7 @@ package io.jsonwebtoken.gson.io;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
 import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
@@ -31,6 +32,8 @@ import java.nio.charset.StandardCharsets;
 public class GsonSerializer<T> extends AbstractSerializer<T> {
 
     static final Gson DEFAULT_GSON = new GsonBuilder()
+            .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+            .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .registerTypeHierarchyAdapter(Supplier.class, GsonSupplierSerializer.INSTANCE)
             .disableHtmlEscaping().create();
 

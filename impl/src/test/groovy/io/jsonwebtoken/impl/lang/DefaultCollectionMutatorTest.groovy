@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.lang
 
-import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.lang.Strings
 import org.junit.Before
 import org.junit.Test
@@ -49,8 +48,16 @@ class DefaultCollectionMutatorTest {
     }
 
     @Test
+    void addNull() {
+        m.add(null)
+        assertEquals 0, changeCount
+        assertTrue m.getCollection().isEmpty() // wasn't added
+    }
+
+    @Test
     void addEmpty() {
         m.add(Strings.EMPTY)
+        assertEquals 0, changeCount
         assertTrue m.getCollection().isEmpty() // wasn't added
     }
 
@@ -91,28 +98,6 @@ class DefaultCollectionMutatorTest {
         def c = ['hello', 'world']
         m.add(c)
         assertEquals 1, changeCount // only one change triggered, not c.size()
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void addIdentifiableWithNullId() {
-        def e = new Identifiable() {
-            @Override
-            String getId() {
-                return null
-            }
-        }
-        m.add(e)
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void addIdentifiableWithEmptyId() {
-        def e = new Identifiable() {
-            @Override
-            String getId() {
-                return '  '
-            }
-        }
-        m.add(e)
     }
 
     @Test

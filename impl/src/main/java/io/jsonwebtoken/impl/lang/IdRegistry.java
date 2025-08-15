@@ -53,7 +53,7 @@ public class IdRegistry<T extends Identifiable> extends StringRegistry<T> {
 
     public IdRegistry(String name, Collection<T> instances, boolean caseSensitive) {
         super(name, "id",
-                Assert.notEmpty(instances, "Collection of Identifiable instances may not be null or empty."),
+                Assert.notNull(instances, "Collection of Identifiable instances may not be null."),
                 IdRegistry.<T>fn(),
                 caseSensitive);
     }
