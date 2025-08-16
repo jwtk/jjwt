@@ -1,0 +1,209 @@
+[
+  {
+    "name": "io.jsonwebtoken.impl.compression.GzipCompressionCodec",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.compression.DeflateCompressionCodec",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.StandardKeyAlgorithms",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.DefaultJwtHeaderBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.DefaultClaimsBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.DefaultJwtBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.DefaultJwtParserBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.JwksBridge",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "UNSAFE_JSON",
+        "parameterTypes": [
+          "io.jsonwebtoken.security.Jwk"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.DefaultJwkParserBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.DefaultJwkSetBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.StandardCurves",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.StandardHashAlgorithms",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.StandardKeyOperations",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "io.jsonwebtoken.impl.security.KeysBridge",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "password",
+        "parameterTypes": ["char[]"]
+      },
+      {
+        "name": "builder",
+        "parameterTypes": ["javax.crypto.SecretKey"]
+      },
+      {
+        "name": "builder",
+        "parameterTypes": ["java.security.PrivateKey"]
+      }
+    ]
+  }
+]
