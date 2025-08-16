@@ -40,7 +40,9 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
-import java.util.Date;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 /**
@@ -523,14 +525,46 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#expiration(Date) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#expiration(Instant) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
     @Override
     // for better/targeted JavaDoc
-    JwtBuilder expiration(Date exp);
+    JwtBuilder expiration(Instant exp);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link #expiration(Instant) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    // for better/targeted JavaDoc
+    JwtBuilder expiration(OffsetDateTime exp);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link #expiration(Instant) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    // for better/targeted JavaDoc
+    JwtBuilder expiration(ZonedDateTime exp);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -540,14 +574,46 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#notBefore(Date) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#notBefore(Instant) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
     @Override
     // for better/targeted JavaDoc
-    JwtBuilder notBefore(Date nbf);
+    JwtBuilder notBefore(Instant nbf);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
+     * <code>nbf</code></a> (not before) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link #notBefore(Instant) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    // for better/targeted JavaDoc
+    JwtBuilder notBefore(OffsetDateTime nbf);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
+     * <code>nbf</code></a> (not before) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link #notBefore(Instant) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    // for better/targeted JavaDoc
+    JwtBuilder notBefore(ZonedDateTime nbf);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -557,14 +623,46 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * <p>This is a convenience wrapper for:</p>
      * <blockquote><pre>
-     * {@link #claims()}.{@link ClaimsMutator#issuedAt(Date) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     * {@link #claims()}.{@link ClaimsMutator#issuedAt(Instant) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
      *
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
      */
     @Override
     // for better/targeted JavaDoc
-    JwtBuilder issuedAt(Date iat);
+    JwtBuilder issuedAt(Instant iat);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
+     * <code>iat</code></a> (issued at) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is the timestamp when the JWT was created.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link #issuedAt(Instant) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    // for better/targeted JavaDoc
+    JwtBuilder issuedAt(OffsetDateTime iat);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
+     * <code>iat</code></a> (issued at) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is the timestamp when the JWT was created.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link #issuedAt(Instant) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     */
+    // for better/targeted JavaDoc
+    JwtBuilder issuedAt(ZonedDateTime iat);
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
