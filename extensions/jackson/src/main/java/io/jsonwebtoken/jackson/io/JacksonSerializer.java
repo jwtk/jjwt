@@ -64,7 +64,7 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // https://github.com/jwtk/jjwt/issues/893
     }
 
-    protected final ObjectMapper objectMapper;
+    private final ObjectWriter objectWriter;
 
     /**
      * Constructor using JJWT's default {@link ObjectMapper} singleton for serialization.
@@ -80,13 +80,15 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
      */
     public JacksonSerializer(ObjectMapper objectMapper) {
         Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
-        this.objectMapper = objectMapper.registerModule(MODULE);
+        this.objectWriter = objectMapper
+            .registerModule(MODULE)
+            .writer();
     }
 
     @Override
     protected void doSerialize(T t, OutputStream out) throws Exception {
         Assert.notNull(out, "OutputStream cannot be null.");
-        ObjectWriter writer = this.objectMapper.writer().without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        ObjectWriter writer = this.objectWriter.without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
         writer.writeValue(out, t);
     }
 }

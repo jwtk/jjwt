@@ -17,7 +17,9 @@ package io.jsonwebtoken.jackson.io;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jsonwebtoken.io.AbstractDeserializer;
@@ -37,7 +39,7 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
 
     private final Class<T> returnType;
 
-    private final ObjectMapper objectMapper;
+    private final ObjectReader objectReader;
 
     /**
      * Constructor using JJWT's default {@link ObjectMapper} singleton for deserialization.
@@ -116,24 +118,27 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
      * @since 0.12.4
      */
     public JacksonDeserializer(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap) {
-        this(objectMapper);
-        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
         // register a new Deserializer on the ObjectMapper instance:
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
-        objectMapper.registerModule(module);
+        this(objectMapper.registerModule(mappedTypeModule(claimTypeMap)));
     }
 
     private JacksonDeserializer(ObjectMapper objectMapper, Class<T> returnType) {
         Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
         Assert.notNull(returnType, "Return type cannot be null.");
-        this.objectMapper = objectMapper;
+        this.objectReader = objectMapper.reader();
         this.returnType = returnType;
     }
 
     @Override
     protected T doDeserialize(Reader reader) throws Exception {
-        return objectMapper.readValue(reader, returnType);
+        return objectReader.readValue(reader, returnType);
+    }
+
+    private static Module mappedTypeModule(Map<String, Class<?>> claimTypeMap) {
+        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
+        return module;
     }
 
     /**

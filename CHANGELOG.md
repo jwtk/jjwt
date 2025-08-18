@@ -1,5 +1,11 @@
 ## Release Notes
 
+### 0.12.8 (pending release)
+
+This patch release:
+* 
+* Updates Jackson usage (in `jjwt-jackson`) to use immutable classes instead of using `ObjectMapper` directly.
+
 ### 0.12.7
 
 This patch release:
@@ -445,6 +451,7 @@ provided the JJWT team.
 This patch release:
 
 * Adds additional handling for rare JSON parsing exceptions and wraps them in a `JwtException` to allow the application to handle these conditions as JWT concerns.
+* Upgrades the `jjwt-jackson` module's Jackson dependency to `2.12.4`.
 * Upgrades the `jjwt-jackson` module's Jackson dependency to `2.12.6.1`.
 * Upgrades the `jjwt-orgjson` module's org.json:json dependency to `20220320`.
 * Upgrades the `jjwt-gson` module's gson dependency to `2.9.0`.

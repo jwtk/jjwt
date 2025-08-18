@@ -45,14 +45,14 @@ class JacksonDeserializerTest {
 
     @Test
     void testDefaultConstructor() {
-        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER, deserializer.objectMapper
+        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER.getDeserializationConfig(), deserializer.objectReader.config
     }
 
     @Test
     void testObjectMapperConstructor() {
         def customOM = new ObjectMapper()
         deserializer = new JacksonDeserializer<>(customOM)
-        assertSame customOM, deserializer.objectMapper
+        assertSame customOM.getDeserializationConfig(), deserializer.objectReader.config
     }
 
     @Test(expected = IllegalArgumentException)
@@ -152,7 +152,7 @@ class JacksonDeserializerTest {
      */
     @Test
     void testIgnoreUnknownPropertiesWhenDeserializeWithCustomObject() {
-        
+
         long currentTime = System.currentTimeMillis()
 
         String json = """
