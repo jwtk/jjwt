@@ -19,7 +19,6 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
-import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import io.jsonwebtoken.lang.Registry
 import org.junit.Test
@@ -123,7 +122,7 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = new DefaultDecryptAeadRequest(ciphertext, key, null, iv, tag)
+            def dreq = Jwts.ENC.decryptRequest().payload(ciphertext).key(key).iv(iv).digest(tag).build()
             alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
 
@@ -157,7 +156,8 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = new DefaultDecryptAeadRequest(ciphertext, key, aad, iv, tag)
+            def dreq = Jwts.ENC.decryptRequest()
+                    .payload(ciphertext).key(key).associatedData(aad).iv(iv).digest(tag).build()
             alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)

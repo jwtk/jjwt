@@ -35,4 +35,32 @@ public class DefaultSecureRequest<T, K extends Key> extends DefaultRequest<T> im
     public K getKey() {
         return this.KEY;
     }
+
+    static abstract class AbstractSecureRequestParams<T, K extends Key, M extends SecureRequest.Params<T, K, M>>
+            extends AbstractRequestParams<T, M> implements SecureRequest.Params<T, K, M> {
+
+        protected K key;
+
+        @Override
+        public M key(K key) {
+            this.key = key;
+            return self();
+        }
+    }
+
+    public static class Builder<T, K extends Key> extends AbstractSecureRequestParams<T, K, SecureRequest.Builder<T, K>>
+            implements SecureRequest.Builder<T, K> {
+
+        @Override
+        public SecureRequest<T, K> build() {
+            return new DefaultSecureRequest<>(this.payload, this.provider, this.random, this.key);
+        }
+
+        public static class Supplier<T, K extends Key> implements java.util.function.Supplier<SecureRequest.Builder<T, K>> {
+            @Override
+            public Builder<T, K> get() {
+                return new Builder<>();
+            }
+        }
+    }
 }

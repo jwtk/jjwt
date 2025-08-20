@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
@@ -194,8 +195,10 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         final SecretKey derived = deriveKey(request, publicKey, pair.getPrivate());
 
-        KeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derived, request.getProvider(),
-                request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
+        KeyRequest<SecretKey> wrapReq = Jwts.KEY.<SecretKey>request()
+                .provider(request.getProvider()).random(request.getSecureRandom())
+                .payload(derived).header(request.getHeader()).encryptionAlgorithm(request.getEncryptionAlgorithm())
+                .build();
         KeyResult result = WRAP_ALG.getEncryptionKey(wrapReq);
 
         header.put(DefaultJweHeader.EPK.getId(), jwk);
@@ -228,8 +231,11 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         final SecretKey derived = deriveKey(request, epk.toKey(), privateKey);
 
-        DecryptionKeyRequest<SecretKey> unwrapReq = new DefaultDecryptionKeyRequest<>(request.getPayload(),
-                null, request.getSecureRandom(), header, request.getEncryptionAlgorithm(), derived);
+        DecryptionKeyRequest<SecretKey> unwrapReq = Jwts.KEY.<SecretKey>decRequest()
+                .random(request.getSecureRandom())
+                .payload(request.getPayload()).key(derived)
+                .header(header).encryptionAlgorithm(request.getEncryptionAlgorithm())
+                .build();
 
         return WRAP_ALG.getDecryptionKey(unwrapReq);
     }

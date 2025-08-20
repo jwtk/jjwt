@@ -54,4 +54,34 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
     public byte[] getIv() {
         return this.IV;
     }
+
+    static abstract class AbstractAeadRequestParams<M extends AeadRequest.Params<M>>
+            extends AbstractSecureRequestParams<InputStream, SecretKey, M>
+            implements AeadRequest.Params<M> {
+
+        protected InputStream aad;
+
+        @Override
+        public M associatedData(InputStream aad) {
+            this.aad = aad;
+            return self();
+        }
+    }
+
+    @SuppressWarnings("unused") // used via reflection in Jwts.ENC
+    public static class Builder extends AbstractAeadRequestParams<AeadRequest.Builder>
+            implements AeadRequest.Builder {
+
+        @Override
+        public AeadRequest build() {
+            return new DefaultAeadRequest(this.payload, this.provider, this.random, this.key, this.aad);
+        }
+
+        public static class Supplier implements java.util.function.Supplier<AeadRequest.Builder> {
+            @Override
+            public AeadRequest.Builder get() {
+                return new Builder();
+            }
+        }
+    }
 }

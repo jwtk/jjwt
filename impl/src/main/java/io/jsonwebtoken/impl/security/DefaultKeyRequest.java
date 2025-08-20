@@ -43,4 +43,39 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
     public AeadAlgorithm getEncryptionAlgorithm() {
         return this.encryptionAlgorithm;
     }
+
+    static abstract class AbstractKeyRequestParams<T, M extends KeyRequest.Params<T, M>>
+            extends AbstractRequestParams<T, M> implements KeyRequest.Params<T, M> {
+
+        protected AeadAlgorithm aeadAlg;
+        protected JweHeader header;
+
+        @Override
+        public M encryptionAlgorithm(AeadAlgorithm aeadAlg) {
+            this.aeadAlg = aeadAlg;
+            return self();
+        }
+
+        @Override
+        public M header(JweHeader header) {
+            this.header = header;
+            return self();
+        }
+    }
+
+    public static class Builder<T> extends AbstractKeyRequestParams<T, KeyRequest.Builder<T>>
+            implements KeyRequest.Builder<T> {
+
+        @Override
+        public KeyRequest<T> build() {
+            return new DefaultKeyRequest<>(this.payload, this.provider, this.random, this.header, this.aeadAlg);
+        }
+
+        public static class Supplier<T> implements java.util.function.Supplier<KeyRequest.Builder<T>> {
+            @Override
+            public KeyRequest.Builder<T> get() {
+                return new Builder<>();
+            }
+        }
+    }
 }

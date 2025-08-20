@@ -58,4 +58,27 @@ public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier
     public byte[] getIv() {
         return this.iv;
     }
+
+    public static class Builder implements AeadResult.Builder {
+
+        private OutputStream out;
+
+        @Override
+        public AeadResult.Builder out(OutputStream out) {
+            this.out = out;
+            return this;
+        }
+
+        @Override
+        public AeadResult build() {
+            return new DefaultAeadResult(this.out); // constructor validates out != null
+        }
+
+        public static class Supplier implements java.util.function.Supplier<AeadResult.Builder> {
+            @Override
+            public AeadResult.Builder get() {
+                return new Builder();
+            }
+        }
+    }
 }

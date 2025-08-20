@@ -38,4 +38,36 @@ public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements Dec
     public byte[] getDigest() {
         return this.TAG;
     }
+
+    @SuppressWarnings("unused") // used via reflection in Jwts.ENC
+    public static class Builder extends AbstractAeadRequestParams<DecryptAeadRequest.Builder>
+            implements DecryptAeadRequest.Builder {
+
+        private byte[] iv;
+        private byte[] tag;
+
+        @Override
+        public DecryptAeadRequest.Builder iv(byte[] iv) {
+            this.iv = iv;
+            return self();
+        }
+
+        @Override
+        public DecryptAeadRequest.Builder digest(byte[] digest) {
+            this.tag = digest;
+            return self();
+        }
+
+        @Override
+        public DecryptAeadRequest build() {
+            return new DefaultDecryptAeadRequest(this.payload, this.key, this.aad, this.iv, this.tag);
+        }
+
+        public static class Supplier implements java.util.function.Supplier<DecryptAeadRequest.Builder> {
+            @Override
+            public DecryptAeadRequest.Builder get() {
+                return new Builder();
+            }
+        }
+    }
 }

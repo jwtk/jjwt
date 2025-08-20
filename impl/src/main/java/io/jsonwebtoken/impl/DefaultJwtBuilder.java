@@ -32,10 +32,6 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
-import io.jsonwebtoken.impl.security.DefaultAeadRequest;
-import io.jsonwebtoken.impl.security.DefaultAeadResult;
-import io.jsonwebtoken.impl.security.DefaultKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms;
@@ -601,7 +597,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         byte[] signature;
         try {
-            SecureRequest<InputStream, Key> request = new DefaultSecureRequest<>(signingInput, provider, secureRandom, key);
+            SecureRequest<InputStream, Key> request = Jwts.SIG.request().payload(signingInput)
+                    .provider(provider).random(secureRandom).key(key).build();
             signature = signFunction.apply(request);
 
             // now that we've calculated the signature, if using the b64 extension, and the payload is
@@ -679,7 +676,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
         JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
-        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(key, keyProvider, this.secureRandom, delegate, enc);
+        KeyRequest<Key> keyRequest = Jwts.KEY.request()
+                .provider(keyProvider).random(this.secureRandom)
+                .payload(key).header(delegate).encryptionAlgorithm(enc)
+                .build();
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
 
@@ -708,8 +708,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // As such, the provider here is intentionally omitted (null):
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
-        AeadRequest req = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
-        DefaultAeadResult res = new DefaultAeadResult(ciphertextOut);
+        AeadRequest req = Jwts.ENC.request().random(secureRandom) // no .provider call, see message above
+                .payload(plaintext).key(cek).associatedData(aad).build();
+        AeadResult res = Jwts.ENC.result().out(ciphertextOut).build();
         encrypt(req, res);
 
         byte[] iv = Assert.notEmpty(res.getIv(), "Encryption result must have a non-empty initialization vector.");

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
@@ -173,8 +174,10 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
         // now get a new CEK that is encrypted ('wrapped') with the PBE-derived key:
-        KeyRequest<SecretKey> wrapReq = new DefaultKeyRequest<>(derivedKek, request.getProvider(),
-                request.getSecureRandom(), request.getHeader(), request.getEncryptionAlgorithm());
+        KeyRequest<SecretKey> wrapReq = Jwts.KEY.<SecretKey>request()
+                .provider(request.getProvider()).random(request.getSecureRandom())
+                .payload(derivedKek).header(request.getHeader()).encryptionAlgorithm(request.getEncryptionAlgorithm())
+                .build();
         KeyResult result = wrapAlg.getEncryptionKey(wrapReq);
 
         request.getHeader().put(DefaultJweHeader.P2S.getId(), inputSalt); //retain for recipients
@@ -203,9 +206,11 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         final char[] password = key.toCharArray(); // password will be safely cleaned/zeroed in deriveKey next:
         final SecretKey derivedKek = deriveKey(request, password, rfcSalt, iterations);
 
-        DecryptionKeyRequest<SecretKey> unwrapReq =
-                new DefaultDecryptionKeyRequest<>(request.getPayload(), request.getProvider(),
-                        request.getSecureRandom(), header, request.getEncryptionAlgorithm(), derivedKek);
+        DecryptionKeyRequest<SecretKey> unwrapReq = Jwts.KEY.<SecretKey>decRequest()
+                .provider(request.getProvider()).random(request.getSecureRandom())
+                .key(derivedKek).payload(request.getPayload())
+                .header(header).encryptionAlgorithm(request.getEncryptionAlgorithm())
+                .build();
 
         return wrapAlg.getDecryptionKey(unwrapReq);
     }

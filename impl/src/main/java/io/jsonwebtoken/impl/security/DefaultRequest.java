@@ -40,4 +40,50 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
     public SecureRandom getSecureRandom() {
         return this.secureRandom;
     }
+
+    static abstract class AbstractRequestParams<T, M extends Params<T, M>>
+            implements Params<T, M> {
+
+        protected Provider provider;
+        protected SecureRandom random;
+        protected T payload;
+
+        @SuppressWarnings("unchecked")
+        protected final M self() {
+            return (M) this;
+        }
+
+        @Override
+        public M payload(T payload) {
+            this.payload = payload;
+            return self();
+        }
+
+        @Override
+        public M provider(Provider provider) {
+            this.provider = provider;
+            return self();
+        }
+
+        @Override
+        public M random(SecureRandom random) {
+            this.random = random;
+            return self();
+        }
+    }
+
+    public static class Builder<T> extends AbstractRequestParams<T, Request.Builder<T>> implements Request.Builder<T> {
+
+        @Override
+        public Request<T> build() {
+            return new DefaultRequest<>(this.payload, this.provider, this.random);
+        }
+
+        public static class Supplier<T> implements java.util.function.Supplier<Builder<T>> {
+            @Override
+            public Builder<T> get() {
+                return new Builder<>();
+            }
+        }
+    }
 }

@@ -30,4 +30,29 @@ import java.io.InputStream;
  * @since 0.12.0
  */
 public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplier {
+
+    /**
+     * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
+     *
+     * @param <M> the instance type returned for method chaining.
+     * @since 0.13.0
+     */
+    interface Params<M extends Params<M>> extends Request.Params<InputStream, M> {
+
+        /**
+         * The digest to verify against the one computed for the given {@link #getPayload() payload}.
+         *
+         * @param digest the digest to verify against the one computed for the given {@link #getPayload() payload}.
+         * @return the instance for method chaining.
+         */
+        M digest(byte[] digest);
+    }
+
+    /**
+     * A builder for creating new immutable {@link VerifyDigestRequest} instances.
+     *
+     * @since 0.13.0
+     */
+    interface Builder extends Params<Builder>, io.jsonwebtoken.lang.Builder<VerifyDigestRequest> {
+    }
 }

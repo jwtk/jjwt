@@ -35,4 +35,28 @@ public class DefaultVerifyDigestRequest extends DefaultRequest<InputStream> impl
     public byte[] getDigest() {
         return this.digest;
     }
+
+    public static class Builder extends AbstractRequestParams<InputStream, VerifyDigestRequest.Builder>
+            implements VerifyDigestRequest.Builder {
+
+        private byte[] digest;
+
+        @Override
+        public VerifyDigestRequest.Builder digest(byte[] digest) {
+            this.digest = digest;
+            return self();
+        }
+
+        @Override
+        public VerifyDigestRequest build() {
+            return new DefaultVerifyDigestRequest(this.payload, this.provider, this.random, this.digest);
+        }
+
+        public static class Supplier implements java.util.function.Supplier<VerifyDigestRequest.Builder> {
+            @Override
+            public Builder get() {
+                return new Builder();
+            }
+        }
+    }
 }

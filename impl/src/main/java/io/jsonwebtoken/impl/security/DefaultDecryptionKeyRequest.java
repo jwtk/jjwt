@@ -43,4 +43,28 @@ public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyReques
     public K getKey() {
         return this.decryptionKey;
     }
+
+    public static class Builder<K extends Key> extends AbstractKeyRequestParams<byte[], DecryptionKeyRequest.Builder<K>>
+            implements DecryptionKeyRequest.Builder<K> {
+
+        private K decryptionKey;
+
+        @Override
+        public DecryptionKeyRequest.Builder<K> key(K decryptionKey) {
+            this.decryptionKey = decryptionKey;
+            return self();
+        }
+
+        @Override
+        public DecryptionKeyRequest<K> build() {
+            return new DefaultDecryptionKeyRequest<>(this.payload, this.provider, this.random, this.header, this.aeadAlg, this.decryptionKey);
+        }
+
+        public static class Supplier<K extends Key> implements java.util.function.Supplier<DecryptionKeyRequest.Builder<K>> {
+            @Override
+            public DecryptionKeyRequest.Builder<K> get() {
+                return new Builder<>();
+            }
+        }
+    }
 }

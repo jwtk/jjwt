@@ -35,8 +35,30 @@ import java.security.Key;
  * {@code JWE Encrypted Key} (such as an initialization vector, authentication tag, ephemeral key, etc) is expected
  * to be available in the JWE protected header, accessible via {@link #getHeader()}.</p>
  *
- * @param <K> the type of {@link Key} used during the request to obtain the resulting decryption key.
+ * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
+ * @see KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)
  * @since 0.12.0
  */
 public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
+
+    /**
+     * Named parameters (setters) used to configure a {@link DecryptionKeyRequest DecryptionKeyRequest}
+     * instance.
+     *
+     * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
+     * @param <M> the instance type returned for method chaining.
+     * @since 0.13.0
+     */
+    interface Params<K extends Key, M extends Params<K, M>> extends KeyRequest.Params<byte[], M>,
+            SecureRequest.Params<byte[], K, M> {
+    }
+
+    /**
+     * A builder for creating new immutable {@link DecryptionKeyRequest} instances.
+     *
+     * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
+     * @since 0.13.0
+     */
+    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
+    }
 }

@@ -46,9 +46,6 @@ import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.RedactedConfidentialValue;
-import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest;
-import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
@@ -332,8 +329,9 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         }
 
         try {
-            VerifySecureDigestRequest<Key> request =
-                    new DefaultVerifySecureDigestRequest<>(verificationInput, provider, null, key, signature);
+            VerifySecureDigestRequest<Key> request = Jwts.SIG.verifyRequest()
+                    .key(key).payload(verificationInput).digest(signature)
+                    .provider(provider).build();
             if (!algorithm.verify(request)) {
                 String msg = "JWT signature does not match locally computed signature. JWT validity cannot be " +
                         "asserted and should not be trusted.";
@@ -548,8 +546,9 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // extract key-specific provider if necessary;
             Provider provider = ProviderKey.getProvider(key, this.provider);
             key = ProviderKey.getKey(key); // this must be called after ProviderKey.getProvider
-            DecryptionKeyRequest<Key> request =
-                    new DefaultDecryptionKeyRequest<>(cekBytes, provider, null, jweHeader, encAlg, key);
+            DecryptionKeyRequest<Key> request = Jwts.KEY.decRequest().provider(provider)
+                    .payload(cekBytes).header(jweHeader).encryptionAlgorithm(encAlg)
+                    .key(key).build();
             final SecretKey cek = keyAlg.getDecryptionKey(request);
             if (cek == null) {
                 String msg = "The '" + keyAlg.getId() + "' JWE key algorithm did not return a decryption key. " +
@@ -563,7 +562,9 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // TODO: add encProvider(Provider) builder method that applies to this request only?
             InputStream ciphertext = payload.toInputStream();
             ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
-            DecryptAeadRequest dreq = new DefaultDecryptAeadRequest(ciphertext, cek, aad, iv, digest);
+            DecryptAeadRequest dreq = Jwts.ENC.decryptRequest()
+                    .payload(ciphertext).key(cek).associatedData(aad).iv(iv).digest(digest)
+                    .build();
             encAlg.decrypt(dreq, plaintext);
             payload = new Payload(plaintext.toByteArray(), header.getContentType());
 
