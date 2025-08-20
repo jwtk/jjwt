@@ -139,7 +139,7 @@ class JacksonDeserializerTest {
             new JacksonDeserializer<>().deserialize(new StringReader(json))
             fail()
         } catch (DeserializationException expected) {
-            String causeMsg = "Duplicate field 'bKey'\n at [Source: (StringReader); line: 5, column: 23]"
+            String causeMsg = "Duplicate field 'bKey'\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 5, column: 23]"
             String msg = "Unable to deserialize: $causeMsg"
             assertEquals msg, expected.getMessage()
             assertTrue expected.getCause() instanceof JsonParseException

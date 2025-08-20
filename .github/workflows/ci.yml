@@ -40,7 +40,7 @@ jobs:
   temurin:
     strategy:
       matrix:
-        java: [ '8', '11', '17', '18' ]
+        java: [ '8', '11', '17', '18', '21', '24' ]
     runs-on: 'ubuntu-latest'
     name: jdk-${{ matrix.java }}-temurin
     steps:
@@ -68,7 +68,7 @@ jobs:
   zulu:
     strategy:
       matrix:
-        java: [ '7', '8', '9', '11', '12', '13', '14', '15', '16', '17', '18', '21' ]
+        java: [ '8', '9', '11', '12', '13', '14', '15', '16', '17', '18', '21', '24' ]
     runs-on: 'ubuntu-latest'
     env:
       JDK_MAJOR_VERSION: ${{ matrix.java }}
@@ -94,7 +94,6 @@ jobs:
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
         run: |
-          if [ "$JDK_MAJOR_VERSION" == "7" ]; then export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"; fi
           ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
 
   # ensure all of our files have the correct/updated license header
@@ -138,16 +137,16 @@ jobs:
         run: impl/src/test/scripts/softhsm configure
       - name: Populate SoftHSM with JJWT test keys
         run: impl/src/test/scripts/softhsm import
-      - name: Wait to start
-        # wait a little to start: code coverage usually only takes about 1 1/2 minutes.  If coverage fails, it will
-        # cancel the other running builds, and we don't want that (because we want to see if jobs fail due to
-        # build issues, not due to the code-coverage job causing the others to cancel).  We could have used the
-        # 'need' property (commented out above), and that would wait until all the other jobs have finished before
-        # starting this one, but that introduces unnecessary (sometimes 2 1/2 minute) delay, whereas delaying the
-        # start of the code coverage checks a bit should allow everything to finish around the same time without having
-        # much of an adverse effect on the other jobs above.
-        run: sleep 90s
-        shell: bash
+#      - name: Wait to start
+#        # wait a little to start: code coverage usually only takes about 1 1/2 minutes.  If coverage fails, it will
+#        # cancel the other running builds, and we don't want that (because we want to see if jobs fail due to
+#        # build issues, not due to the code-coverage job causing the others to cancel).  We could have used the
+#        # 'need' property (commented out above), and that would wait until all the other jobs have finished before
+#        # starting this one, but that introduces unnecessary (sometimes 2 1/2 minute) delay, whereas delaying the
+#        # start of the code coverage checks a bit should allow everything to finish around the same time without having
+#        # much of an adverse effect on the other jobs above.
+#        run: sleep 10s
+#        shell: bash
       - name: Code Coverage
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
