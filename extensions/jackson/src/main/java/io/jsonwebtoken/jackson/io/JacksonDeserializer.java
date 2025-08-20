@@ -113,7 +113,7 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
      * @param objectMapper the objectMapper to modify by registering a custom type-converting
      *                     {@link com.fasterxml.jackson.databind.Module Module}
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
-     * @since 0.12.4
+     * @since 0.13.0
      */
     public JacksonDeserializer(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap) {
         this(objectMapper);
