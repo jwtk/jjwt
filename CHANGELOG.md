@@ -1,5 +1,16 @@
 ## Release Notes
 
+### 0.13.0
+
+This is the last minor JJWT release branch that will support Java 7. Any necessary emergency bug fixes will be fixed in subsequent `0.13.x` patch releases, but all new development, including Java 8 compatible changes, will be in the next minor (`0.14.0`) release.
+
+**All future JJWT major and minor versions (  `0.14.0` and later) will require Java 8 or later.**
+
+This `0.13.0` minor release has only one change:
+
+  - The previously private `JacksonDeserializer(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap)` constructor is now `public` for those that want register a claims 
+   type converter on their own specified `ObjectMapper` instance.  See [Issue 914](https://github.com/jwtk/jjwt/issues/914).
+
 ### 0.12.7
 
 This patch release:
