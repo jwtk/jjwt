@@ -11,45 +11,20 @@ env:
   MVN_CMD: ./mvnw --no-transfer-progress -B
 
 jobs:
-  oracle:
+  build:
     strategy:
       matrix:
-        java: [ '17' ]
+        java: [ '8', '11', '17', '21', '24' ]
+        distribution: [ 'zulu', 'temurin', 'corretto' ]
     runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java }}-oracle
+    name: jdk-${{ matrix.java }}-${{ matrix.distribution }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4.7.0
-        with:
-          distribution: oracle
-          java-version: ${{ matrix.java }}
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
-
-  temurin:
-    strategy:
-      matrix:
-        java: [ '8', '11', '17', '18', '21', '24' ]
-    runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java }}-temurin
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
+      - name: Set up JDK ${{ matrix.java }}-${{ matrix.distribution }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'temurin'
+          distribution: ${{ matrix.distribution }}
           cache: 'maven'
           check-latest: true
       - name: Install softhsm2
@@ -64,37 +39,6 @@ jobs:
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
         run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
-
-  zulu:
-    strategy:
-      matrix:
-        java: [ '8', '9', '11', '12', '13', '14', '15', '16', '17', '18', '21', '24' ]
-    runs-on: 'ubuntu-latest'
-    env:
-      JDK_MAJOR_VERSION: ${{ matrix.java }}
-    name: jdk-${{ matrix.java }}-zulu
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-          cache: 'maven'
-          check-latest: true
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: |
-          ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
 
   # ensure all of our files have the correct/updated license header
   license-check:
