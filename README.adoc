@@ -3471,7 +3471,7 @@ If you're curious, JJWT will automatically create an internal default Gson insta
 [,java]
 ----
 new GsonBuilder()
-    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
     .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .disableHtmlEscaping()
@@ -3514,7 +3514,7 @@ And then you can specify the `GsonSerializer` using your own `Gson` instance on 
 
 Gson gson = new GsonBuilder()
     // don't forget this line!:
-    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
     .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .disableHtmlEscaping().create();
@@ -3543,7 +3543,7 @@ Again, as shown above, it is critical to create your `Gson` instance using the `
 
 [,java]
 ----
-.registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)
+.registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
 ----
 
 to ensure JWK serialization works as expected.

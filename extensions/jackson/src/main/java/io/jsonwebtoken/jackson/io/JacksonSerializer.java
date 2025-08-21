@@ -39,7 +39,7 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
 
     static {
         SimpleModule module = new SimpleModule(MODULE_ID);
-        module.addSerializer(JacksonSupplierSerializer.INSTANCE);
+        module.addSerializer(JacksonConfidentialValueSerializer.INSTANCE);
         MODULE = module;
     }
 

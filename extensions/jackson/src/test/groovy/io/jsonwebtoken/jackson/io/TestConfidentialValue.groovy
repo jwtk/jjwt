@@ -15,14 +15,15 @@
  */
 package io.jsonwebtoken.jackson.io
 
-import io.jsonwebtoken.lang.Supplier
 
-class TestSupplier<T> implements Supplier<T> {
+import io.jsonwebtoken.security.ConfidentialValue
 
-    private static final TestSupplier<String> INSTANCE = new TestSupplier<>("test")
+class TestConfidentialValue<T> implements ConfidentialValue<T> {
+
+    private static final TestConfidentialValue<String> INSTANCE = new TestConfidentialValue<>("test")
     private final T value;
 
-    private TestSupplier(T value) {
+    private TestConfidentialValue(T value) {
         this.value = value;
     }
 

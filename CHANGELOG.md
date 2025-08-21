@@ -1,5 +1,22 @@
 ## Release Notes
 
+### 0.14.0
+
+The first JJWT release that uses Java 8+ features.  This release is not strictly backwards compatible and will also not work with Java 7.
+
+#### Backwards Compatibility Breaking Changes
+
+- The `io.jsonwebtoken.lang.Supplier` interface has been renamed and moved to `io.jsonwebtoken.security.ConfidentialValue` to avoid any potential risk of conflict or accidental use
+ with `java.util.function.Supplier`.  If you have explicitly configured a `Gson` instance to work with this type previously, you must update your usage to reference the new interface, for example:
+    ```java
+    new GsonBuilder()
+        .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
+        // ... etc ...
+        .create();
+    ```
+ - The `io.jsonwebtoken.gson.io.GsonSupplierSerializer` class has been renamed to `GsonConfidentialValueSerializer`
+ - The `io.jsonwebtoken.jackson.io.JacksonSupplierSerializer` has been renamed to `JacksonConfidentialValueSerializer`.`
+
 ### 0.13.0
 
 This is the last minor JJWT release branch that will support Java 7. Any necessary emergency bug fixes will be fixed in subsequent `0.13.x` patch releases, but all new development, including Java 8 compatible changes, will be in the next minor (`0.14.0`) release.
@@ -412,7 +429,7 @@ deprecate some concepts, or in some cases, completely break backwards compatibil
   `GsonSupplierSerializer` type adapter, for example:
   ```java
   new GsonBuilder()
-    .registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, GsonSupplierSerializer.INSTANCE)    
+    .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonSupplierSerializer.INSTANCE)    
     .disableHtmlEscaping().create();
   ```
   This is to ensure JWKs have `toString()` and application log safety (do not print secure material), but still 

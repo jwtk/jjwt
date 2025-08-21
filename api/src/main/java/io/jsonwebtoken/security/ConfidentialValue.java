@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.lang;
+package io.jsonwebtoken.security;
 
 /**
- * Represents a supplier of results.
+ * A wrapper for a value that should be treated as confidential.  Calling {@link Object#toString()} on a
+ * {@code ConfidentialValue} instance will return the string literal <code>&lt;redacted&gt;</code>.
  *
- * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.</p>
- *
- * <p>This interface is the equivalent of a JDK 8 {@code java.util.function.Supplier}, backported for JJWT's use in
- * JDK 7 environments.</p>
+ * <p>There is no requirement that a new or distinct result be returned each time the value is invoked.</p>
  *
  * @param <T> the type of object returned by this supplier
- * @since 0.12.0
+ * @since 0.14.0, renamed and moved from io.jsonwebtoken.lang.Supplier introduced in 0.12.0
  */
-public interface Supplier<T> {
+public interface ConfidentialValue<T> {
 
     /**
-     * Returns a result.
+     * Returns a confidential value that should be treated with care and not exposed unnecessarily.
      *
-     * @return a result.
+     * @return a confidential value that should be treated with care and not exposed unnecessarily.
      */
     T get();
 }

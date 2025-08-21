@@ -37,7 +37,7 @@ class RedactedValueConverterTest {
     @Test
     void testDelegateReturnsRedactedSupplierValue() {
         def suri = 'https://jsonwebtoken.io'
-        def supplier = new RedactedSupplier(suri)
+        def supplier = new RedactedConfidentialValue(suri)
         def delegate = new Converter() {
             @Override
             Object applyTo(Object o) {
@@ -51,7 +51,7 @@ class RedactedValueConverterTest {
         }
         def c = new RedactedValueConverter(delegate)
 
-        // ensure applyTo doesn't change or wrap the delegate return value that is already of type RedactedSupplier:
+        // ensure applyTo doesn't change or wrap the delegate return value that is already of type RedactedConfidentialValue:
         assertSame supplier, c.applyTo(suri)
     }
 }

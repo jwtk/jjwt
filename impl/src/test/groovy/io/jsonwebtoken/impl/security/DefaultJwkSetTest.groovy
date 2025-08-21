@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.impl.lang.RedactedSupplier
+import io.jsonwebtoken.impl.lang.RedactedConfidentialValue
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
@@ -67,17 +67,17 @@ class DefaultJwkSetTest {
     }
 
     /**
-     * Asserts that the raw 'keys' value is not a RedactedSupplier per https://github.com/jwtk/jjwt/issues/976,
-     * but an internal secret key parameter does have a RedactedSupplier
+     * Asserts that the raw 'keys' value is not a RedactedConfidentialValue per https://github.com/jwtk/jjwt/issues/976,
+     * but an internal secret key parameter does have a RedactedConfidentialValue
      */
     @Test
     void testGetKeysNotRedactedSupplier() {
         def jwk = Jwks.builder().key(TestKeys.HS256).build()
         def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
         def keys = set.get('keys')
-        assertFalse keys instanceof RedactedSupplier
+        assertFalse keys instanceof RedactedConfidentialValue
         keys = keys as List
         def element = keys[0] as Map// result is an array/list, so get first JWK in the list
-        assertTrue element.k instanceof RedactedSupplier // 'k' is a secret property, should be redacted
+        assertTrue element.k instanceof RedactedConfidentialValue // 'k' is a secret property, should be redacted
     }
 }

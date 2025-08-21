@@ -28,16 +28,16 @@ public class RedactedValueConverter<T> implements Converter<T, Object> {
     @Override
     public Object applyTo(T t) {
         Object value = this.delegate.applyTo(t);
-        if (value != null && !(value instanceof RedactedSupplier)) {
-            value = new RedactedSupplier<>(value);
+        if (value != null && !(value instanceof RedactedConfidentialValue)) {
+            value = new RedactedConfidentialValue<>(value);
         }
         return value;
     }
 
     @Override
     public T applyFrom(Object o) {
-        if (o instanceof RedactedSupplier) {
-            o = ((RedactedSupplier<?>) o).get();
+        if (o instanceof RedactedConfidentialValue) {
+            o = ((RedactedConfidentialValue<?>) o).get();
         }
         return this.delegate.applyFrom(o);
     }
