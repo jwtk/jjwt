@@ -21,6 +21,7 @@ package io.jsonwebtoken.security;
  *
  * @param <T> the implementing instance for method chaining
  */
+@FunctionalInterface
 public interface KeyOperationPolicied<T extends KeyOperationPolicied<T>> {
 
     /**

@@ -49,7 +49,7 @@ import java.util.Set;
  * <p>JWKs often represent secret or private key data which should never be exposed publicly, nor mistakenly printed
  * to application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
  * private or secret values are 'wrapped' in a {@link ConfidentialValue ConfidentialValue} instance to ensure
- * any attempt to call {@link String#toString() toString()} on the value will print a redacted value instead of an
+ * any attempt to call {@link Object#toString() toString()} on the value will print a redacted value instead of an
  * actual private or secret value.</p>
  *
  * <p>For example, a {@link SecretJwk} will have an internal &quot;{@code k}&quot; member whose value reflects raw

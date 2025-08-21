@@ -21,6 +21,7 @@ package io.jsonwebtoken.security;
  *
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface DigestSupplier {
 
     /**

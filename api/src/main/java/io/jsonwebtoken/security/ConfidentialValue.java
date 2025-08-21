@@ -24,6 +24,7 @@ package io.jsonwebtoken.security;
  * @param <T> the type of object returned by this supplier
  * @since 0.14.0, renamed and moved from io.jsonwebtoken.lang.Supplier introduced in 0.12.0
  */
+// MAINTAINER NOTE: do not mark this as @FunctionalInterface - it makes it easier to break the toString() contract
 public interface ConfidentialValue<T> {
 
     /**
