@@ -29,7 +29,6 @@ import io.jsonwebtoken.impl.io.NamedSerializer;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
@@ -77,6 +76,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
@@ -239,12 +239,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         this.key = key;
         //noinspection unchecked
         this.sigAlg = (SecureDigestAlgorithm<Key, ?>) alg;
-        this.signFunction = Functions.wrap(new Function<SecureRequest<InputStream, Key>, byte[]>() {
-            @Override
-            public byte[] apply(SecureRequest<InputStream, Key> request) {
-                return sigAlg.digest(request);
-            }
-        }, SignatureException.class, "Unable to compute %s signature.", id);
+        this.signFunction = Functions.wrap(request -> sigAlg.digest(request), SignatureException.class, "Unable to compute %s signature.", id);
         return this;
     }
 
@@ -309,12 +304,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         final KeyAlgorithm<Key, ?> alg = this.keyAlg;
 
         final String cekMsg = "Unable to obtain content encryption key from key management algorithm '%s'.";
-        this.keyAlgFunction = Functions.wrap(new Function<KeyRequest<Key>, KeyResult>() {
-            @Override
-            public KeyResult apply(KeyRequest<Key> request) {
-                return alg.getEncryptionKey(request);
-            }
-        }, SecurityException.class, cekMsg, algId);
+        this.keyAlgFunction = Functions.wrap(alg::getEncryptionKey, SecurityException.class, cekMsg, algId);
 
         return this;
     }
@@ -434,7 +424,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     @Override
     public AudienceCollection<JwtBuilder> audience() {
-        return new DelegateAudienceCollection<>((JwtBuilder) this, claims().audience());
+        return new DelegateAudienceCollection<>(this, claims().audience());
     }
 
     @Override
@@ -668,12 +658,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
     }
 
     private void encrypt(final AeadRequest req, final AeadResult res) throws SecurityException {
-        Function<Object, Object> fn = Functions.wrap(new Function<Object, Object>() {
-            @Override
-            public Object apply(Object o) {
-                enc.encrypt(req, res);
-                return null;
-            }
+        Function<Object, Object> fn = Functions.wrap(o -> {
+            enc.encrypt(req, res);
+            return null;
         }, SecurityException.class, "%s encryption failed.", enc.getId());
         fn.apply(null);
     }

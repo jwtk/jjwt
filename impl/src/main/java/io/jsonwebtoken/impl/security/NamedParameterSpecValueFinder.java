@@ -15,12 +15,12 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.OptionalMethodInvoker;
 
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.function.Function;
 
 public class NamedParameterSpecValueFinder implements Function<Key, String> {
 

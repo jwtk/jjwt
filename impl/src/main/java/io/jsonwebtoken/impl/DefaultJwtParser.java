@@ -45,7 +45,6 @@ import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.RedactedSupplier;
 import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
@@ -90,6 +89,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtParser {

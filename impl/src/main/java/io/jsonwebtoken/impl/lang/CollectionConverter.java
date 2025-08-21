@@ -23,18 +23,19 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 class CollectionConverter<T, C extends Collection<T>> implements Converter<C, Object> {
 
     private final Converter<T, Object> elementConverter;
     private final Function<Integer, C> fn;
 
-    public static <T> CollectionConverter<T, List<T>> forList(Converter<T,Object> elementConverter) {
-        return new CollectionConverter<>(elementConverter, new CreateListFunction<T>());
+    public static <T> CollectionConverter<T, List<T>> forList(Converter<T, Object> elementConverter) {
+        return new CollectionConverter<>(elementConverter, new CreateListFunction<>());
     }
 
     public static <T> CollectionConverter<T, Set<T>> forSet(Converter<T, Object> elementConverter) {
-        return new CollectionConverter<>(elementConverter, new CreateSetFunction<T>());
+        return new CollectionConverter<>(elementConverter, new CreateSetFunction<>());
     }
 
     public CollectionConverter(Converter<T, Object> elementConverter, Function<Integer, C> fn) {
@@ -91,14 +92,14 @@ class CollectionConverter<T, C extends Collection<T>> implements Converter<C, Ob
     private static class CreateListFunction<A> implements Function<Integer, List<A>> {
         @Override
         public List<A> apply(Integer size) {
-            return size > 0 ? new ArrayList<A>(size) : new ArrayList<A>();
+            return size > 0 ? new ArrayList<>(size) : new ArrayList<>();
         }
     }
 
     private static class CreateSetFunction<T> implements Function<Integer, Set<T>> {
         @Override
         public Set<T> apply(Integer size) {
-            return size > 0 ? new LinkedHashSet<T>(size) : new LinkedHashSet<T>();
+            return size > 0 ? new LinkedHashSet<>(size) : new LinkedHashSet<>();
         }
     }
 }

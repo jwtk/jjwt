@@ -19,6 +19,8 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.lang.Assert;
 
+import java.util.function.Function;
+
 public class LocatorFunction<T> implements Function<Header, T> {
 
     private final Locator<T> locator;

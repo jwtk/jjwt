@@ -20,15 +20,13 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 public class IdRegistry<T extends Identifiable> extends StringRegistry<T> {
 
-    public static final Function<Identifiable, String> FN = new Function<Identifiable, String>() {
-        @Override
-        public String apply(Identifiable identifiable) {
-            Assert.notNull(identifiable, "Identifiable argument cannot be null.");
-            return Assert.notNull(Strings.clean(identifiable.getId()), "Identifier cannot be null or empty.");
-        }
+    public static final Function<Identifiable, String> FN = identifiable -> {
+        Assert.notNull(identifiable, "Identifiable argument cannot be null.");
+        return Assert.notNull(Strings.clean(identifiable.getId()), "Identifier cannot be null or empty.");
     };
 
     @SuppressWarnings("unchecked")

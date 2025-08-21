@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Strings;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class DefaultRegistry<K, V> extends DelegatingMap<K, V, Map<K, V>> implements Registry<K, V>, Function<K, V> {
 

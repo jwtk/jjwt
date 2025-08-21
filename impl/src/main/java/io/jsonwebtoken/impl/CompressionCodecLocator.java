@@ -18,9 +18,10 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.CompressionCodecResolver;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Locator;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
+
+import java.util.function.Function;
 
 //TODO: delete when deleting CompressionCodecResolver
 public class CompressionCodecLocator implements Function<Header, CompressionAlgorithm>, Locator<CompressionAlgorithm> {

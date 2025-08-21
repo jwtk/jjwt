@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.lang;
 
+import java.util.function.Function;
 
 /**
  * Function that always returns the same value

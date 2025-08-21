@@ -16,13 +16,13 @@
 package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.io.DeserializationException;
 import io.jsonwebtoken.io.Deserializer;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.Reader;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Function that wraps a {@link Deserializer} to add JWT-related error handling.

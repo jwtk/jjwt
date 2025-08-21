@@ -19,9 +19,9 @@ import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.LocatorAdapter;
-import io.jsonwebtoken.impl.lang.Function;
 
 import java.security.Key;
+import java.util.function.Function;
 
 public class ConstantKeyLocator extends LocatorAdapter<Key> implements Function<Header, Key> {
 

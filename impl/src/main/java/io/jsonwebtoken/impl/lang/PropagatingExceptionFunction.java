@@ -20,29 +20,24 @@ import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Supplier;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Function;
 
 public class PropagatingExceptionFunction<T, R, E extends RuntimeException> implements Function<T, R> {
 
     private final CheckedFunction<T, R> function;
-
     private final Function<T, String> msgFunction;
     private final Class<E> clazz;
 
     public PropagatingExceptionFunction(Function<T, R> f, Class<E> exceptionClass, String msg) {
-        this(new DelegatingCheckedFunction<>(f), exceptionClass, new ConstantFunction<T, String>(msg));
+        this(new DelegatingCheckedFunction<>(f), exceptionClass, new ConstantFunction<>(msg));
     }
 
     public PropagatingExceptionFunction(CheckedFunction<T, R> f, Class<E> exceptionClass, final String msg) {
-        this(f, exceptionClass, new ConstantFunction<T, String>(msg));
+        this(f, exceptionClass, new ConstantFunction<>(msg));
     }
 
     public PropagatingExceptionFunction(CheckedFunction<T, R> fn, Class<E> exceptionClass, final Supplier<String> msgSupplier) {
-        this(fn, exceptionClass, new Function<T, String>() {
-            @Override
-            public String apply(T t) {
-                return msgSupplier.get();
-            }
-        });
+        this(fn, exceptionClass, t -> msgSupplier.get());
     }
 
     public PropagatingExceptionFunction(CheckedFunction<T, R> f, Class<E> exceptionClass, Function<T, String> msgFunction) {

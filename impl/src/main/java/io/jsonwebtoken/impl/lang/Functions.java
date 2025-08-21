@@ -17,18 +17,16 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.util.function.Function;
+
 public final class Functions {
 
     private Functions() {
     }
 
+    @Deprecated
     public static <T> Function<T, T> identity() {
-        return new Function<T, T>() {
-            @Override
-            public T apply(T t) {
-                return t;
-            }
-        };
+        return t -> t;
     }
 
     /**
@@ -70,15 +68,13 @@ public final class Functions {
      * applies the {@code after} function.
      * @throws IllegalArgumentException if either {@code before} or {@code after} are null.
      */
+    @Deprecated // don't need with Java 8
     public static <T, V, R> Function<T, R> andThen(final Function<T, ? extends V> before, final Function<V, R> after) {
         Assert.notNull(before, "Before function cannot be null.");
         Assert.notNull(after, "After function cannot be null.");
-        return new Function<T, R>() {
-            @Override
-            public R apply(T t) {
-                V result = before.apply(t);
-                return after.apply(result);
-            }
+        return t -> {
+            V result = before.apply(t);
+            return after.apply(result);
         };
     }
 
@@ -98,18 +94,15 @@ public final class Functions {
     @SafeVarargs
     public static <T, R> Function<T, R> firstResult(final Function<T, R>... fns) {
         Assert.notEmpty(fns, "Function list cannot be null or empty.");
-        return new Function<T, R>() {
-            @Override
-            public R apply(T t) {
-                for (Function<T, R> fn : fns) {
-                    Assert.notNull(fn, "Function cannot be null.");
-                    R result = fn.apply(t);
-                    if (result != null) {
-                        return result;
-                    }
+        return t -> {
+            for (Function<T, R> fn : fns) {
+                Assert.notNull(fn, "Function cannot be null.");
+                R result = fn.apply(t);
+                if (result != null) {
+                    return result;
                 }
-                return null;
             }
+            return null;
         };
     }
 }

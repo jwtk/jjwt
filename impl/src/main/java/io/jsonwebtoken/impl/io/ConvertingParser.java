@@ -16,11 +16,11 @@
 package io.jsonwebtoken.impl.io;
 
 import io.jsonwebtoken.impl.lang.Converter;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.Reader;
 import java.util.Map;
+import java.util.function.Function;
 
 public class ConvertingParser<T> extends AbstractParser<T> {
 
