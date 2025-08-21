@@ -807,7 +807,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
     @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
-    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<JwtBuilder> {
+    public static final class Supplier implements java.util.function.Supplier<JwtBuilder> {
         @Override
         public JwtBuilder get() {
             return new DefaultJwtBuilder();

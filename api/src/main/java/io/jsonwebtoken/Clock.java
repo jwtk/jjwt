@@ -22,6 +22,7 @@ import java.util.Date;
  *
  * @since 0.7.0
  */
+@FunctionalInterface
 public interface Clock {
 
     /**

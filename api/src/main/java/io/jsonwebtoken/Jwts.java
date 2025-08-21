@@ -19,7 +19,6 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyPairBuilderSupplier;
@@ -35,6 +34,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Factory class useful for creating instances of JWT interfaces.  Using this factory class can be a good

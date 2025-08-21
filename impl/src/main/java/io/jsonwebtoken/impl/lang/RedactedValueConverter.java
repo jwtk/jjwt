@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Supplier;
 
 public class RedactedValueConverter<T> implements Converter<T, Object> {
 
@@ -38,7 +37,7 @@ public class RedactedValueConverter<T> implements Converter<T, Object> {
     @Override
     public T applyFrom(Object o) {
         if (o instanceof RedactedSupplier) {
-            o = ((Supplier<?>) o).get();
+            o = ((RedactedSupplier<?>) o).get();
         }
         return this.delegate.applyFrom(o);
     }

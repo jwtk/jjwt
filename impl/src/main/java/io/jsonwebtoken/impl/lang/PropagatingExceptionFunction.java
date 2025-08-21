@@ -17,10 +17,10 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Classes;
-import io.jsonwebtoken.lang.Supplier;
 
 import java.lang.reflect.Constructor;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class PropagatingExceptionFunction<T, R, E extends RuntimeException> implements Function<T, R> {
 

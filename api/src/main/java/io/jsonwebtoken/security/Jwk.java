@@ -16,7 +16,6 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.lang.Supplier;
 
 import java.security.Key;
 import java.util.Map;
@@ -72,7 +71,7 @@ import java.util.Set;
  *
  * <p>Finally, because all private or secret values are wrapped as {@link io.jsonwebtoken.lang.Supplier}
  * instances, if you really wanted the <em>real</em> internal value, you could just call the supplier's
- * {@link Supplier#get() get()} method:</p>
+ * {@link java.util.function.Supplier#get() get()} method:</p>
  * <blockquote><pre>
  * String k = ((Supplier&lt;String&gt;)aSecretJwk.get(&quot;k&quot;)).get();</pre></blockquote>
  * <p>but <b><em>BE CAREFUL</em></b>: obtaining the raw value in your application code exposes greater security

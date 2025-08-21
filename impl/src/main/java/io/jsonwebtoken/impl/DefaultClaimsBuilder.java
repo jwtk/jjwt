@@ -36,7 +36,7 @@ public final class DefaultClaimsBuilder extends DelegatingClaimsMutator<ClaimsBu
 
     // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
     @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
-    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<ClaimsBuilder> {
+    public static final class Supplier implements java.util.function.Supplier<ClaimsBuilder> {
         @Override
         public ClaimsBuilder get() {
             return new DefaultClaimsBuilder();
