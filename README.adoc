@@ -15,7 +15,6 @@ ifdef::env-github[]
 endif::[]
 
 // Macros
-:fn-require-java8-plus: Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.
 :fn-require-java11-plus: Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.
 :fn-require-java15-plus: Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime classpath.
 
@@ -56,7 +55,7 @@ toc::[]
 
 == Features
 
-* Fully functional on all Java 7+ JDKs and Android
+* Fully functional on all Java 8+ JDKs and Android
 * Automatic security best practices and assertions
 * Easy to learn and read API
 * Convenient and readable http://en.wikipedia.org/wiki/Fluent_interface[fluent] interfaces, great for IDE
@@ -128,16 +127,15 @@ and conditional branch variant in the entire codebase is tested and required to 
 | https://www.rfc-editor.org/rfc/rfc7518.html#section-5.2.5[AES_256_CBC_HMAC_SHA_512] authenticated encryption algorithm
 
 | `A128GCM`
-| AES GCM using 128-bit key^*1*^
+| AES GCM using 128-bit key
 
 | `A192GCM`
-| AES GCM using 192-bit key^*1*^
+| AES GCM using 192-bit key
 
 | `A256GCM`
-| AES GCM using 256-bit key^*1*^
+| AES GCM using 256-bit key
 |===
 +
-^*1*.{sp}{fn-require-java8-plus}^
 
 * All Key Management Algorithms for obtaining JWE encryption and decryption keys:
 +
@@ -178,25 +176,24 @@ and conditional branch variant in the entire codebase is tested and required to 
 | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"
 
 | `A128GCMKW`
-| Key wrapping with AES GCM using 128-bit key^*1*^
+| Key wrapping with AES GCM using 128-bit key
 
 | `A192GCMKW`
-| Key wrapping with AES GCM using 192-bit key^*1*^
+| Key wrapping with AES GCM using 192-bit key
 
 | `A256GCMKW`
-| Key wrapping with AES GCM using 256-bit key^*1*^
+| Key wrapping with AES GCM using 256-bit key
 
 | `PBES2-HS256+A128KW`
-| PBES2 with HMAC SHA-256 and "A128KW" wrapping^*1*^
+| PBES2 with HMAC SHA-256 and "A128KW" wrapping
 
 | `PBES2-HS384+A192KW`
-| PBES2 with HMAC SHA-384 and "A192KW" wrapping^*1*^
+| PBES2 with HMAC SHA-384 and "A192KW" wrapping
 
 | `PBES2‑HS512+A256KW`
-| PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
+| PBES2 with HMAC SHA-512 and "A256KW" wrapping
 |===
 +
-^*1*.{sp}{fn-require-java8-plus}^
 
 * Creating, parsing and verifying JSON Web Keys (JWKs) in all standard JWA key formats using native Java `Key` types:
 +
@@ -2217,18 +2214,16 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 
 | `A128GCM`
 | 128
-| AES GCM using 128-bit key^*1*^
+| AES GCM using 128-bit key
 
 | `A192GCM`
 | 192
-| AES GCM using 192-bit key^*1*^
+| AES GCM using 192-bit key
 
 | `A256GCM`
 | 256
-| AES GCM using 256-bit key^*1*^
+| AES GCM using 256-bit key
 |===
-
-^*1*.{sp}{fn-require-java8-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.ENC` registry singleton as
 implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
@@ -2357,25 +2352,23 @@ Content Encryption Key (CEK):
 | ECDH-ES using Concat KDF and CEK wrapped with "A256KW"
 
 | `A128GCMKW`
-| Key wrapping with AES GCM using 128-bit key^*1*^
+| Key wrapping with AES GCM using 128-bit key
 
 | `A192GCMKW`
-| Key wrapping with AES GCM using 192-bit key^*1*^
+| Key wrapping with AES GCM using 192-bit key
 
 | `A256GCMKW`
-| Key wrapping with AES GCM using 256-bit key^*1*^
+| Key wrapping with AES GCM using 256-bit key
 
 | `PBES2-HS256+A128KW`
-| PBES2 with HMAC SHA-256 and "A128KW" wrapping^*1*^
+| PBES2 with HMAC SHA-256 and "A128KW" wrapping
 
 | `PBES2-HS384+A192KW`
-| PBES2 with HMAC SHA-384 and "A192KW" wrapping^*1*^
+| PBES2 with HMAC SHA-384 and "A192KW" wrapping
 
 | `PBES2‑HS512+A256KW`
-| PBES2 with HMAC SHA-512 and "A256KW" wrapping^*1*^
+| PBES2 with HMAC SHA-512 and "A256KW" wrapping
 |===
-
-^*1*.{sp}{fn-require-java8-plus}^
 
 These are all represented as constants in the `io.jsonwebtoken.Jwts.KEY` registry singleton as
 implementations of the `io.jsonwebtoken.security.KeyAlgorithm` interface.

@@ -55,30 +55,6 @@ public final class Functions {
     }
 
     /**
-     * Returns a composed function that first applies the {@code before} function to its input, and then applies
-     * the {@code after} function to the result. If evaluation of either function throws an exception, it is relayed to
-     * the caller of the composed function.
-     *
-     * @param <T>    type of input to the {@code before} function and the resulting composed function.
-     * @param <V>    the type of output of the {@code before} function, and of the input to the {@code after} function.
-     * @param <R>    return type of the {@code after} function and the resulting composed function.
-     * @param before the function to invoke first
-     * @param after  the function to invoke second with the output from the first
-     * @return a composed function that first applies the {@code before} function and then
-     * applies the {@code after} function.
-     * @throws IllegalArgumentException if either {@code before} or {@code after} are null.
-     */
-    @Deprecated // don't need with Java 8
-    public static <T, V, R> Function<T, R> andThen(final Function<T, ? extends V> before, final Function<V, R> after) {
-        Assert.notNull(before, "Before function cannot be null.");
-        Assert.notNull(after, "After function cannot be null.");
-        return t -> {
-            V result = before.apply(t);
-            return after.apply(result);
-        };
-    }
-
-    /**
      * Returns a composed function that invokes the specified functions in iteration order, and returns the first
      * non-null result.  Once a non-null result is discovered, no further functions will be invoked, 'short-circuiting'
      * any remaining functions. If evaluation of any function throws an exception, it is relayed to the caller of the
@@ -89,7 +65,6 @@ public final class Functions {
      * @param fns the functions to iterate
      * @return a composed function that invokes the specified functions in iteration order, returning the first non-null
      * result.
-     * @throws NullPointerException if after is null
      */
     @SafeVarargs
     public static <T, R> Function<T, R> firstResult(final Function<T, R>... fns) {

@@ -121,34 +121,22 @@ public final class Jwts {
 
         /**
          * &quot;AES GCM using 128-bit key&quot; as defined by
-         * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
+         * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 128-bit (16 byte) key.
-         *
-         * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
-         * classpath. If on Java 7 or earlier, BouncyCastle will be used automatically if found in the runtime
-         * classpath.</p>
          */
         public static final AeadAlgorithm A128GCM = get().forKey("A128GCM");
 
         /**
          * &quot;AES GCM using 192-bit key&quot; as defined by
-         * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
+         * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 192-bit (24 byte) key.
-         *
-         * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
-         * classpath. If on Java 7 or earlier, BouncyCastle will be used automatically if found in the runtime
-         * classpath.</p>
          */
         public static final AeadAlgorithm A192GCM = get().forKey("A192GCM");
 
         /**
          * &quot;AES GCM using 256-bit key&quot; as defined by
-         * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a><b><sup>1</sup></b>.  This
+         * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 256-bit (32 byte) key.
-         *
-         * <p><b><sup>1</sup></b> Requires Java 8 or a compatible JCA Provider (like BouncyCastle) in the runtime
-         * classpath. If on Java 7 or earlier, BouncyCastle will be used automatically if found in the runtime
-         * classpath.</p>
          */
         public static final AeadAlgorithm A256GCM = get().forKey("A256GCM");
     }
