@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.security.*
 import io.jsonwebtoken.io.*

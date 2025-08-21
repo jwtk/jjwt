@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.lang.Assert;
 
@@ -60,6 +61,7 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
     static ObjectMapper newObjectMapper() {
         return new ObjectMapper()
                 .registerModule(MODULE)
+                .registerModule(new JavaTimeModule())
                 .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true) // https://github.com/jwtk/jjwt/issues/877
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // https://github.com/jwtk/jjwt/issues/893
     }

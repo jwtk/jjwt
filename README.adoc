@@ -1063,9 +1063,9 @@ String jws = Jwts.builder()
     .issuer("me")
     .subject("Bob")
     .audience().add("you").and()
-    .expiration(expiration) //a java.util.Date
-    .notBefore(notBefore) //a java.util.Date
-    .issuedAt(new Date()) // for example, now
+    .expiration(expiration) //a java.time.Instant
+    .notBefore(notBefore) //a java.time.Instant
+    .issuedAt(Instant.now) // for example, now
     .id(UUID.randomUUID().toString()) //just an example id
 
     /// ... etc ...
@@ -1530,7 +1530,7 @@ Clock clock = new MyClock();
 Jwts.parser().clock(myClock) //... etc ...
 ----
 
-The ``JwtParser``'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
+The ``JwtParser``'s default `Clock` implementation simply returns `Instant.now()` to reflect the time when parsing occurs,
 as most would expect.  However, supplying your own clock could be useful, especially when writing test cases to
 guarantee deterministic behavior.
 
@@ -3406,7 +3406,7 @@ Jwts.parser()
 
 ==== Parsing of Custom Claim Types
 
-By default, JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to
+By default, JJWT will only convert simple claim types: String, Instant, Long, Integer, Short and Byte.  If you need to
 deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in
 through a constructor. For example:
 
@@ -3639,7 +3639,7 @@ last char) are significant. The last two bits are not decoded. Thus all of:
 dGVzdCBzdHJpbmo
 dGVzdCBzdHJpbmp
 dGVzdCBzdHJpbmq
-dGVzdCBzdHJpbmr 
+dGVzdCBzdHJpbmr
 ----
 All decode to the same 11 bytes (116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 106).
 ====

@@ -27,6 +27,8 @@ import org.json.JSONString
 import org.junit.Before
 import org.junit.Test
 
+import java.time.Instant
+
 import static org.junit.Assert.*
 
 class OrgJsonSerializerTest {
@@ -191,18 +193,18 @@ class OrgJsonSerializerTest {
     }
 
     @Test
-    void testDate() {
-        Date now = new Date()
-        String formatted = DateFormats.formatIso8601(now)
-        assertEquals "\"$formatted\"" as String, ser(now)
+    void testInstant() {
+        Instant instant = Instant.now()
+        String formatted = DateFormats.formatIso8601(instant)
+        assertEquals "\"$formatted\"" as String, ser(instant)
     }
 
     @Test
-    void testCalendar() {
-        def cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        def now = cal.getTime()
+    void testDate() {
+        Date date = new Date()
+        def now = date.toInstant()
         String formatted = DateFormats.formatIso8601(now)
-        assertEquals "\"$formatted\"" as String, ser(cal)
+        assertEquals "\"$formatted\"" as String, ser(date)
     }
 
     @Test

@@ -767,7 +767,7 @@ would be very strange if a machine's clock was more than 5 minutes difference fr
 #### Custom Clock Support
 
 Timestamps created during parsing can now be obtained via a custom time source via an implementation of
- the new `io.jsonwebtoken.Clock` interface.  The default implementation simply returns `new Date()` to reflect the time
+ the new `io.jsonwebtoken.Clock` interface.  The default implementation simply returns `new Instant()` to reflect the time
   when parsing occurs, as most would expect.  However, supplying your own clock could be useful, especially during test 
   cases to guarantee deterministic behavior.
 

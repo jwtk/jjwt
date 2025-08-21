@@ -26,6 +26,8 @@ import io.jsonwebtoken.lang.Maps
 import org.junit.Before
 import org.junit.Test
 
+import java.time.Instant
+
 import static org.junit.Assert.*
 
 class JacksonDeserializerTest {
@@ -100,7 +102,7 @@ class JacksonDeserializerTest {
         CustomBean expectedCustomBean = new CustomBean()
                 .setByteArrayValue("bytes".getBytes("UTF-8"))
                 .setByteValue(0xF as byte)
-                .setDateValue(new Date(currentTime))
+                .setInstantValue(Instant.ofEpochMilli(currentTime))
                 .setIntValue(11)
                 .setShortValue(22 as short)
                 .setLongValue(33L)
@@ -108,7 +110,7 @@ class JacksonDeserializerTest {
                 .setNestedValue(new CustomBean()
                         .setByteArrayValue("bytes2".getBytes("UTF-8"))
                         .setByteValue(0xA as byte)
-                        .setDateValue(new Date(currentTime + 1))
+                        .setInstantValue(Instant.ofEpochMilli(currentTime + 1))
                         .setIntValue(111)
                         .setShortValue(222 as short)
                         .setLongValue(333L)
