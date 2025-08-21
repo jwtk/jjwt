@@ -222,17 +222,6 @@ class JacksonDeserializerTest {
             }
         }
 
-        // TODO: the following does NOT work with Java 1.7
-        // when we stop supporting that version we can use a partial mock instead
-        // the `typeMap.put("custom", CustomBean)` line below results in an NPE, (only on 1.7)
-
-//        Map typeMap = partialMockBuilder(HashMap)
-//            .addMockedMethod("containsKey")
-//            .createNiceMock()
-//
-//        expect(typeMap.containsKey(null)).andThrow(new NullPointerException("key is null, expected for this test"))
-//        replay(typeMap)
-
         typeMap.put("custom", CustomBean)
 
         def deserializer = new JacksonDeserializer(typeMap)
