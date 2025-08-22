@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Bytes;
@@ -128,7 +129,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         //otherwise 'alg' was specified, ensure it's valid for secret key use:
         Identifiable alg = Jws.alg.registry().get(algId);
         if (alg == null) alg = Jwts.KEY.get().get(algId);
-        if (alg == null) alg = Jwts.ENC.get().get(algId);
+        if (alg == null) alg = Jwe.alg.registry().get(algId);
         if (alg != null) assertSymmetric(alg); // if we found a standard alg, it must be a symmetric key algorithm
 
         if (alg instanceof MacAlgorithm) {

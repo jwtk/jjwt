@@ -16,10 +16,7 @@
 package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.impl.lang.Services
@@ -545,7 +542,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactSimplestPayload() {
-        def enc = Jwts.ENC.A128GCM
+        def enc = Jwe.alg.A128GCM
         def key = enc.key().build()
         def jwe = builder.setPayload("me").encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseEncryptedContent(jwe)
@@ -554,7 +551,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactSimplestClaims() {
-        def enc = Jwts.ENC.A128GCM
+        def enc = Jwe.alg.A128GCM
         def key = enc.key().build()
         def jwe = builder.setSubject('joe').encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseEncryptedClaims(jwe)
@@ -565,7 +562,7 @@ class DefaultJwtBuilderTest {
     void testSignWithAndEncryptWith() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key).encryptWith(key, Jwts.ENC.A128GCM).compact()
+            builder.signWith(key).encryptWith(key, Jwe.alg.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
             String msg = "Both 'signWith' and 'encryptWith' cannot be specified. Choose either one."
@@ -577,7 +574,7 @@ class DefaultJwtBuilderTest {
     void testEmptyPayloadAndClaimsJwe() {
         def key = TestKeys.HS256
         try {
-            builder.encryptWith(key, Jwts.ENC.A128GCM).compact()
+            builder.encryptWith(key, Jwe.alg.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
             String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'."

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Functions
@@ -34,8 +35,9 @@ class PrivateConstructorsTest {
         new JwksBridge()
         new Functions()
         new Jws.alg()
+        new Jwe.alg()
         new Jwts.SIG(); assertSame(Jws.alg.registry(), Jwts.SIG.get())
-        new Jwts.ENC()
+        new Jwts.ENC(); assertSame(Jwe.alg.registry(), Jwts.ENC.get())
         new Jwts.KEY()
         new Jwts.ZIP()
         new Jwks.CRV()

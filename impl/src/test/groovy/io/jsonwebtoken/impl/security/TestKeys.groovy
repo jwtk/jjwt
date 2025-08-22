@@ -16,8 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.Jwks
 
@@ -52,15 +52,15 @@ class TestKeys {
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static Collection<SecretKey> AGCM
     static {
-        A128GCM = A128KW = A128GCMKW = Jwts.ENC.A128GCM.key().build()
-        A192GCM = A192KW = A192GCMKW = Jwts.ENC.A192GCM.key().build()
-        A256GCM = A256KW = A256GCMKW = Jwts.ENC.A256GCM.key().build()
+        A128GCM = A128KW = A128GCMKW = Jwe.alg.A128GCM.key().build()
+        A192GCM = A192KW = A192GCMKW = Jwe.alg.A192GCM.key().build()
+        A256GCM = A256KW = A256GCMKW = Jwe.alg.A256GCM.key().build()
         AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
 
-    static SecretKey A128CBC_HS256 = Jwts.ENC.A128CBC_HS256.key().build()
-    static SecretKey A192CBC_HS384 = Jwts.ENC.A192CBC_HS384.key().build()
-    static SecretKey A256CBC_HS512 = Jwts.ENC.A256CBC_HS512.key().build()
+    static SecretKey A128CBC_HS256 = Jwe.alg.A128CBC_HS256.key().build()
+    static SecretKey A192CBC_HS384 = Jwe.alg.A192CBC_HS384.key().build()
+    static SecretKey A256CBC_HS512 = Jwe.alg.A256CBC_HS512.key().build()
     static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
 
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()

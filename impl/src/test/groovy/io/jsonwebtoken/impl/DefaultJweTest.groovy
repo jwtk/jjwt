@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.AeadAlgorithm
@@ -27,7 +28,7 @@ class DefaultJweTest {
 
     @Test
     void testToString() {
-        def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
+        def alg = Jwe.alg.A128CBC_HS256 as AeadAlgorithm
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def jwe = Jwts.parser().decryptWith(key).build().parseEncryptedClaims(compact)
@@ -39,7 +40,7 @@ class DefaultJweTest {
 
     @Test
     void testEqualsAndHashCode() {
-        def alg = Jwts.ENC.A128CBC_HS256 as AeadAlgorithm
+        def alg = Jwe.alg.A128CBC_HS256 as AeadAlgorithm
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').encryptWith(key, alg).compact()
         def parser = Jwts.parser().decryptWith(key).build()

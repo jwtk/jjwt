@@ -574,7 +574,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * <p>All JWA-standard AEAD encryption algorithms in the {@link Jwts.ENC} registry are supported by default and
+     * <p>All JWA-standard AEAD encryption algorithms in the {@link Jwe.alg} registry are supported by default and
      * do not need to be added. The collection may be useful however for removing some algorithms (for example,
      * any algorithms not used by the application, or those not compatible with application security requirements),
      * or for adding custom implementations.</p>
@@ -595,7 +595,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use to configure the AEAD encryption algorithms available when parsing.
      * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
-     * @see Jwts.ENC
+     * @see Jwe.alg
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2">&quot;enc&quot; (Encryption Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Encryption Algorithm Name (id) requirements</a>
      * @since 0.12.0

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeaderMutator
@@ -43,7 +44,7 @@ class Pbes2HsAkwAlgorithmTest {
             int iterations = 50 // must be 1000 or more
             def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
-            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwts.ENC.A256GCM)
+            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwe.alg.A256GCM)
             try {
                 alg.getEncryptionKey(req)
                 fail()
@@ -104,7 +105,7 @@ class Pbes2HsAkwAlgorithmTest {
         def password = 'hellowor'.toCharArray()
         def header = new DefaultJweHeader().pbes2Count(iterations)
         def key = Keys.password(password)
-        def req = new DefaultKeyRequest(null, null, key, header, Jwts.ENC.A128GCM)
+        def req = new DefaultKeyRequest(null, null, key, header, Jwe.alg.A128GCM)
         int sum = 0
         for (int i = 0; i < tries; i++) {
             long start = System.currentTimeMillis()

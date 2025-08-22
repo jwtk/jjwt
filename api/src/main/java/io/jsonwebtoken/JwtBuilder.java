@@ -885,9 +885,9 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param key the symmetric encryption key to use with the {@code enc} algorithm.
      * @param enc the {@link AeadAlgorithm} algorithm used to encrypt the JWE, usually one of the JWA-standard
-     *            algorithms accessible via {@link Jwts.ENC}.
+     *            algorithms accessible via {@link Jwe.alg}.
      * @return the JWE builder for method chaining.
-     * @see Jwts.ENC
+     * @see Jwe.alg
      */
     JwtBuilder encryptWith(SecretKey key, AeadAlgorithm enc);
 
@@ -908,7 +908,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * </ol>
      *
      * <p>Most application developers will reference one of the JWA
-     * {@link Jwts.KEY standard key algorithms} and {@link Jwts.ENC standard encryption algorithms}
+     * {@link Jwts.KEY standard key algorithms} and {@link Jwe.alg standard encryption algorithms}
      * when invoking this method, but custom implementations are also supported.</p>
      *
      * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
@@ -917,7 +917,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *               {@code enc} algorithm
      * @param enc    the {@link AeadAlgorithm} algorithm used to encrypt the JWE
      * @return the JWE builder for method chaining.
-     * @see Jwts.ENC
+     * @see Jwe.alg
      * @see Jwts.KEY
      */
     <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Bytes
@@ -118,7 +119,7 @@ class Pkcs11Test {
 
         def algs = [] as List<Identifiable>
         algs.addAll(Jws.alg.registry().values().findAll({ it instanceof KeyBuilderSupplier }))
-        algs.addAll(Jwts.ENC.get().values())
+        algs.addAll(Jwe.alg.registry().values())
 
         algs.each { Identifiable alg ->
             // find any previous one:
@@ -271,7 +272,7 @@ class Pkcs11Test {
         }
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact()
+        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwe.alg.A256GCM).compact()
 
         // The private key can be null if SunPKCS11 doesn't support the key algorithm directly.  In this case
         // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the

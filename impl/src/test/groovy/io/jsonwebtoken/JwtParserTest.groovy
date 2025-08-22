@@ -1661,7 +1661,7 @@ class JwtParserTest {
         def key = TestKeys.A256GCM
         def jwe = Jwts.builder().claim("hello", "world")
                 .compressWith(Jwts.ZIP.DEF)
-                .encryptWith(key, Jwts.ENC.A256GCM)
+                .encryptWith(key, Jwe.alg.A256GCM)
                 .compact()
 
         //now build a parser with no decompression algs (which should disable decompression)
@@ -1717,7 +1717,7 @@ class JwtParserTest {
         // create a compressed JWE first:
         def key = TestKeys.A256GCM
         def jwe = Jwts.builder().claim("hello", "world")
-                .encryptWith(key, Jwts.ENC.A256GCM)
+                .encryptWith(key, Jwe.alg.A256GCM)
                 .compact()
 
         //now build a parser with no encryption algs, which should completely disable decryption
@@ -1744,7 +1744,7 @@ class JwtParserTest {
         // create a compressed JWE first:
         def key = TestKeys.A256GCM
         def jwe = Jwts.builder().claim("hello", "world")
-                .encryptWith(key, Jwts.ENC.A256GCM)
+                .encryptWith(key, Jwe.alg.A256GCM)
                 .compact()
 
         //now build a parser with no key management algs, which should completely disable decryption

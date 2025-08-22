@@ -37,7 +37,7 @@ class RFC7797Test {
     @Test
     void testJwe() {
         try {
-            Jwts.builder().content('hello').encryptWith(TestKeys.A128GCM, Jwts.ENC.A128GCM)
+            Jwts.builder().content('hello').encryptWith(TestKeys.A128GCM, Jwe.alg.A128GCM)
                     .encodePayload(false) // not allowed with JWE
                     .compact()
             fail()

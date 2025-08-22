@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.RfcTests
@@ -169,7 +170,7 @@ class RFC8037AppendixATest {
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
-                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A128GCM)
+                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.alg.A128GCM)
                 .compact()
 
         // the constructed JWE should have the following protected header:
@@ -260,7 +261,7 @@ class RFC8037AppendixATest {
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .issuer(issuer)
-                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A256GCM)
+                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.alg.A256GCM)
                 .compact()
 
         // the constructed JWE should have the following protected header:

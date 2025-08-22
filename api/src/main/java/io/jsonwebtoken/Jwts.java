@@ -70,17 +70,16 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwts.ENC.A256GCM</b>) // or A128GCM, A192GCM, etc...
+     *    .encryptWith(aKey, <b>Jwe.alg.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
-     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
+     * <p>They are also available together as a {@link Registry} instance via {@link Jwe.alg#registry()}.</p>
      *
-     * @see #get()
+     * @see Jwe.alg#registry()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg}.
      */
+    @Deprecated
     public static final class ENC {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms";
-        private static final Registry<String, AeadAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
          * Returns all standard JWA <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5">Cryptographic
@@ -89,9 +88,11 @@ public final class Jwts {
          * Algorithms Registry</a>.
          *
          * @return all standard JWA content encryption algorithms.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#registry()}.
          */
+        @Deprecated
         public static Registry<String, AeadAlgorithm> get() {
-            return REGISTRY;
+            return Jwe.alg.registry();
         }
 
         // prevent instantiation
@@ -102,43 +103,56 @@ public final class Jwts {
          * {@code AES_128_CBC_HMAC_SHA_256} authenticated encryption algorithm as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.3">RFC 7518, Section 5.2.3</a>.  This algorithm
          * requires a 256-bit (32 byte) key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A128CBC_HS256}.
          */
-        public static final AeadAlgorithm A128CBC_HS256 = get().forKey("A128CBC-HS256");
+        @Deprecated
+        public static final AeadAlgorithm A128CBC_HS256 = Jwe.alg.A128CBC_HS256;
 
         /**
          * {@code AES_192_CBC_HMAC_SHA_384} authenticated encryption algorithm, as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.4">RFC 7518, Section 5.2.4</a>. This algorithm
          * requires a 384-bit (48 byte) key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A192CBC_HS384}.
          */
-        public static final AeadAlgorithm A192CBC_HS384 = get().forKey("A192CBC-HS384");
+        @Deprecated
+        public static final AeadAlgorithm A192CBC_HS384 = Jwe.alg.A192CBC_HS384;
 
         /**
          * {@code AES_256_CBC_HMAC_SHA_512} authenticated encryption algorithm, as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.5">RFC 7518, Section 5.2.5</a>.  This algorithm
          * requires a 512-bit (64 byte) key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A256CBC_HS512}.
          */
-        public static final AeadAlgorithm A256CBC_HS512 = get().forKey("A256CBC-HS512");
+        @Deprecated
+        public static final AeadAlgorithm A256CBC_HS512 = Jwe.alg.A256CBC_HS512;
 
         /**
          * &quot;AES GCM using 128-bit key&quot; as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 128-bit (16 byte) key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A128GCM}.
          */
-        public static final AeadAlgorithm A128GCM = get().forKey("A128GCM");
+        @Deprecated
+        public static final AeadAlgorithm A128GCM = Jwe.alg.A128GCM;
 
         /**
          * &quot;AES GCM using 192-bit key&quot; as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 192-bit (24 byte) key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A192GCM}.
          */
-        public static final AeadAlgorithm A192GCM = get().forKey("A192GCM");
+        @Deprecated
+        public static final AeadAlgorithm A192GCM = Jwe.alg.A192GCM;
 
         /**
          * &quot;AES GCM using 256-bit key&quot; as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 256-bit (32 byte) key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A256GCM}.
          */
-        public static final AeadAlgorithm A256GCM = get().forKey("A256GCM");
+        @Deprecated
+        public static final AeadAlgorithm A256GCM = Jwe.alg.A256GCM;
     }
 
     /**
@@ -296,6 +310,7 @@ public final class Jwts {
          * {@code ECDSA using P-256 and SHA-256} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 256-bit key.
+         *
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#ES256}
          */
         @Deprecated
@@ -305,6 +320,7 @@ public final class Jwts {
          * {@code ECDSA using P-384 and SHA-384} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 384-bit key.
+         *
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#ES384}
          */
         @Deprecated
@@ -314,6 +330,7 @@ public final class Jwts {
          * {@code ECDSA using P-521 and SHA-512} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 521-bit key.
+         *
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#ES512}
          */
         @Deprecated
@@ -337,6 +354,7 @@ public final class Jwts {
          *
          * <p><b><sup>1</sup>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
+         *
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#EdDSA}
          */
         @Deprecated
@@ -350,7 +368,7 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwts.KEY.ECDH_ES_A256KW</b>, Jwts.ENC.A256GCM)
+     *    .encryptWith(aKey, <b>Jwts.KEY.ECDH_ES_A256KW</b>, Jwe.alg.A256GCM)
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
