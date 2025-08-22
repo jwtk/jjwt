@@ -20,6 +20,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 
+import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
@@ -63,17 +64,17 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
         }
     }
 
-    public static class Builder<T> extends AbstractKeyRequestParams<T, KeyRequest.Builder<T>>
-            implements KeyRequest.Builder<T> {
+    public static class Builder<K extends Key> extends AbstractKeyRequestParams<K, KeyRequest.Builder<K>>
+            implements KeyRequest.Builder<K> {
 
         @Override
-        public KeyRequest<T> build() {
+        public KeyRequest<K> build() {
             return new DefaultKeyRequest<>(this.payload, this.provider, this.random, this.header, this.aeadAlg);
         }
 
-        public static class Supplier<T> implements java.util.function.Supplier<KeyRequest.Builder<T>> {
+        public static class Supplier<K extends Key> implements java.util.function.Supplier<KeyRequest.Builder<K>> {
             @Override
-            public KeyRequest.Builder<T> get() {
+            public KeyRequest.Builder<K> get() {
                 return new Builder<>();
             }
         }

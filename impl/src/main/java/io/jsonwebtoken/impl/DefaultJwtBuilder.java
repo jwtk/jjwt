@@ -597,8 +597,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         byte[] signature;
         try {
-            SecureRequest<InputStream, Key> request = Jwts.SIG.request().payload(signingInput)
-                    .provider(provider).random(secureRandom).key(key).build();
+            SecureRequest<InputStream, Key> request =
+                    SecureRequest.<InputStream, Key>builder().payload(signingInput).key(key)
+                            .provider(provider).random(secureRandom).build();
             signature = signFunction.apply(request);
 
             // now that we've calculated the signature, if using the b64 extension, and the payload is
@@ -676,7 +677,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
         JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
-        KeyRequest<Key> keyRequest = Jwts.KEY.request()
+        KeyRequest<Key> keyRequest = KeyRequest.<Key>builder()
                 .provider(keyProvider).random(this.secureRandom)
                 .payload(key).header(delegate).encryptionAlgorithm(enc)
                 .build();
@@ -708,9 +709,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // As such, the provider here is intentionally omitted (null):
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
-        AeadRequest req = Jwts.ENC.request().random(secureRandom) // no .provider call, see message above
+        AeadRequest req = AeadRequest.builder().random(secureRandom) // no .provider call, see message above
                 .payload(plaintext).key(cek).associatedData(aad).build();
-        AeadResult res = Jwts.ENC.result().out(ciphertextOut).build();
+        AeadResult res = AeadResult.of(ciphertextOut);
         encrypt(req, res);
 
         byte[] iv = Assert.notEmpty(res.getIv(), "Encryption result must have a non-empty initialization vector.");

@@ -47,18 +47,32 @@ public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[
      *
      * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
      * @param <M> the instance type returned for method chaining.
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Params<K extends Key, M extends Params<K, M>> extends KeyRequest.Params<byte[], M>,
             SecureRequest.Params<byte[], K, M> {
     }
 
     /**
-     * A builder for creating new immutable {@link DecryptionKeyRequest} instances.
+     * A builder for creating new immutable {@link DecryptionKeyRequest} instances used to get a JWE
+     * decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
      *
      * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
+    }
+
+    /**
+     * Returns a new {@link DecryptionKeyRequest.Builder} for creating immutable {@link DecryptionKeyRequest}s used to
+     * get a JWE decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
+     *
+     * @return a new {@link DecryptionKeyRequest.Builder} for creating immutable {@link DecryptionKeyRequest}s used to
+     * get a JWE decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <K extends Key> DecryptionKeyRequest.Builder<K> builder() {
+        return (DecryptionKeyRequest.Builder<K>) Suppliers.DECRYPTION_KEY_REQUEST_BUILDER.get();
     }
 }

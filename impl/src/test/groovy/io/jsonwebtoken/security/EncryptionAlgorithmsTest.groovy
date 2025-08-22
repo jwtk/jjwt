@@ -122,7 +122,7 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = Jwts.ENC.decryptRequest().payload(ciphertext).key(key).iv(iv).digest(tag).build()
+            def dreq = DecryptAeadRequest.builder().payload(ciphertext).key(key).iv(iv).digest(tag).build()
             alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
 
@@ -156,7 +156,7 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = Jwts.ENC.decryptRequest()
+            def dreq = DecryptAeadRequest.builder()
                     .payload(ciphertext).key(key).associatedData(aad).iv(iv).digest(tag).build()
             alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()

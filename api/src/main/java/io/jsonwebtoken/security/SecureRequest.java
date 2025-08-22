@@ -32,7 +32,7 @@ public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier
      * @param <T> the type of payload in the request.
      * @param <K> the type of key used by the algorithm during the request.
      * @param <M> the instance type returned for method chaining.
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Params<T, K extends Key, M extends Params<T, K, M>> extends Request.Params<T, M> {
 
@@ -46,12 +46,26 @@ public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier
     }
 
     /**
-     * A builder for creating new immutable {@link SecureRequest} instances.
+     * A builder for creating {@link SecureRequest}s used to compute a mac or signature via
+     * {@link SecureDigestAlgorithm#digest(Request)}.
      *
      * @param <T> the type of payload in the request.
      * @param <K> the type of key used by the algorithm during the request.
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Builder<T, K extends Key> extends Params<T, K, Builder<T, K>>, io.jsonwebtoken.lang.Builder<SecureRequest<T, K>> {
+    }
+
+    /**
+     * Returns a new {@link SecureRequest.Builder} for creating {@link SecureRequest}s used to compute a mac or
+     * signature via {@link SecureDigestAlgorithm#digest(Request)}.
+     *
+     * @return a new {@link SecureRequest.Builder} for creating {@link SecureRequest}s used to compute a mac or
+     * signature via {@link SecureDigestAlgorithm#digest(Request)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <T, K extends Key> SecureRequest.Builder<T, K> builder() {
+        return (SecureRequest.Builder<T, K>) Suppliers.SECURE_REQUEST_BUILDER.get();
     }
 }

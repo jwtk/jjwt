@@ -18,6 +18,7 @@ package io.jsonwebtoken.security;
 import io.jsonwebtoken.Identifiable;
 
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 /**
  * A {@link DigestAlgorithm} that computes and verifies digests without the use of a cryptographic key, such as for
@@ -42,4 +43,27 @@ import java.io.InputStream;
  * @since 0.12.0
  */
 public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, VerifyDigestRequest> {
+
+    default byte[] digest(Consumer<Request.Params<InputStream, ?>> c) {
+        Request.Builder<InputStream> b = Request.builder();
+        c.accept(b);
+        Request<InputStream> r = b.build();
+        return digest(r);
+    }
+
+    default byte[] digest(InputStream is) {
+        return digest(c -> c.payload(is));
+    }
+
+    default boolean verify(Consumer<VerifyDigestRequest.Params<?>> c) {
+        VerifyDigestRequest.Builder b = VerifyDigestRequest.builder();
+        c.accept(b);
+        VerifyDigestRequest r = b.build();
+        return verify(r);
+    }
+
+    default boolean verify(InputStream is, byte[] digest) {
+        return verify(c -> c.payload(is).digest(digest));
+    }
+
 }

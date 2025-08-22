@@ -32,11 +32,9 @@ class DefaultHashAlgorithmTest {
         byte[] data = Strings.utf8('Hello World')
         InputStream payload = Streams.of(data)
         for (HashAlgorithm alg : algs) {
-            def req = Jwks.HASH.request().payload(payload).build()
-            byte[] hash = alg.digest(req)
+            byte[] hash = alg.digest(payload)
             payload.reset()
-            req = Jwks.HASH.verifyRequest().payload(payload).digest(hash).build()
-            assertTrue alg.verify(req)
+            assertTrue alg.verify(payload, hash)
             payload.reset()
         }
     }

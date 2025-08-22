@@ -22,8 +22,6 @@ import io.jsonwebtoken.lang.Registry;
 
 import java.util.function.Supplier;
 
-import java.io.InputStream;
-
 /**
  * Utility methods for creating
  * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">JWKs (JSON Web Keys)</a> with a type-safe builder.
@@ -291,14 +289,6 @@ public final class Jwks {
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardHashAlgorithms";
         private static final Registry<String, HashAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
-        // @since 0.13.0
-        private static final Supplier<Request.Builder<InputStream>> REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultRequest$Builder$Supplier");
-
-        // @since 0.13.0
-        private static final Supplier<VerifyDigestRequest.Builder> VERIFY_REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultVerifyDigestRequest$Builder$Supplier");
-
         /**
          * Returns a registry of various (<em>but not all</em>)
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
@@ -367,30 +357,6 @@ public final class Jwks {
          * classpath.</b></p>
          */
         public static final HashAlgorithm SHA3_512 = get().forKey("sha3-512");
-
-        /**
-         * Returns a new {@link Request.Builder} for creating {@link Request}s to compute a digest via
-         * {@link HashAlgorithm#digest(Request)}.
-         *
-         * @return a new {@link Request.Builder} for creating {@link Request}s to compute a digest via
-         * {@link HashAlgorithm#digest(Request)}.
-         * @since 0.13.0
-         */
-        public static Request.Builder<InputStream> request() {
-            return REQUEST_BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Returns a new {@link VerifyDigestRequest.Builder} for creating {@link VerifyDigestRequest}s to verify a
-         * digest via {@link HashAlgorithm#verify(VerifyDigestRequest)}.
-         *
-         * @return a new {@link VerifyDigestRequest.Builder} for creating {@link VerifyDigestRequest}s to verify a
-         * digest via {@link HashAlgorithm#verify(VerifyDigestRequest)}.
-         * @since 0.13.0
-         */
-        public static VerifyDigestRequest.Builder verifyRequest() {
-            return VERIFY_REQUEST_BUILDER_SUPPLIER.get();
-        }
 
         //prevent instantiation
         private HASH() {

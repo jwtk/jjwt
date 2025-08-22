@@ -20,27 +20,16 @@ import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.AeadRequest;
-import io.jsonwebtoken.security.AeadResult;
-import io.jsonwebtoken.security.DecryptAeadRequest;
-import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyPairBuilderSupplier;
-import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.Password;
-import io.jsonwebtoken.security.Request;
 import io.jsonwebtoken.security.SecretKeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
-import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.VerifyDigestRequest;
-import io.jsonwebtoken.security.VerifySecureDigestRequest;
 import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -92,18 +81,6 @@ public final class Jwts {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms";
         private static final Registry<String, AeadAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
-
-        // @since 0.13.0
-        private static final Supplier<AeadRequest.Builder> REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadRequest$Builder$Supplier");
-
-        // @since 0.13.0
-        private static final Supplier<DecryptAeadRequest.Builder> DECRYPT_REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest$Builder$Supplier");
-
-        // @since 0.13.0
-        private static final Supplier<AeadResult.Builder> RESULT_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadResult$Builder$Supplier");
 
         /**
          * Returns all standard JWA <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5">Cryptographic
@@ -162,42 +139,6 @@ public final class Jwts {
          * algorithm requires a 256-bit (32 byte) key.
          */
         public static final AeadAlgorithm A256GCM = get().forKey("A256GCM");
-
-        /**
-         * Returns a new builder to create {@link AeadRequest}s used for AEAD encryption via
-         * {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}
-         *
-         * @return a new builder to create {@link AeadRequest}s used for AEAD encryption via
-         * {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}
-         * @since 0.13.0
-         */
-        public static AeadRequest.Builder request() {
-            return REQUEST_BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Returns a new builder to create {@link DecryptAeadRequest}s used for AEAD decryption via
-         * {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)}
-         *
-         * @return a new builder to create {@link DecryptAeadRequest}s used for AEAD decryption via
-         * {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)}
-         * @since 0.13.0
-         */
-        public static DecryptAeadRequest.Builder decryptRequest() {
-            return DECRYPT_REQUEST_BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Returns a new builder to create {@link AeadResult}s used to store AEAD encryption results when calling
-         * {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}
-         *
-         * @return a new builder to create {@link AeadResult}s used to store AEAD encryption results when calling
-         * {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}
-         * @since 0.13.0
-         */
-        public static AeadResult.Builder result() {
-            return RESULT_BUILDER_SUPPLIER.get();
-        }
     }
 
     /**
@@ -220,14 +161,6 @@ public final class Jwts {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms";
         private static final Registry<String, SecureDigestAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
-
-        // @since 0.13.0
-        private static final Supplier<SecureRequest.Builder<InputStream, ?>> REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultSecureRequest$Builder$Supplier");
-
-        // @since 0.13.0
-        private static final Supplier<VerifySecureDigestRequest.Builder<?>> VERIFY_REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest$Builder$Supplier");
 
         //prevent instantiation
         private SIG() {
@@ -369,34 +302,6 @@ public final class Jwts {
          * classpath.</b></p>
          */
         public static final SignatureAlgorithm EdDSA = Jwts.get(REGISTRY, "EdDSA");
-
-        /**
-         * Returns a new builder to create {@link SecureRequest}s used to compute a mac or signature via
-         * {@link SecureDigestAlgorithm#digest(Request)}.
-         *
-         * @param <K> the type of key used by the algorithm to compute the mac or signature.
-         * @return a new builder to create {@link SecureRequest}s used to compute a mac or signature via
-         * {@link SecureDigestAlgorithm#digest(Request)}.
-         * @since 0.13.0
-         */
-        @SuppressWarnings("unchecked")
-        public static <K extends Key> SecureRequest.Builder<InputStream, K> request() {
-            return (SecureRequest.Builder<InputStream, K>) REQUEST_BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Returns a new builder to create {@link VerifySecureDigestRequest}s used to verify a mac or signature via
-         * {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
-         *
-         * @param <K> the type of key used by the algorithm to verify the mac or signature.
-         * @return a new builder to create {@link VerifySecureDigestRequest}s used to verify a mac or signature via
-         * {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
-         * @since 0.13.0
-         */
-        @SuppressWarnings("unchecked")
-        public static <K extends Key> VerifySecureDigestRequest.Builder<K> verifyRequest() {
-            return (VerifySecureDigestRequest.Builder<K>) VERIFY_REQUEST_BUILDER_SUPPLIER.get();
-        }
     }
 
     /**
@@ -417,14 +322,6 @@ public final class Jwts {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyAlgorithms";
         private static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
-
-        // @since 0.13.0
-        private static final Supplier<KeyRequest.Builder<?>> REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyRequest$Builder$Supplier");
-
-        // @since 0.13.0
-        private static final Supplier<DecryptionKeyRequest.Builder<?>> VERIFY_REQUEST_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest$Builder$Supplier");
 
         /**
          * Returns all standard JWA standard <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Cryptographic
@@ -1028,34 +925,6 @@ public final class Jwts {
          * </ol>
          */
         public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Jwts.get(REGISTRY, "ECDH-ES+A256KW");
-
-        /**
-         * Returns a new builder to create {@link KeyRequest}s used to get a JWE encryption key via
-         * {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
-         *
-         * @param <K> the type of key used by the {@link KeyAlgorithm} to get a JWE encryption key.
-         * @return a new builder to create {@link KeyRequest}s used to get a JWE encryption key via
-         * {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
-         * @since 0.13.0
-         */
-        @SuppressWarnings("unchecked")
-        public static <K extends Key> KeyRequest.Builder<K> request() {
-            return (KeyRequest.Builder<K>) REQUEST_BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Returns a new builder to create {@link DecryptionKeyRequest}s used to get a JWE decryption key via
-         * {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
-         *
-         * @param <K> the type of key used by the {@link KeyAlgorithm} to get a JWE decryption key.
-         * @return a new builder to create {@link DecryptionKeyRequest}s used to get a JWE decryption key via
-         * {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
-         * @since 0.13.0
-         */
-        @SuppressWarnings("unchecked")
-        public static <K extends Key> DecryptionKeyRequest.Builder<K> decRequest() {
-            return (DecryptionKeyRequest.Builder<K>) VERIFY_REQUEST_BUILDER_SUPPLIER.get();
-        }
 
         //prevent instantiation
         private KEY() {

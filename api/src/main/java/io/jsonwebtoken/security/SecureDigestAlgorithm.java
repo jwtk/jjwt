@@ -52,4 +52,28 @@ import java.security.Key;
  */
 public interface SecureDigestAlgorithm<S extends Key, V extends Key>
         extends DigestAlgorithm<SecureRequest<InputStream, S>, VerifySecureDigestRequest<V>> {
+
+    /*
+    default byte[] digest(Consumer<SecureRequest.Params<InputStream, S, ?>> p) {
+        SecureRequest.Builder<InputStream, S> b = SecureRequest.builder();
+        p.accept(b);
+        SecureRequest<InputStream, S> r = b.build();
+        return digest(r);
+    }
+
+    default byte[] digest(InputStream is, S key) {
+        return digest(c -> c.payload(is).key(key));
+    }
+
+    default boolean verify(Consumer<VerifySecureDigestRequest.Params<V, ?>> c) {
+        VerifySecureDigestRequest.Builder<V> b = VerifySecureDigestRequest.builder();
+        c.accept(b);
+        VerifySecureDigestRequest<V> r = b.build();
+        return verify(r);
+    }
+
+    default boolean verify(InputStream is, V key) {
+        return verify(c -> c.payload(is).key(key));
+    }
+     */
 }

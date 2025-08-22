@@ -329,7 +329,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         }
 
         try {
-            VerifySecureDigestRequest<Key> request = Jwts.SIG.verifyRequest()
+            VerifySecureDigestRequest<Key> request = VerifySecureDigestRequest.builder()
                     .key(key).payload(verificationInput).digest(signature)
                     .provider(provider).build();
             if (!algorithm.verify(request)) {
@@ -546,7 +546,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // extract key-specific provider if necessary;
             Provider provider = ProviderKey.getProvider(key, this.provider);
             key = ProviderKey.getKey(key); // this must be called after ProviderKey.getProvider
-            DecryptionKeyRequest<Key> request = Jwts.KEY.decRequest().provider(provider)
+            DecryptionKeyRequest<Key> request = DecryptionKeyRequest.builder().provider(provider)
                     .payload(cekBytes).header(jweHeader).encryptionAlgorithm(encAlg)
                     .key(key).build();
             final SecretKey cek = keyAlg.getDecryptionKey(request);
@@ -562,7 +562,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             // TODO: add encProvider(Provider) builder method that applies to this request only?
             InputStream ciphertext = payload.toInputStream();
             ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
-            DecryptAeadRequest dreq = Jwts.ENC.decryptRequest()
+            DecryptAeadRequest dreq = DecryptAeadRequest.builder()
                     .payload(ciphertext).key(cek).associatedData(aad).iv(iv).digest(digest)
                     .build();
             encAlg.decrypt(dreq, plaintext);

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import javax.crypto.SecretKey;
+import java.io.OutputStream;
 
 /**
  * A request to an {@link AeadAlgorithm} to decrypt ciphertext with integrity verification with a supplied
@@ -29,7 +30,7 @@ public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSuppl
     /**
      * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
      *
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Params<M extends Params<M>> extends AeadRequest.Params<M> {
 
@@ -50,11 +51,24 @@ public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSuppl
     }
 
     /**
-     * A builder for creating new immutable {@link DecryptAeadRequest} instances.
+     * A builder for creating new immutable {@link DecryptAeadRequest}s used for AEAD decryption via
+     * {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)}.
      *
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Builder extends io.jsonwebtoken.lang.Builder<DecryptAeadRequest>, Params<Builder> {
+    }
+
+    /**
+     * Returns a new {@link DecryptAeadRequest.Builder} for creating immutable {@link DecryptAeadRequest}s used for
+     * AEAD decryption via {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)}.
+     *
+     * @return a new {@link DecryptAeadRequest.Builder} for creating immutable {@link DecryptAeadRequest}s used for
+     * AEAD decryption via {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static DecryptAeadRequest.Builder builder() {
+        return Suppliers.DECRYPT_AEAD_REQUEST_BUILDER.get();
     }
 
 }

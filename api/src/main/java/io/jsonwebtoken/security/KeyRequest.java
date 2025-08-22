@@ -17,6 +17,8 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.JweHeader;
 
+import java.security.Key;
+
 /**
  * A request to a {@link KeyAlgorithm} to obtain the key necessary for AEAD encryption or decryption.  The exact
  * {@link AeadAlgorithm} that will be used is accessible via {@link #getEncryptionAlgorithm()}.
@@ -82,7 +84,7 @@ public interface KeyRequest<T> extends Request<T> {
      *            key used to obtain the encryption key. For a decryption key request, this will be the encrypted CEK
      *            (Content Encryption Key) ciphertext byte array.
      * @param <M> the instance type returned for method chaining.
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Params<T, M extends Params<T, M>> extends Request.Params<T, M> {
 
@@ -121,13 +123,25 @@ public interface KeyRequest<T> extends Request<T> {
     }
 
     /**
-     * A builder for creating new immutable {@link KeyRequest} instances.
+     * A builder for creating {@link KeyRequest}s used to get a JWE encryption key via
+     * {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
      *
-     * @param <T> the type of request payload. For an encryption key request, this will be the
-     *            {@link java.security.Key Key} used to obtain the encryption key. For a decryption key request,
-     *            this will be the encrypted CEK (Content Encryption Key) ciphertext byte array.
-     * @since 0.13.0
+     * @param <K> the type of {@link java.security.Key Key} used to obtain the encryption key.
+     * @since JJWT_RELEASE_VERSION
      */
-    interface Builder<T> extends Params<T, Builder<T>>, io.jsonwebtoken.lang.Builder<KeyRequest<T>> {
+    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<KeyRequest<K>> {
+    }
+
+    /**
+     * Returns a new {@link KeyRequest.Builder} for creating immutable {@link KeyRequest}s used to get a JWE
+     * encryption key via {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
+     *
+     * @return a new {@link KeyRequest.Builder} for creating immutable {@link KeyRequest}s used to get a JWE
+     * encryption key via {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <K extends Key> KeyRequest.Builder<K> builder() {
+        return (KeyRequest.Builder<K>) Suppliers.KEY_REQUEST_BUILDER.get();
     }
 }

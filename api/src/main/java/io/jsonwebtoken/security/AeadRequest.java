@@ -33,7 +33,7 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
      * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
      *
      * @param <M> the instance type returned for method chaining.
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Params<M extends Params<M>> extends SecureRequest.Params<InputStream, SecretKey, M> {
 
@@ -51,10 +51,23 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
     }
 
     /**
-     * A builder for creating new immutable {@link AeadRequest} instances.
+     * A builder for creating new immutable {@link AeadRequest} instances used for AEAD encryption via
+     * {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}.
      *
-     * @since 0.13.0
+     * @since JJWT_RELEASE_VERSION
      */
     interface Builder extends Params<Builder>, io.jsonwebtoken.lang.Builder<AeadRequest> {
+    }
+
+    /**
+     * Returns a new {@link AeadRequest.Builder} for creating immutable {@link AeadRequest}s used for AEAD encryption
+     * via {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}.
+     *
+     * @return a new {@link AeadRequest.Builder} for creating immutable {@link AeadRequest}s used for AEAD encryption
+     * via {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static AeadRequest.Builder builder() {
+        return Suppliers.AEAD_REQUEST_BUILDER.get();
     }
 }

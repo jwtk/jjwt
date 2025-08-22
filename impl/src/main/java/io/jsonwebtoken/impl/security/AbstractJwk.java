@@ -154,7 +154,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterRea
         Assert.hasText(json, "Canonical JWK Thumbprint JSON cannot be null or empty.");
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8); // https://www.rfc-editor.org/rfc/rfc7638#section-3 #2
         InputStream in = Streams.of(bytes);
-        Request<InputStream> request = Jwks.HASH.request()
+        Request<InputStream> request = Request.<InputStream>builder()
                 .provider(this.context.getProvider()).random(this.context.getRandom())
                 .payload(in).build();
         byte[] digest = alg.digest(request);
