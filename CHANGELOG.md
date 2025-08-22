@@ -226,7 +226,7 @@ All JWA-defined encryption algorithms and key management algorithms are fully im
 available immediately.  For example:
 
 ```java
-AeadAlgorithm enc = Jwe.alg.A256GCM;
+AeadAlgorithm enc = Jwts.ENC.A256GCM;
 SecretKey key = enc.key().build();
 String compact = Jwts.builder().setSubject("Joe").encryptWith(key, enc).compact();
 
