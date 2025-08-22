@@ -37,6 +37,7 @@ public class DefaultVerifySecureDigestRequest<K extends Key> extends DefaultSecu
         return this.digest;
     }
 
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
     public static class Builder<K extends Key> extends AbstractSecureRequestParams<InputStream, K, VerifySecureDigestRequest.Builder<K>>
             implements VerifySecureDigestRequest.Builder<K> {
 

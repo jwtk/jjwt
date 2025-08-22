@@ -2,6 +2,8 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Classes;
 
+import java.io.OutputStream;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -38,7 +40,6 @@ final class Suppliers {
     static final Supplier<DecryptAeadRequest.Builder> DECRYPT_AEAD_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest$Builder$Supplier");
 
-    static final Supplier<AeadResult.Builder> AEAD_RESULT_BUILDER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadResult$Builder$Supplier");
-
+    static final Function<OutputStream, AeadResult> AEAD_RESULT_FACTORY =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadResult$Factory");
 }

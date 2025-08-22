@@ -677,7 +677,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
         JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
-        KeyRequest<Key> keyRequest = KeyRequest.<Key>builder()
+        KeyRequest<Key> keyRequest = KeyRequest.builder()
                 .provider(keyProvider).random(this.secureRandom)
                 .payload(key).header(delegate).encryptionAlgorithm(enc)
                 .build();
@@ -706,12 +706,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         // During encryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
-        // As such, the provider here is intentionally omitted (null):
+        // As such, the provider here is intentionally omitted when building the AeadRequest:
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
         AeadRequest req = AeadRequest.builder().random(secureRandom) // no .provider call, see message above
                 .payload(plaintext).key(cek).associatedData(aad).build();
-        AeadResult res = AeadResult.of(ciphertextOut);
+        AeadResult res = AeadResult.with(ciphertextOut);
         encrypt(req, res);
 
         byte[] iv = Assert.notEmpty(res.getIv(), "Encryption result must have a non-empty initialization vector.");

@@ -52,24 +52,6 @@ public interface AeadResult extends DigestSupplier, IvSupplier {
     AeadResult setIv(byte[] iv);
 
     /**
-     * A builder for creating new {@link AeadResult} instances.
-     *
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Builder extends io.jsonwebtoken.lang.Builder<AeadResult> {
-
-        /**
-         * Sets the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
-         * encryption or plaintext during decryption.
-         *
-         * @param out the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
-         *            encryption or plaintext during decryption.
-         * @return the builder for instance chaining.
-         */
-        Builder out(OutputStream out);
-    }
-
-    /**
      * Returns a new {@link AeadResult} with the specified {@link OutputStream} that will be used to write the
      * resulting ciphertext during encryption or plaintext during decryption.
      *
@@ -77,8 +59,8 @@ public interface AeadResult extends DigestSupplier, IvSupplier {
      * resulting ciphertext during encryption or plaintext during decryption.
      * @since JJWT_RELEASE_VERSION
      */
-    static AeadResult of(OutputStream out) {
-        return Suppliers.AEAD_RESULT_BUILDER.get().out(out).build();
+    static AeadResult with(OutputStream out) {
+        return Suppliers.AEAD_RESULT_FACTORY.apply(out);
     }
 
 }

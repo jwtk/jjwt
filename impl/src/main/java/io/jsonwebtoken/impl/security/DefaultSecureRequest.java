@@ -48,6 +48,7 @@ public class DefaultSecureRequest<T, K extends Key> extends DefaultRequest<T> im
         }
     }
 
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
     public static class Builder<T, K extends Key> extends AbstractSecureRequestParams<T, K, SecureRequest.Builder<T, K>>
             implements SecureRequest.Builder<T, K> {
 

@@ -64,6 +64,7 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
         }
     }
 
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
     public static class Builder<K extends Key> extends AbstractKeyRequestParams<K, KeyRequest.Builder<K>>
             implements KeyRequest.Builder<K> {
 

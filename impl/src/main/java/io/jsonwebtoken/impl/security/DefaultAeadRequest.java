@@ -68,7 +68,7 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
         }
     }
 
-    @SuppressWarnings("unused") // used via reflection in Jwts.ENC
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
     public static class Builder extends AbstractAeadRequestParams<AeadRequest.Builder>
             implements AeadRequest.Builder {
 

@@ -39,7 +39,7 @@ public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements Dec
         return this.TAG;
     }
 
-    @SuppressWarnings("unused") // used via reflection in Jwts.ENC
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
     public static class Builder extends AbstractAeadRequestParams<DecryptAeadRequest.Builder>
             implements DecryptAeadRequest.Builder {
 

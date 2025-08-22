@@ -72,6 +72,7 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
         }
     }
 
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
     public static class Builder<T> extends AbstractRequestParams<T, Request.Builder<T>> implements Request.Builder<T> {
 
         @Override

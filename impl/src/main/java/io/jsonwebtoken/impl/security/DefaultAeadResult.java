@@ -21,6 +21,7 @@ import io.jsonwebtoken.security.DigestSupplier;
 import io.jsonwebtoken.security.IvSupplier;
 
 import java.io.OutputStream;
+import java.util.function.Function;
 
 public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier {
 
@@ -59,26 +60,11 @@ public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier
         return this.iv;
     }
 
-    public static class Builder implements AeadResult.Builder {
-
-        private OutputStream out;
-
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Factory implements Function<OutputStream, AeadResult> {
         @Override
-        public AeadResult.Builder out(OutputStream out) {
-            this.out = out;
-            return this;
-        }
-
-        @Override
-        public AeadResult build() {
-            return new DefaultAeadResult(this.out); // constructor validates out != null
-        }
-
-        public static class Supplier implements java.util.function.Supplier<AeadResult.Builder> {
-            @Override
-            public AeadResult.Builder get() {
-                return new Builder();
-            }
+        public AeadResult apply(OutputStream out) {
+            return new DefaultAeadResult(out);
         }
     }
 }
