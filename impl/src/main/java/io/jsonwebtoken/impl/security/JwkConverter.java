@@ -21,7 +21,6 @@ import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
@@ -36,6 +35,7 @@ import io.jsonwebtoken.security.RsaPublicJwk;
 import io.jsonwebtoken.security.SecretJwk;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static io.jsonwebtoken.lang.Strings.nespace;
 

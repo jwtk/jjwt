@@ -81,6 +81,7 @@ package io.jsonwebtoken;
  *
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface Identifiable {
 
     /**

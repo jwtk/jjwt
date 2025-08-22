@@ -22,6 +22,7 @@ package io.jsonwebtoken.io;
  * @param <R> decoding output type
  * @since 0.10.0
  */
+@FunctionalInterface
 public interface Decoder<T, R> {
 
     /**

@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.InvalidKeyException;
 
@@ -23,6 +22,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.function.Function;
 
 /**
  * Derives a PublicKey from an Edwards-curve PrivateKey instance.

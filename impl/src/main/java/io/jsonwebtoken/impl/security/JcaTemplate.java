@@ -21,7 +21,6 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.CheckedSupplier;
 import io.jsonwebtoken.impl.lang.DefaultRegistry;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
@@ -79,13 +78,7 @@ public class JcaTemplate {
     );
 
     private static final Registry<Class<?>, InstanceFactory<?>> REGISTRY = new DefaultRegistry<>(
-            "JCA Instance Factory", "instance class", FACTORIES,
-            new Function<InstanceFactory<?>, Class<?>>() {
-                @Override
-                public Class<?> apply(InstanceFactory<?> factory) {
-                    return factory.getInstanceClass();
-                }
-            });
+            "JCA Instance Factory", "instance class", FACTORIES, InstanceFactory::getInstanceClass);
 
     // visible for testing
     protected Provider findBouncyCastle() {

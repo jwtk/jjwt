@@ -16,7 +16,6 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Strings;
@@ -36,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
 

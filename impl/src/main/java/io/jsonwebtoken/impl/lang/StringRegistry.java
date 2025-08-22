@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 public class StringRegistry<V> extends DefaultRegistry<String, V> {
 
@@ -31,7 +32,7 @@ public class StringRegistry<V> extends DefaultRegistry<String, V> {
     private final Map<String, V> CI_VALUES;
 
     public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, boolean caseSensitive) {
-        this(name, keyName, values, keyFn, caseSensitive ? Functions.<String>identity() : CaseInsensitiveFunction.ENGLISH);
+        this(name, keyName, values, keyFn, caseSensitive ? Function.identity() : CaseInsensitiveFunction.ENGLISH);
     }
 
     public StringRegistry(String name, String keyName, Collection<V> values, Function<V, String> keyFn, Function<String, String> caseFn) {

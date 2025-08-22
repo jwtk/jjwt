@@ -17,8 +17,6 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.ParameterMap;
 import io.jsonwebtoken.impl.io.Streams;
-import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -30,8 +28,10 @@ import io.jsonwebtoken.security.X509Builder;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.function.Function;
 
 //Consolidates logic between DefaultJwtHeaderBuilder and AbstractAsymmetricJwkBuilder
 public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
@@ -46,12 +46,7 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
     protected Boolean computeX509Sha256Thumbprint = null;
 
     private static Function<X509Certificate, byte[]> createGetBytesFunction(Class<? extends RuntimeException> clazz) {
-        return Functions.wrapFmt(new CheckedFunction<X509Certificate, byte[]>() {
-            @Override
-            public byte[] apply(X509Certificate cert) throws Exception {
-                return cert.getEncoded();
-            }
-        }, clazz, "Unable to access X509Certificate encoded bytes necessary to compute thumbprint. Certificate: %s");
+        return Functions.wrapFmt(Certificate::getEncoded, clazz, "Unable to access X509Certificate encoded bytes necessary to compute thumbprint. Certificate: %s");
     }
 
     private final Function<X509Certificate, byte[]> GET_X509_BYTES;

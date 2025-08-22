@@ -24,6 +24,7 @@ import java.io.InputStream;
  * @see #getAssociatedData()
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface AssociatedDataSupplier {
 
     /**

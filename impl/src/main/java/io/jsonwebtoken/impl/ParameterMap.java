@@ -19,7 +19,7 @@ import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.impl.lang.Parameters;
-import io.jsonwebtoken.impl.lang.RedactedSupplier;
+import io.jsonwebtoken.impl.lang.RedactedConfidentialValue;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
@@ -181,7 +181,7 @@ public class ParameterMap implements Map<String, Object>, ParameterReadable, Nam
             StringBuilder sb = new StringBuilder(100);
             sb.append("Invalid ").append(getName()).append(" ").append(param).append(" value");
             if (param.isSecret()) {
-                sb.append(": ").append(RedactedSupplier.REDACTED_VALUE);
+                sb.append(": ").append(RedactedConfidentialValue.REDACTED_VALUE);
             } else if (!(rawValue instanceof byte[])) {
                 // don't print raw byte array gibberish.  We can't base64[url] encode it either because that could
                 // make the exception message confusing: the developer would see an encoded string and could think

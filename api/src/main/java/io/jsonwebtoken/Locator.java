@@ -28,6 +28,7 @@ import java.security.Key;
  * @param <T> the type of object that may be returned from the {@link #locate(Header)} method
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface Locator<T> {
 
     /**

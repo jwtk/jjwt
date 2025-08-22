@@ -20,7 +20,6 @@ import io.jsonwebtoken.CompressionException;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.CheckedFunction;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.PropagatingExceptionFunction;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Assert;
@@ -31,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.Function;
 
 /**
  * Abstract class that asserts arguments and wraps IOException with CompressionException.

@@ -25,6 +25,7 @@ import java.security.KeyPair;
  * @see KeyPairBuilder
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface KeyPairBuilderSupplier {
 
     /**

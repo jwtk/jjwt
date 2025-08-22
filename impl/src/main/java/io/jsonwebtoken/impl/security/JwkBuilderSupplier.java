@@ -15,12 +15,12 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyOperationPolicy;
 
 import java.security.Provider;
+import java.util.function.Supplier;
 
 public class JwkBuilderSupplier implements Supplier<DynamicJwkBuilder<?, ?>> {
 

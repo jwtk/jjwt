@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 jsonwebtoken.io
+ * Copyright © 2023 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.lang;
+package io.jsonwebtoken.jackson.io
 
-public interface Function<T, R> {
 
-    R apply(T t);
+import io.jsonwebtoken.security.ConfidentialValue
+
+class TestConfidentialValue<T> implements ConfidentialValue<T> {
+
+    private static final TestConfidentialValue<String> INSTANCE = new TestConfidentialValue<>("test")
+    private final T value;
+
+    private TestConfidentialValue(T value) {
+        this.value = value;
+    }
+
+    @Override
+    T get() {
+        return value;
+    }
 }

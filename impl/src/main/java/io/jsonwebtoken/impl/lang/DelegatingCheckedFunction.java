@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.impl.lang;
 
+import java.util.function.Function;
+
 public class DelegatingCheckedFunction<T, R> implements CheckedFunction<T, R> {
 
     final Function<T, R> delegate;

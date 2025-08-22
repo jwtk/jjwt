@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jsonwebtoken</groupId>
@@ -90,50 +91,51 @@
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <arguments />
+        <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
-        <maven.jar.version>3.3.0</maven.jar.version>
-        <maven.compiler.version>3.11.0</maven.compiler.version>
-        <maven.javadoc.version>3.1.1</maven.javadoc.version> <!-- max version allowed for JDK 7 builds -->
-        <maven.source.version>3.2.1</maven.source.version>
-        <maven.resources.version>3.1.0</maven.resources.version>
-        <maven.gpg.version>1.6</maven.gpg.version> <!-- max version allowed for JDK 7 builds -->
-        <maven.japicmp.version>0.13.1</maven.japicmp.version> <!-- max version allowed for JDK 7 builds -->
-        <gmavenplus.version>1.6.1</gmavenplus.version> <!-- higher version used in jdk8AndLater profile below -->
-        <maven.license.version>4.2.rc3</maven.license.version>
+        <maven.jar.version>3.4.2</maven.jar.version>
+        <maven.compiler.version>3.14.0</maven.compiler.version>
+        <maven.javadoc.version>3.11.3</maven.javadoc.version>
+        <maven.source.version>3.3.1</maven.source.version>
+        <maven.resources.version>3.3.1</maven.resources.version>
+        <maven.gpg.version>3.2.8</maven.gpg.version>
+        <maven.japicmp.version>0.23.1</maven.japicmp.version>
+        <gmavenplus.version>4.2.1</gmavenplus.version>
+        <maven.license.version>4.6</maven.license.version>
         <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
-        <jdk.version>7</jdk.version>
+        <jdk.version>8</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
-        <jackson.version>2.12.7.1</jackson.version>
-        <orgjson.version>20231013</orgjson.version>
-        <gson.version>2.11.0</gson.version>
+        <jackson.version>2.19.2</jackson.version>
+        <orgjson.version>20250517</orgjson.version>
+        <gson.version>2.13.1</gson.version>
 
-        <maven.javadoc.additionalOptions />
+        <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
-        <bouncycastle.version>1.78.1</bouncycastle.version>
+        <bouncycastle.version>1.81</bouncycastle.version>
         <bcprov.artifactId>bcprov-jdk18on</bcprov.artifactId>
         <bcpkix.artifactId>bcpkix-jdk18on</bcpkix.artifactId>
 
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
-        <groovy.version>2.5.16</groovy.version> <!-- higher version used in jdk8AndLater profile below -->
-        <easymock.version>3.6</easymock.version> <!-- higher version used in jdk8AndLater profile below -->
-        <junit.version>4.12</junit.version>
-        <powermock.version>2.0.0-beta.5</powermock.version> <!-- higher version used in jdk8AndLater profile below -->
-        <failsafe.plugin.version>3.0.0-M5</failsafe.plugin.version>
-        <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
-        <clover.version>4.3.1</clover.version> <!-- max version allowed for JDK 7 builds -->
+        <groovy.version>4.0.28</groovy.version>
+        <easymock.version>5.6.0</easymock.version>
+        <junit.version>4.13.2</junit.version>
+        <powermock.version>2.0.9</powermock.version>
+        <failsafe.plugin.version>3.1.2</failsafe.plugin.version>
+        <surefire.plugin.version>3.1.2</surefire.plugin.version>
+        <clover.version>4.5.2</clover.version>
         <clover.db>${jjwt.root}/target/clover/clover.db</clover.db>
-        <surefire.argLine />
+        <surefire.argLine/>
         <test.addOpens>
             --add-opens java.base/java.lang=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
             --add-opens java.desktop/java.beans=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
             --add-opens java.base/java.lang.ref=ALL-UNNAMED, <!-- Needed by PowerMock -->
+            --add-opens java.base/java.security=ALL-UNNAMED, <!-- Needed by TestProvider.groovy on JDK 17 or later -->
             <!-- needed by KeysImplTest.testKeyPairFor, KeysTest.testDeprecatedKeyPairFor, and
                  KeysTest.testKeyPairBuilder: -->
             --add-opens java.base/sun.security.util=ALL-UNNAMED
@@ -211,7 +213,7 @@
     <dependencies>
         <!-- Test Dependencies: Only required for testing when building.  Not required by users at runtime: -->
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
             <scope>test</scope>
@@ -243,7 +245,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -254,12 +256,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>3.1.1</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.maven.scm</groupId>
                             <artifactId>maven-scm-provider-gitexe</artifactId>
-                            <version>1.9.5</version>
+                            <version>2.1.0</version>
                         </dependency>
                     </dependencies>
                     <configuration>
@@ -467,7 +469,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <shadedClassifierName>deprecated</shadedClassifierName>
                         <shadedArtifactAttached>true</shadedArtifactAttached>
@@ -496,7 +498,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>
@@ -558,6 +560,7 @@
                 <configuration>
                     <source>${jdk.version}</source>
                     <target>${jdk.version}</target>
+                    <release>${jdk.version}</release>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -582,7 +585,7 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
+                        <groupId>org.apache.groovy</groupId>
                         <artifactId>groovy</artifactId>
                         <version>${groovy.version}</version>
                     </dependency>
@@ -632,7 +635,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.14</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -643,7 +646,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>5.1.9</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -672,65 +675,12 @@
     </build>
     <profiles>
         <profile>
-            <id>jdk7</id>
-            <activation>
-                <jdk>1.7</jdk>
-            </activation>
-            <properties>
-                <maven.jar.version>3.2.2</maven.jar.version>
-                <maven.compiler.version>3.8.1</maven.compiler.version>
-                <orgjson.version>20230618</orgjson.version>
-                <bcprov.artifactId>bcprov-jdk15to18</bcprov.artifactId>
-                <bcpkix.artifactId>bcpkix-jdk15to18</bcpkix.artifactId>
-            </properties>
-        </profile>
-        <profile>
-            <id>jdk8AndLater</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <properties>
-                <gmavenplus.version>3.0.2</gmavenplus.version>
-                <groovy.version>3.0.19</groovy.version>
-                <easymock.version>4.2</easymock.version>
-                <powermock.version>2.0.7</powermock.version>
-                <maven.japicmp.version>0.15.6</maven.japicmp.version>
-                <failsafe.plugin.version>3.1.2</failsafe.plugin.version>
-                <surefire.plugin.version>3.1.2</surefire.plugin.version>
-            </properties>
-        </profile>
-<!--        <profile>-->
-<!--            <id>jdk7And8</id>-->
-<!--            <activation>-->
-<!--                <jdk>[1.7,9)</jdk>-->
-<!--            </activation>-->
-<!--            <build>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                        <version>${maven.compiler.version}</version>-->
-<!--                        <configuration>-->
-<!--                            <source>${jdk.version}</source>-->
-<!--                            <target>${jdk.version}</target>-->
-<!--                            <release />-->
-<!--                            <encoding>${project.build.sourceEncoding}</encoding>-->
-<!--                            <excludes>-->
-<!--                                <exclude>module-info.java</exclude>-->
-<!--                            </excludes>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </build>-->
-<!--        </profile>-->
-        <profile>
             <!-- Added profile to address https://github.com/jwtk/jjwt/issues/364 -->
             <id>jdk9AndLater</id>
             <activation>
                 <jdk>[1.9,)</jdk>
             </activation>
             <properties>
-                <maven.compiler.version>3.11.0</maven.compiler.version>
                 <surefire.useModulePath>false</surefire.useModulePath>
                 <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
                 <surefire.argLine>${test.addOpens}, --illegal-access=debug</surefire.argLine>
@@ -744,16 +694,6 @@
             <properties>
                 <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
                 <surefire.argLine>${test.addOpens}</surefire.argLine>
-            </properties>
-        </profile>
-        <profile>
-            <id>jdk21AndLater</id>
-            <activation>
-                <jdk>[21,)</jdk>
-            </activation>
-            <properties>
-                <!-- normally this is 1.7, but as of 21, JDK 8 is the lowest source/target -->
-                <jdk.version>8</jdk.version>
             </properties>
         </profile>
         <profile>

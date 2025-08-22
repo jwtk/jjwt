@@ -27,6 +27,7 @@ import java.security.Key;
  * @see KeyBuilder
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface KeyBuilderSupplier<K extends Key, B extends KeyBuilder<K, B>> {
 
     /**

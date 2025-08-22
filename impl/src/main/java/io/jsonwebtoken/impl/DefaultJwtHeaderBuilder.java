@@ -87,7 +87,7 @@ public class DefaultJwtHeaderBuilder extends DefaultJweHeaderBuilder<Jwts.Header
 
     // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
     @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
-    public static final class Supplier implements io.jsonwebtoken.lang.Supplier<Jwts.HeaderBuilder> {
+    public static final class Supplier implements java.util.function.Supplier<Jwts.HeaderBuilder> {
         @Override
         public Jwts.HeaderBuilder get() {
             return new DefaultJwtHeaderBuilder();

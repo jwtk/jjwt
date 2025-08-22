@@ -17,18 +17,16 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.util.function.Function;
+
 public final class Functions {
 
     private Functions() {
     }
 
+    @Deprecated
     public static <T> Function<T, T> identity() {
-        return new Function<T, T>() {
-            @Override
-            public T apply(T t) {
-                return t;
-            }
-        };
+        return t -> t;
     }
 
     /**
@@ -57,32 +55,6 @@ public final class Functions {
     }
 
     /**
-     * Returns a composed function that first applies the {@code before} function to its input, and then applies
-     * the {@code after} function to the result. If evaluation of either function throws an exception, it is relayed to
-     * the caller of the composed function.
-     *
-     * @param <T>    type of input to the {@code before} function and the resulting composed function.
-     * @param <V>    the type of output of the {@code before} function, and of the input to the {@code after} function.
-     * @param <R>    return type of the {@code after} function and the resulting composed function.
-     * @param before the function to invoke first
-     * @param after  the function to invoke second with the output from the first
-     * @return a composed function that first applies the {@code before} function and then
-     * applies the {@code after} function.
-     * @throws IllegalArgumentException if either {@code before} or {@code after} are null.
-     */
-    public static <T, V, R> Function<T, R> andThen(final Function<T, ? extends V> before, final Function<V, R> after) {
-        Assert.notNull(before, "Before function cannot be null.");
-        Assert.notNull(after, "After function cannot be null.");
-        return new Function<T, R>() {
-            @Override
-            public R apply(T t) {
-                V result = before.apply(t);
-                return after.apply(result);
-            }
-        };
-    }
-
-    /**
      * Returns a composed function that invokes the specified functions in iteration order, and returns the first
      * non-null result.  Once a non-null result is discovered, no further functions will be invoked, 'short-circuiting'
      * any remaining functions. If evaluation of any function throws an exception, it is relayed to the caller of the
@@ -93,23 +65,19 @@ public final class Functions {
      * @param fns the functions to iterate
      * @return a composed function that invokes the specified functions in iteration order, returning the first non-null
      * result.
-     * @throws NullPointerException if after is null
      */
     @SafeVarargs
     public static <T, R> Function<T, R> firstResult(final Function<T, R>... fns) {
         Assert.notEmpty(fns, "Function list cannot be null or empty.");
-        return new Function<T, R>() {
-            @Override
-            public R apply(T t) {
-                for (Function<T, R> fn : fns) {
-                    Assert.notNull(fn, "Function cannot be null.");
-                    R result = fn.apply(t);
-                    if (result != null) {
-                        return result;
-                    }
+        return t -> {
+            for (Function<T, R> fn : fns) {
+                Assert.notNull(fn, "Function cannot be null.");
+                R result = fn.apply(t);
+                if (result != null) {
+                    return result;
                 }
-                return null;
             }
+            return null;
         };
     }
 }
