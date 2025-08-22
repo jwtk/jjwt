@@ -16,6 +16,7 @@
 package io.jsonwebtoken.issues
 
 import io.jsonwebtoken.Header
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.Locator
 import io.jsonwebtoken.impl.DefaultJwtBuilder
@@ -39,7 +40,7 @@ class Issue365Test {
 
 
     private static final Collection<SignatureAlgorithm> sigalgs() {
-        def algs = Jwts.SIG.get().values()
+        def algs = Jws.alg.registry().values()
                 .findAll({ it -> it instanceof SignatureAlgorithm })
         return algs as Collection<SignatureAlgorithm>
     }

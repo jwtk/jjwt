@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.SignatureException
@@ -27,7 +28,7 @@ import static org.junit.Assert.*
 
 class EdSignatureAlgorithmTest {
 
-    static EdSignatureAlgorithm alg = Jwts.SIG.EdDSA as EdSignatureAlgorithm
+    static EdSignatureAlgorithm alg = Jws.alg.EdDSA as EdSignatureAlgorithm
 
     @Test
     void testJcaName() {

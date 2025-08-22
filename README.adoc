@@ -738,7 +738,7 @@ import java.security.Key;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
-SecretKey key = Jwts.SIG.HS256.key().build();
+SecretKey key = Jws.alg.HS256.key().build();
 
 String jws = Jwts.builder().subject("Joe").signWith(key).compact();
 ----
@@ -1611,7 +1611,7 @@ key algorithms:
 
 ^*2*.{sp}{fn-require-java15-plus}^
 
-These are all represented as constants in the `io.jsonwebtoken.Jwts.SIG` registry class.
+These are all represented as constants in the `io.jsonwebtoken.Jws.alg` registry class.
 
 +++<a name="jws-key">++++++</a>+++
 
@@ -1705,7 +1705,7 @@ algorithm's `key()` builder method:
 
 [,java]
 ----
-SecretKey key = Jwts.SIG.HS256.key().build(); //or HS384.key() or HS512.key()
+SecretKey key = Jws.alg.HS256.key().build(); //or HS384.key() or HS512.key()
 ----
 
 Under the hood, JJWT uses the JCA default provider's `KeyGenerator` to create a secure-random key with the correct
@@ -1716,7 +1716,7 @@ as builder arguments. For example:
 
 [,java]
 ----
-SecretKey key = Jwts.SIG.HS256.key().provider(aProvider).random(aSecureRandom).build();
+SecretKey key = Jws.alg.HS256.key().provider(aProvider).random(aSecureRandom).build();
 ----
 
 If you need to save this new `SecretKey`, you can Base64 (or Base64URL) encode it:
@@ -1739,7 +1739,7 @@ algorithms, use an algorithm's respective `keyPair()` builder method:
 
 [,java]
 ----
-KeyPair keyPair = Jwts.SIG.RS256.keyPair().build(); //or RS384, RS512, PS256, etc...
+KeyPair keyPair = Jws.alg.RS256.keyPair().build(); //or RS384, RS512, PS256, etc...
 ----
 
 Once you've generated a `KeyPair`, you can use the private key (`keyPair.getPrivate()`) to create a JWS and the
@@ -1874,7 +1874,7 @@ that accepts the `SignatureAlgorithm` as an additional argument:
 [,java]
 ----
 
-   .signWith(privateKey, Jwts.SIG.RS512) // <---
+   .signWith(privateKey, Jws.alg.RS512) // <---
 
    .compact();
 ----
@@ -2062,7 +2062,7 @@ We need to do three things during creation:
 [,java]
 ----
 // create a test key for this example:
-SecretKey testKey = Jwts.SIG.HS512.key().build();
+SecretKey testKey = Jws.alg.HS512.key().build();
 
 String message = "Hello World. It's a Beautiful Day!";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
@@ -2105,7 +2105,7 @@ period (`.`) characters_*.
 [,java]
 ----
 // create a test key for this example:
-SecretKey testKey = Jwts.SIG.HS512.key().build();
+SecretKey testKey = Jws.alg.HS512.key().build();
 
 String claimsString = "{\"sub\":\"joe\",\"iss\":\"me\"}";
 
@@ -3740,7 +3740,7 @@ Example:
 [,java]
 ----
 // Create a test key suitable for the desired HMAC-SHA algorithm:
-MacAlgorithm alg = Jwts.SIG.HS512; //or HS384 or HS256
+MacAlgorithm alg = Jws.alg.HS512; //or HS384 or HS256
 SecretKey key = alg.key().build();
 
 String message = "Hello World!";
@@ -3769,7 +3769,7 @@ public key:
 [,java]
 ----
 // Create a test key suitable for the desired RSA signature algorithm:
-SignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
+SignatureAlgorithm alg = Jws.alg.RS512; //or PS512, RS256, etc...
 KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his RSA private key:
@@ -3802,7 +3802,7 @@ public key:
 [,java]
 ----
 // Create a test key suitable for the desired ECDSA signature algorithm:
-SignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
+SignatureAlgorithm alg = Jws.alg.ES512; //or ES256 or ES384
 KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his EC private key:
@@ -3854,7 +3854,7 @@ KeyPair pair = curve.keyPair().build();
 
 // Bob creates the compact JWS with his Edwards Curve private key:
 String jws = Jwts.builder().subject("Alice")
-    .signWith(pair.getPrivate(), Jwts.SIG.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
+    .signWith(pair.getPrivate(), Jws.alg.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
     .compact();
 
 // Alice receives and verifies the compact JWS came from Bob:
@@ -3922,7 +3922,7 @@ decrypt the JWT using her RSA private key:
 [,java]
 ----
 // Create a test KeyPair suitable for the desired RSA key algorithm:
-KeyPair pair = Jwts.SIG.RS512.keyPair().build();
+KeyPair pair = Jws.alg.RS512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
 KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
@@ -3994,7 +3994,7 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 [,java]
 ----
 // Create a test KeyPair suitable for the desired EC key algorithm:
-KeyPair pair = Jwts.SIG.ES512.keyPair().build();
+KeyPair pair = Jws.alg.ES512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
 KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
@@ -4070,7 +4070,7 @@ Example creating and parsing a secret JWK:
 
 [,java]
 ----
-SecretKey key = Jwts.SIG.HS512.key().build(); // or HS384 or HS256
+SecretKey key = Jws.alg.HS512.key().build(); // or HS384 or HS256
 SecretJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -4092,7 +4092,7 @@ Example creating and parsing an RSA Public JWK:
 
 [,java]
 ----
-RSAPublicKey key = (RSAPublicKey)Jwts.SIG.RS512.keyPair().build().getPublic();
+RSAPublicKey key = (RSAPublicKey)Jws.alg.RS512.keyPair().build().getPublic();
 RsaPublicJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -4114,7 +4114,7 @@ Example creating and parsing an RSA Private JWK:
 
 [,java]
 ----
-KeyPair pair = Jwts.SIG.RS512.keyPair().build();
+KeyPair pair = Jws.alg.RS512.keyPair().build();
 RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
 RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
@@ -4142,7 +4142,7 @@ Example creating and parsing an Elliptic Curve Public JWK:
 
 [,java]
 ----
-ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPair().build().getPublic();
+ECPublicKey key = (ECPublicKey) Jws.alg.ES512.keyPair().build().getPublic();
 EcPublicJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -4164,7 +4164,7 @@ Example creating and parsing an Elliptic Curve Private JWK:
 
 [,java]
 ----
-KeyPair pair = Jwts.SIG.ES512.keyPair().build();
+KeyPair pair = Jws.alg.ES512.keyPair().build();
 ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
 ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 

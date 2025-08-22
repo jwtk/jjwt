@@ -125,13 +125,13 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             "Section 4.1.2. See https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2 for more information.";
 
     private static final String UNSECURED_DISABLED_MSG_PREFIX = "Unsecured JWSs (those with an " +
-            DefaultHeader.ALGORITHM + " header value of '" + Jwts.SIG.NONE.getId() + "') are disallowed by " +
+            DefaultHeader.ALGORITHM + " header value of '" + Jws.alg.NONE.getId() + "') are disallowed by " +
             "default as mandated by https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6. If you wish to " +
             "allow them to be parsed, call the JwtParserBuilder.unsecured() method, but please read the " +
             "security considerations covered in that method's JavaDoc before doing so. Header: ";
 
     private static final String CRIT_UNSECURED_MSG = "Unsecured JWSs (those with an " + DefaultHeader.ALGORITHM +
-            " header value of '" + Jwts.SIG.NONE.getId() + "') may not use the " + DefaultProtectedHeader.CRIT +
+            " header value of '" + Jws.alg.NONE.getId() + "') may not use the " + DefaultProtectedHeader.CRIT +
             " header parameter per https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.11 (\"the [crit] Header " +
             "Parameter MUST be integrity protected; therefore, it MUST occur only within [a] JWS Protected Header)\"." +
             " Header: %s";
@@ -147,11 +147,11 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             "is supported by using the JwtParserBuilder.critical method. Header: %s";
 
     private static final String JWE_NONE_MSG = "JWEs do not support key management " + DefaultHeader.ALGORITHM +
-            " header value '" + Jwts.SIG.NONE.getId() + "' per " +
+            " header value '" + Jws.alg.NONE.getId() + "' per " +
             "https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1";
 
     private static final String JWS_NONE_SIG_MISMATCH_MSG = "The JWS header references signature algorithm '" +
-            Jwts.SIG.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
+            Jws.alg.NONE.getId() + "' yet the compact JWS string contains a signature. This is not permitted " +
             "per https://tools.ietf.org/html/rfc7518#section-3.6.";
 
     private static final String B64_MISSING_PAYLOAD = "Unable to verify JWS signature: the parser has encountered an " +
@@ -170,7 +170,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     private static final String UNPROTECTED_DECOMPRESSION_MSG = "The JWT header references compression algorithm " +
             "'%s', but payload decompression for Unprotected JWTs (those with an " + DefaultHeader.ALGORITHM +
-            " header value of '" + Jwts.SIG.NONE.getId() + "') or Unencoded JWSs (those with a " +
+            " header value of '" + Jws.alg.NONE.getId() + "') or Unencoded JWSs (those with a " +
             DefaultJwsHeader.B64 + " header value of false) that also rely on a SigningKeyResolver are disallowed " +
             "by default to protect against [Denial of Service attacks](" +
             "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf).  If you " +
@@ -397,7 +397,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             String msg = tokenized instanceof TokenizedJwe ? MISSING_JWE_ALG_MSG : MISSING_JWS_ALG_MSG;
             throw new MalformedJwtException(msg);
         }
-        final boolean unsecured = Jwts.SIG.NONE.getId().equalsIgnoreCase(alg);
+        final boolean unsecured = Jws.alg.NONE.getId().equalsIgnoreCase(alg);
 
         final CharSequence base64UrlDigest = tokenized.getDigest();
         final boolean hasDigest = Strings.hasText(base64UrlDigest);

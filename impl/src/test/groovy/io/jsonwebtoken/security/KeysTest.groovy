@@ -16,7 +16,7 @@
 //file:noinspection GrDeprecatedAPIUsage
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.impl.DefaultJwtBuilder
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.*
@@ -73,7 +73,7 @@ class KeysTest {
                     "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                     "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                     "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                    "output size).  Consider using the Jwts.SIG.HS256.key() builder (or " +
+                    "output size).  Consider using the Jws.alg.HS256.key() builder (or " +
                     "HS384.key() or HS512.key()) to create a key guaranteed to be secure enough " +
                     "for your preferred HMAC-SHA algorithm.  See " +
                     "https://tools.ietf.org/html/rfc7518#section-3.2 for more information." as String, expected.message
@@ -129,7 +129,7 @@ class KeysTest {
 
     @Test
     void testSecretKeyFor() {
-        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
+        for (SecureDigestAlgorithm alg : Jws.alg.registry().values()) {
             if (alg instanceof MacAlgorithm) {
                 SecretKey key = alg.key().build()
                 assertEquals alg.getKeyBitLength(), Bytes.bitLength(key.getEncoded())
@@ -208,7 +208,7 @@ class KeysTest {
     @Test
     void testKeyPairBuilder() {
 
-        Collection<SignatureAlgorithm> algs = Jwts.SIG.get().values()
+        Collection<SignatureAlgorithm> algs = Jws.alg.registry().values()
                 .findAll({ it instanceof KeyPairBuilderSupplier }) as Collection<SignatureAlgorithm>
 
         for (SignatureAlgorithm alg : algs) {

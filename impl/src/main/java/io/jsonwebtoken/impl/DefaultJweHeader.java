@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.JweHeader;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.impl.lang.Converters;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
@@ -63,7 +63,7 @@ public class DefaultJweHeader extends DefaultProtectedHeader implements JweHeade
 
     static boolean isCandidate(ParameterMap map) {
         String id = map.get(DefaultHeader.ALGORITHM);
-        return Strings.hasText(id) && !id.equalsIgnoreCase(Jwts.SIG.NONE.getId()) && // alg cannot be empty or 'none'
+        return Strings.hasText(id) && !id.equalsIgnoreCase(Jws.alg.NONE.getId()) && // alg cannot be empty or 'none'
                 Strings.hasText(map.get(ENCRYPTION_ALGORITHM)); // enc cannot be empty
 //        return Strings.hasText(map.get(ENCRYPTION_ALGORITHM)) || // MUST have at least an `enc` header
 //                !Collections.isEmpty(map.get(EPK)) ||

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.security.Curve
@@ -104,7 +105,7 @@ class RFC8037AppendixATest {
         def privJwk = a1Jwk()
         String compact = Jwts.builder()
                 .content(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
-                .signWith(privJwk.toKey() as PrivateKey, Jwts.SIG.EdDSA)
+                .signWith(privJwk.toKey() as PrivateKey, Jws.alg.EdDSA)
                 .compact()
         assertEquals A4_JWS_COMPACT, compact
 

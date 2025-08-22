@@ -37,7 +37,7 @@ import java.security.Key;
  *
  * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">Cryptographic Algorithms for Digital Signatures and
- * MACs</a> are available via {@link io.jsonwebtoken.Jwts.SIG Jwts.SIG}.</p>
+ * MACs</a> are available via {@link io.jsonwebtoken.Jws.alg Jws.alg}.</p>
  *
  * <p><b>&quot;alg&quot; identifier</b></p>
  *

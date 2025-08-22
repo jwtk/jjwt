@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
@@ -89,7 +90,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwts.KEY.get();
 
-    private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jwts.SIG.get();
+    private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jws.alg.registry();
 
     private Registry<String, CompressionAlgorithm> zipAlgs = Jwts.ZIP.get();
 

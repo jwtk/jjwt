@@ -144,7 +144,7 @@ class DefaultJwtParserBuilderTest {
         def p = builder.deserializeJsonWith(deserializer)
         assertSame deserializer, p.@deserializer
 
-        def alg = Jwts.SIG.HS256
+        def alg = Jws.alg.HS256
         def key = alg.key().build()
 
         String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
@@ -321,10 +321,10 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testAddSignatureAlgorithmsOverrideDefaults() {
-        final String standardId = Jwts.SIG.HS256.id
+        final String standardId = Jws.alg.HS256.id
         def header = Jwts.header().add('alg', standardId).build()
         def parser = builder.build()
-        assertSame Jwts.SIG.HS256, parser.sigAlgs.apply(header) // standard implementation default
+        assertSame Jws.alg.HS256, parser.sigAlgs.apply(header) // standard implementation default
 
         def custom = new TestMacAlgorithm(id: standardId) // custom impl with standard identifier
         parser = builder.sig().add(custom).and().build()
@@ -348,7 +348,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testCaseSensitiveSignatureAlgorithm() {
-        def alg = Jwts.SIG.HS256
+        def alg = Jws.alg.HS256
         def hb = Jwts.header().add('alg', alg.id)
         def standard = hb.build()
         def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()

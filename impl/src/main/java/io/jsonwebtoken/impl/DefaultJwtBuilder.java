@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -90,7 +91,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private Payload payload = Payload.EMPTY;
 
-    private SecureDigestAlgorithm<Key, ?> sigAlg = Jwts.SIG.NONE;
+    private SecureDigestAlgorithm<Key, ?> sigAlg = Jws.alg.NONE;
     private Function<SecureRequest<InputStream, Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
@@ -228,7 +229,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
-        if (Jwts.SIG.NONE.getId().equalsIgnoreCase(id)) {
+        if (Jws.alg.NONE.getId().equalsIgnoreCase(id)) {
             String msg = "The 'none' JWS algorithm cannot be used to sign JWTs.";
             throw new IllegalArgumentException(msg);
         }
@@ -244,7 +245,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.get().forKey(alg.getValue()));
+        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jws.alg.registry().forKey(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -635,7 +636,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(content, "Content argument cannot be null.");
         assertPayloadEncoding("unprotected JWT");
 
-        this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), Jwts.SIG.NONE.getId());
+        this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), Jws.alg.NONE.getId());
 
         final ByteArrayOutputStream jwt = new ByteArrayOutputStream(512);
 

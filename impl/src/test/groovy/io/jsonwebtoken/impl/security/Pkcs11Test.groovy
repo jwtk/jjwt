@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Assert
@@ -116,7 +117,7 @@ class Pkcs11Test {
         def prot = new KeyStore.PasswordProtection(PIN)
 
         def algs = [] as List<Identifiable>
-        algs.addAll(Jwts.SIG.get().values().findAll({ it instanceof KeyBuilderSupplier }))
+        algs.addAll(Jws.alg.registry().values().findAll({ it instanceof KeyBuilderSupplier }))
         algs.addAll(Jwts.ENC.get().values())
 
         algs.each { Identifiable alg ->
@@ -149,7 +150,7 @@ class Pkcs11Test {
         Map<String, TestKeys.Bundle> bundles = new LinkedHashMap()
 
         def algs = []
-        algs.addAll(Jwts.SIG.get().values().findAll({
+        algs.addAll(Jws.alg.registry().values().findAll({
             it instanceof KeyPairBuilderSupplier && it.id != 'EdDSA'
         }))
         algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
@@ -210,7 +211,7 @@ class Pkcs11Test {
     static void testJws(Provider keyProvider) {
 
         def algs = [] as List<Identifiable>
-        algs.addAll(Jwts.SIG.get().values().findAll({ it != Jwts.SIG.EdDSA })) // EdDSA accounted for by next two:
+        algs.addAll(Jws.alg.registry().values().findAll({ it != Jws.alg.EdDSA })) // EdDSA accounted for by next two:
         algs.add(Jwks.CRV.Ed25519)
         algs.add(Jwks.CRV.Ed448)
 
@@ -225,7 +226,7 @@ class Pkcs11Test {
             }
             if (!signKey) continue // not supported by Either the SunPKCS11 provider or SoftHSM2, so we have to try next
 
-            alg = alg instanceof Curve ? Jwts.SIG.EdDSA : alg as SecureDigestAlgorithm
+            alg = alg instanceof Curve ? Jws.alg.EdDSA : alg as SecureDigestAlgorithm
 
             // We might need to specify the PKCS11 provider since we can't access the private key material:
             def jws = Jwts.builder().provider(keyProvider).issuer('me').signWith(signKey, alg).compact()
@@ -286,7 +287,7 @@ class Pkcs11Test {
 
     static void testJwe(Provider provider) {
         def algs = []
-        algs.addAll(Jwts.SIG.get().values().findAll({
+        algs.addAll(Jws.alg.registry().values().findAll({
             it.id.startsWith('RS') || it.id.startsWith('ES')
             // unfortunately we can't also match .startsWith('PS') because SoftHSM2 doesn't support RSA-PSS keys :(
             // see https://github.com/opendnssec/SoftHSMv2/issues/721

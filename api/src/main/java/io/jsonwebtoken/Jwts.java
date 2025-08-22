@@ -57,7 +57,7 @@ public final class Jwts {
 
     // do not change this visibility.  Raw type method signature not be publicly exposed:
     @SuppressWarnings("unchecked")
-    private static <T> T get(Registry<String, ?> registry, String id) {
+    static <T> T get(Registry<String, ?> registry, String id) {
         return (T) registry.forKey(id);
     }
 
@@ -150,17 +150,16 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .signWith(aKey, <b>Jwts.SIG.HS512</b>) // or RS512, PS256, EdDSA, etc...
+     *    .signWith(aKey, <b>Jws.alg.HS512</b>) // or RS512, PS256, EdDSA, etc...
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg}.
      */
+    @Deprecated
     public static final class SIG {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms";
-        private static final Registry<String, SecureDigestAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         //prevent instantiation
         private SIG() {
@@ -173,9 +172,11 @@ public final class Jwts {
          * Algorithms Registry</a>.
          *
          * @return all standard JWA digital signature and MAC algorithms.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#registry()}
          */
+        @Deprecated
         public static Registry<String, SecureDigestAlgorithm<?, ?>> get() {
-            return REGISTRY;
+            return Jws.alg.registry();
         }
 
         /**
@@ -183,50 +184,71 @@ public final class Jwts {
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">RFC 7518, Section 3.6</a>.  This algorithm
          * is used only when creating unsecured (not integrity protected) JWSs and is not usable in any other scenario.
          * Any attempt to call its methods will result in an exception being thrown.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#NONE}
          */
-        public static final SecureDigestAlgorithm<Key, Key> NONE = Jwts.get(REGISTRY, "none");
+        @Deprecated
+        public static final SecureDigestAlgorithm<Key, Key> NONE = Jws.alg.NONE;
 
         /**
          * {@code HMAC using SHA-256} message authentication algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
          * requires a 256-bit (32 byte) key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#HS256}
          */
-        public static final MacAlgorithm HS256 = Jwts.get(REGISTRY, "HS256");
+        @Deprecated
+        public static final MacAlgorithm HS256 = Jws.alg.HS256;
 
         /**
          * {@code HMAC using SHA-384} message authentication algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
          * requires a 384-bit (48 byte) key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#HS384}
          */
-        public static final MacAlgorithm HS384 = Jwts.get(REGISTRY, "HS384");
+        @Deprecated
+        public static final MacAlgorithm HS384 = Jws.alg.HS384;
 
         /**
          * {@code HMAC using SHA-512} message authentication algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
          * requires a 512-bit (64 byte) key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#HS512}
          */
-        public static final MacAlgorithm HS512 = Jwts.get(REGISTRY, "HS512");
+        @Deprecated
+        public static final MacAlgorithm HS512 = Jws.alg.HS512;
 
         /**
          * {@code RSASSA-PKCS1-v1_5 using SHA-256} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
          * requires a 2048-bit key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#RS256}
          */
-        public static final SignatureAlgorithm RS256 = Jwts.get(REGISTRY, "RS256");
+        @Deprecated
+        public static final SignatureAlgorithm RS256 = Jws.alg.RS256;
 
         /**
          * {@code RSASSA-PKCS1-v1_5 using SHA-384} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
          * requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#RS384}
          */
-        public static final SignatureAlgorithm RS384 = Jwts.get(REGISTRY, "RS384");
+        @Deprecated
+        public static final SignatureAlgorithm RS384 = Jws.alg.RS384;
 
         /**
          * {@code RSASSA-PKCS1-v1_5 using SHA-512} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
          * requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#RS512}
          */
-        public static final SignatureAlgorithm RS512 = Jwts.get(REGISTRY, "RS512");
+        @Deprecated
+        public static final SignatureAlgorithm RS512 = Jws.alg.RS512;
 
         /**
          * {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256} signature algorithm as defined by
@@ -236,8 +258,11 @@ public final class Jwts {
          * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
          * classpath.</p>
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#PS256}
          */
-        public static final SignatureAlgorithm PS256 = Jwts.get(REGISTRY, "PS256");
+        @Deprecated
+        public static final SignatureAlgorithm PS256 = Jws.alg.PS256;
 
         /**
          * {@code RSASSA-PSS using SHA-384 and MGF1 with SHA-384} signature algorithm as defined by
@@ -247,8 +272,11 @@ public final class Jwts {
          * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
          * classpath.</p>
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#PS384}
          */
-        public static final SignatureAlgorithm PS384 = Jwts.get(REGISTRY, "PS384");
+        @Deprecated
+        public static final SignatureAlgorithm PS384 = Jws.alg.PS384;
 
         /**
          * {@code RSASSA-PSS using SHA-512 and MGF1 with SHA-512} signature algorithm as defined by
@@ -258,29 +286,38 @@ public final class Jwts {
          * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
          * classpath.</p>
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#PS512}
          */
-        public static final SignatureAlgorithm PS512 = Jwts.get(REGISTRY, "PS512");
+        @Deprecated
+        public static final SignatureAlgorithm PS512 = Jws.alg.PS512;
 
         /**
          * {@code ECDSA using P-256 and SHA-256} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 256-bit key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#ES256}
          */
-        public static final SignatureAlgorithm ES256 = Jwts.get(REGISTRY, "ES256");
+        @Deprecated
+        public static final SignatureAlgorithm ES256 = Jws.alg.ES256;
 
         /**
          * {@code ECDSA using P-384 and SHA-384} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 384-bit key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#ES384}
          */
-        public static final SignatureAlgorithm ES384 = Jwts.get(REGISTRY, "ES384");
+        @Deprecated
+        public static final SignatureAlgorithm ES384 = Jws.alg.ES384;
 
         /**
          * {@code ECDSA using P-521 and SHA-512} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 521-bit key.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#ES512}
          */
-        public static final SignatureAlgorithm ES512 = Jwts.get(REGISTRY, "ES512");
+        @Deprecated
+        public static final SignatureAlgorithm ES512 = Jws.alg.ES512;
 
         /**
          * {@code EdDSA} signature algorithm defined by
@@ -300,8 +337,10 @@ public final class Jwts {
          *
          * <p><b><sup>1</sup>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg#EdDSA}
          */
-        public static final SignatureAlgorithm EdDSA = Jwts.get(REGISTRY, "EdDSA");
+        @Deprecated
+        public static final SignatureAlgorithm EdDSA = Jws.alg.EdDSA;
     }
 
     /**

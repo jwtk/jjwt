@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.io.Streams
@@ -98,7 +99,7 @@ class DefaultJwtBuilderTest {
 
         replay provider
         def b = new DefaultJwtBuilder().provider(provider)
-                .setSubject('me').signWith(Jwts.SIG.HS256.key().build(), alg)
+                .setSubject('me').signWith(Jws.alg.HS256.key().build(), alg)
         assertSame provider, b.provider
         b.compact()
         verify provider
@@ -140,7 +141,7 @@ class DefaultJwtBuilderTest {
         }
 
         def b = new DefaultJwtBuilder().random(random)
-                .setSubject('me').signWith(Jwts.SIG.HS256.key().build(), alg)
+                .setSubject('me').signWith(Jws.alg.HS256.key().build(), alg)
         assertSame random, b.secureRandom
         b.compact()
         assertTrue called[0]
@@ -315,8 +316,8 @@ class DefaultJwtBuilderTest {
 
         builder.subject("Joe") // make Claims JWS
 
-        for (SecureDigestAlgorithm alg : Jwts.SIG.get().values()) {
-            if (alg.equals(Jwts.SIG.NONE)) { // skip
+        for (SecureDigestAlgorithm alg : Jws.alg.registry().values()) {
+            if (alg.equals(Jws.alg.NONE)) { // skip
                 continue;
             }
             def key, vkey
@@ -522,7 +523,7 @@ class DefaultJwtBuilderTest {
     void testSignWithNoneAlgorithm() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key, Jwts.SIG.NONE)
+            builder.signWith(key, Jws.alg.NONE)
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = "The 'none' JWS algorithm cannot be used to sign JWTs."
@@ -533,7 +534,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testSignWithPublicKey() {
         def key = TestKeys.RS256.pair.public
-        def alg = Jwts.SIG.RS256
+        def alg = Jws.alg.RS256
         try {
             builder.signWith(key, alg)
             fail()

@@ -1688,7 +1688,7 @@ class JwtParserTest {
         // create a compressed JWE first:
         def key = TestKeys.HS256
         def jws = Jwts.builder().claim("hello", "world")
-                .signWith(key, Jwts.SIG.HS256)
+                .signWith(key, Jws.alg.HS256)
                 .compact()
 
         //now build a parser with no signature algs, which should completely disable signature verification
