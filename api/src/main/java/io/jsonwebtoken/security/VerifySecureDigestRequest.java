@@ -58,6 +58,7 @@ public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<
      * Returns a new {@link VerifySecureDigestRequest.Builder} for creating {@link VerifySecureDigestRequest}s used
      * to verify a mac or signature via {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
      *
+     * @param <K> type of key used to verify the digest.
      * @return a new {@link VerifySecureDigestRequest.Builder} for creating {@link VerifySecureDigestRequest}s used
      * to verify a mac or signature via {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
      * @since JJWT_RELEASE_VERSION

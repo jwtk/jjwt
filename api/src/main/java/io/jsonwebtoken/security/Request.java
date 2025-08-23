@@ -105,6 +105,7 @@ public interface Request<T> extends Message<T> {
     /**
      * Returns a new {@link Request.Builder} for creating immutable {@link Request}s.
      *
+     * @param <T> the type of payload in the request.
      * @return a new {@link Request.Builder} for creating immutable {@link Request}s.
      * @since JJWT_RELEASE_VERSION
      */

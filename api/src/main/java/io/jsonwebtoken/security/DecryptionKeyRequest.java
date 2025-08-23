@@ -67,6 +67,8 @@ public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[
      * Returns a new {@link DecryptionKeyRequest.Builder} for creating immutable {@link DecryptionKeyRequest}s used to
      * get a JWE decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
      *
+     * @param <K> the type of key used to obtain the JWE decryption key via
+     *            {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
      * @return a new {@link DecryptionKeyRequest.Builder} for creating immutable {@link DecryptionKeyRequest}s used to
      * get a JWE decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
      * @since JJWT_RELEASE_VERSION

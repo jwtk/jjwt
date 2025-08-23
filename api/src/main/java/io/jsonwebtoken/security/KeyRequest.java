@@ -136,6 +136,7 @@ public interface KeyRequest<T> extends Request<T> {
      * Returns a new {@link KeyRequest.Builder} for creating immutable {@link KeyRequest}s used to get a JWE
      * encryption key via {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
      *
+     * @param <K> the type of {@link java.security.Key Key} used to obtain the JWE content encryption key.
      * @return a new {@link KeyRequest.Builder} for creating immutable {@link KeyRequest}s used to get a JWE
      * encryption key via {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
      * @since JJWT_RELEASE_VERSION

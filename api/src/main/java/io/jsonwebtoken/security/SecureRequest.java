@@ -60,6 +60,8 @@ public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier
      * Returns a new {@link SecureRequest.Builder} for creating {@link SecureRequest}s used to compute a mac or
      * signature via {@link SecureDigestAlgorithm#digest(Request)}.
      *
+     * @param <T> the type of payload in the request.
+     * @param <K> the type of key used by the algorithm to compute the digest.
      * @return a new {@link SecureRequest.Builder} for creating {@link SecureRequest}s used to compute a mac or
      * signature via {@link SecureDigestAlgorithm#digest(Request)}.
      * @since JJWT_RELEASE_VERSION

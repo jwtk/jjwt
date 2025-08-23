@@ -55,8 +55,9 @@ public interface AeadResult extends DigestSupplier, IvSupplier {
      * Returns a new {@link AeadResult} with the specified {@link OutputStream} that will be used to write the
      * resulting ciphertext during encryption or plaintext during decryption.
      *
+     * @param out the {@link OutputStream} that will be used to write the resulting ciphertext during encryption
      * @return a new {@link AeadResult} with the specified {@link OutputStream} that will be used to write the
-     * resulting ciphertext during encryption or plaintext during decryption.
+     * resulting ciphertext during encryption.
      * @since JJWT_RELEASE_VERSION
      */
     static AeadResult with(OutputStream out) {
