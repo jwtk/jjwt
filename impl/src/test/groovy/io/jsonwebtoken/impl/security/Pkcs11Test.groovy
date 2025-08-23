@@ -308,10 +308,10 @@ class Pkcs11Test {
                 if (name == 'RSA') {
                     // SunPKCS11 doesn't support RSA-OAEP* ciphers :(
                     // So we can only try with RSA1_5 and we have to skip RSA_OAEP and RSA_OAEP_256:
-                    encRoundtrip(bundle, Jwts.KEY.RSA1_5, provider)
+                    encRoundtrip(bundle, Jwe.enc.RSA1_5, provider)
                 } else if (StandardCurves.findByKey(bundle.pair.public) != null) { // EC or Ed key
                     // try all ECDH key algorithms:
-                    Jwts.KEY.get().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
+                    Jwe.enc.registry().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
                         encRoundtrip(bundle, it, provider)
                     }
                 } else {

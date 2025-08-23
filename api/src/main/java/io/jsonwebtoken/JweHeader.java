@@ -65,11 +65,11 @@ public interface JweHeader extends ProtectedHeader {
      * @return the <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.1">{@code epk} (Ephemeral
      * Public Key)</a> header value created by the JWE originator for use with key agreement algorithms, or
      * {@code null} if not present.
-     * @see Jwts.KEY
-     * @see Jwts.KEY#ECDH_ES
-     * @see Jwts.KEY#ECDH_ES_A128KW
-     * @see Jwts.KEY#ECDH_ES_A192KW
-     * @see Jwts.KEY#ECDH_ES_A256KW
+     * @see Jwe.enc
+     * @see Jwe.enc#ECDH_ES
+     * @see Jwe.enc#ECDH_ES_A128KW
+     * @see Jwe.enc#ECDH_ES_A192KW
+     * @see Jwe.enc#ECDH_ES_A256KW
      */
     PublicJwk<?> getEphemeralPublicKey();
 
@@ -80,10 +80,10 @@ public interface JweHeader extends ProtectedHeader {
      * @return any information about the JWE producer for use with key agreement algorithms, or {@code null} if not
      * present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.2">JWE <code>apu</code> (Agreement PartyUInfo) Header Parameter</a>
-     * @see Jwts.KEY#ECDH_ES
-     * @see Jwts.KEY#ECDH_ES_A128KW
-     * @see Jwts.KEY#ECDH_ES_A192KW
-     * @see Jwts.KEY#ECDH_ES_A256KW
+     * @see Jwe.enc#ECDH_ES
+     * @see Jwe.enc#ECDH_ES_A128KW
+     * @see Jwe.enc#ECDH_ES_A192KW
+     * @see Jwe.enc#ECDH_ES_A256KW
      */
     byte[] getAgreementPartyUInfo();
 
@@ -94,10 +94,10 @@ public interface JweHeader extends ProtectedHeader {
      * @return any information about the JWE recipient for use with key agreement algorithms, or {@code null} if not
      * present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.6.1.3">JWE <code>apv</code> (Agreement PartyVInfo) Header Parameter</a>
-     * @see Jwts.KEY#ECDH_ES
-     * @see Jwts.KEY#ECDH_ES_A128KW
-     * @see Jwts.KEY#ECDH_ES_A192KW
-     * @see Jwts.KEY#ECDH_ES_A256KW
+     * @see Jwe.enc#ECDH_ES
+     * @see Jwe.enc#ECDH_ES_A128KW
+     * @see Jwe.enc#ECDH_ES_A192KW
+     * @see Jwe.enc#ECDH_ES_A256KW
      */
     byte[] getAgreementPartyVInfo();
 
@@ -113,9 +113,9 @@ public interface JweHeader extends ProtectedHeader {
      * automatically when producing the encryption key.</p>
      *
      * @return the 96-bit initialization vector generated during key encryption, or {@code null} if not present.
-     * @see Jwts.KEY#A128GCMKW
-     * @see Jwts.KEY#A192GCMKW
-     * @see Jwts.KEY#A256GCMKW
+     * @see Jwe.enc#A128GCMKW
+     * @see Jwe.enc#A192GCMKW
+     * @see Jwe.enc#A256GCMKW
      */
     byte[] getInitializationVector();
 
@@ -130,9 +130,9 @@ public interface JweHeader extends ProtectedHeader {
      * automatically when producing the encryption key.</p>
      *
      * @return the 128-bit authentication tag resulting from key encryption, or {@code null} if not present.
-     * @see Jwts.KEY#A128GCMKW
-     * @see Jwts.KEY#A192GCMKW
-     * @see Jwts.KEY#A256GCMKW
+     * @see Jwe.enc#A128GCMKW
+     * @see Jwe.enc#A192GCMKW
+     * @see Jwe.enc#A256GCMKW
      */
     byte[] getAuthenticationTag();
 
@@ -143,9 +143,9 @@ public interface JweHeader extends ProtectedHeader {
      * @return the number of PBKDF2 iterations necessary to derive the key used during JWE encryption, or {@code null}
      * if not present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.2">JWE <code>p2c</code> (PBES2 Count) Header Parameter</a>
-     * @see Jwts.KEY#PBES2_HS256_A128KW
-     * @see Jwts.KEY#PBES2_HS384_A192KW
-     * @see Jwts.KEY#PBES2_HS512_A256KW
+     * @see Jwe.enc#PBES2_HS256_A128KW
+     * @see Jwe.enc#PBES2_HS384_A192KW
+     * @see Jwe.enc#PBES2_HS512_A256KW
      */
     Integer getPbes2Count();
 
@@ -162,9 +162,9 @@ public interface JweHeader extends ProtectedHeader {
      * @return the PBKDF2 {@code Salt Input} value necessary to derive the key used during JWE encryption, or
      * {@code null} if not present.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.8.1.1">JWE <code>p2s</code> (PBES2 Salt Input) Header Parameter</a>
-     * @see Jwts.KEY#PBES2_HS256_A128KW
-     * @see Jwts.KEY#PBES2_HS384_A192KW
-     * @see Jwts.KEY#PBES2_HS512_A256KW
+     * @see Jwe.enc#PBES2_HS256_A128KW
+     * @see Jwe.enc#PBES2_HS384_A192KW
+     * @see Jwe.enc#PBES2_HS512_A256KW
      */
     byte[] getPbes2Salt();
 }

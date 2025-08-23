@@ -25,7 +25,7 @@ import static org.junit.Assert.*
 
 class StandardAlgorithmsTest {
 
-    static final List<Registry<String, ?>> registries = [Jws.alg.registry(), Jwe.alg.registry(), Jwts.KEY.get(), Jwts.ZIP.get(), Jwks.HASH.get()]
+    static final List<Registry<String, ?>> registries = [Jws.alg.registry(), Jwe.alg.registry(), Jwe.enc.registry(), Jwts.ZIP.get(), Jwks.HASH.get()]
 
     private static void eachRegAlg(Closure c) {
         registries.each { reg -> reg.values().each { c(reg, it) } }
@@ -35,7 +35,7 @@ class StandardAlgorithmsTest {
     void testSize() {
         assertEquals 14, Jws.alg.registry().size()
         assertEquals 6, Jwe.alg.registry().size()
-        assertEquals 17, Jwts.KEY.get().size()
+        assertEquals 17, Jwe.enc.registry().size()
         assertEquals 2, Jwts.ZIP.get().size()
         assertEquals 6, Jwks.HASH.get().size()
     }

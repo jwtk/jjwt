@@ -34,9 +34,9 @@ import static org.junit.Assert.fail
 class Pbes2HsAkwAlgorithmTest {
 
     private static Password KEY = Keys.password("12345678".toCharArray())
-    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwts.KEY.PBES2_HS256_A128KW,
-                                                     Jwts.KEY.PBES2_HS384_A192KW,
-                                                     Jwts.KEY.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
+    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwe.enc.PBES2_HS256_A128KW,
+                                                     Jwe.enc.PBES2_HS384_A192KW,
+                                                     Jwe.enc.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
 
     @Test
     void testInsufficientIterations() {
@@ -92,10 +92,10 @@ class Pbes2HsAkwAlgorithmTest {
     @Test
     void test() {
 
-        def alg = Jwts.KEY.PBES2_HS256_A128KW
+        def alg = Jwe.enc.PBES2_HS256_A128KW
 
         int desiredMillis = 100
-        int iterations = Jwts.KEY.estimateIterations(alg, desiredMillis)
+        int iterations = Jwe.enc.estimateIterations(alg, desiredMillis)
         println "Estimated iterations: $iterations"
 
         int tries = 30

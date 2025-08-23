@@ -16,7 +16,6 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.Jwts;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -30,7 +29,7 @@ import java.security.Key;
  *
  * <p>All standard Key Algorithms are defined in
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1">JWA (RFC 7518), Section 4.1</a>,
- * and they are all available as concrete instances via {@link Jwts.KEY}.</p>
+ * and they are all available as concrete instances via {@link Jwe.enc}.</p>
  *
  * <p><b>&quot;alg&quot; identifier</b></p>
  *
@@ -40,7 +39,7 @@ import java.security.Key;
  *
  * @param <E> The type of key to use to obtain the AEAD encryption key
  * @param <D> The type of key to use to obtain the AEAD decryption key
- * @see Jwts.KEY
+ * @see Jwe.enc
  * @see <a href="https://tools.ietf.org/html/rfc7516#section-2">RFC 7561, Section 2: JWE Key (Management) Algorithms</a>
  * @since 0.12.0
  */

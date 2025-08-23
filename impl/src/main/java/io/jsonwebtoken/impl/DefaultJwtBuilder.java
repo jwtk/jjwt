@@ -17,11 +17,11 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.io.Base64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.ByteBase64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.CountingInputStream;
@@ -280,7 +280,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (key instanceof Password) {
             return encryptWith((Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()), enc);
         }
-        return encryptWith(key, Jwts.KEY.DIRECT, enc);
+        return encryptWith(key, Jwe.enc.DIRECT, enc);
     }
 
     @Override

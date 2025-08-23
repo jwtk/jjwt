@@ -871,12 +871,12 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * <ul>
      *     <li>If the provided {@code key} is a {@link Password Password} instance,
      *     the {@code KeyAlgorithm} used will be one of the three JWA-standard password-based key algorithms
-     *      ({@link Jwts.KEY#PBES2_HS256_A128KW PBES2_HS256_A128KW},
-     *      {@link Jwts.KEY#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
-     *      {@link Jwts.KEY#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
+     *      ({@link Jwe.enc#PBES2_HS256_A128KW PBES2_HS256_A128KW},
+     *      {@link Jwe.enc#PBES2_HS384_A192KW PBES2_HS384_A192KW}, or
+     *      {@link Jwe.enc#PBES2_HS512_A256KW PBES2_HS512_A256KW}) as determined by the {@code enc} algorithm's
      *      {@link AeadAlgorithm#getKeyBitLength() key length} requirement.</li>
      *     <li>If the {@code key} is otherwise a standard {@code SecretKey}, the {@code KeyAlgorithm} will be
-     *     {@link Jwts.KEY#DIRECT DIRECT}, indicating that {@code key} should be used directly with the
+     *     {@link Jwe.enc#DIRECT DIRECT}, indicating that {@code key} should be used directly with the
      *     {@code enc} algorithm.  In this case, the {@code key} argument <em>MUST</em> be of sufficient strength to
      *     use with the specified {@code enc} algorithm, otherwise an exception will be thrown during encryption. If
      *     desired, secure-random keys suitable for an {@link AeadAlgorithm} may be generated using the algorithm's
@@ -908,7 +908,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * </ol>
      *
      * <p>Most application developers will reference one of the JWA
-     * {@link Jwts.KEY standard key algorithms} and {@link Jwe.alg standard encryption algorithms}
+     * {@link Jwe.enc standard key algorithms} and {@link Jwe.alg standard encryption algorithms}
      * when invoking this method, but custom implementations are also supported.</p>
      *
      * @param <K>    the type of key that must be used with the specified {@code keyAlg} instance.
@@ -918,7 +918,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @param enc    the {@link AeadAlgorithm} algorithm used to encrypt the JWE
      * @return the JWE builder for method chaining.
      * @see Jwe.alg
-     * @see Jwts.KEY
+     * @see Jwe.enc
      */
     <K extends Key> JwtBuilder encryptWith(K key, KeyAlgorithm<? super K, ?> keyAlg, AeadAlgorithm enc);
 

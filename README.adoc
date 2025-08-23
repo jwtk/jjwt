@@ -2370,7 +2370,7 @@ Content Encryption Key (CEK):
 | PBES2 with HMAC SHA-512 and "A256KW" wrapping
 |===
 
-These are all represented as constants in the `io.jsonwebtoken.Jwts.KEY` registry singleton as
+These are all represented as constants in the `io.jsonwebtoken.Jwe.enc` registry singleton as
 implementations of the `io.jsonwebtoken.security.KeyAlgorithm` interface.
 
 But 17 algorithms are a lot to choose from.  When would you use them?  The sections below describe when you might

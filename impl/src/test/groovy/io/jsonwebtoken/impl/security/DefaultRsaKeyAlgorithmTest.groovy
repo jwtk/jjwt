@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
@@ -29,11 +29,11 @@ import static org.junit.Assert.assertEquals
 
 class DefaultRsaKeyAlgorithmTest {
 
-    static final algs = [Jwts.KEY.RSA1_5, Jwts.KEY.RSA_OAEP, Jwts.KEY.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
+    static final algs = [Jwe.enc.RSA1_5, Jwe.enc.RSA_OAEP, Jwe.enc.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
 
     @Test
     void testValidateNonRSAKey() {
-        SecretKey key = Jwts.KEY.A128KW.key().build()
+        SecretKey key = Jwe.enc.A128KW.key().build()
         for (DefaultRsaKeyAlgorithm alg : algs) {
             try {
                 alg.validate(key, true)

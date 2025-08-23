@@ -155,7 +155,7 @@ class RFC8037AppendixATest {
         ]).build() as OctetPrivateJwk
 
         // ensure this is used during key algorithm execution per the RFC test case:
-        def alg = new EcdhKeyAlgorithm(Jwts.KEY.A128KW) {
+        def alg = new EcdhKeyAlgorithm(Jwe.enc.A128KW) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
@@ -246,7 +246,7 @@ class RFC8037AppendixATest {
         ]).build() as OctetPrivateJwk
 
         // ensure this is used during key algorithm execution per the RFC test case:
-        def alg = new EcdhKeyAlgorithm(Jwts.KEY.A256KW) {
+        def alg = new EcdhKeyAlgorithm(Jwe.enc.A256KW) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()

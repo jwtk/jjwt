@@ -89,7 +89,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Registry<String, AeadAlgorithm> encAlgs = Jwe.alg.registry();
 
-    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwts.KEY.get();
+    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwe.enc.registry();
 
     private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jws.alg.registry();
 

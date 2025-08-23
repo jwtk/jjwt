@@ -231,7 +231,7 @@ public class JavaReadmeTest {
         KeyPair pair = Jws.alg.RS512.keyPair().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.enc.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
         // Choose the Encryption Algorithm to encrypt the payload:
         AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
@@ -254,7 +254,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweAESKW() {
         // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-        SecretKeyAlgorithm alg = Jwts.KEY.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
+        SecretKeyAlgorithm alg = Jwe.enc.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
         SecretKey key = alg.key().build();
 
         // Chooose the Encryption Algorithm used to encrypt the payload:
@@ -279,7 +279,7 @@ public class JavaReadmeTest {
         KeyPair pair = Jws.alg.ES512.keyPair().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.enc.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
         // Choose the Encryption Algorithm to encrypt the payload:
         AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
@@ -306,7 +306,7 @@ public class JavaReadmeTest {
         Password password = Keys.password(pw.toCharArray());
 
         // Choose the desired PBES2 key derivation algorithm:
-        KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384...
+        KeyAlgorithm<Password, Password> alg = Jwe.enc.PBES2_HS512_A256KW; //or PBES2_HS384...
 
         // Optionally choose the number of PBES2 computational iterations to use to derive the key.
         // This is optional - if you do not specify a value, JJWT will automatically choose a value

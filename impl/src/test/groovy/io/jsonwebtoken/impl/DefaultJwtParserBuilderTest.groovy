@@ -275,10 +275,10 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testAddKeyAlgorithmsOverrideDefaults() {
-        final String standardId = Jwts.KEY.A256GCMKW.id
+        final String standardId = Jwe.enc.A256GCMKW.id
         def header = Jwts.header().add('enc', Jwe.alg.A256GCM.id).add('alg', standardId).build()
         def parser = builder.build()
-        assertSame Jwts.KEY.A256GCMKW, parser.keyAlgs.apply(header) // standard implementation default
+        assertSame Jwe.enc.A256GCMKW, parser.keyAlgs.apply(header) // standard implementation default
 
         def custom = new TestKeyAlgorithm(id: standardId) // custom impl with standard identifier
         parser = builder.key().add(custom).and().build()
@@ -304,7 +304,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testCaseSensitiveKeyAlgorithm() {
-        def alg = Jwts.KEY.A256GCMKW
+        def alg = Jwe.enc.A256GCMKW
         def hb = Jwts.header().add('enc', Jwe.alg.A256GCM.id)
         def standard = hb.add('alg', alg.id).build()
         def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()

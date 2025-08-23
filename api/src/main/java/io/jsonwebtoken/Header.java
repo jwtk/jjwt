@@ -137,7 +137,7 @@ public interface Header extends Map<String, Object> {
      * identifies the cryptographic key management algorithm used to encrypt or determine the value of the Content
      * Encryption Key (CEK).  The encrypted content is not usable if the <code>alg</code> value does not represent a
      * supported algorithm, or if the recipient does not have a key that can be used with that algorithm.  Consider
-     * using {@link Jwts.KEY}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)} to convert this string value
+     * using {@link Jwe.enc}.{@link io.jsonwebtoken.lang.Registry#get(Object) get(id)} to convert this string value
      * to a type-safe {@link io.jsonwebtoken.security.KeyAlgorithm KeyAlgorithm} instance.</li>
      * </ul>
      *
