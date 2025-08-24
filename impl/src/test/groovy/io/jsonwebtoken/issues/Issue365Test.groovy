@@ -15,9 +15,7 @@
  */
 package io.jsonwebtoken.issues
 
-import io.jsonwebtoken.Header
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.Locator
+import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.DefaultJwtBuilder
 import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.security.TestKeys
@@ -39,13 +37,13 @@ class Issue365Test {
 
 
     private static final Collection<SignatureAlgorithm> sigalgs() {
-        def algs = Jwts.SIG.get().values()
+        def algs = Jws.alg.registry().values()
                 .findAll({ it -> it instanceof SignatureAlgorithm })
         return algs as Collection<SignatureAlgorithm>
     }
 
     private static final Collection<KeyAlgorithm<PublicKey, PrivateKey>> asymKeyAlgs() {
-        def algs = Jwts.KEY.get().values()
+        def algs = Jwe.enc.registry().values()
                 .findAll({ it -> it.id.startsWith('R') || it.id.startsWith('E') })
         return algs as Collection<KeyAlgorithm<PublicKey, PrivateKey>>
     }
@@ -107,7 +105,7 @@ class Issue365Test {
     void testEncryptWithPrivateKey() {
         for (def alg : asymKeyAlgs) {
             try {
-                Jwts.builder().issuer('me').encryptWith(new TestPrivateKey(), alg, Jwts.ENC.A256GCM).compact()
+                Jwts.builder().issuer('me').encryptWith(new TestPrivateKey(), alg, Jwe.alg.A256GCM).compact()
                 fail()
             } catch (IllegalArgumentException expected) {
                 assertEquals DefaultJwtBuilder.PRIV_KEY_ENC_MSG, expected.getMessage()
@@ -118,7 +116,7 @@ class Issue365Test {
     @Test
     void testDecryptWithPublicKey() {
         def pub = TestKeys.RS256.pair.public
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwts.KEY.RSA1_5, Jwts.ENC.A256GCM).compact()
+        String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwe.enc.RSA1_5, Jwe.alg.A256GCM).compact()
         try {
             Jwts.parser().decryptWith(new TestPublicKey()).build().parseEncryptedClaims(jwe)
             fail()
@@ -130,7 +128,7 @@ class Issue365Test {
     @Test
     void testDecryptWithKeyLocatorPublicKey() {
         def pub = TestKeys.RS256.pair.public
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwts.KEY.RSA1_5, Jwts.ENC.A256GCM).compact()
+        String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwe.enc.RSA1_5, Jwe.alg.A256GCM).compact()
         try {
             Jwts.parser().keyLocator(new Locator<Key>() {
                 @Override

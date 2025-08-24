@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.security.Curve
@@ -104,7 +106,7 @@ class RFC8037AppendixATest {
         def privJwk = a1Jwk()
         String compact = Jwts.builder()
                 .content(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
-                .signWith(privJwk.toKey() as PrivateKey, Jwts.SIG.EdDSA)
+                .signWith(privJwk.toKey() as PrivateKey, Jws.alg.EdDSA)
                 .compact()
         assertEquals A4_JWS_COMPACT, compact
 
@@ -153,7 +155,7 @@ class RFC8037AppendixATest {
         ]).build() as OctetPrivateJwk
 
         // ensure this is used during key algorithm execution per the RFC test case:
-        def alg = new EcdhKeyAlgorithm(Jwts.KEY.A128KW) {
+        def alg = new EcdhKeyAlgorithm(Jwe.enc.A128KW) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
@@ -168,7 +170,7 @@ class RFC8037AppendixATest {
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
-                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A128GCM)
+                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.alg.A128GCM)
                 .compact()
 
         // the constructed JWE should have the following protected header:
@@ -244,7 +246,7 @@ class RFC8037AppendixATest {
         ]).build() as OctetPrivateJwk
 
         // ensure this is used during key algorithm execution per the RFC test case:
-        def alg = new EcdhKeyAlgorithm(Jwts.KEY.A256KW) {
+        def alg = new EcdhKeyAlgorithm(Jwe.enc.A256KW) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
@@ -259,7 +261,7 @@ class RFC8037AppendixATest {
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .issuer(issuer)
-                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwts.ENC.A256GCM)
+                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.alg.A256GCM)
                 .compact()
 
         // the constructed JWE should have the following protected header:

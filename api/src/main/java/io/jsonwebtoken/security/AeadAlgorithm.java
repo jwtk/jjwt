@@ -16,7 +16,6 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.Jwts;
 
 import javax.crypto.SecretKey;
 import java.io.OutputStream;
@@ -27,7 +26,7 @@ import java.io.OutputStream;
  * Per <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2">JWE RFC 7516, Section 4.1.2</a>, all JWEs
  * <em>MUST</em> use an AEAD algorithm to encrypt or decrypt the JWE payload/content.  Consequently, all
  * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1">JWA &quot;enc&quot; algorithms</a> are AEAD
- * algorithms, and they are accessible as concrete instances via {@link Jwts.ENC}.
+ * algorithms, and they are accessible as concrete instances via {@link io.jsonwebtoken.Jwe.alg Jwe.alg}.
  *
  * <p><b>&quot;enc&quot; identifier</b></p>
  *
@@ -58,7 +57,7 @@ import java.io.OutputStream;
  * <p>The resulting {@code key} is guaranteed to have the correct algorithm parameters and strength/length necessary for
  * that exact {@code aeadAlgorithm} instance.</p>
  *
- * @see Jwts.ENC
+ * @see io.jsonwebtoken.Jwe.alg Jwe.alg
  * @see Identifiable#getId()
  * @see KeyLengthSupplier
  * @see KeyBuilderSupplier

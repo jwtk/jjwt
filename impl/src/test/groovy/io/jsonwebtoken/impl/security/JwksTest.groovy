@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
@@ -41,7 +41,7 @@ import static org.junit.Assert.*
 class JwksTest {
 
     private static final SecretKey SKEY = TestKeys.NA256
-    private static final java.security.KeyPair EC_PAIR = Jwts.SIG.ES256.keyPair().build()
+    private static final java.security.KeyPair EC_PAIR = Jws.alg.ES256.keyPair().build()
 
     private static String srandom() {
         byte[] random = new byte[16]
@@ -197,7 +197,7 @@ class JwksTest {
     @Test
     void testX509CertChain() {
         //get a test cert:
-        X509Certificate cert = TestKeys.forAlgorithm(Jwts.SIG.RS256).cert
+        X509Certificate cert = TestKeys.forAlgorithm(Jws.alg.RS256).cert
         def sval = JwtX509StringConverter.INSTANCE.applyTo(cert)
         testProperty('x509Chain', 'x5c', [cert], [sval])
     }
@@ -225,7 +225,7 @@ class JwksTest {
     }
 
     static void testX509Thumbprint(int number) {
-        def algs = Jwts.SIG.get().values().findAll { it instanceof SignatureAlgorithm }
+        def algs = Jws.alg.registry().values().findAll { it instanceof SignatureAlgorithm }
 
         for (def alg : algs) {
             //get test cert:
@@ -248,7 +248,7 @@ class JwksTest {
 
     @Test
     void testSecretJwks() {
-        Collection<MacAlgorithm> algs = Jwts.SIG.get().values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
+        Collection<MacAlgorithm> algs = Jws.alg.registry().values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
         for (def alg : algs) {
             SecretKey secretKey = alg.key().build()
             def jwk = Jwks.builder().key(secretKey).id('id').build()
@@ -300,7 +300,7 @@ class JwksTest {
     @Test
     void testAsymmetricJwks() {
 
-        Collection<SignatureAlgorithm> algs = Jwts.SIG.get().values()
+        Collection<SignatureAlgorithm> algs = Jws.alg.registry().values()
                 .findAll({ it instanceof SignatureAlgorithm }) as Collection<SignatureAlgorithm>
 
         for (SignatureAlgorithm alg : algs) {
@@ -345,7 +345,7 @@ class JwksTest {
 
     @Test
     void testInvalidEcCurvePoint() {
-        def algs = [Jwts.SIG.ES256, Jwts.SIG.ES384, Jwts.SIG.ES512]
+        def algs = [Jws.alg.ES256, Jws.alg.ES384, Jws.alg.ES512]
 
         for (SignatureAlgorithm alg : algs) {
 

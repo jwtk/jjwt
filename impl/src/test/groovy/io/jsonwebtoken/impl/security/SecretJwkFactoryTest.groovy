@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
@@ -32,7 +32,7 @@ import static org.junit.Assert.*
 class SecretJwkFactoryTest {
 
     private static Set<MacAlgorithm> macAlgs() {
-        return Jwts.SIG.get().values().findAll({ it -> it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
+        return Jws.alg.registry().values().findAll({ it -> it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
     }
 
     @Test
@@ -138,7 +138,7 @@ class SecretJwkFactoryTest {
     // 'oct' type, but 'alg' value is not a secret key algorithm (and therefore malformed)
     void testMismatchedAlgorithm() {
         try {
-            Jwks.builder().key(TestKeys.NA256).add('alg', Jwts.SIG.RS256.getId()).build()
+            Jwks.builder().key(TestKeys.NA256).add('alg', Jws.alg.RS256.getId()).build()
             fail()
         } catch (MalformedKeyException expected) {
             String msg = "Invalid Secret JWK ${AbstractJwk.ALG} value 'RS256'. Secret JWKs may only be used with " +

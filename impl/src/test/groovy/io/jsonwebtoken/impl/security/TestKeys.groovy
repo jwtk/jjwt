@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.Jwks
 
@@ -38,9 +39,9 @@ class TestKeys {
     // =======================================================
     // Secret Keys
     // =======================================================
-    static SecretKey HS256 = Jwts.SIG.HS256.key().build()
-    static SecretKey HS384 = Jwts.SIG.HS384.key().build()
-    static SecretKey HS512 = Jwts.SIG.HS512.key().build()
+    static SecretKey HS256 = Jws.alg.HS256.key().build()
+    static SecretKey HS384 = Jws.alg.HS384.key().build()
+    static SecretKey HS512 = Jws.alg.HS512.key().build()
     static Collection<SecretKey> HS = Collections.setOf(HS256, HS384, HS512)
 
     static SecretKey NA256 = new SecretKeySpec(HS256.encoded, "NONE")
@@ -51,15 +52,15 @@ class TestKeys {
     static SecretKey A128GCM, A192GCM, A256GCM, A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
     static Collection<SecretKey> AGCM
     static {
-        A128GCM = A128KW = A128GCMKW = Jwts.ENC.A128GCM.key().build()
-        A192GCM = A192KW = A192GCMKW = Jwts.ENC.A192GCM.key().build()
-        A256GCM = A256KW = A256GCMKW = Jwts.ENC.A256GCM.key().build()
+        A128GCM = A128KW = A128GCMKW = Jwe.alg.A128GCM.key().build()
+        A192GCM = A192KW = A192GCMKW = Jwe.alg.A192GCM.key().build()
+        A256GCM = A256KW = A256GCMKW = Jwe.alg.A256GCM.key().build()
         AGCM = Collections.setOf(A128GCM, A192GCM, A256GCM)
     }
 
-    static SecretKey A128CBC_HS256 = Jwts.ENC.A128CBC_HS256.key().build()
-    static SecretKey A192CBC_HS384 = Jwts.ENC.A192CBC_HS384.key().build()
-    static SecretKey A256CBC_HS512 = Jwts.ENC.A256CBC_HS512.key().build()
+    static SecretKey A128CBC_HS256 = Jwe.alg.A128CBC_HS256.key().build()
+    static SecretKey A192CBC_HS384 = Jwe.alg.A192CBC_HS384.key().build()
+    static SecretKey A256CBC_HS512 = Jwe.alg.A256CBC_HS512.key().build()
     static Collection<SecretKey> ACBC = Collections.setOf(A128CBC_HS256, A192CBC_HS384, A256CBC_HS512)
 
     static Collection<SecretKey> SECRET = new LinkedHashSet<>()
@@ -73,9 +74,9 @@ class TestKeys {
     // =======================================================
     // Elliptic Curve Keys & Certificates
     // =======================================================
-    static Bundle ES256 = TestCertificates.readBundle(Jwts.SIG.ES256)
-    static Bundle ES384 = TestCertificates.readBundle(Jwts.SIG.ES384)
-    static Bundle ES512 = TestCertificates.readBundle(Jwts.SIG.ES512)
+    static Bundle ES256 = TestCertificates.readBundle(Jws.alg.ES256)
+    static Bundle ES384 = TestCertificates.readBundle(Jws.alg.ES384)
+    static Bundle ES512 = TestCertificates.readBundle(Jws.alg.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
     static Bundle Ed25519 = TestCertificates.readBundle(Jwks.CRV.Ed25519)
@@ -89,12 +90,12 @@ class TestKeys {
     // =======================================================
     // RSA Keys & Certificates
     // =======================================================
-    static Bundle RS256 = TestCertificates.readBundle(Jwts.SIG.RS256)
-    static Bundle RS384 = TestCertificates.readBundle(Jwts.SIG.RS384)
-    static Bundle RS512 = TestCertificates.readBundle(Jwts.SIG.RS512)
-    static Bundle PS256 = TestCertificates.readBundle(Jwts.SIG.PS256)
-    static Bundle PS384 = TestCertificates.readBundle(Jwts.SIG.PS384)
-    static Bundle PS512 = TestCertificates.readBundle(Jwts.SIG.PS512)
+    static Bundle RS256 = TestCertificates.readBundle(Jws.alg.RS256)
+    static Bundle RS384 = TestCertificates.readBundle(Jws.alg.RS384)
+    static Bundle RS512 = TestCertificates.readBundle(Jws.alg.RS512)
+    static Bundle PS256 = TestCertificates.readBundle(Jws.alg.PS256)
+    static Bundle PS384 = TestCertificates.readBundle(Jws.alg.PS384)
+    static Bundle PS512 = TestCertificates.readBundle(Jws.alg.PS512)
 //    static Set<Bundle> PKCSv15 = Collections.setOf(RS256, RS384, RS512)
 //    static Set<Bundle> RSASSA_PSS = Collections.setOf(PS256, PS384, PS512)
     static Set<Bundle> RSA = Collections.setOf(RS256, RS384, RS512, PS256, PS384, PS512)

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeaderMutator
@@ -33,9 +34,9 @@ import static org.junit.Assert.fail
 class Pbes2HsAkwAlgorithmTest {
 
     private static Password KEY = Keys.password("12345678".toCharArray())
-    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwts.KEY.PBES2_HS256_A128KW,
-                                                     Jwts.KEY.PBES2_HS384_A192KW,
-                                                     Jwts.KEY.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
+    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwe.enc.PBES2_HS256_A128KW,
+                                                     Jwe.enc.PBES2_HS384_A192KW,
+                                                     Jwe.enc.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
 
     @Test
     void testInsufficientIterations() {
@@ -43,7 +44,7 @@ class Pbes2HsAkwAlgorithmTest {
             int iterations = 50 // must be 1000 or more
             def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
-            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwts.ENC.A256GCM)
+            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwe.alg.A256GCM)
             try {
                 alg.getEncryptionKey(req)
                 fail()
@@ -91,10 +92,10 @@ class Pbes2HsAkwAlgorithmTest {
     @Test
     void test() {
 
-        def alg = Jwts.KEY.PBES2_HS256_A128KW
+        def alg = Jwe.enc.PBES2_HS256_A128KW
 
         int desiredMillis = 100
-        int iterations = Jwts.KEY.estimateIterations(alg, desiredMillis)
+        int iterations = Jwe.enc.estimateIterations(alg, desiredMillis)
         println "Estimated iterations: $iterations"
 
         int tries = 30
@@ -104,7 +105,7 @@ class Pbes2HsAkwAlgorithmTest {
         def password = 'hellowor'.toCharArray()
         def header = new DefaultJweHeader().pbes2Count(iterations)
         def key = Keys.password(password)
-        def req = new DefaultKeyRequest(null, null, key, header, Jwts.ENC.A128GCM)
+        def req = new DefaultKeyRequest(null, null, key, header, Jwe.alg.A128GCM)
         int sum = 0
         for (int i = 0; i < tries; i++) {
             long start = System.currentTimeMillis()

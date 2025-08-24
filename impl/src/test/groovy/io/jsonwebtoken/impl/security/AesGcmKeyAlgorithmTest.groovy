@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
@@ -72,7 +73,7 @@ class AesGcmKeyAlgorithmTest {
         def out = new ByteArrayOutputStream(8192)
         def encRequest = new DefaultAeadRequest(Streams.of(cek.getEncoded()), null, null, kek, null, iv)
         def encResult = new DefaultAeadResult(out)
-        Jwts.ENC.A256GCM.encrypt(encRequest, encResult)
+        Jwe.alg.A256GCM.encrypt(encRequest, encResult)
 
         assertArrayEquals tag, encResult.digest
         assertArrayEquals iv, encResult.iv

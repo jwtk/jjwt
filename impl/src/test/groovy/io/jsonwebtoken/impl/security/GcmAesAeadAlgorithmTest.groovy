@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.io.Streams
 import org.junit.Test
 
@@ -58,7 +58,7 @@ class GcmAesAeadAlgorithmTest {
     @Test
     void testEncryptionAndDecryption() {
 
-        def alg = Jwts.ENC.A256GCM
+        def alg = Jwe.alg.A256GCM
 
         def ins = Streams.of(P)
         def aad = Streams.of(AAD)

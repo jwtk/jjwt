@@ -18,6 +18,8 @@ package io.jsonwebtoken.impl;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
+import io.jsonwebtoken.Jwe;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
@@ -85,11 +87,11 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
 
-    private Registry<String, AeadAlgorithm> encAlgs = Jwts.ENC.get();
+    private Registry<String, AeadAlgorithm> encAlgs = Jwe.alg.registry();
 
-    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwts.KEY.get();
+    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwe.enc.registry();
 
-    private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jwts.SIG.get();
+    private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jws.alg.registry();
 
     private Registry<String, CompressionAlgorithm> zipAlgs = Jwts.ZIP.get();
 

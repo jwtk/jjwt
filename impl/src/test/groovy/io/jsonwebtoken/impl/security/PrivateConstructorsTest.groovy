@@ -15,12 +15,16 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.Suppliers
 import org.junit.Test
+
+import static org.junit.Assert.assertSame
 
 class PrivateConstructorsTest {
 
@@ -30,9 +34,12 @@ class PrivateConstructorsTest {
         new KeysBridge()
         new JwksBridge()
         new Functions()
-        new Jwts.SIG()
-        new Jwts.ENC()
-        new Jwts.KEY()
+        new Jws.alg()
+        new Jwe.alg()
+        new Jwe.enc()
+        new Jwts.SIG(); assertSame(Jws.alg.registry(), Jwts.SIG.get())
+        new Jwts.ENC(); assertSame(Jwe.alg.registry(), Jwts.ENC.get())
+        new Jwts.KEY(); assertSame(Jwe.enc.registry(), Jwts.KEY.get())
         new Jwts.ZIP()
         new Jwks.CRV()
         new Jwks.HASH()

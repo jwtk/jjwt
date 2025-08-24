@@ -83,8 +83,8 @@ class DefaultJwtParserTest {
         def pb = Jwts.parser().deserializeJsonWith(deserializer)
         assertFalse invoked
 
-        def key = Jwts.SIG.HS256.key().build()
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jwts.SIG.HS256).compact()
+        def key = Jws.alg.HS256.key().build()
+        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jws.alg.HS256).compact()
         assertFalse invoked
 
         assertEquals 'bar', pb.verifyWith(key).build().parseSignedClaims(jws).getPayload().get('foo')

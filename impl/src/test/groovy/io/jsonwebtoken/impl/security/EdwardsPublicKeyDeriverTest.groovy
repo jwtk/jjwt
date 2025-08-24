@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.security.InvalidKeyException
 import org.junit.Test
 
@@ -26,7 +26,7 @@ class EdwardsPublicKeyDeriverTest {
 
     @Test
     void testDeriveWithNonEdwardsKey() {
-        def rsaPrivKey = Jwts.SIG.RS256.keyPair().build().getPrivate()
+        def rsaPrivKey = Jws.alg.RS256.keyPair().build().getPrivate()
         try {
             EdwardsPublicKeyDeriver.INSTANCE.apply(rsaPrivKey)
             fail()

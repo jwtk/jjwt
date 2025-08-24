@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jwe;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.impl.lang.RequiredParameterReader;
@@ -114,7 +115,7 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
             // KeyAlgorithm and AeadAlgorithm use cases, so that's our default.
             int kBitLen = (int) Bytes.bitLength(bytes);
 
-            if (ctx.isSigUse() || kBitLen > Jwts.SIG.HS256.getKeyBitLength()) {
+            if (ctx.isSigUse() || kBitLen > Jws.alg.HS256.getKeyBitLength()) {
                 // The only JWA SecretKey signature algorithms are HS256, HS384, HS512, so choose based on bit length:
                 key = Keys.hmacShaKeyFor(bytes);
             } else {
@@ -125,9 +126,9 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
         }
 
         //otherwise 'alg' was specified, ensure it's valid for secret key use:
-        Identifiable alg = Jwts.SIG.get().get(algId);
-        if (alg == null) alg = Jwts.KEY.get().get(algId);
-        if (alg == null) alg = Jwts.ENC.get().get(algId);
+        Identifiable alg = Jws.alg.registry().get(algId);
+        if (alg == null) alg = Jwe.enc.registry().get(algId);
+        if (alg == null) alg = Jwe.alg.registry().get(algId);
         if (alg != null) assertSymmetric(alg); // if we found a standard alg, it must be a symmetric key algorithm
 
         if (alg instanceof MacAlgorithm) {

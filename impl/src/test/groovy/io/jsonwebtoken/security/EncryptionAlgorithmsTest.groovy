@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.security.DefaultAeadRequest
 import io.jsonwebtoken.impl.security.DefaultAeadResult
@@ -26,7 +26,7 @@ import org.junit.Test
 import static org.junit.Assert.*
 
 /**
- * Tests the {@link Jwts.ENC} implementation.
+ * Tests the {@link Jwe.alg} implementation.
  *
  * @since 0.12.0
  */
@@ -53,7 +53,7 @@ class EncryptionAlgorithmsTest {
     private static final String AAD = 'You can get with this, or you can get with that'
     private static final byte[] AAD_BYTES = AAD.getBytes("UTF-8")
 
-    private static final Registry<String, AeadAlgorithm> registry = Jwts.ENC.get()
+    private static final Registry<String, AeadAlgorithm> registry = Jwe.alg.registry()
 
     static boolean contains(AeadAlgorithm alg) {
         return registry.containsValue(alg)
@@ -62,12 +62,12 @@ class EncryptionAlgorithmsTest {
     @Test
     void testValues() {
         assertEquals 6, registry.values().size()
-        assertTrue(contains(Jwts.ENC.A128CBC_HS256) &&
-                contains(Jwts.ENC.A192CBC_HS384) &&
-                contains(Jwts.ENC.A256CBC_HS512) &&
-                contains(Jwts.ENC.A128GCM) &&
-                contains(Jwts.ENC.A192GCM) &&
-                contains(Jwts.ENC.A256GCM)
+        assertTrue(contains(Jwe.alg.A128CBC_HS256) &&
+                contains(Jwe.alg.A192CBC_HS384) &&
+                contains(Jwe.alg.A256CBC_HS512) &&
+                contains(Jwe.alg.A128GCM) &&
+                contains(Jwe.alg.A192GCM) &&
+                contains(Jwe.alg.A256GCM)
         )
     }
 

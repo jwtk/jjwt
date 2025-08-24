@@ -16,6 +16,8 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Assert
@@ -116,8 +118,8 @@ class Pkcs11Test {
         def prot = new KeyStore.PasswordProtection(PIN)
 
         def algs = [] as List<Identifiable>
-        algs.addAll(Jwts.SIG.get().values().findAll({ it instanceof KeyBuilderSupplier }))
-        algs.addAll(Jwts.ENC.get().values())
+        algs.addAll(Jws.alg.registry().values().findAll({ it instanceof KeyBuilderSupplier }))
+        algs.addAll(Jwe.alg.registry().values())
 
         algs.each { Identifiable alg ->
             // find any previous one:
@@ -149,7 +151,7 @@ class Pkcs11Test {
         Map<String, TestKeys.Bundle> bundles = new LinkedHashMap()
 
         def algs = []
-        algs.addAll(Jwts.SIG.get().values().findAll({
+        algs.addAll(Jws.alg.registry().values().findAll({
             it instanceof KeyPairBuilderSupplier && it.id != 'EdDSA'
         }))
         algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
@@ -210,7 +212,7 @@ class Pkcs11Test {
     static void testJws(Provider keyProvider) {
 
         def algs = [] as List<Identifiable>
-        algs.addAll(Jwts.SIG.get().values().findAll({ it != Jwts.SIG.EdDSA })) // EdDSA accounted for by next two:
+        algs.addAll(Jws.alg.registry().values().findAll({ it != Jws.alg.EdDSA })) // EdDSA accounted for by next two:
         algs.add(Jwks.CRV.Ed25519)
         algs.add(Jwks.CRV.Ed448)
 
@@ -225,7 +227,7 @@ class Pkcs11Test {
             }
             if (!signKey) continue // not supported by Either the SunPKCS11 provider or SoftHSM2, so we have to try next
 
-            alg = alg instanceof Curve ? Jwts.SIG.EdDSA : alg as SecureDigestAlgorithm
+            alg = alg instanceof Curve ? Jws.alg.EdDSA : alg as SecureDigestAlgorithm
 
             // We might need to specify the PKCS11 provider since we can't access the private key material:
             def jws = Jwts.builder().provider(keyProvider).issuer('me').signWith(signKey, alg).compact()
@@ -270,7 +272,7 @@ class Pkcs11Test {
         }
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwts.ENC.A256GCM).compact()
+        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwe.alg.A256GCM).compact()
 
         // The private key can be null if SunPKCS11 doesn't support the key algorithm directly.  In this case
         // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the
@@ -286,7 +288,7 @@ class Pkcs11Test {
 
     static void testJwe(Provider provider) {
         def algs = []
-        algs.addAll(Jwts.SIG.get().values().findAll({
+        algs.addAll(Jws.alg.registry().values().findAll({
             it.id.startsWith('RS') || it.id.startsWith('ES')
             // unfortunately we can't also match .startsWith('PS') because SoftHSM2 doesn't support RSA-PSS keys :(
             // see https://github.com/opendnssec/SoftHSMv2/issues/721
@@ -306,10 +308,10 @@ class Pkcs11Test {
                 if (name == 'RSA') {
                     // SunPKCS11 doesn't support RSA-OAEP* ciphers :(
                     // So we can only try with RSA1_5 and we have to skip RSA_OAEP and RSA_OAEP_256:
-                    encRoundtrip(bundle, Jwts.KEY.RSA1_5, provider)
+                    encRoundtrip(bundle, Jwe.enc.RSA1_5, provider)
                 } else if (StandardCurves.findByKey(bundle.pair.public) != null) { // EC or Ed key
                     // try all ECDH key algorithms:
-                    Jwts.KEY.get().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
+                    Jwe.enc.registry().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
                         encRoundtrip(bundle, it, provider)
                     }
                 } else {

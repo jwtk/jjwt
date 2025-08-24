@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
@@ -300,7 +301,7 @@ class DefaultMutableJweHeaderTest {
 
     @Test
     void testEncryptionAlgorithm() {
-        def enc = Jwts.ENC.A256GCM.getId()
+        def enc = Jwe.alg.A256GCM.getId()
         header.put('enc', enc)
         assertEquals enc, header.getEncryptionAlgorithm()
     }

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.io.Streams
 import org.junit.Test
 
@@ -88,7 +88,7 @@ class RFC7518AppendixB1Test {
     @Test
     void test() {
 
-        def alg = Jwts.ENC.A128CBC_HS256
+        def alg = Jwe.alg.A128CBC_HS256
         def aad = Streams.of(A)
         def out = new ByteArrayOutputStream(8192)
         def result = new DefaultAeadResult(out)
