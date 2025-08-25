@@ -734,7 +734,32 @@
                 <surefire.useModulePath>false</surefire.useModulePath>
                 <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
                 <surefire.argLine>${test.addOpens}, --illegal-access=debug</surefire.argLine>
+                <maven.compiler.release>${jdk.version}</maven.compiler.release>
             </properties>
+            <modules>
+                <module>integration-tests</module>
+            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-module-info</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>9</release>
+                                    <compileSourceRoots>${project.basedir}/src/main/java9</compileSourceRoots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>jdk17AndLater</id>
