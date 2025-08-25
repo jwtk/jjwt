@@ -21,8 +21,6 @@ import io.jsonwebtoken.security.HashAlgorithm
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
-import java.nio.charset.StandardCharsets
-
 import static org.junit.Assert.*
 
 class HashAlgorithmsTest {
@@ -79,18 +77,12 @@ class HashAlgorithmsTest {
         assertNull reg.get('invalid')
     }
 
-    static DefaultRequest<InputStream> request(String msg) {
-        byte[] data = msg.getBytes(StandardCharsets.UTF_8)
-        InputStream payload = Streams.of(data)
-        return new DefaultRequest<InputStream>(payload, null, null)
-    }
-
     static void testSha(HashAlgorithm alg) {
         String id = alg.getId()
         int c = ('-' as char) as int
         def digestLength = id.substring(id.lastIndexOf(c) + 1) as int
         assertTrue alg.getJcaName().endsWith('' + digestLength)
-        def digest = alg.digest(request("hello"))
+        def digest = alg.digest(Streams.of("hello"))
         assertEquals digestLength, (digest.length * Byte.SIZE)
     }
 

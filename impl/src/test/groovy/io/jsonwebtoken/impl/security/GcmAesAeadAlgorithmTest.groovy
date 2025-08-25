@@ -17,6 +17,8 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
+import io.jsonwebtoken.security.AeadResult
+import io.jsonwebtoken.security.DecryptAeadRequest
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -63,7 +65,7 @@ class GcmAesAeadAlgorithmTest {
         def ins = Streams.of(P)
         def aad = Streams.of(AAD)
         def out = new ByteArrayOutputStream(8192)
-        def res = new DefaultAeadResult(out)
+        def res = AeadResult.with(out)
         def req = new DefaultAeadRequest(ins, null, null, KEY, aad, IV)
 
         alg.encrypt(req, res)
@@ -77,7 +79,8 @@ class GcmAesAeadAlgorithmTest {
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = new DefaultDecryptAeadRequest(Streams.of(ciphertext), KEY, aad, res.iv, res.digest)
+        def dreq = DecryptAeadRequest.builder().payload(Streams.of(ciphertext))
+                .key(KEY).associatedData(aad).iv(res.iv).digest(res.digest).build()
         alg.decrypt(dreq, out)
         assertArrayEquals(P, out.toByteArray())
     }

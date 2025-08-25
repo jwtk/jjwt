@@ -33,8 +33,7 @@ class JwkThumbprintsTest {
 
     static byte[] digest(String json, HashAlgorithm alg) {
         def payload = Streams.of(json)
-        def req = new DefaultRequest(payload, null, null)
-        return alg.digest(req)
+        return alg.digest(payload)
     }
 
     static JwkThumbprint thumbprint(String json, HashAlgorithm alg) {

@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
@@ -120,7 +121,7 @@ class EcSignatureAlgorithmTest {
     @Test
     void testSignWithPublicKey() {
         ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
-        def request = new DefaultSecureRequest(Streams.of(new byte[1]), null, null, key)
+        def request = SecureRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
         def alg = Jwts.SIG.ES256
         try {
             alg.digest(request)
@@ -137,9 +138,8 @@ class EcSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPrivateKey priv = new TestECPrivateKey(algorithm: 'EC', params: spec)
-            def request = new DefaultSecureRequest(Streams.of(new byte[1]), null, null, priv)
             try {
-                it.digest(request)
+                it.digest(priv, Streams.of(new byte[1]))
             } catch (InvalidKeyException expected) {
                 String msg = "The provided Elliptic Curve signing key size (aka order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
@@ -154,9 +154,8 @@ class EcSignatureAlgorithmTest {
     void testSignWithInvalidKeyFieldLength() {
         def keypair = Jwts.SIG.ES256.keyPair().build()
         def data = "foo".getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultSecureRequest(Streams.of(data), null, null, keypair.private)
         try {
-            Jwts.SIG.ES384.digest(req)
+            Jwts.SIG.ES384.digest(keypair.private, Streams.of(data))
         } catch (InvalidKeyException expected) {
             String msg = "The provided Elliptic Curve signing key size (aka order bit length) is " +
                     "256 bits (32 bytes), but the 'ES384' algorithm requires EC Keys with " +
@@ -174,8 +173,7 @@ class EcSignatureAlgorithmTest {
             payload.reset()
             def pair = it.keyPair().build()
             def key = pair.getPrivate()
-            def signRequest = new DefaultSecureRequest(payload, null, null, key)
-            byte[] signature = it.digest(signRequest)
+            byte[] signature = it.digest(key, payload)
             payload.reset()
             def verifyRequest = new DefaultVerifySecureDigestRequest(payload, null, null, key, signature)
             try {
@@ -330,7 +328,7 @@ class EcSignatureAlgorithmTest {
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
             def data = Strings.ascii(withoutSignature)
             def payload = Streams.of(data)
-            def signature = alg.digest(new DefaultSecureRequest<>(payload, null, null, keypair.private))
+            def signature = alg.digest(keypair.private, payload)
             payload.reset()
             assertTrue alg.verify(new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, signature))
         }
