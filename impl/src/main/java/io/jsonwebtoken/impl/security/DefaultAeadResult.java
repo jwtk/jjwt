@@ -23,13 +23,14 @@ import io.jsonwebtoken.security.IvSupplier;
 import java.io.OutputStream;
 import java.util.function.Function;
 
+@SuppressWarnings("unused") //used via reflection as io.jsonwebtoken.security.Suppliers.AEAD_RESULT_FACTORY
 public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier {
 
     private final OutputStream out;
     private byte[] tag;
     private byte[] iv;
 
-    public DefaultAeadResult(OutputStream out) {
+    private DefaultAeadResult(OutputStream out) {
         this.out = Assert.notNull(out, "OutputStream cannot be null.");
     }
 
@@ -60,7 +61,7 @@ public class DefaultAeadResult implements AeadResult, DigestSupplier, IvSupplier
         return this.iv;
     }
 
-    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    @SuppressWarnings("unused") // instantiated via reflection as io.jsonwebtoken.security.Suppliers.AEAD_RESULT_FACTORY
     public static class Factory implements Function<OutputStream, AeadResult> {
         @Override
         public AeadResult apply(OutputStream out) {

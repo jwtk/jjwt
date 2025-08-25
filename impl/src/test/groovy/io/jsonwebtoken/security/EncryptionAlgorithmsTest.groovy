@@ -17,8 +17,6 @@ package io.jsonwebtoken.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
-import io.jsonwebtoken.impl.security.DefaultAeadRequest
-import io.jsonwebtoken.impl.security.DefaultAeadResult
 import io.jsonwebtoken.impl.security.GcmAesAeadAlgorithm
 import io.jsonwebtoken.lang.Registry
 import org.junit.Test
@@ -105,10 +103,8 @@ class EncryptionAlgorithmsTest {
             def key = alg.key().build()
 
             def out = new ByteArrayOutputStream()
-            def request = new DefaultAeadRequest(Streams.of(PLAINTEXT_BYTES), null, null, key, null)
-            def result = new DefaultAeadResult(out)
-
-            alg.encrypt(request, result)
+            def request = AeadRequest.builder().payload(Streams.of(PLAINTEXT_BYTES)).key(key).build()
+            def result = alg.encrypt(request, out)
             byte[] iv = result.getIv()
             byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
@@ -140,10 +136,8 @@ class EncryptionAlgorithmsTest {
             def plaintextIn = Streams.of(PLAINTEXT_BYTES)
             def out = new ByteArrayOutputStream(8192)
             def aad = Streams.of(AAD_BYTES)
-            def req = new DefaultAeadRequest(plaintextIn, null, null, key, aad)
-            def res = new DefaultAeadResult(out)
-
-            alg.encrypt(req, res)
+            def req = AeadRequest.builder().payload(plaintextIn).key(key).associatedData(aad).build()
+            def res = alg.encrypt(req, out)
             byte[] iv = res.getIv()
             byte[] tag = res.getDigest()
             byte[] ciphertextBytes = out.toByteArray()

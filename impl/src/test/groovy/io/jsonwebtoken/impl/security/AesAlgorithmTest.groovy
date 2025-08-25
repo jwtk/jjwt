@@ -43,8 +43,6 @@ class AesAlgorithmTest {
 
         SecretKey key = TestKeys.A128GCM //weaker than required
 
-        Request<byte[]> request = new DefaultSecureRequest(new byte[1], null, null, key)
-
         try {
             alg.assertKey(key)
             fail()
@@ -113,7 +111,8 @@ class AesAlgorithmTest {
         def ins = Streams.of('data')
         def key = TestKeys.A256GCM
         def aad = Strings.utf8('aad')
-        def req = new DefaultAeadRequest(ins, null, secureRandom, key, Streams.of(aad))
+        def req = AeadRequest.builder().payload(ins).random(secureRandom).key(key)
+                .associatedData(Streams.of(aad)).build()
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 

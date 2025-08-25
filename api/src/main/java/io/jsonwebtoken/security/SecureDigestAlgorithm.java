@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Assert;
 
 import java.io.InputStream;
 import java.security.Key;
@@ -71,6 +72,7 @@ public interface SecureDigestAlgorithm<S extends Key, V extends Key>
      * @since JJWT_RELEASE_VERSION
      */
     default byte[] digest(Consumer<SecureRequest.Params<InputStream, S, ?>> c) {
+        Assert.notNull(c, "Consumer cannot be null");
         SecureRequest.Builder<InputStream, S> b = SecureRequest.builder();
         c.accept(b);
         SecureRequest<InputStream, S> r = b.build();
@@ -117,6 +119,7 @@ public interface SecureDigestAlgorithm<S extends Key, V extends Key>
      * @since JJWT_RELEASE_VERSION
      */
     default boolean verify(Consumer<VerifySecureDigestRequest.Params<V, ?>> c) {
+        Assert.notNull(c, "Consumer cannot be null");
         VerifySecureDigestRequest.Builder<V> b = VerifySecureDigestRequest.builder();
         c.accept(b);
         VerifySecureDigestRequest<V> r = b.build();

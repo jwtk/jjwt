@@ -21,6 +21,7 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -88,7 +89,7 @@ class RsaSignatureAlgorithmTest {
     @Test
     void testValidateSigningKeyNotPrivate() {
         RSAPublicKey key = createMock(RSAPublicKey)
-        def request = new DefaultSecureRequest(Streams.of(new byte[1]), null, null, key)
+        def request = SecureRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
         try {
             Jwts.SIG.RS256.digest(request)
             fail()
@@ -116,9 +117,8 @@ class RsaSignatureAlgorithmTest {
 
         algs.each {
             def pair = it.getId().startsWith("PS") ? pssPair : rsaPair
-            def request = new DefaultSecureRequest(Streams.of(new byte[1]), null, null, pair.getPrivate())
             try {
-                it.digest(request)
+                it.digest(pair.getPrivate(), Streams.of(new byte[1]))
                 fail()
             } catch (WeakKeyException expected) {
                 String id = it.getId()

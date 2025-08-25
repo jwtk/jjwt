@@ -25,7 +25,7 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
     private final Provider provider;
     private final SecureRandom secureRandom;
 
-    public DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
+    DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
         super(payload);
         this.provider = provider;
         this.secureRandom = secureRandom;

@@ -40,7 +40,7 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
         this.IV = iv;
     }
 
-    public DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
+    private DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
                               SecretKey key, InputStream aad) {
         this(payload, provider, secureRandom, key, aad, null);
     }

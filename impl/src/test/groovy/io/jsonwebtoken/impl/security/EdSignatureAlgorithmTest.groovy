@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.security.SecureRequest
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
@@ -60,7 +61,7 @@ class EdSignatureAlgorithmTest {
     void testGetRequestJcaNameByKeyAlgorithmNameOnly() {
         def key = new TestKey(algorithm: EdwardsCurve.X25519.OID)
         def payload = [0x00] as byte[]
-        def req = new DefaultSecureRequest(payload, null, null, key)
+        def req = SecureRequest.builder().payload(payload).key(key).build()
         assertEquals 'X25519', alg.getJcaName(req) // Not the EdDSA default
     }
 
