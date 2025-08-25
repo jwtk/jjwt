@@ -42,6 +42,7 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A builder for constructing Unprotected JWTs, Signed JWTs (aka 'JWS's) and Encrypted JWTs (aka 'JWE's).
@@ -584,6 +585,26 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
     @Override
     // for better/targeted JavaDoc
     JwtBuilder id(String jti);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) claim. It will set the expiration Date to the issuedAt time plus the duration
+     * specified if it has been set, otherwise it will use the current system time plus the duration specified
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#expiration(Date) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * @param duration The duration after the issue time that the JWT should expire. It is added to the issue time to
+     *                 calculate the expiration time.
+     * @param timeUnit The time unit of the duration parameter. This specifies the unit of measurement for the
+     *                 duration (e.g., seconds, minutes, hours, etc.), determining how the duration value should
+     *                 be interpreted when calculating the expiration time.
+     * @return the builder instance for method chaining.
+     */
+    JwtBuilder expireAfter(long duration, TimeUnit timeUnit);
 
     /**
      * Signs the constructed JWT with the specified key using the key's <em>recommended signature algorithm</em>

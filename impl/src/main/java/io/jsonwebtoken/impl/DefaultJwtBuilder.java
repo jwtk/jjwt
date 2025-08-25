@@ -31,6 +31,7 @@ import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Functions;
+import io.jsonwebtoken.impl.lang.JwtDateConverter;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
 import io.jsonwebtoken.impl.security.DefaultAeadRequest;
@@ -76,7 +77,9 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class DefaultJwtBuilder implements JwtBuilder {
 
@@ -475,6 +478,27 @@ public class DefaultJwtBuilder implements JwtBuilder {
     @Override
     public JwtBuilder id(String jti) {
         return claims().id(jti).and();
+    }
+
+    @Override
+    public JwtBuilder expireAfter(final long duration, final TimeUnit timeUnit) { // TODO: use java.time and optionals from jdk 8 for version 1.0
+        Assert.gt(duration, 0L, "duration must be > 0.");
+        Assert.notNull(timeUnit, "timeUnit cannot be null.");
+
+        Date issuedAtDate = this.claimsBuilder.get(DefaultClaims.ISSUED_AT);
+        long expiryEpochMillis;
+        if (null != issuedAtDate) {
+            expiryEpochMillis = issuedAtDate.getTime() + timeUnit.toMillis(duration);
+        } else {
+            expiryEpochMillis = (System.currentTimeMillis() + timeUnit.toMillis(duration));
+        }
+        Date expiryDate = JwtDateConverter.INSTANCE.applyFrom(expiryEpochMillis / 1000L);
+
+        /*Instant expiryInstant = Optional.ofNullable(this.claimsBuilder.get(DefaultClaims.ISSUED_AT)) // this should return an instant I guess
+                .orElseGet(() -> Instant.now())
+                .plus(duration, timeUnit);*/
+
+        return claims().expiration(expiryDate).and();
     }
 
     private void assertPayloadEncoding(String type) {
