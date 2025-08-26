@@ -20,6 +20,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 
+import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
 
@@ -42,5 +43,41 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
     @Override
     public AeadAlgorithm getEncryptionAlgorithm() {
         return this.encryptionAlgorithm;
+    }
+
+    static abstract class AbstractKeyRequestParams<T, M extends KeyRequest.Params<T, M>>
+            extends AbstractRequestParams<T, M> implements KeyRequest.Params<T, M> {
+
+        protected AeadAlgorithm aeadAlg;
+        protected JweHeader header;
+
+        @Override
+        public M encryptionAlgorithm(AeadAlgorithm aeadAlg) {
+            this.aeadAlg = aeadAlg;
+            return self();
+        }
+
+        @Override
+        public M header(JweHeader header) {
+            this.header = header;
+            return self();
+        }
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Builder<K extends Key> extends AbstractKeyRequestParams<K, KeyRequest.Builder<K>>
+            implements KeyRequest.Builder<K> {
+
+        @Override
+        public KeyRequest<K> build() {
+            return new DefaultKeyRequest<>(this.payload, this.provider, this.random, this.header, this.aeadAlg);
+        }
+
+        public static class Supplier<K extends Key> implements java.util.function.Supplier<KeyRequest.Builder<K>> {
+            @Override
+            public KeyRequest.Builder<K> get() {
+                return new Builder<>();
+            }
+        }
     }
 }

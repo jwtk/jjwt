@@ -141,8 +141,7 @@ class JwtsTest {
         def c = base64Url('{"sub":"joe","exp":"-42-"}')
         def data = Strings.utf8(("$h.$c" as String))
         def payload = Streams.of(data)
-        def request = new DefaultSecureRequest<>(payload, null, null, key)
-        def result = Jwts.SIG.HS256.digest(request)
+        def result = Jwts.SIG.HS256.digest(key, payload)
         def sig = Encoders.BASE64URL.encode(result)
         def compact = "$h.$c.$sig" as String
         try {

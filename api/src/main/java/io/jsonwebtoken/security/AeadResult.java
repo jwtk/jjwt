@@ -24,7 +24,7 @@ import java.io.OutputStream;
  *
  * @since 0.12.0
  */
-public interface AeadResult {
+public interface AeadResult extends DigestSupplier, IvSupplier {
 
     /**
      * Returns the {@code OutputStream} the AeadAlgorithm will use to write the resulting ciphertext during
@@ -50,4 +50,18 @@ public interface AeadResult {
      * @return the AeadResult for method chaining.
      */
     AeadResult setIv(byte[] iv);
+
+    /**
+     * Returns a new {@link AeadResult} with the specified {@link OutputStream} that will be used to write the
+     * resulting ciphertext during encryption or plaintext during decryption.
+     *
+     * @param out the {@link OutputStream} that will be used to write the resulting ciphertext during encryption
+     * @return a new {@link AeadResult} with the specified {@link OutputStream} that will be used to write the
+     * resulting ciphertext during encryption.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static AeadResult with(OutputStream out) {
+        return Suppliers.AEAD_RESULT_FACTORY.apply(out);
+    }
+
 }
