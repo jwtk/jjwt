@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2014-2023 jsonwebtoken.io
+  ~ Copyright (C) 2014-2025 jsonwebtoken.io
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <arguments/>
 
-        <jjwt.root>${basedir}</jjwt.root>
+        <jjwt.root>${maven.multiModuleProjectDirectory}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
         <maven.jar.version>3.4.2</maven.jar.version>
