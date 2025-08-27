@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-root</artifactId>
+        <version>0.14.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>io.jsonwebtoken.its</groupId>
+    <artifactId>jjwt-its</artifactId>
+    <version>0.14.0-SNAPSHOT</version>
+
+    <name>JJWT :: Integration-Tests</name>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- do not deploy ITs -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
+    <profiles>
+        <profile>
+            <!-- Added profile to address https://github.com/jwtk/jjwt/issues/364 -->
+            <id>jdk9AndLater</id>
+            <activation>
+                <jdk>[1.9,)</jdk>
+            </activation>
+            <modules>
+                <module>modular</module>
+            </modules>
+        </profile>
+    </profiles>
+
+    
+</project>
