@@ -23,7 +23,6 @@ import java.io.InputStream;
 
 /**
  * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
- * A parser for reading JWT strings, used to convert them into a {@link Jwt} object representing the expanded JWT.
  *
  * @since 0.1
  */
