@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2014-2023 jsonwebtoken.io
+  ~ Copyright (C) 2014-2025 jsonwebtoken.io
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <arguments/>
 
-        <jjwt.root>${basedir}</jjwt.root>
+        <jjwt.root>${maven.multiModuleProjectDirectory}</jjwt.root>
         <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
 
         <maven.jar.version>3.4.2</maven.jar.version>
@@ -147,6 +147,7 @@
         <module>api</module>
         <module>impl</module>
         <module>extensions</module>
+        <module>integration-tests</module>
         <module>tdjar</module>
         <module>bom</module>
     </modules>
@@ -649,6 +650,31 @@
                 <maven.javadoc.additionalOptions>-html5</maven.javadoc.additionalOptions>
                 <surefire.argLine>${test.addOpens}, --illegal-access=debug</surefire.argLine>
             </properties>
+            <build>
+                <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-compiler-plugin</artifactId>
+                      <executions>
+                          <execution>
+                              <id>compile-java21</id>
+                              <phase>compile</phase>
+                              <goals>
+                                  <goal>compile</goal>
+                              </goals>
+                              <configuration>
+                                  <release>9</release>
+                                  <compileSourceRoots>
+                                      <compileSourceroot>${project.basedir}/src/main/java9</compileSourceroot>
+                                  </compileSourceRoots>
+                                  <!-- cannot use multireleaseOutput, because we are creating a Java 8 class file -->
+                                  <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
+                              </configuration>
+                          </execution>
+                      </executions>
+                  </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>jdk17AndLater</id>
