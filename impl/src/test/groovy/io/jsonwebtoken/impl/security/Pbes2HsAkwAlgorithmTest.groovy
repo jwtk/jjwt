@@ -21,7 +21,6 @@ import io.jsonwebtoken.impl.DefaultJweHeaderMutator
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.KeyRequest
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.Password
 import org.junit.Test
@@ -43,9 +42,8 @@ class Pbes2HsAkwAlgorithmTest {
             int iterations = 50 // must be 1000 or more
             def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
-            KeyRequest<Password> req = new DefaultKeyRequest<>(KEY, null, null, mutable, Jwts.ENC.A256GCM)
             try {
-                alg.getEncryptionKey(req)
+                alg.getEncryptionKey(KEY, mutable, Jwts.ENC.A256GCM)
                 fail()
             } catch (IllegalArgumentException iae) {
                 assertEquals Pbes2HsAkwAlgorithm.MIN_ITERATIONS_MSG_PREFIX + iterations, iae.getMessage()

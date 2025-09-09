@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.KeyRequest
 import org.junit.Test
 
 import java.security.PrivateKey
@@ -49,8 +50,9 @@ class EcdhKeyAlgorithmTest {
         PublicKey encKey = TestKeys.X25519.pair.public as PublicKey
         def header = new DefaultMutableJweHeader(Jwts.header())
         def provider = TestKeys.BC
-        def request = new DefaultKeyRequest(encKey, provider, null, header, Jwts.ENC.A128GCM)
-        def result = alg.getEncryptionKey(request)
+        def req = KeyRequest.builder().payload(encKey).provider(provider).header(header)
+                .encryptionAlgorithm(Jwts.ENC.A128GCM).build()
+        def result = alg.getEncryptionKey(req)
         assertNotNull result.getKey()
     }
 
@@ -124,9 +126,8 @@ class EcdhKeyAlgorithmTest {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.RS256.pair.public as PublicKey // not an elliptic curve key, must fail
         def header = new DefaultMutableJweHeader(Jwts.header())
-        def request = new DefaultKeyRequest(encKey, null, null, header, Jwts.ENC.A128GCM)
         try {
-            alg.getEncryptionKey(request)
+            alg.getEncryptionKey(encKey, header, Jwts.ENC.A128GCM)
             fail()
         } catch (InvalidKeyException expected) {
             String msg = "Unable to determine JWA-standard Elliptic Curve for encryption key [${KeysBridge.toString(encKey)}]"

@@ -16,10 +16,13 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.function.Consumer;
 
 /**
  * A {@code KeyAlgorithm} produces the {@link SecretKey} used to encrypt or decrypt a JWE. The {@code KeyAlgorithm}
@@ -65,6 +68,17 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      */
     KeyResult getEncryptionKey(KeyRequest<E> request) throws SecurityException;
 
+    default KeyResult getEncryptionKey(Consumer<KeyRequest.Params<E, ?>> p) throws SecurityException {
+        Assert.notNull(p, "Consumer cannot be null");
+        KeyRequest.Builder<E> builder = KeyRequest.builder();
+        p.accept(builder);
+        return getEncryptionKey(builder.build());
+    }
+
+    default KeyResult getEncryptionKey(E key, JweHeader header, AeadAlgorithm enc) throws SecurityException {
+        return getEncryptionKey(p -> p.payload(key).header(header).encryptionAlgorithm(enc));
+    }
+
     /**
      * Return the {@link SecretKey} that should be used to decrypt a JWE via the request's specified
      * {@link DecryptionKeyRequest#getEncryptionAlgorithm() AeadAlgorithm}.
@@ -81,4 +95,15 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      * @throws SecurityException if there is a problem obtaining or decrypting the AEAD {@code SecretKey}.
      */
     SecretKey getDecryptionKey(DecryptionKeyRequest<D> request) throws SecurityException;
+
+    default SecretKey getDecryptionKey(Consumer<DecryptionKeyRequest.Params<D, ?>> p) throws SecurityException {
+        Assert.notNull(p, "Consumer cannot be null");
+        DecryptionKeyRequest.Builder<D> builder = DecryptionKeyRequest.builder();
+        p.accept(builder);
+        return getDecryptionKey(builder.build());
+    }
+
+    default SecretKey getDecryptionKey(byte[] cekCiphertext, D decryptionKey, JweHeader header, AeadAlgorithm enc) throws SecurityException {
+        return getDecryptionKey(p -> p.payload(cekCiphertext).key(decryptionKey).header(header).encryptionAlgorithm(enc));
+    }
 }

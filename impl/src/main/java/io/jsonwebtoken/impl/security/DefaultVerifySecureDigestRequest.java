@@ -36,4 +36,29 @@ public class DefaultVerifySecureDigestRequest<K extends Key> extends DefaultSecu
     public byte[] getDigest() {
         return this.digest;
     }
+
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Builder<K extends Key> extends AbstractSecureRequestParams<InputStream, K, VerifySecureDigestRequest.Builder<K>>
+            implements VerifySecureDigestRequest.Builder<K> {
+
+        private byte[] digest;
+
+        @Override
+        public VerifySecureDigestRequest.Builder<K> digest(byte[] digest) {
+            this.digest = digest;
+            return self();
+        }
+
+        @Override
+        public VerifySecureDigestRequest<K> build() {
+            return new DefaultVerifySecureDigestRequest<>(this.payload, this.provider, this.random, this.key, this.digest);
+        }
+
+        public static class Supplier<K extends Key> implements java.util.function.Supplier<VerifySecureDigestRequest.Builder<K>> {
+            @Override
+            public VerifySecureDigestRequest.Builder<K> get() {
+                return new Builder<>();
+            }
+        }
+    }
 }

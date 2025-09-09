@@ -25,7 +25,7 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
     private final Provider provider;
     private final SecureRandom secureRandom;
 
-    public DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
+    DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
         super(payload);
         this.provider = provider;
         this.secureRandom = secureRandom;
@@ -39,5 +39,52 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
     @Override
     public SecureRandom getSecureRandom() {
         return this.secureRandom;
+    }
+
+    static abstract class AbstractRequestParams<T, M extends Params<T, M>>
+            implements Params<T, M> {
+
+        protected Provider provider;
+        protected SecureRandom random;
+        protected T payload;
+
+        @SuppressWarnings("unchecked")
+        protected final M self() {
+            return (M) this;
+        }
+
+        @Override
+        public M payload(T payload) {
+            this.payload = payload;
+            return self();
+        }
+
+        @Override
+        public M provider(Provider provider) {
+            this.provider = provider;
+            return self();
+        }
+
+        @Override
+        public M random(SecureRandom random) {
+            this.random = random;
+            return self();
+        }
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Builder<T> extends AbstractRequestParams<T, Request.Builder<T>> implements Request.Builder<T> {
+
+        @Override
+        public Request<T> build() {
+            return new DefaultRequest<>(this.payload, this.provider, this.random);
+        }
+
+        public static class Supplier<T> implements java.util.function.Supplier<Builder<T>> {
+            @Override
+            public Builder<T> get() {
+                return new Builder<>();
+            }
+        }
     }
 }

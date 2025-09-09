@@ -17,6 +17,8 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.JweHeader;
 
+import java.security.Key;
+
 /**
  * A request to a {@link KeyAlgorithm} to obtain the key necessary for AEAD encryption or decryption.  The exact
  * {@link AeadAlgorithm} that will be used is accessible via {@link #getEncryptionAlgorithm()}.
@@ -74,4 +76,73 @@ public interface KeyRequest<T> extends Request<T> {
      * reading or writing any {@link KeyAlgorithm}-specific information.
      */
     JweHeader getHeader();
+
+    /**
+     * Named parameters (setters) used to configure a {@link KeyRequest KeyRequest} instance.
+     *
+     * @param <T> the type of request payload. For an encryption key request, this will be the
+     *            key used to obtain the encryption key. For a decryption key request, this will be the encrypted CEK
+     *            (Content Encryption Key) ciphertext byte array.
+     * @param <M> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<T, M extends Params<T, M>> extends Request.Params<T, M> {
+
+        /**
+         * Sets the {@link JweHeader} that will be used to construct the final JWE header, available for
+         * reading or writing any {@link KeyAlgorithm}-specific information.
+         *
+         * <p>For an encryption key request, any <em>public</em> information specific to the called {@code KeyAlgorithm}
+         * implementation that is required to be transmitted in the JWE (such as an initialization vector,
+         * authentication tag or ephemeral key, etc) is expected to be added to this header. Although the header is
+         * checked for authenticity and integrity, it itself is <em>not</em> encrypted, so
+         * {@link KeyAlgorithm}s should never place any secret or private information in the header.</p>
+         *
+         * <p>For a decryption request, any public information necessary by the called {@link KeyAlgorithm}
+         * (such as an initialization vector, authentication tag, ephemeral key, etc) is expected to be available in
+         * this header.</p>
+         *
+         * @param header the {@link JweHeader} that will be used to construct the final JWE header, available for
+         *               reading or writing any {@link KeyAlgorithm}-specific information.
+         * @return the instance for method chaining.
+         */
+        M header(JweHeader header);
+
+        /**
+         * Sets the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
+         * {@code KeyRequest}. {@link KeyAlgorithm} implementations that generate an ephemeral {@code SecretKey} to use
+         * as what the <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">JWE specification calls</a> a
+         * &quot;Content Encryption Key (CEK)&quot; should call the {@code AeadAlgorithm}'s
+         * {@link AeadAlgorithm#key() key()} builder to create a key suitable for that exact {@code AeadAlgorithm}.
+         *
+         * @param alg the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
+         *            {@code KeyRequest}.
+         * @return the instance for method chaining.
+         */
+        M encryptionAlgorithm(AeadAlgorithm alg);
+    }
+
+    /**
+     * A builder for creating {@link KeyRequest}s used to get a JWE encryption key via
+     * {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
+     *
+     * @param <K> the type of {@link java.security.Key Key} used to obtain the encryption key.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<KeyRequest<K>> {
+    }
+
+    /**
+     * Returns a new {@link KeyRequest.Builder} for creating immutable {@link KeyRequest}s used to get a JWE
+     * encryption key via {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
+     *
+     * @param <K> the type of {@link java.security.Key Key} used to obtain the JWE content encryption key.
+     * @return a new {@link KeyRequest.Builder} for creating immutable {@link KeyRequest}s used to get a JWE
+     * encryption key via {@link KeyAlgorithm#getEncryptionKey(KeyRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <K extends Key> KeyRequest.Builder<K> builder() {
+        return (KeyRequest.Builder<K>) Suppliers.KEY_REQUEST_BUILDER.get();
+    }
 }

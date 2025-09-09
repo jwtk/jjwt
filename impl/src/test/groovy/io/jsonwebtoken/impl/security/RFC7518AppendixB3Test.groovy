@@ -89,9 +89,8 @@ class RFC7518AppendixB3Test {
         def alg = Jwts.ENC.A256CBC_HS512
         def aad = Streams.of(A)
         def out = new ByteArrayOutputStream(8192)
-        def res = new DefaultAeadResult(out)
         AeadRequest req = new DefaultAeadRequest(Streams.of(P), null, null, KEY, aad, IV)
-        alg.encrypt(req, res)
+        def res = alg.encrypt(req, out)
         byte[] ciphertext = out.toByteArray()
         byte[] tag = res.getDigest()
         byte[] iv = res.getIv()
