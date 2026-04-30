@@ -25,6 +25,37 @@ import static org.junit.Assert.assertSame
 
 class ProviderKeyTest {
 
+    @Test
+    void testStaticGetProviderWithProviderKey() {
+        def src = new TestKey()
+        def pkey = new ProviderKey(PROVIDER, src)
+        // when the key IS a ProviderKey, getProvider should return the ProviderKey's own provider
+        assertSame PROVIDER, ProviderKey.getProvider(pkey, null)
+    }
+
+    @Test
+    void testStaticGetProviderWithNonProviderKey() {
+        def backup = new TestProvider('backup')
+        def src = new TestKey()
+        // when the key is NOT a ProviderKey, getProvider should return the backup
+        assertSame backup, ProviderKey.getProvider(src, backup)
+    }
+
+    @Test
+    void testStaticGetKeyWithProviderKey() {
+        def src = new TestKey()
+        def pkey = new ProviderKey(PROVIDER, src)
+        // when the key IS a ProviderKey, getKey should unwrap and return the inner key
+        assertSame src, ProviderKey.getKey(pkey)
+    }
+
+    @Test
+    void testStaticGetKeyWithNonProviderKey() {
+        def src = new TestKey()
+        // when the key is NOT a ProviderKey, getKey should return the key unchanged
+        assertSame src, ProviderKey.getKey(src)
+    }
+
     static final Provider PROVIDER = new TestProvider()
 
     @Test(expected = IllegalArgumentException)
