@@ -118,6 +118,9 @@
              test executions (jdk-8 and jdk-11 profiles). -->
         <module.skip.jdk8.tests>false</module.skip.jdk8.tests>
         <module.skip.jdk11.tests>false</module.skip.jdk11.tests>
+        <!-- Skips the default surefire execution when test.jdk.version is set,
+             since the matching jdk-N profile will run tests via toolchain instead. -->
+        <skip.default.tests>false</skip.default.tests>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.12.7.1</jackson.version>
@@ -583,6 +586,7 @@
                 <configuration>
                     <argLine>${surefire.argLine}</argLine>
                     <forkMode>once</forkMode>
+                    <skip>${skip.default.tests}</skip>
                 </configuration>
             </plugin>
             <plugin>
@@ -697,9 +701,29 @@
             execution selects which JDK runs the tests, independently of compilation.
         -->
 
+        <!-- When test.jdk.version is explicitly set, skip the default surefire
+             execution — the matching jdk-N profile runs tests via toolchain. -->
+        <profile>
+            <id>skip-default-tests</id>
+            <activation>
+                <property>
+                    <name>test.jdk.version</name>
+                </property>
+            </activation>
+            <properties>
+                <skip.default.tests>true</skip.default.tests>
+            </properties>
+        </profile>
+
         <!-- ==================== JDK 8 test execution ==================== -->
         <profile>
             <id>jdk-8</id>
+            <activation>
+                <property>
+                    <name>test.jdk.version</name>
+                    <value>8</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -729,6 +753,12 @@
         <!-- ==================== JDK 11 test execution ==================== -->
         <profile>
             <id>jdk-11</id>
+            <activation>
+                <property>
+                    <name>test.jdk.version</name>
+                    <value>11</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -742,7 +772,7 @@
                                 <configuration>
                                     <skip>${module.skip.jdk11.tests}</skip>
                                     <jdkToolchain>
-                                        <version>[11,12)</version>
+                                        <version>11</version>
                                     </jdkToolchain>
                                     <argLine>${test.addOpens}</argLine>
                                 </configuration>
@@ -754,17 +784,16 @@
         </profile>
 
         <!-- ==================== JDK 17 test execution ==================== -->
-        <!-- Active by default (property-based activation): runs whenever
-             -Dskip.jdk17.tests is NOT set, regardless of which other profiles
-             are active. Suppress with -Dskip.jdk17.tests on the command line.
-             No toolchain needed: the build JDK is 17+, so the default surefire
-             execution already targets JDK 17. This profile adds an explicit
-             named execution so CI can treat 17 consistently with other JDKs. -->
+        <!-- No toolchain needed: the build JDK is 17+, so the default surefire
+             execution already runs on the current JVM. This profile exists so CI
+             can invoke tests on JDK 17 via the same -Dtest.jdk.version pattern
+             used for all other JDKs. -->
         <profile>
             <id>jdk-17</id>
             <activation>
                 <property>
-                    <name>!skip.jdk17.tests</name>
+                    <name>test.jdk.version</name>
+                    <value>17</value>
                 </property>
             </activation>
             <build>
@@ -778,9 +807,6 @@
                                 <id>test-jdk-17</id>
                                 <goals><goal>test</goal></goals>
                                 <configuration>
-                                    <jdkToolchain>
-                                        <version>[17,18)</version>
-                                    </jdkToolchain>
                                     <argLine>${test.addOpens}</argLine>
                                 </configuration>
                             </execution>
@@ -793,6 +819,12 @@
         <!-- ==================== JDK 21 test execution ==================== -->
         <profile>
             <id>jdk-21</id>
+            <activation>
+                <property>
+                    <name>test.jdk.version</name>
+                    <value>21</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -805,7 +837,7 @@
                                 <goals><goal>test</goal></goals>
                                 <configuration>
                                     <jdkToolchain>
-                                        <version>[21,22)</version>
+                                        <version>21</version>
                                     </jdkToolchain>
                                     <argLine>${test.addOpens}</argLine>
                                 </configuration>
@@ -819,6 +851,12 @@
         <!-- ==================== JDK 25 test execution ==================== -->
         <profile>
             <id>jdk-25</id>
+            <activation>
+                <property>
+                    <name>test.jdk.version</name>
+                    <value>25</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -831,7 +869,7 @@
                                 <goals><goal>test</goal></goals>
                                 <configuration>
                                     <jdkToolchain>
-                                        <version>[25,26)</version>
+                                        <version>25</version>
                                     </jdkToolchain>
                                     <argLine>${test.addOpens}</argLine>
                                 </configuration>
