@@ -754,10 +754,19 @@
         </profile>
 
         <!-- ==================== JDK 17 test execution ==================== -->
-        <!-- No toolchain needed: the build JDK is JDK 17+. Activating this profile
-             simply re-runs tests under JDK 17 (useful as the CI matrix entry). -->
+        <!-- Active by default (property-based activation): runs whenever
+             -Dskip.jdk17.tests is NOT set, regardless of which other profiles
+             are active. Suppress with -Dskip.jdk17.tests on the command line.
+             No toolchain needed: the build JDK is 17+, so the default surefire
+             execution already targets JDK 17. This profile adds an explicit
+             named execution so CI can treat 17 consistently with other JDKs. -->
         <profile>
             <id>jdk-17</id>
+            <activation>
+                <property>
+                    <name>!skip.jdk17.tests</name>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
