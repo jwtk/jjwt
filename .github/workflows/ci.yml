@@ -11,19 +11,27 @@ env:
   MVN_CMD: ./mvnw --no-transfer-progress -B
 
 jobs:
+  # Oracle only provides JDK 17+, so test against 17, 21, and 25
   oracle:
-    strategy:
-      matrix:
-        java: [ '17' ]
     runs-on: 'ubuntu-latest'
     name: jdk-${{ matrix.java }}-oracle
     steps:
       - uses: actions/checkout@v4
+      # Install test-only JDKs first; each call appends an entry to ~/.m2/toolchains.xml
       - name: Set up JDK
-        uses: actions/setup-java@v4.7.0
+        uses: actions/setup-java@v4
         with:
           distribution: oracle
-          java-version: ${{ matrix.java }}
+          java-version: |
+            21
+            25
+      # Build JDK last so it ends up as the active JAVA_HOME / PATH entry
+      - name: Set up JDK 17 (build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: oracle
+          java-version: '17'
+          cache: 'maven'
       - name: Set up OSS Community Develocity Instance for Maven
         uses: gradle/develocity-actions/setup-maven@v2.1
         with:
@@ -39,20 +47,28 @@ jobs:
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-17,jdk-21,jdk-25
 
   temurin:
-    strategy:
-      matrix:
-        java: [ '8', '11', '17', '18' ]
     runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java }}-temurin
+    name: temurin
     steps:
       - uses: actions/checkout@v4
+      # Install test-only JDKs first; each call appends an entry to ~/.m2/toolchains.xml
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          java-version: |
+            8
+            11
+            21
+            25
+      # Build JDK last so it ends up as the active JAVA_HOME / PATH entry
+      - name: Set up JDK 17 (build)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
           check-latest: true
@@ -71,43 +87,7 @@ jobs:
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
-
-  zulu:
-    strategy:
-      matrix:
-        java: [ '7', '8', '9', '11', '12', '13', '14', '15', '16', '17', '18', '21' ]
-    runs-on: 'ubuntu-latest'
-    env:
-      JDK_MAJOR_VERSION: ${{ matrix.java }}
-    name: jdk-${{ matrix.java }}-zulu
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-          cache: 'maven'
-          check-latest: true
-      - name: Set up OSS Community Develocity Instance for Maven
-        uses: gradle/develocity-actions/setup-maven@v2.1
-        with:
-          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: |
-          if [ "$JDK_MAJOR_VERSION" == "7" ]; then export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"; fi
-          ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-8,jdk-11,jdk-17,jdk-21,jdk-25
 
   # ensure all of our files have the correct/updated license header
   license-check:
@@ -119,8 +99,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '17'
           cache: 'maven'
           check-latest: true
       - name: Set up OSS Community Develocity Instance for Maven
@@ -133,14 +113,14 @@ jobs:
           ${{env.MVN_CMD}} license:check
 
   code-coverage:
-    needs: [oracle, temurin, zulu]
+    needs: [oracle, temurin]
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
           check-latest: true

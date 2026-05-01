@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.impl.security
+package io.jsonwebtoken.impl.security;
 
-import java.security.Provider
+import java.security.Provider;
 
-class TestProvider extends Provider {
+/**
+ * Test-only {@link Provider} subclass. Defined in Java (not Groovy) because Groovy 4 cannot resolve
+ * the {@code protected} {@code Provider} constructor via its meta-class on JDK 17+.
+ */
+public class TestProvider extends Provider {
 
-    TestProvider() {
-        this('test')
+    public TestProvider() {
+        this("test");
     }
 
-    TestProvider(String name) {
-        super(name, 1.0d, 'info')
+    public TestProvider(String name) {
+        //noinspection deprecation - double constructor used for Java 8 source compatibility;
+        // the (String, String, String) replacement was added in Java 9
+        super(name, 1.0d, "info");
     }
 }
