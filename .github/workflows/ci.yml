@@ -24,6 +24,10 @@ jobs:
         with:
           distribution: oracle
           java-version: ${{ matrix.java }}
+      - name: Set up OSS Community Develocity Instance for Maven
+        uses: gradle/develocity-actions/setup-maven@v2.1
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: Install softhsm2
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
@@ -52,6 +56,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
           check-latest: true
+      - name: Set up OSS Community Develocity Instance for Maven
+        uses: gradle/develocity-actions/setup-maven@v2.1
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: Install softhsm2
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
@@ -82,6 +90,10 @@ jobs:
           distribution: 'zulu'
           cache: 'maven'
           check-latest: true
+      - name: Set up OSS Community Develocity Instance for Maven
+        uses: gradle/develocity-actions/setup-maven@v2.1
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: Install softhsm2
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
@@ -111,6 +123,10 @@ jobs:
           java-version: '8'
           cache: 'maven'
           check-latest: true
+      - name: Set up OSS Community Develocity Instance for Maven
+        uses: gradle/develocity-actions/setup-maven@v2.1
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: License Check
         # This adds about 1 minute to any build, which is why we don't want to do it on every other build:
         run: |
@@ -130,6 +146,10 @@ jobs:
           java-version: '8'
           cache: 'maven'
           check-latest: true
+      - name: Set up OSS Community Develocity Instance for Maven
+        uses: gradle/develocity-actions/setup-maven@v2.1
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: Install softhsm2
         run: sudo apt-get install -y softhsm2
       - name: Install opensc
