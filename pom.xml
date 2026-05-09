@@ -327,6 +327,7 @@
                                     <exclude>**/genkeys</exclude>
                                     <exclude>**/softhsm</exclude>
                                     <exclude>**.adoc</exclude>
+                                    <exclude>.mvn/.develocity/**</exclude>
                                 </excludes>
                             </licenseSet>
                         </licenseSets>
