@@ -117,7 +117,7 @@
         <maven.javadoc.additionalOptions/>
 
         <!-- Optional Runtime Dependencies: -->
-        <bouncycastle.version>1.81</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <bcprov.artifactId>bcprov-jdk18on</bcprov.artifactId>
         <bcpkix.artifactId>bcpkix-jdk18on</bcpkix.artifactId>
 
@@ -329,6 +329,7 @@
                                     <exclude>**/genkeys</exclude>
                                     <exclude>**/softhsm</exclude>
                                     <exclude>**.adoc</exclude>
+                                    <exclude>.mvn/.develocity/**</exclude>
                                 </excludes>
                             </licenseSet>
                         </licenseSets>
@@ -634,6 +635,16 @@
                 <groupId>io.jsonwebtoken.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.4.1</version>
+                <dependencies>
+                    <!-- coveralls-maven-plugin uses javax.xml.bind.DatatypeConverter (via MD5DigestInputStream),
+                         which was removed in JDK 11+. Pull in the last javax-namespace-compatible version so
+                         the plugin works when the coverage job runs on JDK 17. -->
+                    <dependency>
+                        <groupId>jakarta.xml.bind</groupId>
+                        <artifactId>jakarta.xml.bind-api</artifactId>
+                        <version>2.3.3</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

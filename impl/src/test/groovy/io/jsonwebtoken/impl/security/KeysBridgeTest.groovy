@@ -23,9 +23,30 @@ import java.security.PrivateKey
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 class KeysBridgeTest {
+
+    @Test
+    void testRootWithKeySupplier() {
+        // when key is a KeySupplier, root() should unwrap and return the inner key
+        def inner = TestKeys.HS256
+        def providerKey = new ProviderSecretKey(new TestProvider(), inner)
+        // cast to Key to force the root(K key) overload — ProviderSecretKey implements both Key and KeySupplier
+        assertSame inner, KeysBridge.root((Key) providerKey)
+    }
+
+    @Test
+    void testFindBitLengthSecretKeyNonRawFormat() {
+        // when a SecretKey's format is not "RAW", findBitLength should return -1
+        def nonRawSecretKey = new SecretKey() {
+            @Override String getAlgorithm() { return 'AES' }
+            @Override String getFormat() { return 'PKCS8' } // not RAW
+            @Override byte[] getEncoded() { return new byte[16] }
+        }
+        assertEquals(-1, KeysBridge.findBitLength(nonRawSecretKey))
+    }
 
     @Test
     void testToStringKeyNull() {
