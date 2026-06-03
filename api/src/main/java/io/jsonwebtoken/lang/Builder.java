@@ -21,6 +21,7 @@ package io.jsonwebtoken.lang;
  * @param <T> The type of object that will be created when {@link #build()} is invoked.
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface Builder<T> {
 
     /**

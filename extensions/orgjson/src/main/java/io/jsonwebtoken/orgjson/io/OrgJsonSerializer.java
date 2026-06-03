@@ -22,7 +22,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.DateFormats;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.ConfidentialValue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -78,8 +78,8 @@ public class OrgJsonSerializer<T> extends AbstractSerializer<T> {
             return JSONObject.NULL;
         }
 
-        if (object instanceof Supplier) {
-            object = ((Supplier<?>) object).get();
+        if (object instanceof ConfidentialValue) {
+            object = ((ConfidentialValue<?>) object).get();
         }
 
         if (object instanceof JSONObject || object instanceof JSONArray

@@ -17,15 +17,15 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.ConfidentialValue;
 
-public class RedactedSupplier<T> implements Supplier<T> {
+public class RedactedConfidentialValue<T> implements ConfidentialValue<T> {
 
     public static final String REDACTED_VALUE = "<redacted>";
 
     private final T value;
 
-    public RedactedSupplier(T value) {
+    public RedactedConfidentialValue(T value) {
         this.value = Assert.notNull(value, "value cannot be null.");
     }
 
@@ -44,8 +44,8 @@ public class RedactedSupplier<T> implements Supplier<T> {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof RedactedSupplier) {
-            obj = ((RedactedSupplier<?>) obj).value; // get the wrapped value
+        if (obj instanceof RedactedConfidentialValue) {
+            obj = ((RedactedConfidentialValue<?>) obj).value; // get the wrapped value
         }
         return Objects.nullSafeEquals(this.value, obj);
     }

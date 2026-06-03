@@ -19,7 +19,6 @@ import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.lang.Supplier;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkSet;
@@ -32,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class JwkSetConverter implements Converter<JwkSet, Object> {
 

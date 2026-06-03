@@ -18,6 +18,8 @@ package io.jsonwebtoken.impl.lang
 import org.junit.Before
 import org.junit.Test
 
+import java.util.function.Function
+
 import static org.junit.Assert.*
 
 class DefaultRegistryTest {
@@ -26,7 +28,7 @@ class DefaultRegistryTest {
 
     @Before
     void setUp() {
-        reg = new DefaultRegistry<>('test', 'id', ['a', 'b', 'c', 'd'], Functions.identity())
+        reg = new DefaultRegistry<>('test', 'id', ['a', 'b', 'c', 'd'], Function.identity())
     }
 
     static void immutable(Closure c) {
@@ -65,7 +67,7 @@ class DefaultRegistryTest {
 
     @Test
     void testEqualsValues() {
-        def another = new DefaultRegistry<>('test', 'id', ['a', 'b', 'c', 'd'], Functions.identity())
+        def another = new DefaultRegistry<>('test', 'id', ['a', 'b', 'c', 'd'], Function.identity())
         assertEquals another, reg
     }
 

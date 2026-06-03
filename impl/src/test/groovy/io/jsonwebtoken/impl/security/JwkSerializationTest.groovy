@@ -22,9 +22,9 @@ import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.jackson.io.JacksonDeserializer
 import io.jsonwebtoken.jackson.io.JacksonSerializer
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.lang.Supplier
 import io.jsonwebtoken.orgjson.io.OrgJsonDeserializer
 import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
+import io.jsonwebtoken.security.ConfidentialValue
 import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import org.junit.Test
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue
 
 /**
  * Asserts that serializing and deserializing private or secret key values works as expected without
- * exposing raw strings in the JWKs themselves (should be wrapped with RedactedSupplier instances) for toString safety.
+ * exposing raw strings in the JWKs themselves (should be wrapped with ConfidentialValue instances) for toString safety.
  */
 class JwkSerializationTest {
 
@@ -115,7 +115,7 @@ class JwkSerializationTest {
         //now ensure it deserializes back to a JWK:
         def map = deserialize(des, json)
         def jwk2 = Jwks.builder().add(map).build()
-        assertTrue jwk.k instanceof Supplier
+        assertTrue jwk.k instanceof ConfidentialValue
         assertEquals jwk, jwk2
         assertEquals jwk.k, jwk2.k
         assertEquals jwk.k.get(), jwk2.k.get()
@@ -145,7 +145,7 @@ class JwkSerializationTest {
         //now ensure it deserializes back to a JWK:
         def map = deserialize(des, json)
         def jwk2 = Jwks.builder().add(map).build()
-        assertTrue jwk.d instanceof Supplier
+        assertTrue jwk.d instanceof ConfidentialValue
         assertEquals jwk, jwk2
         assertEquals jwk.d, jwk2.d
         assertEquals jwk.d.get(), jwk2.d.get()
@@ -154,8 +154,8 @@ class JwkSerializationTest {
     private static assertWrapped(Map<String, ?> map, List<String> keys) {
         for (String key : keys) {
             def value = map.get(key)
-            assertTrue value instanceof Supplier
-            value = ((Supplier<?>) value).get()
+            assertTrue value instanceof ConfidentialValue
+            value = ((ConfidentialValue<?>) value).get()
             assertTrue value instanceof String
         }
     }
@@ -163,8 +163,8 @@ class JwkSerializationTest {
     private static assertEquals(Jwk<? extends Key> jwk1, Jwk<? extends Key> jwk2, List<String> keys) {
         assertEquals jwk1, jwk2
         for (String key : keys) {
-            assertTrue jwk1.get(key) instanceof Supplier
-            assertTrue jwk2.get(key) instanceof Supplier
+            assertTrue jwk1.get(key) instanceof ConfidentialValue
+            assertTrue jwk2.get(key) instanceof ConfidentialValue
             assertEquals jwk1.get(key), jwk2.get(key)
             assertEquals jwk1.get(key).get(), jwk2.get(key).get()
         }
