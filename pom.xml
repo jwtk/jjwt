@@ -587,7 +587,9 @@
                 <version>${surefire.plugin.version}</version>
                 <configuration>
                     <argLine>${surefire.argLine}</argLine>
-                    <forkMode>once</forkMode>
+                    <!-- Next two lines replace 'forkMode', removed in maven-surefire-plugin version 3.0.0-M8: -->
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
                     <skip>${skip.default.tests}</skip>
                 </configuration>
             </plugin>
@@ -743,7 +745,9 @@
                                     </jdkToolchain>
                                     <!-- No add-opens flags on JDK 8 -->
                                     <argLine></argLine>
-                                    <forkMode>once</forkMode>
+                                    <!-- Next two lines replace 'forkMode', removed in maven-surefire-plugin version 3.0.0-M8: -->
+                                    <forkCount>1</forkCount>
+                                    <reuseForks>true</reuseForks>
                                 </configuration>
                             </execution>
                         </executions>
