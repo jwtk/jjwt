@@ -23,6 +23,7 @@ import java.security.Key;
  * @param <T> The type of payload in the message.
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface Message<T> {
 
     /**

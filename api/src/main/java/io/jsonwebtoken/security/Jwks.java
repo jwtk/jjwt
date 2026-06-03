@@ -19,7 +19,8 @@ import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.lang.Supplier;
+
+import java.util.function.Supplier;
 
 /**
  * Utility methods for creating

@@ -16,7 +16,8 @@
 package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Supplier;
+
+import java.util.function.Supplier;
 
 public class FormattedStringSupplier implements Supplier<String> {
 

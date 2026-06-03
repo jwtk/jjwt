@@ -45,8 +45,7 @@ import io.jsonwebtoken.impl.io.JsonObjectDeserializer;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.Function;
-import io.jsonwebtoken.impl.lang.RedactedSupplier;
+import io.jsonwebtoken.impl.lang.RedactedConfidentialValue;
 import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest;
 import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
 import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
@@ -90,6 +89,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtParser {
@@ -883,7 +883,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             return Streams.bytes(decoding, "Unable to Base64Url-decode input.");
         } catch (Throwable t) {
             // Don't disclose potentially-sensitive information per https://github.com/jwtk/jjwt/issues/824:
-            String value = "payload".equals(name) ? RedactedSupplier.REDACTED_VALUE : base64UrlEncoded.toString();
+            String value = "payload".equals(name) ? RedactedConfidentialValue.REDACTED_VALUE : base64UrlEncoded.toString();
             String msg = "Invalid Base64Url " + name + ": " + value;
             throw new MalformedJwtException(msg, t);
         }

@@ -18,17 +18,17 @@ package io.jsonwebtoken.gson.io;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.ConfidentialValue;
 
 import java.lang.reflect.Type;
 
-public final class GsonSupplierSerializer implements JsonSerializer<Supplier<?>> {
+public final class GsonConfidentialValueSerializer implements JsonSerializer<ConfidentialValue<?>> {
 
-    public static final GsonSupplierSerializer INSTANCE = new GsonSupplierSerializer();
+    public static final GsonConfidentialValueSerializer INSTANCE = new GsonConfidentialValueSerializer();
 
     @Override
-    public JsonElement serialize(Supplier<?> supplier, Type type, JsonSerializationContext ctx) {
-        Object value = supplier.get();
+    public JsonElement serialize(ConfidentialValue<?> confidentialValue, Type type, JsonSerializationContext ctx) {
+        Object value = confidentialValue.get();
         return ctx.serialize(value);
     }
 }

@@ -18,6 +18,8 @@ package io.jsonwebtoken.impl.lang
 import io.jsonwebtoken.MalformedJwtException
 import org.junit.Test
 
+import java.util.function.Function
+
 import static org.junit.Assert.*
 
 class FunctionsTest {

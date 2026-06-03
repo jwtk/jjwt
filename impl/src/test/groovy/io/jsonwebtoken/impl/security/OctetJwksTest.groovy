@@ -106,7 +106,7 @@ class OctetJwksTest {
         assertEquals kty, jwk.getType()
         assertEquals crv, jwk.get('crv')
         assertEquals x, jwk.get('x')
-        assertEquals d, jwk.get('d').get() // Supplier
+        assertEquals d, jwk.get('d').get() // ConfidentialValue
         def pubJwk = jwk.toPublicJwk()
         assertEquals use, pubJwk.getPublicKeyUse()
         assertEquals kty, pubJwk.getType()

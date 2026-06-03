@@ -23,6 +23,7 @@ import java.security.Key;
  * @param <K> the type of key provided by this supplier.
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface KeySupplier<K extends Key> {
 
     /**

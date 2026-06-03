@@ -21,7 +21,7 @@ import com.google.gson.GsonBuilder
 import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.lang.Supplier
+import io.jsonwebtoken.security.ConfidentialValue
 import org.junit.Before
 import org.junit.Test
 
@@ -54,7 +54,7 @@ class GsonSerializerTest {
     @Test
     void testGsonConstructor() {
         def customGSON = new GsonBuilder()
-                .registerTypeHierarchyAdapter(Supplier.class, GsonSupplierSerializer.INSTANCE)
+                .registerTypeHierarchyAdapter(ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
                 .disableHtmlEscaping().create()
         s = new GsonSerializer(customGSON)
         assertSame customGSON, s.gson
@@ -83,10 +83,11 @@ class GsonSerializerTest {
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = 'Invalid Gson instance - it has not been registered with the necessary ' +
-                    'io.jsonwebtoken.lang.Supplier type adapter.  When using the GsonBuilder, ensure this type ' +
-                    'adapter is registered by calling ' +
-                    'gsonBuilder.registerTypeHierarchyAdapter(io.jsonwebtoken.lang.Supplier.class, ' +
-                    'io.jsonwebtoken.gson.io.GsonSupplierSerializer.INSTANCE) before calling gsonBuilder.create()'
+                    'io.jsonwebtoken.security.ConfidentialValue type adapter.  When using the GsonBuilder, ' +
+                    'ensure this type adapter is registered by calling ' +
+                    'gsonBuilder.registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, ' +
+                    'io.jsonwebtoken.gson.io.GsonConfidentialValueSerializer.INSTANCE) ' +
+                    'before calling gsonBuilder.create()'
             assertEquals msg, expected.message
         }
     }
