@@ -1,0 +1,76 @@
+name: 'Setup Build Environment'
+description: 'Sets up JDK(s), Maven Develocity, and optionally SoftHSM'
+inputs:
+  java-version-tests:
+    description: 'The primary/test Java version'
+    required: false
+    default: '17'
+  distribution:
+    description: 'JDK distribution to use'
+    required: false
+    default: 'zulu'
+  java-version-maven:
+    description: 'The Java version used to execute Maven'
+    required: false
+    default: '17'
+  develocity-access-key:
+    description: 'Develocity access key'
+    required: false
+  setup-softhsm:
+    description: 'Whether to set up SoftHSM'
+    required: false
+    default: 'true'
+  fetch-depth:
+    description: 'Git fetch depth'
+    required: false
+    default: '1'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - name: Set up JDK ${{ inputs.java-version-tests }} (Runs Tests)
+      if: ${{ inputs.java-version != inputs.java-version-maven }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version-tests }}
+        cache: 'maven'
+        check-latest: true
+
+    - name: Set up JDK ${{ inputs.java-version-maven }} (Runs Maven)
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version-maven }}
+        cache: 'maven'
+        check-latest: true
+
+    - name: Set up OSS Community Develocity Instance for Maven
+      uses: gradle/develocity-actions/setup-maven@v2.1
+      with:
+        develocity-access-key: ${{ inputs.develocity-access-key }}
+
+    - name: Install softhsm2
+      if: ${{ inputs.setup-softhsm == 'true' }}
+      run: sudo apt-get install -y softhsm2
+      shell: bash
+
+    - name: Install opensc
+      if: ${{ inputs.setup-softhsm == 'true' }}
+      run: sudo apt-get install -y opensc
+      shell: bash
+
+    - name: Ensure SoftHSM user configuration
+      if: ${{ inputs.setup-softhsm == 'true' }}
+      run: impl/src/test/scripts/softhsm configure
+      shell: bash
+
+    - name: Populate SoftHSM with JJWT test keys
+      if: ${{ inputs.setup-softhsm == 'true' }}
+      run: impl/src/test/scripts/softhsm import
+      shell: bash
