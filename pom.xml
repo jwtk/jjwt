@@ -106,7 +106,7 @@
         <maven.license.version>4.2.rc3</maven.license.version>
         <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
-        <jdk.version>7</jdk.version>
+        <jdk.version>17</jdk.version>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.12.7.1</jackson.version>
@@ -468,7 +468,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <shadedClassifierName>deprecated</shadedClassifierName>
                         <shadedArtifactAttached>true</shadedArtifactAttached>
@@ -644,7 +644,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>5.1.9</version>
                 <executions>
                     <execution>
                         <id>bundle-manifest</id>
@@ -764,7 +764,7 @@
             </activation>
             <properties>
                 <!-- normally this is 1.7, but as of 21, JDK 8 is the lowest source/target -->
-                <jdk.version>8</jdk.version>
+                <jdk.version>17</jdk.version>
             </properties>
         </profile>
         <profile>
