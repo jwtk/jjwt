@@ -119,9 +119,6 @@
              test executions (jdk-8 and jdk-11 profiles). -->
         <module.skip.jdk8.tests>false</module.skip.jdk8.tests>
         <module.skip.jdk11.tests>false</module.skip.jdk11.tests>
-        <!-- Skips the default surefire execution when test.jdk.version is set,
-             since the matching jdk-N profile will run tests via toolchain instead. -->
-        <skip.default.tests>false</skip.default.tests>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.19.2</jackson.version>
@@ -589,7 +586,6 @@
                     <!-- Next two lines replace 'forkMode', removed in maven-surefire-plugin version 3.0.0-M8: -->
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
-                    <skip>${skip.default.tests}</skip>
                 </configuration>
             </plugin>
             <plugin>
@@ -701,9 +697,22 @@
                     <name>test.jdk.version</name>
                 </property>
             </activation>
-            <properties>
-                <skip.default.tests>true</skip.default.tests>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <!-- ==================== JDK 8 test execution ==================== -->
