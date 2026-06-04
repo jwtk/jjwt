@@ -37,5 +37,6 @@
         <module>jackson</module>
         <module>orgjson</module>
         <module>gson</module>
+        <module>jackson3</module>
     </modules>
 </project>
