@@ -49,27 +49,29 @@ jobs:
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
         run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-17,jdk-21,jdk-25
 
-  temurin:
+  non-oracle:
     runs-on: 'ubuntu-latest'
-    name: temurin
+    strategy:
+      matrix:
+        distribution: [ 'temurin', 'zulu' ]
+        java: [ 8, 11, 21, 25 ] # don't specify 17, since it's explicitly defined below
+    name: jdk-${{ matrix.java }}-${{ matrix.distribution }}
     steps:
       - uses: actions/checkout@v4
-      # Install test-only JDKs first; each call appends an entry to ~/.m2/toolchains.xml
-      - name: Set up JDK
+      # Install test-only JDK first; will append an entry to ~/.m2/toolchains.xml
+      - name: Set up ${{ matrix.distribution }} JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: |
-            8
-            11
-            21
-            25
-      # Build JDK last so it ends up as the active JAVA_HOME / PATH entry
+          distribution: ${{ matrix.distribution }}
+          java-version: ${{ matrix.java }}
+          cache: 'maven'
+          check-latest: true
+      # Install full build JDK last so it ends up as the active JAVA_HOME / PATH entry
       - name: Set up JDK 17 (build)
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin'
+          distribution: 'zulu'
           cache: 'maven'
           check-latest: true
       - name: Set up OSS Community Develocity Instance for Maven
@@ -87,7 +89,7 @@ jobs:
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-8,jdk-11,jdk-17,jdk-21,jdk-25
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-17,jdk-${{ matrix.java }}
 
   # ensure all of our files have the correct/updated license header
   license-check:
@@ -108,12 +110,10 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: License Check
-        # This adds about 1 minute to any build, which is why we don't want to do it on every other build:
-        run: |
-          ${{env.MVN_CMD}} license:check
+        # This adds about 1 minute to any build, which is why we don't want to do it on every build:
+        run: ${{env.MVN_CMD}} license:check
 
   code-coverage:
-    needs: [oracle, temurin]
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v4
