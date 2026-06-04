@@ -11,34 +11,19 @@ env:
   MVN_CMD: ./mvnw --no-transfer-progress -B
 
 jobs:
-  # Oracle only provides JDK 17+, so test against 17, 21, and 25
-  oracle:
-    runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java-version }}-oracle
-    strategy:
-      matrix:
-        java-version: [ 17, 21, 25 ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - name: Setup Build Environment
-        uses: ./.github/actions/setup-build
-        with:
-          java-version-tests: ${{ matrix.java-version }}
-          distribution: oracle
-          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java-version }}
-
-  non-oracle:
+  build:
     runs-on: 'ubuntu-latest'
     strategy:
-      matrix:
-        distribution: [ 'temurin', 'zulu', 'corretto', 'semeru' ]
-        java-version: [ 8, 11, 17, 21, 25 ]
       fail-fast: false
+      matrix:
+        distribution: [ 'oracle', 'temurin', 'zulu', 'corretto', 'semeru' ]
+        java-version: [ 8, 11, 17, 21, 25 ]
+        # Oracle only provides JDK 17+, so exclude earlier versions:
+        exclude:
+          - distribution: 'oracle'
+            java-version: 8
+          - distribution: 'oracle'
+            java-version: 11
     name: jdk-${{ matrix.java-version }}-${{ matrix.distribution }}
     steps:
       - name: Checkout
