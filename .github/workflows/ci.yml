@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   pull_request: # all pull requests
   push:
     branches:
@@ -14,21 +14,23 @@ jobs:
   # Oracle only provides JDK 17+, so test against 17, 21, and 25
   oracle:
     runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java }}-oracle
+    name: jdk-${{ matrix.java-version }}-oracle
     strategy:
       matrix:
         java-version: [ 17, 21, 25 ]
     steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Setup Build Environment
         uses: ./.github/actions/setup-build
         with:
-          java-version-tests: ${{ matrix.java }}
+          java-version-tests: ${{ matrix.java-version }}
           distribution: oracle
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java }}
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java-version }}
 
   non-oracle:
     runs-on: 'ubuntu-latest'
@@ -37,29 +39,34 @@ jobs:
         distribution: [ 'temurin', 'zulu', 'corretto', 'semeru' ]
         java-version: [ 8, 11, 17, 21, 25 ]
       fail-fast: false
-    name: jdk-${{ matrix.java }}-${{ matrix.distribution }}
+    name: jdk-${{ matrix.java-version }}-${{ matrix.distribution }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Setup Build Environment
         uses: ./.github/actions/setup-build
         with:
-          java-version-tests: ${{ matrix.java }}
+          java-version-tests: ${{ matrix.java-version }}
           distribution: ${{ matrix.distribution }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java }}
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java-version }}
 
   # ensure all of our files have the correct/updated license header
   license-check:
     runs-on: 'ubuntu-latest'
     steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
       - name: Setup Build Environment
         uses: ./.github/actions/setup-build
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           setup-softhsm: 'false'
-          fetch-depth: 0
       - name: License Check
         # This adds about 1 minute to any build, which is why we don't want to do it on every build:
         run: ${{env.MVN_CMD}} license:check
@@ -67,6 +74,8 @@ jobs:
   code-coverage:
     runs-on: 'ubuntu-latest'
     steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Setup Build Environment
         uses: ./.github/actions/setup-build
         with:
