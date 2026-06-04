@@ -15,6 +15,9 @@ jobs:
   oracle:
     runs-on: 'ubuntu-latest'
     name: jdk-${{ matrix.java }}-oracle
+    strategy:
+      matrix:
+        java: [ 17, 21, 25 ] # don't specify 17, since it's explicitly defined below
     steps:
       - uses: actions/checkout@v4
       # Install test-only JDKs first; each call appends an entry to ~/.m2/toolchains.xml
@@ -22,9 +25,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: oracle
-          java-version: |
-            21
-            25
+          java-version: ${{ matrix.java }}
       # Build JDK last so it ends up as the active JAVA_HOME / PATH entry
       - name: Set up JDK 17 (build)
         uses: actions/setup-java@v4
@@ -47,14 +48,15 @@ jobs:
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-17,jdk-21,jdk-25
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java }}
 
   non-oracle:
     runs-on: 'ubuntu-latest'
     strategy:
       matrix:
-        distribution: [ 'temurin', 'zulu' ]
-        java: [ 8, 11, 21, 25 ] # don't specify 17, since it's explicitly defined below
+        distribution: [ 'temurin', 'zulu', 'corretto' ]
+        java: [ 8, 11, 17, 21, 25 ]
+      fail-fast: false
     name: jdk-${{ matrix.java }}-${{ matrix.distribution }}
     steps:
       - uses: actions/checkout@v4
@@ -71,7 +73,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'zulu'
+          distribution: ${{ matrix.distribution }}
           cache: 'maven'
           check-latest: true
       - name: Set up OSS Community Develocity Instance for Maven
@@ -89,7 +91,7 @@ jobs:
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -P jdk-17,jdk-${{ matrix.java }}
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java }}
 
   # ensure all of our files have the correct/updated license header
   license-check:
@@ -101,7 +103,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
           cache: 'maven'
           check-latest: true
@@ -120,7 +122,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
           cache: 'maven'
           check-latest: true
