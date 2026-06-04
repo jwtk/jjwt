@@ -146,7 +146,6 @@
         <!-- Default surefire argLine for JDK 17 (the required build JDK).
              Individual jdk-N profiles override this for their toolchain executions. -->
         <surefire.useModulePath>false</surefire.useModulePath>
-        <surefire.argLine>${test.addOpens}</surefire.argLine>
         <test.addOpens>
             --add-opens java.base/java.lang=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
             --add-opens java.desktop/java.beans=ALL-UNNAMED, <!-- Needed by EasyMock/cglib -->
@@ -156,7 +155,7 @@
                  KeysTest.testKeyPairBuilder: -->
             --add-opens java.base/sun.security.util=ALL-UNNAMED
         </test.addOpens>
-
+        <surefire.argLine>${test.addOpens}</surefire.argLine>
     </properties>
 
     <modules>
@@ -472,7 +471,7 @@
                     </executions>
                 </plugin>
 
-                <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
+                <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson to repackage (and verify)
                      binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
                      avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
                 <!-- TODO: remove these deprecated packages and this config before v1.0 -->
@@ -664,18 +663,6 @@
                 <groupId>io.jsonwebtoken.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.4.1</version>
-                <configuration>
-                    <!-- TestProvider.java lives in impl/src/test/java; Clover instruments it and includes it
-                         in clover.xml, so coveralls must be able to resolve it. Add each module's test
-                         source root so the plugin finds the file instead of reporting "No source found". -->
-                    <sourceDirectories>
-                        <sourceDirectory>${jjwt.root}/api/src/test/java</sourceDirectory>
-                        <sourceDirectory>${jjwt.root}/impl/src/test/java</sourceDirectory>
-                        <sourceDirectory>${jjwt.root}/extensions/jackson/src/test/java</sourceDirectory>
-                        <sourceDirectory>${jjwt.root}/extensions/gson/src/test/java</sourceDirectory>
-                        <sourceDirectory>${jjwt.root}/extensions/orgjson/src/test/java</sourceDirectory>
-                    </sourceDirectories>
-                </configuration>
                 <dependencies>
                     <!-- coveralls-maven-plugin uses javax.xml.bind.DatatypeConverter (via MD5DigestInputStream),
                          which was removed in JDK 11+. Pull in the last javax-namespace-compatible version so
@@ -728,6 +715,10 @@
                     <value>8</value>
                 </property>
             </activation>
+            <properties>
+                <property>surefire.argLine</property>
+                <value><!-- No add-opens flags on JDK 8 --></value>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -743,8 +734,7 @@
                                     <jdkToolchain>
                                         <version>[1.8,1.9),[8,9)</version>
                                     </jdkToolchain>
-                                    <!-- No add-opens flags on JDK 8 -->
-                                    <argLine></argLine>
+                                    <argLine>${surefire.argLine}</argLine>
                                     <!-- Next two lines replace 'forkMode', removed in maven-surefire-plugin version 3.0.0-M8: -->
                                     <forkCount>1</forkCount>
                                     <reuseForks>true</reuseForks>
@@ -780,7 +770,7 @@
                                     <jdkToolchain>
                                         <version>11</version>
                                     </jdkToolchain>
-                                    <argLine>${test.addOpens}</argLine>
+                                    <argLine>${surefire.argLine}</argLine>
                                 </configuration>
                             </execution>
                         </executions>
@@ -813,7 +803,7 @@
                                 <id>test-jdk-17</id>
                                 <goals><goal>test</goal></goals>
                                 <configuration>
-                                    <argLine>${test.addOpens}</argLine>
+                                    <argLine>${surefire.argLine}</argLine>
                                 </configuration>
                             </execution>
                         </executions>
@@ -845,7 +835,7 @@
                                     <jdkToolchain>
                                         <version>21</version>
                                     </jdkToolchain>
-                                    <argLine>${test.addOpens}</argLine>
+                                    <argLine>${surefire.argLine}</argLine>
                                 </configuration>
                             </execution>
                         </executions>
@@ -877,7 +867,7 @@
                                     <jdkToolchain>
                                         <version>25</version>
                                     </jdkToolchain>
-                                    <argLine>${test.addOpens}</argLine>
+                                    <argLine>${surefire.argLine}</argLine>
                                 </configuration>
                             </execution>
                         </executions>
