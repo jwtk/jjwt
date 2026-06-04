@@ -715,10 +715,6 @@
                     <value>8</value>
                 </property>
             </activation>
-            <properties>
-                <property>surefire.argLine</property>
-                <value><!-- No add-opens flags on JDK 8 --></value>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -734,7 +730,7 @@
                                     <jdkToolchain>
                                         <version>[1.8,1.9),[8,9)</version>
                                     </jdkToolchain>
-                                    <argLine>${surefire.argLine}</argLine>
+                                    <argLine><!-- No add-opens flags supported on JDK 8 --></argLine>
                                     <!-- Next two lines replace 'forkMode', removed in maven-surefire-plugin version 3.0.0-M8: -->
                                     <forkCount>1</forkCount>
                                     <reuseForks>true</reuseForks>
