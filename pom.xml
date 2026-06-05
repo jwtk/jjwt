@@ -114,11 +114,6 @@
         <!-- Used by javadoc plugin <source> parameter -->
         <jdk.version>8</jdk.version>
 
-        <!-- Minimum JDK required to test this module. Modules requiring JDK 17+
-             set both skip flags to true in their own pom.xml to skip lower-JDK
-             test executions (jdk-8 and jdk-11 profiles). -->
-        <module.skip.jdk8.tests>false</module.skip.jdk8.tests>
-        <module.skip.jdk11.tests>false</module.skip.jdk11.tests>
         <buildNumber>${user.name}-${maven.build.timestamp}</buildNumber>
 
         <jackson.version>2.19.2</jackson.version>
@@ -735,7 +730,6 @@
                                 <id>test-jdk-8</id>
                                 <goals><goal>test</goal></goals>
                                 <configuration combine.self="override">
-                                    <skip>${module.skip.jdk8.tests}</skip>
                                     <jdkToolchain>
                                         <version>[1.8,1.9),[8,9)</version>
                                     </jdkToolchain>
@@ -771,7 +765,6 @@
                                 <id>test-jdk-11</id>
                                 <goals><goal>test</goal></goals>
                                 <configuration>
-                                    <skip>${module.skip.jdk11.tests}</skip>
                                     <jdkToolchain>
                                         <version>11</version>
                                     </jdkToolchain>
