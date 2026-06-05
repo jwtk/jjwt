@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   pull_request: # all pull requests
   push:
     branches:
@@ -11,151 +11,60 @@ env:
   MVN_CMD: ./mvnw --no-transfer-progress -B
 
 jobs:
-  oracle:
-    strategy:
-      matrix:
-        java: [ '17' ]
+  build:
     runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java }}-oracle
+    strategy:
+      fail-fast: false
+      matrix:
+        distribution: [ 'oracle', 'temurin', 'zulu', 'corretto', 'semeru' ]
+        java-version: [ 8, 11, 17, 21, 25 ]
+        # Oracle only provides JDK 17+, so exclude earlier versions:
+        exclude:
+          - distribution: 'oracle'
+            java-version: 8
+          - distribution: 'oracle'
+            java-version: 11
+    name: jdk-${{ matrix.java-version }}-${{ matrix.distribution }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4.7.0
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build
         with:
-          distribution: oracle
-          java-version: ${{ matrix.java }}
-      - name: Set up OSS Community Develocity Instance for Maven
-        uses: gradle/develocity-actions/setup-maven@v2.1
-        with:
+          java-version-tests: ${{ matrix.java-version }}
+          distribution: ${{ matrix.distribution }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
       - name: Build
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
-
-  temurin:
-    strategy:
-      matrix:
-        java: [ '8', '11', '17', '18' ]
-    runs-on: 'ubuntu-latest'
-    name: jdk-${{ matrix.java }}-temurin
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'temurin'
-          cache: 'maven'
-          check-latest: true
-      - name: Set up OSS Community Develocity Instance for Maven
-        uses: gradle/develocity-actions/setup-maven@v2.1
-        with:
-          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
-
-  zulu:
-    strategy:
-      matrix:
-        java: [ '7', '8', '9', '11', '12', '13', '14', '15', '16', '17', '18', '21' ]
-    runs-on: 'ubuntu-latest'
-    env:
-      JDK_MAJOR_VERSION: ${{ matrix.java }}
-    name: jdk-${{ matrix.java }}-zulu
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'zulu'
-          cache: 'maven'
-          check-latest: true
-      - name: Set up OSS Community Develocity Instance for Maven
-        uses: gradle/develocity-actions/setup-maven@v2.1
-        with:
-          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
-      - name: Build
-        # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
-        # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
-        run: |
-          if [ "$JDK_MAJOR_VERSION" == "7" ]; then export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"; fi
-          ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true
+        run: ${{env.MVN_CMD}} verify -Possrh -Dgpg.skip=true -Dtest.jdk.version=${{ matrix.java-version }}
 
   # ensure all of our files have the correct/updated license header
   license-check:
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          fetch-depth: 0 # avoid license plugin history warnings (plus it needs full history)
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '8'
-          cache: 'maven'
-          check-latest: true
-      - name: Set up OSS Community Develocity Instance for Maven
-        uses: gradle/develocity-actions/setup-maven@v2.1
+          fetch-depth: 0
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          setup-softhsm: 'false'
       - name: License Check
-        # This adds about 1 minute to any build, which is why we don't want to do it on every other build:
-        run: |
-          ${{env.MVN_CMD}} license:check
+        # This adds about 1 minute to any build, which is why we don't want to do it on every build:
+        run: ${{env.MVN_CMD}} license:check
 
   code-coverage:
-    needs: [oracle, temurin, zulu]
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'maven'
-          check-latest: true
-      - name: Set up OSS Community Develocity Instance for Maven
-        uses: gradle/develocity-actions/setup-maven@v2.1
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-build
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: Install softhsm2
-        run: sudo apt-get install -y softhsm2
-      - name: Install opensc
-        run: sudo apt-get install -y opensc
-      - name: Ensure SoftHSM user configuration
-        run: impl/src/test/scripts/softhsm configure
-      - name: Populate SoftHSM with JJWT test keys
-        run: impl/src/test/scripts/softhsm import
       - name: Code Coverage
         # run a full build, just as we would for a release (i.e. the `ossrh` profile), but don't use gpg
         # to sign artifacts, since we don't want to mess with storing signing credentials in CI:
