@@ -248,6 +248,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
                 new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, zipAlgs, "compression", "decompression", null);
     }
 
+    @Deprecated
     @Override
     public boolean isSigned(CharSequence compact) {
         if (!Strings.hasText(compact)) {
