@@ -17,6 +17,7 @@ package io.jsonwebtoken.jackson.io;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -145,7 +146,7 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
         private final Map<String, Class<?>> claimTypeMap;
 
         private MappedTypeDeserializer(Map<String, Class<?>> claimTypeMap) {
-            super(null, null);
+            super((JavaType)null, null);
             this.claimTypeMap = claimTypeMap;
         }
 

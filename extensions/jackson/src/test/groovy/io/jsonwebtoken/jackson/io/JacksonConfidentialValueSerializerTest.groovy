@@ -15,18 +15,19 @@
  */
 package io.jsonwebtoken.jackson.io
 
+
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.lang.Supplier
+import io.jsonwebtoken.security.ConfidentialValue
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 
-class JacksonSupplierSerializerTest {
+class JacksonConfidentialValueSerializerTest {
 
     @Test
     void testSupplierNullValue() {
         def serializer = new JacksonSerializer()
-        def supplier = new Supplier() {
+        def supplier = new ConfidentialValue() {
             @Override
             Object get() {
                 return null
@@ -40,7 +41,7 @@ class JacksonSupplierSerializerTest {
     @Test
     void testSupplierStringValue() {
         def serializer = new JacksonSerializer()
-        def supplier = new Supplier() {
+        def supplier = new ConfidentialValue() {
             @Override
             Object get() {
                 return 'hello'

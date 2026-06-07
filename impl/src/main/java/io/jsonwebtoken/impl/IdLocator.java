@@ -20,11 +20,12 @@ import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.lang.Strings;
+
+import java.util.function.Function;
 
 public class IdLocator<H extends Header, R extends Identifiable> implements Locator<R>, Function<H, R> {
 

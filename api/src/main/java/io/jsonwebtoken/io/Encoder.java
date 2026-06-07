@@ -22,6 +22,7 @@ package io.jsonwebtoken.io;
  * @param <R> the type of the resulting formatted data
  * @since 0.10.0
  */
+@FunctionalInterface
 public interface Encoder<T, R> {
 
     /**

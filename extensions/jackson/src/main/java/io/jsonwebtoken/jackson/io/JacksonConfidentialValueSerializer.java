@@ -19,21 +19,21 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.ConfidentialValue;
 
 import java.io.IOException;
 
-final class JacksonSupplierSerializer extends StdSerializer<Supplier<?>> {
+final class JacksonConfidentialValueSerializer extends StdSerializer<ConfidentialValue<?>> {
 
-    static final JacksonSupplierSerializer INSTANCE = new JacksonSupplierSerializer();
+    static final JacksonConfidentialValueSerializer INSTANCE = new JacksonConfidentialValueSerializer();
 
-    public JacksonSupplierSerializer() {
-        super(Supplier.class, false);
+    public JacksonConfidentialValueSerializer() {
+        super(ConfidentialValue.class, false);
     }
 
     @Override
-    public void serialize(Supplier<?> supplier, JsonGenerator generator, SerializerProvider provider) throws IOException {
-        Object value = supplier.get();
+    public void serialize(ConfidentialValue<?> confidentialValue, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        Object value = confidentialValue.get();
 
         if (value == null) {
             provider.defaultSerializeNull(generator);

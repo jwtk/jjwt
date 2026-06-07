@@ -16,7 +16,6 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
-import io.jsonwebtoken.lang.Supplier;
 
 import java.security.Key;
 import java.util.Map;
@@ -49,8 +48,8 @@ import java.util.Set;
  *
  * <p>JWKs often represent secret or private key data which should never be exposed publicly, nor mistakenly printed
  * to application logs or {@code System.out.println} calls.  As a result, all JJWT JWK
- * private or secret values are 'wrapped' in a {@link io.jsonwebtoken.lang.Supplier Supplier} instance to ensure
- * any attempt to call {@link String#toString() toString()} on the value will print a redacted value instead of an
+ * private or secret values are 'wrapped' in a {@link ConfidentialValue ConfidentialValue} instance to ensure
+ * any attempt to call {@link Object#toString() toString()} on the value will print a redacted value instead of an
  * actual private or secret value.</p>
  *
  * <p>For example, a {@link SecretJwk} will have an internal &quot;{@code k}&quot; member whose value reflects raw
@@ -70,11 +69,11 @@ import java.util.Set;
  * k=&lt;redacted&gt;</pre></blockquote>
  * <p>instead of the actual/raw {@code k} value.</p>
  *
- * <p>Finally, because all private or secret values are wrapped as {@link io.jsonwebtoken.lang.Supplier}
+ * <p>Finally, because all private or secret values are wrapped as {@link ConfidentialValue}
  * instances, if you really wanted the <em>real</em> internal value, you could just call the supplier's
- * {@link Supplier#get() get()} method:</p>
+ * {@link ConfidentialValue#get() get()} method:</p>
  * <blockquote><pre>
- * String k = ((Supplier&lt;String&gt;)aSecretJwk.get(&quot;k&quot;)).get();</pre></blockquote>
+ * String k = ((ConfidentialValue&lt;String&gt;)aSecretJwk.get(&quot;k&quot;)).get();</pre></blockquote>
  * <p>but <b><em>BE CAREFUL</em></b>: obtaining the raw value in your application code exposes greater security
  * risk - you must ensure to keep that value safe and out of console or log output.  It is almost always better to
  * interact with the JWK's {@link #toKey() toKey()} instance directly instead of accessing

@@ -22,7 +22,7 @@ import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Objects;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.ConfidentialValue;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -34,7 +34,7 @@ public class GsonSerializer<T> extends AbstractSerializer<T> {
     static final Gson DEFAULT_GSON = new GsonBuilder()
             .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-            .registerTypeHierarchyAdapter(Supplier.class, GsonSupplierSerializer.INSTANCE)
+            .registerTypeHierarchyAdapter(ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
             .disableHtmlEscaping().create();
 
     protected final Gson gson;
@@ -48,13 +48,13 @@ public class GsonSerializer<T> extends AbstractSerializer<T> {
         this.gson = gson;
 
         //ensure the necessary type adapter has been registered, and if not, throw an error:
-        String json = this.gson.toJson(TestSupplier.INSTANCE);
+        String json = this.gson.toJson(TestConfidentialValue.INSTANCE);
         if (json.contains("value")) {
             String msg = "Invalid Gson instance - it has not been registered with the necessary " +
-                    Supplier.class.getName() + " type adapter.  When using the GsonBuilder, ensure this " +
+                    ConfidentialValue.class.getName() + " type adapter.  When using the GsonBuilder, ensure this " +
                     "type adapter is registered by calling gsonBuilder.registerTypeHierarchyAdapter(" +
-                    Supplier.class.getName() + ".class, " +
-                    GsonSupplierSerializer.class.getName() + ".INSTANCE) before calling gsonBuilder.create()";
+                    ConfidentialValue.class.getName() + ".class, " +
+                    GsonConfidentialValueSerializer.class.getName() + ".INSTANCE) before calling gsonBuilder.create()";
             throw new IllegalArgumentException(msg);
         }
     }
@@ -79,12 +79,12 @@ public class GsonSerializer<T> extends AbstractSerializer<T> {
         this.gson.toJson(o, writer);
     }
 
-    private static class TestSupplier<T> implements Supplier<T> {
+    private static class TestConfidentialValue<T> implements ConfidentialValue<T> {
 
-        private static final TestSupplier<String> INSTANCE = new TestSupplier<>("test");
+        private static final TestConfidentialValue<String> INSTANCE = new TestConfidentialValue<>("test");
         private final T value;
 
-        private TestSupplier(T value) {
+        private TestConfidentialValue(T value) {
             this.value = value;
         }
 

@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.lang;
 
+@FunctionalInterface
 public interface CheckedFunction<T, R> {
     R apply(T t) throws Exception;
 }

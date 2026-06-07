@@ -19,39 +19,39 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class RedactedSupplierTest {
+class RedactedConfidentialValueTest {
 
     @Test
     void testEqualsWrappedSameValue() {
         def value = 42
-        assertTrue new RedactedSupplier<>(value).equals(value)
+        assertTrue new RedactedConfidentialValue<>(value).equals(value)
     }
 
     @Test
     void testEqualsWrappedDifferentValue() {
-        assertFalse new RedactedSupplier<>(42).equals(30)
+        assertFalse new RedactedConfidentialValue<>(42).equals(30)
     }
 
     @Test
     void testEquals() {
-        assertTrue new RedactedSupplier<>(42).equals(new RedactedSupplier(42))
+        assertTrue new RedactedConfidentialValue<>(42).equals(new RedactedConfidentialValue(42))
     }
 
     @Test
     void testEqualsSameTypeDifferentValue() {
-        assertFalse new RedactedSupplier<>(42).equals(new RedactedSupplier(30))
+        assertFalse new RedactedConfidentialValue<>(42).equals(new RedactedConfidentialValue(30))
     }
 
     @Test
     void testEqualsIdentity() {
-        def supplier = new RedactedSupplier('hello')
+        def supplier = new RedactedConfidentialValue('hello')
         assertEquals supplier, supplier
     }
 
     @Test
     void testHashCode() {
         int hashCode = 42.hashCode()
-        assertEquals hashCode, new RedactedSupplier(42).hashCode()
+        assertEquals hashCode, new RedactedConfidentialValue(42).hashCode()
     }
 
 }

@@ -21,7 +21,7 @@ import io.jsonwebtoken.io.SerializationException
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.DateFormats
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.lang.Supplier
+import io.jsonwebtoken.security.ConfidentialValue
 import org.json.JSONObject
 import org.json.JSONString
 import org.junit.Before
@@ -165,7 +165,7 @@ class OrgJsonSerializerTest {
 
     @Test
     void testSupplier() {
-        def supplier = new Supplier() {
+        def supplier = new ConfidentialValue() {
             @Override
             Object get() {
                 return 'test'

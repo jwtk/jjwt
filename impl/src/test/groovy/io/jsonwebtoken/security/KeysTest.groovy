@@ -295,7 +295,15 @@ class KeysTest {
         assertTrue result instanceof PrivateECKey
         def key = result as PrivateECKey
         assertSame priv, key.getKey()
-        assertSame pub.getParams(), key.getParams()
+        // NOTE:
+        // There is a bug with Groovy 4 on >= JDK 22 that cannot resolve
+        // the ambiguity when calling key.getParams() between
+        // java.security.AsymmetricKey (introduced in JDK 22) and
+        // java.security.interfaces.ECKey, and returns AsymmetricKey's default
+        // interface implementation value of `null`. So we just assert the internal
+        // object state by looking at the field directly:
+        //assertSame pub.getParams(), key.getParams() //ambiguous w/ Groovy 4 on >= JDK 22
+        assertSame pub.getParams(), key.@params
     }
 
     @Test

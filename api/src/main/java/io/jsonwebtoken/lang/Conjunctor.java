@@ -22,6 +22,7 @@ package io.jsonwebtoken.lang;
  * @param <T> the type of joined object to return.
  * @since 0.12.0
  */
+@FunctionalInterface
 public interface Conjunctor<T> {
 
     /**

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.impl.lang;
 
+import java.util.function.Function;
+
 abstract class ReflectionFunction<T, R> implements Function<T, R> {
 
     public static final String ERR_MSG = "Reflection operation failed. This is likely due to an internal " +

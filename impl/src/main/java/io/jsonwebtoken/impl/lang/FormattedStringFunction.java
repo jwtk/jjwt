@@ -17,6 +17,8 @@ package io.jsonwebtoken.impl.lang;
 
 import io.jsonwebtoken.lang.Assert;
 
+import java.util.function.Function;
+
 public class FormattedStringFunction<T> implements Function<T, String> {
 
     private final String msg;

@@ -25,7 +25,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.lang.Supplier;
+import io.jsonwebtoken.security.ConfidentialValue;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkThumbprint;
@@ -115,8 +115,8 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterRea
 
     private String getRequiredThumbprintValue(Parameter<?> param) {
         Object value = get(param.getId());
-        if (value instanceof Supplier) {
-            value = ((Supplier<?>) value).get();
+        if (value instanceof ConfidentialValue<?>) {
+            value = ((ConfidentialValue<?>) value).get();
         }
         return Assert.isInstanceOf(String.class, value, "Parameter canonical value is not a String.");
     }

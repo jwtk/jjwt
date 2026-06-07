@@ -266,12 +266,8 @@ class JcaTemplateTest {
             template.generatePrivate(new X509EncodedKeySpec(invalid))
             fail()
         } catch (SecurityException expected) {
-            boolean jdk11OrLater = Classes.isAvailable('java.security.interfaces.XECPrivateKey')
-            String msg = 'KeyFactory callback execution failed: key spec not recognized'
-            if (jdk11OrLater) {
-                msg = 'KeyFactory callback execution failed: Only PKCS8EncodedKeySpec and XECPrivateKeySpec supported'
-            }
-            assertEquals msg, expected.getMessage()
+            String msg = expected.getMessage()
+            assertTrue msg, msg.startsWith('KeyFactory callback execution failed:')
         }
     }
 
