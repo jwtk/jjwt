@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * A clock represents a time source that can be used when creating and verifying JWTs.
@@ -29,5 +29,5 @@ public interface Clock {
      *
      * @return the clock's current timestamp at the instant the method is invoked.
      */
-    Date now();
+    Instant now();
 }

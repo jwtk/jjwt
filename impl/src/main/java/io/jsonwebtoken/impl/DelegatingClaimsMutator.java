@@ -23,7 +23,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.lang.Strings;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,32 +141,32 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
     }
 
     @Override
-    public T setExpiration(Date exp) {
+    public T setExpiration(Instant exp) {
         return expiration(exp);
     }
 
     @Override
-    public T expiration(Date exp) {
+    public T expiration(Instant exp) {
         return put(DefaultClaims.EXPIRATION, exp);
     }
 
     @Override
-    public T setNotBefore(Date nbf) {
+    public T setNotBefore(Instant nbf) {
         return notBefore(nbf);
     }
 
     @Override
-    public T notBefore(Date nbf) {
+    public T notBefore(Instant nbf) {
         return put(DefaultClaims.NOT_BEFORE, nbf);
     }
 
     @Override
-    public T setIssuedAt(Date iat) {
+    public T setIssuedAt(Instant iat) {
         return issuedAt(iat);
     }
 
     @Override
-    public T issuedAt(Date iat) {
+    public T issuedAt(Instant iat) {
         return put(DefaultClaims.ISSUED_AT, iat);
     }
 

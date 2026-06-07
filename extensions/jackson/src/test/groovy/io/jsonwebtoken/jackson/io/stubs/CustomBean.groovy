@@ -15,11 +15,13 @@
  */
 package io.jsonwebtoken.jackson.io.stubs
 
+import java.time.Instant
+
 class CustomBean {
 
     private String stringValue
     private int intValue
-    private Date dateValue
+    private Instant instantValue
     private short shortValue
     private long longValue
     private byte byteValue
@@ -44,12 +46,12 @@ class CustomBean {
         return this
     }
 
-    Date getDateValue() {
-        return dateValue
+    Instant getInstantValue() {
+        return instantValue
     }
 
-    CustomBean setDateValue(Date dateValue) {
-        this.dateValue = dateValue
+    CustomBean setInstantValue(Instant instantValue) {
+        this.instantValue = instantValue
         return this
     }
 
@@ -109,7 +111,7 @@ class CustomBean {
         if (longValue != that.longValue) return false
         if (shortValue != that.shortValue) return false
         if (!Arrays.equals(byteArrayValue, that.byteArrayValue)) return false
-        if (dateValue != that.dateValue) return false
+        if (instantValue != that.instantValue) return false
         if (nestedValue != that.nestedValue) return false
         if (stringValue != that.stringValue) return false
 
@@ -120,7 +122,7 @@ class CustomBean {
         int result
         result = stringValue.hashCode()
         result = 31 * result + intValue
-        result = 31 * result + dateValue.hashCode()
+        result = 31 * result + instantValue.hashCode()
         result = 31 * result + (int) shortValue
         result = 31 * result + (int) (longValue ^ (longValue >>> 32))
         result = 31 * result + (int) byteValue
@@ -135,7 +137,7 @@ class CustomBean {
         return "CustomBean{" +
                 "stringValue='" + stringValue + '\'' +
                 ", intValue=" + intValue +
-                ", dateValue=" + dateValue?.time +
+                ", instantValue=" + instantValue?.toEpochMilli() +
                 ", shortValue=" + shortValue +
                 ", longValue=" + longValue +
                 ", byteValue=" + byteValue +

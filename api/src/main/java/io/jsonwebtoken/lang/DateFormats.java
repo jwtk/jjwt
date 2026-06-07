@@ -15,11 +15,11 @@
  */
 package io.jsonwebtoken.lang;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Utility methods to format and parse date strings.
@@ -31,68 +31,55 @@ public final class DateFormats {
     private DateFormats() {
     } // prevent instantiation
 
-    private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
 
-    private static final String ISO_8601_MILLIS_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final String ISO_8601_MILLIS_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-    private static final ThreadLocal<DateFormat> ISO_8601 = new ThreadLocal<DateFormat>() {
-        @Override
-        protected DateFormat initialValue() {
-            SimpleDateFormat format = new SimpleDateFormat(ISO_8601_PATTERN);
-            format.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return format;
-        }
-    };
+    private static final ThreadLocal<DateTimeFormatter> ISO_8601 = ThreadLocal.withInitial(() -> DateTimeFormatter.ofPattern(ISO_8601_PATTERN));
 
-    private static final ThreadLocal<DateFormat> ISO_8601_MILLIS = new ThreadLocal<DateFormat>() {
-        @Override
-        protected DateFormat initialValue() {
-            SimpleDateFormat format = new SimpleDateFormat(ISO_8601_MILLIS_PATTERN);
-            format.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return format;
-        }
-    };
+    private static final ThreadLocal<DateTimeFormatter> ISO_8601_MILLIS = ThreadLocal.withInitial(() -> DateTimeFormatter.ofPattern(ISO_8601_MILLIS_PATTERN));
 
     /**
      * Return an ISO-8601-formatted string with millisecond precision representing the
-     * specified {@code date}.
+     * specified {@code instant}. Will always convert to UTC timezone.
      *
-     * @param date the date for which to create an ISO-8601-formatted string
-     * @return the date represented as an ISO-8601-formatted string with millisecond precision.
+     * @param instant the instant for which to create an ISO-8601-formatted string
+     * @return the instant represented as an ISO-8601-formatted string in UTC timezone with millisecond precision.
      */
-    public static String formatIso8601(Date date) {
-        return formatIso8601(date, true);
+    public static String formatIso8601(Instant instant) {
+        return formatIso8601(instant, true);
     }
 
     /**
      * Returns an ISO-8601-formatted string with optional millisecond precision for the specified
-     * {@code date}.
+     * {@code instant}. Will always convert to UTC timezone.
      *
-     * @param date          the date for which to create an ISO-8601-formatted string
-     * @param includeMillis whether to include millisecond notation within the string.
-     * @return the date represented as an ISO-8601-formatted string with optional millisecond precision.
+     * @param instant           the instant for which to create an ISO-8601-formatted string
+     * @param includeMillis     whether to include millisecond notation within the string.
+     * @return the instant represented as an ISO-8601-formatted string in UTC timezone with optional millisecond precision.
      */
-    public static String formatIso8601(Date date, boolean includeMillis) {
+    public static String formatIso8601(Instant instant, boolean includeMillis) {
+        Assert.notNull(instant, "Instant argument cannot be null.");
         if (includeMillis) {
-            return ISO_8601_MILLIS.get().format(date);
+            return ISO_8601_MILLIS.get().format(instant.atZone(ZoneOffset.UTC));
         }
-        return ISO_8601.get().format(date);
+        return ISO_8601.get().format(instant.atZone(ZoneOffset.UTC));
     }
 
     /**
-     * Parse the specified ISO-8601-formatted date string and return the corresponding {@link Date} instance.  The
-     * date string may optionally contain millisecond notation, and those milliseconds will be represented accordingly.
+     * Parse the specified ISO-8601-formatted date string and return the corresponding {@link Instant} instance.
+     * The date string may optionally contain millisecond notation, and those milliseconds will be represented accordingly.
      *
      * @param s the ISO-8601-formatted string to parse
-     * @return the string's corresponding {@link Date} instance.
-     * @throws ParseException if the specified date string is not a validly-formatted ISO-8601 string.
+     * @return the string's corresponding {@link Instant} instance.
+     * @throws DateTimeParseException if the specified date string is not a validly-formatted ISO-8601 string.
      */
-    public static Date parseIso8601Date(String s) throws ParseException {
+    public static Instant parseIso8601Date(String s) throws DateTimeParseException {
         Assert.notNull(s, "String argument cannot be null.");
         if (s.lastIndexOf('.') > -1) { //assume ISO-8601 with milliseconds
-            return ISO_8601_MILLIS.get().parse(s);
+            return OffsetDateTime.parse(s, ISO_8601_MILLIS.get()).toInstant();
         } else { //assume ISO-8601 without millis:
-            return ISO_8601.get().parse(s);
+            return OffsetDateTime.parse(s, ISO_8601.get()).toInstant();
         }
     }
 }
