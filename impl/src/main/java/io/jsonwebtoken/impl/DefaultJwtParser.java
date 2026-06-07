@@ -46,6 +46,9 @@ import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.io.UncloseableInputStream;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.RedactedConfidentialValue;
+import io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest;
+import io.jsonwebtoken.impl.security.DefaultDecryptionKeyRequest;
+import io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest;
 import io.jsonwebtoken.impl.security.LocatingKeyResolver;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.io.CompressionAlgorithm;
@@ -245,6 +248,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
                 new IdLocator<>(DefaultHeader.COMPRESSION_ALGORITHM, zipAlgs, "compression", "decompression", null);
     }
 
+    @Deprecated
     @Override
     public boolean isSigned(CharSequence compact) {
         if (!Strings.hasText(compact)) {
