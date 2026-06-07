@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Assert;
 
 import java.io.InputStream;
 import java.util.function.Consumer;
@@ -57,6 +58,7 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * @since JJWT_RELEASE_VERSION
      */
     default byte[] digest(Consumer<Request.Params<InputStream, ?>> c) {
+        Assert.notNull(c, "Consumer cannot be null");
         Request.Builder<InputStream> b = Request.builder();
         c.accept(b);
         Request<InputStream> r = b.build();
@@ -95,6 +97,7 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * @since JJWT_RELEASE_VERSION
      */
     default boolean verify(Consumer<VerifyDigestRequest.Params<?>> c) {
+        Assert.notNull(c, "Consumer cannot be null");
         VerifyDigestRequest.Builder b = VerifyDigestRequest.builder();
         c.accept(b);
         VerifyDigestRequest r = b.build();

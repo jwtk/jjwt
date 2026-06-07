@@ -19,6 +19,7 @@ import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.lang.Arrays
 import io.jsonwebtoken.security.DecryptionKeyRequest
+import io.jsonwebtoken.security.KeyRequest
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -47,7 +48,7 @@ class DirectKeyAlgorithmTest {
 
     @Test(expected = IllegalArgumentException)
     void testGetEncryptionKeyWithNullRequest() {
-        new DirectKeyAlgorithm().getEncryptionKey(null)
+        new DirectKeyAlgorithm().getEncryptionKey(null as KeyRequest)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -76,7 +77,7 @@ class DirectKeyAlgorithmTest {
 
     @Test(expected = IllegalArgumentException)
     void testGetDecryptionKeyWithNullRequest() {
-        new DirectKeyAlgorithm().getDecryptionKey(null)
+        new DirectKeyAlgorithm().getDecryptionKey(null as DecryptionKeyRequest)
     }
 
     @Test(expected = IllegalArgumentException)

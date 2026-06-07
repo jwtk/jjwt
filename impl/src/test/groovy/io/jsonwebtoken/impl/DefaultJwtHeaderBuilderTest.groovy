@@ -19,7 +19,6 @@ import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
-import io.jsonwebtoken.impl.security.DefaultRequest
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Collections
@@ -359,8 +358,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX509CertificateSha1Thumbprint() {
         def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
-        def request = new DefaultRequest(payload, null, null)
-        def x5t = DefaultHashAlgorithm.SHA1.digest(request)
+        def x5t = DefaultHashAlgorithm.SHA1.digest(payload)
         String encoded = Encoders.BASE64URL.encode(x5t)
 
         header = jws().x509Sha1Thumbprint(x5t).build() as JwsHeader
@@ -372,8 +370,7 @@ class DefaultJwtHeaderBuilderTest {
     void testX509CertificateSha1ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
         def payload = Streams.of(chain[0].getEncoded())
-        def request = new DefaultRequest(payload, null, null)
-        def x5t = DefaultHashAlgorithm.SHA1.digest(request)
+        def x5t = DefaultHashAlgorithm.SHA1.digest(payload)
         String encoded = Encoders.BASE64URL.encode(x5t)
         header = jws().x509Chain(chain).x509Sha1Thumbprint(true).build() as JwsHeader
         assertArrayEquals x5t, header.getX509Sha1Thumbprint()
@@ -387,8 +384,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testX509CertificateSha256Thumbprint() {
         def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
-        def request = new DefaultRequest(payload, null, null)
-        def x5tS256 = Jwks.HASH.@SHA256.digest(request)
+        def x5tS256 = Jwks.HASH.@SHA256.digest(payload)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         header = jws().x509Sha256Thumbprint(x5tS256).build() as JwsHeader
         assertArrayEquals x5tS256, header.getX509Sha256Thumbprint()
@@ -399,8 +395,7 @@ class DefaultJwtHeaderBuilderTest {
     void testX509CertificateSha256ThumbprintEnabled() {
         def chain = TestKeys.RS256.chain
         def payload = Streams.of(chain[0].getEncoded())
-        def request = new DefaultRequest(payload, null, null)
-        def x5tS256 = Jwks.HASH.SHA256.digest(request)
+        def x5tS256 = Jwks.HASH.SHA256.digest(payload)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
         header = jws().x509Chain(chain).x509Sha256Thumbprint(true).build() as JwsHeader
         assertArrayEquals x5tS256, header.getX509Sha256Thumbprint()
