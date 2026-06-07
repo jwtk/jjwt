@@ -21,11 +21,24 @@ import org.junit.Test
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
+import java.security.PrivateKey
 import java.security.Provider
 
 import static org.junit.Assert.assertSame
+import static org.junit.Assert.assertTrue
 
 class ProvidedKeyBuilderTest {
+
+    @Test
+    void testBuildPrivateKeyWithProvider() {
+        Provider provider = new TestProvider()
+        PrivateKey privateKey = TestKeys.ES256.pair.private
+        def result = Keys.builder(privateKey).provider(provider).build()
+
+        assertTrue result instanceof ProviderPrivateKey
+        assertSame provider, (result as ProviderPrivateKey).getProvider()
+        assertSame privateKey, (result as ProviderPrivateKey).getKey()
+    }
 
     @Test
     void testBuildWithSpecifiedProviderKey() {

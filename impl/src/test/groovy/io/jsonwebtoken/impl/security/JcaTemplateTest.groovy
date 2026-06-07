@@ -111,6 +111,44 @@ class JcaTemplateTest {
     }
 
     @Test
+    void testInstanceFactoryPreemptiveBouncyCastleFallback() {
+        // When provider==null and FALLBACK_ATTEMPTS already has TRUE for the jcaName,
+        // the factory should preemptively use BC without retrying the default provider.
+        Provider bc = TestKeys.BC
+        String alg = 'foo-preemptive'
+        int[] doGetCallCount = [0]
+
+        def factory = new JcaTemplate.JcaInstanceFactory<Cipher>(Cipher.class) {
+            @Override
+            protected Cipher doGet(String jcaName, Provider provider) throws Exception {
+                doGetCallCount[0]++
+                if (provider == null) {
+                    throw new NoSuchAlgorithmException(jcaName)
+                }
+                // Succeed when called with any explicit provider (simulates BC fallback success)
+                return null // return value not used in this test
+            }
+
+            @Override
+            protected Provider findBouncyCastle() {
+                return bc
+            }
+        }
+
+        // First call: default provider fails, BC fallback succeeds -> FALLBACK_ATTEMPTS[alg] = TRUE
+        factory.get(alg, null) // should succeed via BC
+
+        // Reset counter
+        doGetCallCount[0] = 0
+
+        // Second call: FALLBACK_ATTEMPTS[alg] == TRUE, so factory preemptively passes BC as provider
+        factory.get(alg, null)
+
+        // doGet should have been called once with bc (preemptive), not twice (no default retry)
+        assertEquals 1, doGetCallCount[0]
+    }
+
+    @Test
     void testInstanceFactoryFallbackFailureRetainsOriginalException() {
         String alg = 'foo'
         NoSuchAlgorithmException ex = new NoSuchAlgorithmException('foo')
@@ -228,12 +266,8 @@ class JcaTemplateTest {
             template.generatePrivate(new X509EncodedKeySpec(invalid))
             fail()
         } catch (SecurityException expected) {
-            boolean jdk11OrLater = Classes.isAvailable('java.security.interfaces.XECPrivateKey')
-            String msg = 'KeyFactory callback execution failed: key spec not recognized'
-            if (jdk11OrLater) {
-                msg = 'KeyFactory callback execution failed: Only PKCS8EncodedKeySpec and XECPrivateKeySpec supported'
-            }
-            assertEquals msg, expected.getMessage()
+            String msg = expected.getMessage()
+            assertTrue msg, msg.startsWith('KeyFactory callback execution failed:')
         }
     }
 

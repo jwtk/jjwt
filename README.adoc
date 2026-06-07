@@ -22,6 +22,7 @@ image:https://github.com/jwtk/jjwt/actions/workflows/ci.yml/badge.svg?branch=mas
 image:https://coveralls.io/repos/github/jwtk/jjwt/badge.svg?branch=master[Coverage Status,link=https://coveralls.io/github/jwtk/jjwt?branch=master]
 image:https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg[Vuln score,link=https://snyk-widget.herokuapp.com/badge/mvn/io.jsonwebtoken/jjwt-root/badge.svg]
 image:https://snyk.io/test/github/jwtk/jjwt/badge.svg[Known Vulns,link=https://snyk.io/test/github/jwtk/jjwt/badge.svg]
+image:https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A[link="https://community.develocity.cloud/scans?search.rootProjectNames=JJWT",title="Revved up by Develocity"]
 
 JJWT aims to be the easiest to use and understand library for creating and verifying JSON Web Tokens (JWTs) and
 JSON Web Keys (JWKs) on the JVM and Android.
@@ -734,7 +735,7 @@ code quickly.  Here's an example:
 ----
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
+import javax.crypto.SecretKey;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
