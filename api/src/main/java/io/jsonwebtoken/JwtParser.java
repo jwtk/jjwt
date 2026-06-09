@@ -38,7 +38,11 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @param compact the compact serialized JWT to check
      * @return {@code true} if the specified JWT compact string represents a signed JWT (aka a 'JWS'), {@code false}
      * otherwise.
+     * @deprecated this performs only a structural (not cryptographic) check and is scheduled for removal in 1.0.
+     * If you need to read a signed JWT, parse it directly and handle the resulting exception when it is not the
+     * expected type, rather than checking with this method first and parsing afterwards.
      */
+    @Deprecated
     boolean isSigned(CharSequence compact);
 
     /**
