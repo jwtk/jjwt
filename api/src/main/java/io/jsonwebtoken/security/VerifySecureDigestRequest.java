@@ -31,4 +31,40 @@ import java.security.Key;
  * @since 0.12.0
  */
 public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<InputStream, K>, VerifyDigestRequest {
+
+    /**
+     * Named parameters (setters) used to configure a {@link VerifySecureDigestRequest VerifySecureDigestRequest}
+     * instance.
+     *
+     * @param <K> type of key to use to verify the digest.
+     * @param <M> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<K extends Key, M extends Params<K, M>> extends SecureRequest.Params<InputStream, K, M>,
+            VerifyDigestRequest.Params<M> {
+    }
+
+    /**
+     * A builder for creating {@link VerifySecureDigestRequest}s used to verify a mac or signature via
+     * {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
+     *
+     * @param <K> type of key used to verify the digest.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<VerifySecureDigestRequest<K>> {
+    }
+
+    /**
+     * Returns a new {@link VerifySecureDigestRequest.Builder} for creating {@link VerifySecureDigestRequest}s used
+     * to verify a mac or signature via {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
+     *
+     * @param <K> type of key used to verify the digest.
+     * @return a new {@link VerifySecureDigestRequest.Builder} for creating {@link VerifySecureDigestRequest}s used
+     * to verify a mac or signature via {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <K extends Key> VerifySecureDigestRequest.Builder<K> builder() {
+        return (VerifySecureDigestRequest.Builder<K>) Suppliers.VERIFY_SECURE_DIGEST_REQUEST_BUILDER.get();
+    }
 }

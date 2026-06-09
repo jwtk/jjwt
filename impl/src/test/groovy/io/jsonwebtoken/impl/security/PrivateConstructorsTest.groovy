@@ -19,6 +19,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
 import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Suppliers
 import org.junit.Test
 
 class PrivateConstructorsTest {
@@ -36,5 +37,6 @@ class PrivateConstructorsTest {
         new Jwks.CRV()
         new Jwks.HASH()
         new Jwks.OP()
+        new Suppliers()
     }
 }

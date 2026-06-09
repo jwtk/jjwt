@@ -40,7 +40,7 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
         this.IV = iv;
     }
 
-    public DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
+    private DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
                               SecretKey key, InputStream aad) {
         this(payload, provider, secureRandom, key, aad, null);
     }
@@ -53,5 +53,35 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
     @Override
     public byte[] getIv() {
         return this.IV;
+    }
+
+    static abstract class AbstractAeadRequestParams<M extends AeadRequest.Params<M>>
+            extends AbstractSecureRequestParams<InputStream, SecretKey, M>
+            implements AeadRequest.Params<M> {
+
+        protected InputStream aad;
+
+        @Override
+        public M associatedData(InputStream aad) {
+            this.aad = aad;
+            return self();
+        }
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Builder extends AbstractAeadRequestParams<AeadRequest.Builder>
+            implements AeadRequest.Builder {
+
+        @Override
+        public AeadRequest build() {
+            return new DefaultAeadRequest(this.payload, this.provider, this.random, this.key, this.aad);
+        }
+
+        public static class Supplier implements java.util.function.Supplier<AeadRequest.Builder> {
+            @Override
+            public AeadRequest.Builder get() {
+                return new Builder();
+            }
+        }
     }
 }

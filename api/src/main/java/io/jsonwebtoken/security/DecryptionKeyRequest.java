@@ -35,8 +35,46 @@ import java.security.Key;
  * {@code JWE Encrypted Key} (such as an initialization vector, authentication tag, ephemeral key, etc) is expected
  * to be available in the JWE protected header, accessible via {@link #getHeader()}.</p>
  *
- * @param <K> the type of {@link Key} used during the request to obtain the resulting decryption key.
+ * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
+ * @see KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)
  * @since 0.12.0
  */
 public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
+
+    /**
+     * Named parameters (setters) used to configure a {@link DecryptionKeyRequest DecryptionKeyRequest}
+     * instance.
+     *
+     * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
+     * @param <M> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<K extends Key, M extends Params<K, M>> extends KeyRequest.Params<byte[], M>,
+            SecureRequest.Params<byte[], K, M> {
+    }
+
+    /**
+     * A builder for creating new immutable {@link DecryptionKeyRequest} instances used to get a JWE
+     * decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
+     *
+     * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
+    }
+
+    /**
+     * Returns a new {@link DecryptionKeyRequest.Builder} for creating immutable {@link DecryptionKeyRequest}s used to
+     * get a JWE decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
+     *
+     * @param <K> the type of key used to obtain the JWE decryption key via
+     *            {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
+     * @return a new {@link DecryptionKeyRequest.Builder} for creating immutable {@link DecryptionKeyRequest}s used to
+     * get a JWE decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <K extends Key> DecryptionKeyRequest.Builder<K> builder() {
+        return (DecryptionKeyRequest.Builder<K>) Suppliers.DECRYPTION_KEY_REQUEST_BUILDER.get();
+    }
 }
