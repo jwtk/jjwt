@@ -1,7 +1,5 @@
 .DS_Store
-
 .mvn/.develocity
-
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

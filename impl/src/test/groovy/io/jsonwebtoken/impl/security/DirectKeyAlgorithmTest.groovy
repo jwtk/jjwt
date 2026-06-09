@@ -40,8 +40,8 @@ class DirectKeyAlgorithmTest {
     void testGetEncryptionKey() {
         def alg = new DirectKeyAlgorithm()
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader([:]), Jwe.alg.A128GCM)
-        def result = alg.getEncryptionKey(request)
+        def header = new DefaultJweHeader([:])
+        def result = alg.getEncryptionKey(key, header, Jwe.alg.A128GCM)
         assertSame key, result.getKey()
         assertEquals 0, Arrays.length(result.getPayload()) //must not have an encrypted key
     }
