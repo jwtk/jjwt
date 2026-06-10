@@ -81,18 +81,21 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * @since JJWT_RELEASE_VERSION
      */
     default byte[] digest(InputStream is) {
-        return digest(p -> p.payload(is));
+        return digest(r -> r.payload(is));
     }
 
     /**
-     * Computes a hash of the specified byte array using the algorithm's default JCA provider and SecureRandom.
+     * Computes a hash of the specified byte array. This is a convenience method using the algorithm default JCA
+     * provider and {@code SecureRandom}, and is equivalent to:
+     * <blockquote><pre>
+     * return digest(r -&gt; r.payload(payload));</pre></blockquote>
      *
      * @param payload the byte array to hash
      * @return the computed hash (aka digest) of the specified byte array.
      * @since JJWT_RELEASE_VERSION
      */
     default byte[] digest(byte[] payload) {
-        return digest(p -> p.payload(payload));
+        return digest(r -> r.payload(payload));
     }
 
     /**
@@ -128,7 +131,7 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * @param is     the {@code InputStream} that will be consumed to compute the digest. Callers are expected to
      *               {@link InputStream#close() close} or {@link InputStream#reset() reset} the payload stream if
      *               necessary after calling this method.
-     * @param digest the previously-computed digest to compare with the algorithm's computed digest of {@code is}.
+     * @param digest the previously computed digest to compare with the algorithm's computed digest of {@code is}.
      * @return {@code true} if the specified {@code digest} matches (equals) the algorithm's computed digest of the
      * specified {@code is} input stream, {@code false} otherwise.
      * @since JJWT_RELEASE_VERSION
@@ -141,10 +144,10 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * Returns {@code true} if the specified {@code digest} matches (equals) the algorithm's computed digest of the
      * specified {@code payload} byte array, {@code false} otherwise.
      *
-     * @param payload the byte array that will be consumed to compute the digest.
-     * @param digest the previously computed digest to compare with the algorithm's computed digest of {@code payload}.
+     * @param payload the byte array to hash
+     * @param digest  the previously computed digest to compare with the algorithm's computed digest of {@code payload}.
      * @return {@code true} if the specified {@code digest} matches (equals) the algorithm's computed digest of the
-     * specified {@code is} input stream, {@code false} otherwise.
+     * specified {@code payload}, {@code false} otherwise.
      * @since JJWT_RELEASE_VERSION
      */
     default boolean verify(byte[] payload, byte[] digest) {
