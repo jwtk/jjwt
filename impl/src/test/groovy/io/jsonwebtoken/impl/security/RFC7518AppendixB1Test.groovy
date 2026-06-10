@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.io.Streams
+import io.jsonwebtoken.security.AeadResult
 import io.jsonwebtoken.security.DecryptAeadRequest
 import org.junit.Test
 
@@ -93,7 +94,8 @@ class RFC7518AppendixB1Test {
         def aad = Streams.of(A)
         def out = new ByteArrayOutputStream(8192)
         def request = new DefaultAeadRequest(Streams.of(P), null, null, KEY, aad, IV)
-        def result = alg.encrypt(request, out)
+        def result = AeadResult.with(out)
+        alg.encrypt(request, result)
 
         byte[] ciphertext = out.toByteArray()
         byte[] tag = result.getDigest()

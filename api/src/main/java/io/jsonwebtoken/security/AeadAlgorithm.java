@@ -69,35 +69,48 @@ import java.util.function.Consumer;
 public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuilderSupplier<SecretKey, SecretKeyBuilder> {
 
     /**
-     * Encrypts plaintext and signs any {@link AeadRequest#getAssociatedData() associated data}, placing the resulting
-     * ciphertext, initialization vector and authentication tag in the provided {@code result}.
+     * Encrypts plaintext and signs any optional {@link AeadRequest#getAssociatedData() associated data},
+     * placing the resulting ciphertext, initialization vector, and authentication tag in the provided {@code result}.
      *
      * @param req the encryption request representing the plaintext to be encrypted, any additional
-     *            integrity-protected data and the encryption key.
+     *            integrity-protected data, and the encryption key.
      * @param res the result to write ciphertext, initialization vector and AAD authentication tag (aka digest)
      * @throws SecurityException if there is an encryption problem or AAD authenticity cannot be guaranteed.
      */
     void encrypt(AeadRequest req, AeadResult res) throws SecurityException;
 
+    /**
+     * Encrypts plaintext and signs any optional {@link AeadRequest#getAssociatedData() associated data} using
+     * specified parameters, writing the ciphertext to the specified {@code out}put stream, and returns
+     * the resulting initialization vector and authentication tag.
+     * <p>
+     * This is a convenience method that constructs an implicit {@link AeadResult} and {@link AeadRequest} using
+     * lambda parameters, and then immediately delegates to {@link #encrypt(AeadRequest, AeadResult)}.
+     * <h5>Usage Example</h5>
+     * <pre><code>
+     *     ByteArrayOutputStream out = new ByteArrayOutputStream(8196);
+     *     AeadResult result = aeadAlgorithm.encrypt(r -&gt; r.payload(plaintext).aad(aad).key(key), out);
+     *     byte[] iv = result.getIv();
+     *     byte[] tag = result.getDigest();
+     *     byte[] ciphertext = out.toByteArray();
+     * </code></pre>
+     *
+     * @param p   the request parameters builder, used to set the plaintext to be encrypted, any additional data to be
+     *            integrity-protected, and the encryption key necessary to encrypt the plaintext.
+     * @param out the stream to receive the output ciphertext.
+     * @return the result containing the initialization vector and authentication tag; the result's
+     * {@link AeadResult#getOutputStream() output stream} is the same as the specified {@code out}put stream argument.
+     * @throws SecurityException if there is an encryption problem or AAD authenticity cannot be guaranteed.
+     * @since JJWT_RELEASE_VERSION
+     */
     default AeadResult encrypt(Consumer<AeadRequest.Params<?>> p, OutputStream out) throws SecurityException {
         Assert.notNull(p, "Consumer cannot be null");
         AeadRequest.Builder b = AeadRequest.builder();
         p.accept(b);
         AeadRequest req = b.build();
-        return encrypt(req, out);
-    }
-
-    /**
-     * @param req
-     * @param out
-     * @return
-     * @throws SecurityException
-     * @since JJWT_RELEASE_VERSION
-     */
-    default AeadResult encrypt(AeadRequest req, OutputStream out) throws SecurityException {
-        AeadResult result = AeadResult.with(out);
-        encrypt(req, result);
-        return result;
+        AeadResult res = AeadResult.with(out);
+        encrypt(req, res);
+        return res;
     }
 
     /**
@@ -106,7 +119,7 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      *
      * @param request the decryption request representing the ciphertext to be decrypted, any additional
      *                integrity-protected data, authentication tag, initialization vector, and decryption key
-     * @param out     the OutputStream for writing decrypted plaintext
+     * @param out     the OutputStream to receive the decrypted plaintext
      * @throws SecurityException if there is a decryption problem or authenticity assertions fail.
      */
     void decrypt(DecryptAeadRequest request, OutputStream out) throws SecurityException;
