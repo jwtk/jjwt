@@ -46,16 +46,15 @@ import java.util.function.Supplier;
  * for easy code-completion in IDEs, showing available algorithm instances.  For example, when typing:</p>
  * <blockquote><pre>
  * Jwts.// press code-completion hotkeys to suggest available algorithm registry fields
- * Jwts.{@link SIG SIG}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
- * Jwts.{@link ENC ENC}.// press hotkeys to suggest individual encryption algorithms or utility methods
- * Jwts.{@link KEY KEY}.// press hotkeys to suggest individual key algorithms or utility methods</pre></blockquote>
+ * {@link Jws.alg Jws.alg}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
+ * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual encryption algorithms or utility methods
+ * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual key management algorithms or utility methods</pre></blockquote>
  *
  * @since 0.1
  */
 public final class Jwts {
 
-
-    // do not change this visibility.  Raw type method signature not be publicly exposed:
+    // do not change this visibility.  Raw type method signature must not be publicly exposed:
     @SuppressWarnings("unchecked")
     static <T> T get(Registry<String, ?> registry, String id) {
         return (T) registry.forKey(id);
@@ -171,9 +170,9 @@ public final class Jwts {
      *    // ... etc ...
      *    .signWith(aKey, <b>Jws.alg.HS512</b>) // or RS512, PS256, EdDSA, etc...
      *    .build();</pre></blockquote>
-     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
+     * <p>They are also available together as a {@link Registry} instance via {@link Jws.alg#registry()}.</p>
      *
-     * @see #get()
+     * @see Jws.alg#registry()
      * @since 0.12.0
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg}.
      */
@@ -1053,13 +1052,15 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .compressWith(<b>Jwts.ZIP.DEF</b>)
+     *    .compressWith(<b>Jwe.zip.DEF</b>)
      *    .build();</pre></blockquote>
-     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
+     * <p>They are also available together as a {@link Registry} instance via the {@link Jwe.zip#registry()} method.</p>
      *
-     * @see #get()
+     * @see Jwe.zip#registry()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.zip}.
      */
+    @Deprecated
     public static final class ZIP {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms";

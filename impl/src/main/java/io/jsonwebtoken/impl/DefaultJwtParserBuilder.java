@@ -93,7 +93,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jws.alg.registry();
 
-    private Registry<String, CompressionAlgorithm> zipAlgs = Jwts.ZIP.get();
+    private Registry<String, CompressionAlgorithm> zipAlgs = Jwe.zip.registry();
 
     @SuppressWarnings("deprecation")
     private CompressionCodecResolver compressionCodecResolver;
@@ -399,7 +399,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
                     "due to their security implications.";
             throw new IllegalStateException(msg);
         }
-        if (this.compressionCodecResolver != null && !Jwts.ZIP.get().equals(this.zipAlgs)) {
+        if (this.compressionCodecResolver != null && !Jwe.zip.registry().equals(this.zipAlgs)) {
             String msg = "Both 'zip()' and 'compressionCodecResolver' " +
                     "cannot be configured. Choose either.";
             throw new IllegalStateException(msg);

@@ -942,7 +942,7 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param alg implementation of the {@link CompressionAlgorithm} to be used.
      * @return the builder for method chaining.
-     * @see Jwts.ZIP
+     * @see Jwe.zip
      * @since 0.12.0
      */
     JwtBuilder compressWith(CompressionAlgorithm alg);

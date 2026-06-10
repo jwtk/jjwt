@@ -1660,7 +1660,7 @@ class JwtParserTest {
         // create a compressed JWE first:
         def key = TestKeys.A256GCM
         def jwe = Jwts.builder().claim("hello", "world")
-                .compressWith(Jwts.ZIP.DEF)
+                .compressWith(Jwe.zip.DEF)
                 .encryptWith(key, Jwe.alg.A256GCM)
                 .compact()
 

@@ -208,7 +208,7 @@ class DefaultJwtParserBuilderTest {
     void testAddCompressionAlgorithmsOverrideDefaults() {
         def header = Jwts.header().add('zip', 'DEF').build()
         def parser = builder.build()
-        assertSame Jwts.ZIP.DEF, parser.zipAlgs.apply(header) // standard implementation default
+        assertSame Jwe.zip.DEF, parser.zipAlgs.apply(header) // standard implementation default
 
         def alg = new TestCompressionCodec(id: 'DEF') // custom impl with standard identifier
         parser = builder.zip().add(alg).and().build()
@@ -220,7 +220,7 @@ class DefaultJwtParserBuilderTest {
         def standard = Jwts.header().add('zip', 'DEF').build()
         def nonStandard = Jwts.header().add('zip', 'def').build()
         def parser = builder.build()
-        assertSame Jwts.ZIP.DEF, parser.zipAlgs.apply(standard) // standard implementation default
+        assertSame Jwe.zip.DEF, parser.zipAlgs.apply(standard) // standard implementation default
         try {
             parser.zipAlgs.apply(nonStandard)
             fail()
@@ -394,7 +394,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDecompressUnprotectedJwtDefault() {
-        def codec = Jwts.ZIP.GZIP
+        def codec = Jwe.zip.GZIP
         String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
         try {
             builder.unsecured().build().parse(jwt)
@@ -407,7 +407,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testDecompressUnprotectedJwtEnabled() {
-        def codec = Jwts.ZIP.GZIP
+        def codec = Jwe.zip.GZIP
         String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
         def jwt = builder.unsecured().unsecuredDecompression().build().parse(jws)
         assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()

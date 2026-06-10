@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -739,6 +740,65 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
 
         //prevent instantiation
         private enc() {
+        }
+    }
+
+    /**
+     * Constants for JWA (RFC 7518) compression algorithms referenced in the {@code zip} header defined in the
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">JSON Web Encryption Compression Algorithms
+     * Registry</a>. Each algorithm is available as a ({@code public static final}) constant for
+     * direct type-safe reference in application code. For example:
+     * <blockquote><pre>
+     * Jwts.builder()
+     *    // ... etc ...
+     *    .compressWith(<b>Jwe.zip.DEF</b>)
+     *    .build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
+     *
+     * @see #registry()
+     * @since JJWT_RELEASE_VERSION
+     */
+    final class zip {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms";
+        private static final Registry<String, CompressionAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        /**
+         * Returns various useful <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">
+         * Compression Algorithms</a>.
+         *
+         * @return various standard and non-standard useful compression algorithms.
+         */
+        public static Registry<String, CompressionAlgorithm> registry() {
+            return REGISTRY;
+        }
+
+        /**
+         * The JWE-standard <a href="https://www.rfc-editor.org/rfc/rfc1951">DEFLATE</a>
+         * compression algorithm with a {@code zip} header value of {@code "DEF"}.
+         *
+         * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">JWE RFC 7516, Section 4.1.3</a>
+         */
+        public static final CompressionAlgorithm DEF = registry().forKey("DEF");
+
+        /**
+         * A commonly used, but <b>NOT JWA-STANDARD</b>
+         * <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm with a {@code zip} header value
+         * of {@code "GZIP"}.
+         *
+         * <p><b>Compatibility Warning</b></p>
+         *
+         * <p><b>This is not a standard JWE compression algorithm</b>.  Be sure to use this only when you are confident
+         * that all parties accessing the token support the &quot;GZIP&quot; identifier and associated algorithm.</p>
+         *
+         * <p>If you're concerned about compatibility, {@link #DEF DEF} is the only JWA standards-compliant algorithm.</p>
+         *
+         * @see #DEF
+         */
+        public static final CompressionAlgorithm GZIP = registry().forKey("GZIP");
+
+        //prevent instantiation
+        private zip() {
         }
     }
 

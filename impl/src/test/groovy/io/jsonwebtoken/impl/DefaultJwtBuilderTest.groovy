@@ -298,7 +298,7 @@ class DefaultJwtBuilderTest {
         def ser = new TestSerializer(ex: ex)
         def b = new DefaultJwtBuilder()
                 .setSubject("Joe") // ensures claims instance
-                .compressWith(Jwts.ZIP.DEF)
+                .compressWith(Jwe.zip.DEF)
                 .json(ser)
         try {
             b.compact()

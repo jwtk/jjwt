@@ -502,7 +502,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().id(id).issuer("an issuer").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.DEF).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwe.zip.DEF).compact()
 
         def jws = Jwts.parser().verifyWith(key).build().parseSignedClaims(compact)
 
@@ -524,7 +524,7 @@ class JwtsTest {
         String id = UUID.randomUUID().toString()
 
         String compact = Jwts.builder().id(id).issuer("an issuer").signWith(key, alg)
-                .claim("state", "hello this is an amazing jwt").compressWith(Jwts.ZIP.GZIP).compact()
+                .claim("state", "hello this is an amazing jwt").compressWith(Jwe.zip.GZIP).compact()
 
         def jws = Jwts.parser().verifyWith(key).build().parseSignedClaims(compact)
 
@@ -559,7 +559,7 @@ class JwtsTest {
                 String algorithm = header.getCompressionAlgorithm()
                 //noinspection ChangeToOperator
                 if ("CUSTOM".equals(algorithm)) {
-                    return Jwts.ZIP.GZIP as CompressionCodec
+                    return Jwe.zip.GZIP as CompressionCodec
                 } else {
                     return null
                 }
@@ -604,7 +604,7 @@ class JwtsTest {
         String payload = "this is my test for a payload"
 
         String compact = Jwts.builder().setPayload(payload).signWith(key, alg)
-                .compressWith(Jwts.ZIP.DEF).compact()
+                .compressWith(Jwe.zip.DEF).compact()
 
         def jws = Jwts.parser().setSigningKey(key).build().parseSignedContent(compact)
 
@@ -1190,7 +1190,7 @@ class JwtsTest {
         def b64 = jws.substring(i, j)
         def json = Strings.utf8(Decoders.BASE64URL.decode(b64))
         def deser = Services.get(Deserializer)
-        def m = deser.deserialize(new StringReader(json)) as Map<String,?>
+        def m = deser.deserialize(new StringReader(json)) as Map<String, ?>
 
         assertEquals aud, m.get('aud') // single string value
     }
@@ -1370,7 +1370,7 @@ class JwtsTest {
     @Test
     void testJweCompression() {
 
-        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+        def codecs = [Jwe.zip.DEF, Jwe.zip.GZIP]
 
         for (CompressionCodec codec : codecs) {
 
@@ -1397,7 +1397,7 @@ class JwtsTest {
 
     @Test
     void testJweCompressionWithArbitraryContentString() {
-        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+        def codecs = [Jwe.zip.DEF, Jwe.zip.GZIP]
 
         for (CompressionAlgorithm zip : codecs) {
 
@@ -1409,16 +1409,16 @@ class JwtsTest {
 
                 // encrypt and compress:
                 String jwe = Jwts.builder()
-                    .content(payload)
-                    .compressWith(zip)
-                    .encryptWith(key, enc)
-                    .compact()
+                        .content(payload)
+                        .compressWith(zip)
+                        .encryptWith(key, enc)
+                        .compact()
 
                 //decompress and decrypt:
                 def jwt = Jwts.parser()
-                    .decryptWith(key)
-                    .build()
-                    .parseEncryptedContent(jwe)
+                        .decryptWith(key)
+                        .build()
+                        .parseEncryptedContent(jwe)
                 assertEquals payload, new String(jwt.getPayload(), StandardCharsets.UTF_8)
             }
         }
@@ -1426,7 +1426,7 @@ class JwtsTest {
 
     @Test
     void testJweCompressionWithArbitraryContentByteArray() {
-        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+        def codecs = [Jwe.zip.DEF, Jwe.zip.GZIP]
 
         for (CompressionAlgorithm zip : codecs) {
 
@@ -1456,7 +1456,7 @@ class JwtsTest {
 
     @Test
     void testJweCompressionWithArbitraryContentInputStream() {
-        def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]
+        def codecs = [Jwe.zip.DEF, Jwe.zip.GZIP]
 
         for (CompressionAlgorithm zip : codecs) {
 

@@ -28,6 +28,7 @@ import static org.junit.Assert.assertSame
 
 class PrivateConstructorsTest {
 
+    @SuppressWarnings(['GrDeprecatedAPIUsage', 'GroovyResultOfObjectAllocationIgnored'])
     @Test
     void testPrivateCtors() { // for code coverage only
         new Classes()
@@ -40,7 +41,7 @@ class PrivateConstructorsTest {
         new Jwts.SIG(); assertSame(Jws.alg.registry(), Jwts.SIG.get())
         new Jwts.ENC(); assertSame(Jwe.alg.registry(), Jwts.ENC.get())
         new Jwts.KEY(); assertSame(Jwe.enc.registry(), Jwts.KEY.get())
-        new Jwts.ZIP()
+        new Jwts.ZIP(); assertSame(Jwe.zip.registry(), Jwts.ZIP.get())
         new Jwks.CRV()
         new Jwks.HASH()
         new Jwks.OP()

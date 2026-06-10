@@ -697,7 +697,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * <p>All JWA-standard compression algorithms in the {@link Jwts.ZIP} registry are supported by default and
+     * <p>All JWA-standard compression algorithms in the {@link Jwe.zip} registry are supported by default and
      * do not need to be added. The collection may be useful however for removing some algorithms (for example,
      * any algorithms not used by the application), or for adding custom implementations.</p>
      *
@@ -717,7 +717,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use to configure the compression algorithms available when parsing.
      * @see JwtBuilder#compressWith(CompressionAlgorithm)
-     * @see Jwts.ZIP
+     * @see Jwe.zip
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516#section-4.1.3">&quot;zip&quot; (Compression Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1">Compression Algorithm Name (id) requirements</a>
      * @since 0.12.0
@@ -743,8 +743,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Default Support</b></p>
      *
-     * <p>JJWT's default {@link JwtParser} implementation supports both the {@link Jwts.ZIP#DEF DEF}
-     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
+     * <p>JJWT's default {@link JwtParser} implementation supports both the {@link Jwe.zip#DEF DEF}
+     * and {@link Jwe.zip#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
      *
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.
