@@ -1063,9 +1063,6 @@ public final class Jwts {
     @Deprecated
     public static final class ZIP {
 
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms";
-        private static final Registry<String, CompressionAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
-
         /**
          * Returns various useful <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">
          * Compression Algorithms</a>.
@@ -1073,7 +1070,7 @@ public final class Jwts {
          * @return various standard and non-standard useful compression algorithms.
          */
         public static Registry<String, CompressionAlgorithm> get() {
-            return REGISTRY;
+            return Jwe.zip.registry();
         }
 
         /**
