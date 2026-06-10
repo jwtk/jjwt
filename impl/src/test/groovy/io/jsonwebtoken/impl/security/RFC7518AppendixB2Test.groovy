@@ -101,8 +101,9 @@ class RFC7518AppendixB2Test {
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = DecryptAeadRequest.builder().payload(Streams.of(ciphertext))
-        .key(KEY).associatedData(aad).iv(iv).digest(tag).build()
+        def dreq = DecryptAeadRequest.builder()
+                .payload(ciphertext).key(KEY).aad(aad).iv(iv).tag(tag)
+                .build()
         alg.decrypt(dreq, out)
         assertArrayEquals(P, out.toByteArray())
     }

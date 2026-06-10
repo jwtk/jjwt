@@ -16,9 +16,11 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.SecretKey;
 import java.io.OutputStream;
+import java.util.function.Consumer;
 
 /**
  * A cryptographic algorithm that performs
@@ -35,14 +37,14 @@ import java.io.OutputStream;
  *
  * <p><b>Key Strength</b></p>
  *
- * <p>Encryption strength is in part attributed to how difficult it is to discover the encryption key.  As such,
- * cryptographic algorithms often require keys of a minimum length to ensure the keys are difficult to discover
+ * <p>Encryption strength is in part attributed to how challenging it is to discover the encryption key.  As such,
+ * cryptographic algorithms often require keys of a minimum length to ensure the keys are challenging to discover
  * and the algorithm's security properties are maintained.</p>
  *
  * <p>The {@code AeadAlgorithm} interface extends the {@link KeyLengthSupplier} interface to represent the length
  * in bits a key must have to be used with its implementation.  If you do not want to worry about lengths and
  * parameters of keys required for an algorithm, it is often easier to automatically generate a key that adheres
- * to the algorithms requirements, as discussed below.</p>
+ * to the algorithm's requirements, as discussed below.</p>
  *
  * <p><b>Key Generation</b></p>
  *
@@ -76,6 +78,14 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      * @throws SecurityException if there is an encryption problem or AAD authenticity cannot be guaranteed.
      */
     void encrypt(AeadRequest req, AeadResult res) throws SecurityException;
+
+    default AeadResult encrypt(Consumer<AeadRequest.Params<?>> p, OutputStream out) throws SecurityException {
+        Assert.notNull(p, "Consumer cannot be null");
+        AeadRequest.Builder b = AeadRequest.builder();
+        p.accept(b);
+        AeadRequest req = b.build();
+        return encrypt(req, out);
+    }
 
     /**
      * @param req

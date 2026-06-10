@@ -103,8 +103,7 @@ class EncryptionAlgorithmsTest {
             def key = alg.key().build()
 
             def out = new ByteArrayOutputStream()
-            def request = AeadRequest.builder().payload(Streams.of(PLAINTEXT_BYTES)).key(key).build()
-            def result = alg.encrypt(request, out)
+            def result = alg.encrypt(r -> r.payload(PLAINTEXT_BYTES).key(key), out)
             byte[] iv = result.getIv()
             byte[] tag = result.getDigest() //there is always a tag, even if there is no AAD
             assertNotNull tag
@@ -118,7 +117,7 @@ class EncryptionAlgorithmsTest {
 
             def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
-            def dreq = DecryptAeadRequest.builder().payload(ciphertext).key(key).iv(iv).digest(tag).build()
+            def dreq = DecryptAeadRequest.builder().payload(ciphertext).key(key).iv(iv).tag(tag).build()
             alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
 
@@ -133,15 +132,11 @@ class EncryptionAlgorithmsTest {
 
             def key = alg.key().build()
 
-            def plaintextIn = Streams.of(PLAINTEXT_BYTES)
             def out = new ByteArrayOutputStream(8192)
-            def aad = Streams.of(AAD_BYTES)
-            def req = AeadRequest.builder().payload(plaintextIn).key(key).associatedData(aad).build()
-            def res = alg.encrypt(req, out)
+            def res = alg.encrypt(r -> r.payload(PLAINTEXT_BYTES).key(key).aad(AAD_BYTES), out)
             byte[] iv = res.getIv()
             byte[] tag = res.getDigest()
             byte[] ciphertextBytes = out.toByteArray()
-            Streams.reset(aad)
 
             //AES GCM always results in ciphertext the same length as the plaintext:
             if (alg instanceof GcmAesAeadAlgorithm) {
@@ -151,7 +146,7 @@ class EncryptionAlgorithmsTest {
             def ciphertext = Streams.of(ciphertextBytes)
             out = new ByteArrayOutputStream(8192)
             def dreq = DecryptAeadRequest.builder()
-                    .payload(ciphertext).key(key).associatedData(aad).iv(iv).digest(tag).build()
+                    .payload(ciphertext).key(key).aad(AAD_BYTES).iv(iv).tag(tag).build()
             alg.decrypt(dreq, out)
             byte[] decryptedPlaintextBytes = out.toByteArray()
             assertArrayEquals(PLAINTEXT_BYTES, decryptedPlaintextBytes)

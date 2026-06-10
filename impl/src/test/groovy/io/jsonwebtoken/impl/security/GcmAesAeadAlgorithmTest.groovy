@@ -79,8 +79,9 @@ class GcmAesAeadAlgorithmTest {
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = DecryptAeadRequest.builder().payload(Streams.of(ciphertext))
-                .key(KEY).associatedData(aad).iv(res.iv).digest(res.digest).build()
+        def dreq = DecryptAeadRequest.builder()
+                .payload(ciphertext).key(KEY).aad(aad).iv(res.iv).tag(res.digest)
+                .build()
         alg.decrypt(dreq, out)
         assertArrayEquals(P, out.toByteArray())
     }

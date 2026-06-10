@@ -563,7 +563,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
             InputStream ciphertext = payload.toInputStream();
             ByteArrayOutputStream plaintext = new ByteArrayOutputStream(8192);
             DecryptAeadRequest dreq = DecryptAeadRequest.builder()
-                    .payload(ciphertext).key(cek).associatedData(aad).iv(iv).digest(digest)
+                    .payload(ciphertext).key(cek).aad(aad).iv(iv).tag(digest)
                     .build();
             encAlg.decrypt(dreq, plaintext);
             payload = new Payload(plaintext.toByteArray(), header.getContentType());

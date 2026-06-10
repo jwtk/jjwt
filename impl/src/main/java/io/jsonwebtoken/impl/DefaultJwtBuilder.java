@@ -711,7 +711,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
         AeadRequest req = AeadRequest.builder().random(secureRandom) // no .provider call, see message above
-                .payload(plaintext).key(cek).associatedData(aad).build();
+                .payload(plaintext).key(cek).aad(aad).build();
         AeadResult res = AeadResult.with(ciphertextOut);
         encrypt(req, res);
 

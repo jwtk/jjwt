@@ -16,11 +16,9 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.AeadAlgorithm
-import io.jsonwebtoken.security.AeadRequest
 import io.jsonwebtoken.security.DecryptAeadRequest
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -65,11 +63,9 @@ class HmacAesAeadAlgorithmTest {
         SecretKey key = alg.key().build()
 
         byte[] data = Strings.utf8('Hello World! Nice to meet you!')
-        def plaintext = Streams.of(data)
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(8192)
-        def req = AeadRequest.builder().payload(plaintext).key(key).build()
-        def res = alg.encrypt(req, out)
+        def res = alg.encrypt(r -> r.payload(data).key(key), out)
 
         def iv = res.getIv()
         def realTag = res.getDigest()
@@ -80,8 +76,7 @@ class HmacAesAeadAlgorithmTest {
 
         byte[] ciphertext = out.toByteArray()
         out = new ByteArrayOutputStream(8192)
-        def dreq = DecryptAeadRequest.builder().payload(Streams.of(ciphertext))
-                .key(key).iv(iv).digest(fakeTag).build();
+        def dreq = DecryptAeadRequest.builder().payload(ciphertext).key(key).iv(iv).tag(fakeTag).build();
         alg.decrypt(dreq, out)
     }
 }

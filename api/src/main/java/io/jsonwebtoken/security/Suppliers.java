@@ -54,11 +54,11 @@ final class Suppliers {
     static final Supplier<AeadRequest.Builder> AEAD_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadRequest$Builder$Supplier");
 
-    static final Supplier<DecryptAeadRequest.Builder> DECRYPT_AEAD_REQUEST_BUILDER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest$Builder$Supplier");
-
     static final Function<OutputStream, AeadResult> AEAD_RESULT_FACTORY =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadResult$Factory");
+
+    static final Supplier<DecryptAeadRequest.Builder> DECRYPT_AEAD_REQUEST_BUILDER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest$Builder$Supplier");
 
     static final Function<byte[], InputStream> BYTES_INPUT_STREAM_FACTORY =
             Classes.newInstance("io.jsonwebtoken.impl.io.BytesInputStream$Factory");

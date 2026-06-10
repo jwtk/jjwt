@@ -33,23 +33,7 @@ public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSuppl
      * @param <M> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends AeadRequest.Params<M> {
-
-        /**
-         * Sets the required initialization vector used during AEAD decryption.
-         *
-         * @param iv the required initialization vector used during AEAD decryption.
-         * @return the instance for method chaining.
-         */
-        M iv(byte[] iv);
-
-        /**
-         * Sets the required AEAD Authentication Tag used to verify message authenticity during AEAD decryption.
-         *
-         * @param digest the required AEAD Authentication Tag used to verify message authenticity during AEAD decryption.
-         * @return the instance for method chaining.
-         */
-        M digest(byte[] digest);
+    interface Params<M extends Params<M>> extends AeadRequest.Params<M>, AeadResult.Params<M> {
     }
 
     /**

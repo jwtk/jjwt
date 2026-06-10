@@ -53,7 +53,7 @@ public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements Dec
         }
 
         @Override
-        public DecryptAeadRequest.Builder digest(byte[] digest) {
+        public DecryptAeadRequest.Builder tag(byte[] digest) {
             this.tag = digest;
             return self();
         }

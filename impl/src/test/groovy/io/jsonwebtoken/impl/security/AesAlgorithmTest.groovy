@@ -111,8 +111,7 @@ class AesAlgorithmTest {
         def ins = Streams.of('data')
         def key = TestKeys.A256GCM
         def aad = Strings.utf8('aad')
-        def req = AeadRequest.builder().payload(ins).random(secureRandom).key(key)
-                .associatedData(Streams.of(aad)).build()
+        def req = AeadRequest.builder().payload(ins).random(secureRandom).key(key).aad(aad).build()
 
         def returnedSecureRandom = alg.ensureSecureRandom(req)
 
