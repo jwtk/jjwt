@@ -77,6 +77,13 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      */
     void encrypt(AeadRequest req, AeadResult res) throws SecurityException;
 
+    /**
+     * @param req
+     * @param out
+     * @return
+     * @throws SecurityException
+     * @since JJWT_RELEASE_VERSION
+     */
     default AeadResult encrypt(AeadRequest req, OutputStream out) throws SecurityException {
         AeadResult result = AeadResult.with(out);
         encrypt(req, result);

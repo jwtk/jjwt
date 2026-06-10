@@ -39,7 +39,7 @@ class AbstractSecureDigestAlgorithmTest {
         def pair = Jws.alg.RS256.keyPair().build()
         byte[] data = Strings.utf8('foo')
         def payload = Streams.of(data)
-        byte[] signature = Jws.alg.RS256.digest( r -> r.provider(provider).payload(payload).key(pair.getPrivate()))
+        byte[] signature = Jws.alg.RS256.digest( r -> r.provider(provider).payload(payload as InputStream).key(pair.getPrivate()))
         payload.reset()
         assertTrue Jws.alg.RS256.verify(new DefaultVerifySecureDigestRequest<PublicKey>(payload, provider, null, pair.getPublic(), signature))
     }

@@ -35,7 +35,7 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
      * @param <M> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends SecureRequest.Params<InputStream, SecretKey, M> {
+    interface Params<M extends Params<M>> extends SecureRequest.Params<InputStream, SecretKey, M>, OctetStreamPayloadParams<M> {
 
         /**
          * Sets any &quot;associated data&quot; that must be integrity protected (but not encrypted) when performing

@@ -38,6 +38,7 @@ class PrivateConstructorsTest {
         new Jws.alg()
         new Jwe.alg()
         new Jwe.enc()
+        new Jwe.zip()
         new Jwts.SIG(); assertSame(Jws.alg.registry(), Jwts.SIG.get())
         new Jwts.ENC(); assertSame(Jwe.alg.registry(), Jwts.ENC.get())
         new Jwts.KEY(); assertSame(Jwe.enc.registry(), Jwts.KEY.get())

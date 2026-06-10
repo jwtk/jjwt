@@ -71,20 +71,4 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
             return self();
         }
     }
-
-    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder<T> extends AbstractRequestParams<T, Request.Builder<T>> implements Request.Builder<T> {
-
-        @Override
-        public Request<T> build() {
-            return new DefaultRequest<>(this.payload, this.provider, this.random);
-        }
-
-        public static class Supplier<T> implements java.util.function.Supplier<Builder<T>> {
-            @Override
-            public Builder<T> get() {
-                return new Builder<>();
-            }
-        }
-    }
 }

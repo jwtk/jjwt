@@ -92,25 +92,4 @@ public interface Request<T> extends Message<T> {
          */
         M payload(T payload);
     }
-
-    /**
-     * A builder for creating new immutable {@link Request} instances.
-     *
-     * @param <T> the type of payload in the request.
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Builder<T> extends io.jsonwebtoken.lang.Builder<Request<T>>, Params<T, Builder<T>> {
-    }
-
-    /**
-     * Returns a new {@link Request.Builder} for creating immutable {@link Request}s.
-     *
-     * @param <T> the type of payload in the request.
-     * @return a new {@link Request.Builder} for creating immutable {@link Request}s.
-     * @since JJWT_RELEASE_VERSION
-     */
-    @SuppressWarnings("unchecked")
-    static <T> Builder<T> builder() {
-        return (Builder<T>) Suppliers.REQUEST_BUILDER.get();
-    }
 }

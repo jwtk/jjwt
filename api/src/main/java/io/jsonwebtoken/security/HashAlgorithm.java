@@ -46,27 +46,30 @@ import java.util.function.Consumer;
 public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, VerifyDigestRequest> {
 
     /**
-     * Computes a digest of a request {@link Request#getPayload() payload} {@code InputStream} using configured
-     * parameters. This is a lambda-style method to execute the request in-line instead of requiring the caller to
-     * first use a {@link Request.Builder} to construct the request.
+     * Computes a digest of a request {@link Request#getPayload() payload} {@code InputStream} or byte array using
+     * configured parameters. This is a lambda-style method to execute the request in-line instead of requiring the
+     * caller to first use a {@link DigestRequest.Builder} to construct the request.
      *
-     * <p>Callers are expected to {@link InputStream#close() close} or {@link InputStream#reset() reset} the request
-     * payload stream if necessary after calling this method.</p>
+     * <p>Callers are expected to {@link InputStream#close() close} or {@link InputStream#reset() reset} any specified
+     * request payload {@code InputStream} if necessary after calling this method.</p>
      *
-     * @param c consumer supporting lambda-style specification of digest {@link Request.Params}.
-     * @return the computed digest of the request {@link Request#getPayload() payload}.
+     * @param p lambda-style consumer for specifying digest algorithm {@link DigestRequest.Params parameters}.
+     * @return the computed digest of the request {@link DigestRequest#getPayload() payload}.
      * @since JJWT_RELEASE_VERSION
      */
-    default byte[] digest(Consumer<Request.Params<InputStream, ?>> c) {
-        Assert.notNull(c, "Consumer cannot be null");
-        Request.Builder<InputStream> b = Request.builder();
-        c.accept(b);
-        Request<InputStream> r = b.build();
+    default byte[] digest(Consumer<DigestRequest.Params<?>> p) {
+        Assert.notNull(p, "Consumer cannot be null");
+        DigestRequest.Builder b = DigestRequest.builder();
+        p.accept(b);
+        DigestRequest r = b.build();
         return digest(r);
     }
 
     /**
-     * Computes a digest of the specified {@code is} input stream.
+     * Computes a hash of the specified {@code is} input stream.  This is a convenience method using the algorithm
+     * default JCA provider and {@code SecureRandom}, and is equivalent to:
+     * <blockquote><pre>
+     * return digest(r -&gt; r.payload(is));</pre></blockquote>
      *
      * <p>Callers are expected to {@link InputStream#close() close} or {@link InputStream#reset() reset} the payload
      * stream if necessary after calling this method.</p>
@@ -78,7 +81,18 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * @since JJWT_RELEASE_VERSION
      */
     default byte[] digest(InputStream is) {
-        return digest(c -> c.payload(is));
+        return digest(p -> p.payload(is));
+    }
+
+    /**
+     * Computes a hash of the specified byte array using the algorithm's default JCA provider and SecureRandom.
+     *
+     * @param payload the byte array to hash
+     * @return the computed hash (aka digest) of the specified byte array.
+     * @since JJWT_RELEASE_VERSION
+     */
+    default byte[] digest(byte[] payload) {
+        return digest(p -> p.payload(payload));
     }
 
     /**
@@ -90,16 +104,16 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * <p>Callers are expected to {@link InputStream#close() close} or {@link InputStream#reset() reset} the request
      * payload stream if necessary after calling this method.</p>
      *
-     * @param c consumer supporting lambda-style specification of {@link VerifyDigestRequest.Params}.
+     * @param p params consumer supporting lambda-style specification of {@link VerifyDigestRequest.Params}.
      * @return {@code true} if the request's specified {@link VerifyDigestRequest#getDigest() digest} matches (equals)
      * the algorithm's computed digest of the request {@link VerifyDigestRequest#getPayload() payload}, {@code false}
      * otherwise.
      * @since JJWT_RELEASE_VERSION
      */
-    default boolean verify(Consumer<VerifyDigestRequest.Params<?>> c) {
-        Assert.notNull(c, "Consumer cannot be null");
+    default boolean verify(Consumer<VerifyDigestRequest.Params<?>> p) {
+        Assert.notNull(p, "Consumer cannot be null");
         VerifyDigestRequest.Builder b = VerifyDigestRequest.builder();
-        c.accept(b);
+        p.accept(b);
         VerifyDigestRequest r = b.build();
         return verify(r);
     }
@@ -121,5 +135,19 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      */
     default boolean verify(InputStream is, byte[] digest) {
         return verify(c -> c.payload(is).digest(digest));
+    }
+
+    /**
+     * Returns {@code true} if the specified {@code digest} matches (equals) the algorithm's computed digest of the
+     * specified {@code payload} byte array, {@code false} otherwise.
+     *
+     * @param payload the byte array that will be consumed to compute the digest.
+     * @param digest the previously computed digest to compare with the algorithm's computed digest of {@code payload}.
+     * @return {@code true} if the specified {@code digest} matches (equals) the algorithm's computed digest of the
+     * specified {@code is} input stream, {@code false} otherwise.
+     * @since JJWT_RELEASE_VERSION
+     */
+    default boolean verify(byte[] payload, byte[] digest) {
+        return verify(c -> c.payload(payload).digest(digest));
     }
 }

@@ -19,6 +19,7 @@ import io.jsonwebtoken.impl.lang.Bytes;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.function.Function;
 
 /**
  * Allows read access to the internal byte array, avoiding the need copy/extract to a
@@ -39,5 +40,13 @@ public final class BytesInputStream extends ByteArrayInputStream {
     @Override
     public void close() throws IOException {
         reset();
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection as io.jsonwebtoken.security.Suppliers.BYTES_INPUT_STREAM_FACTORY
+    public static class Factory implements Function<byte[], BytesInputStream> {
+        @Override
+        public BytesInputStream apply(byte[] buf) {
+            return new BytesInputStream(buf);
+        }
     }
 }

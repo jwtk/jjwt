@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken.security;
 
-import java.io.InputStream;
-
 /**
  * A request to verify a previously-computed cryptographic digest (available via {@link #getDigest()}) against the
  * digest to be computed for the specified {@link #getPayload() payload}.
@@ -29,7 +27,7 @@ import java.io.InputStream;
  * @see VerifySecureDigestRequest
  * @since 0.12.0
  */
-public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplier {
+public interface VerifyDigestRequest extends DigestRequest, DigestSupplier {
 
     /**
      * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
@@ -37,7 +35,7 @@ public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplie
      * @param <M> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends Request.Params<InputStream, M> {
+    interface Params<M extends Params<M>> extends DigestRequest.Params<M> {
 
         /**
          * The digest to verify against the one computed for the given {@link #getPayload() payload}.

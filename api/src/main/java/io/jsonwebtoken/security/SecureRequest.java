@@ -34,15 +34,7 @@ public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier
      * @param <M> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<T, K extends Key, M extends Params<T, K, M>> extends Request.Params<T, M> {
-
-        /**
-         * Sets the key used by the algorithm during the request, must be compatible with the target algorithm.
-         *
-         * @param key the algorithm key to use during the request.
-         * @return the instance for method chaining.
-         */
-        M key(K key);
+    interface Params<T, K extends Key, M extends Params<T, K, M>> extends Request.Params<T, M>, Keyable<K, M> {
     }
 
     /**
