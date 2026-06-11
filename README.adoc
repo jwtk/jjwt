@@ -332,6 +332,8 @@ If any of those don't appeal to you, no worries! Any help you would like to offe
 appreciated based on the above caveats concerning <<contributing-pull-requests,contributing pull requests>>. Feel free
 to https://github.com/jwtk/jjwt/discussions[discuss or ask questions first] if you're not sure. :)
 
+When you're ready to build and test the project locally, see link:CONTRIBUTING.md[CONTRIBUTING.md].
+
 +++<a name="overview">++++++</a>+++
 
 == What is a JSON Web Token?
