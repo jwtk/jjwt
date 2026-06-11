@@ -21,7 +21,7 @@ import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.SecureRequest
+import io.jsonwebtoken.security.SecureDigestRequest
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -40,6 +40,7 @@ class RsaSignatureAlgorithmTest {
         it instanceof RsaSignatureAlgorithm
     }) as Collection<RsaSignatureAlgorithm>
 
+    @SuppressWarnings('GroovyAssignabilityCheck')
     @Test
     void testKeyPairBuilder() {
         algs.each {
@@ -89,8 +90,9 @@ class RsaSignatureAlgorithmTest {
     @Test
     void testValidateSigningKeyNotPrivate() {
         RSAPublicKey key = createMock(RSAPublicKey)
-        def request = SecureRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
+        def request = SecureDigestRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
         try {
+            //noinspection GroovyAssignabilityCheck
             Jws.alg.RS256.digest(request)
             fail()
         } catch (InvalidKeyException e) {

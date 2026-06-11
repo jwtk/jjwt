@@ -38,7 +38,7 @@ public class DefaultVerifyDigestRequest extends DefaultDigestRequest implements 
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder extends AbstractRequestParams<InputStream, VerifyDigestRequest.Builder>
+    public static class Builder extends AbstractPayloadParams<InputStream, VerifyDigestRequest.Builder>
             implements VerifyDigestRequest.Builder {
 
         private byte[] digest;

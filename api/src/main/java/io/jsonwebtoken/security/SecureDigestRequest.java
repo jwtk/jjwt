@@ -16,21 +16,16 @@
 package io.jsonwebtoken.security;
 
 import java.io.InputStream;
+import java.security.Key;
 
-/**
- * A request to an {@link DigestAlgorithm}, allowing either byte array or octet stream payloads.
- *
- * @see #getPayload()
- * @since JJWT_RELEASE_VERSION
- */
-public interface DigestRequest extends Request<InputStream> {
+public interface SecureDigestRequest<K extends Key> extends DigestRequest, SecureRequest<InputStream, K> {
 
     /**
-     * A builder for creating new immutable {@link DigestRequest} instances.
+     * A builder for creating new immutable {@link SecureDigestRequest} instances.
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Builder extends io.jsonwebtoken.lang.Builder<DigestRequest>, DigestAlgorithm.Params<Builder> {
+    interface Builder<K extends Key> extends io.jsonwebtoken.lang.Builder<SecureDigestRequest<K>>, SecureDigestAlgorithm.Params<K, Builder<K>> {
     }
 
     /**
@@ -39,8 +34,7 @@ public interface DigestRequest extends Request<InputStream> {
      * @return a new {@link DigestRequest.Builder} for creating immutable {@link DigestRequest}s.
      * @since JJWT_RELEASE_VERSION
      */
-    static DigestRequest.Builder builder() {
-        return Suppliers.DIGEST_REQUEST_BUILDER.get();
+    static <K extends Key> SecureDigestRequest.Builder<K> builder() {
+        return Suppliers.secureDigestRequestBuilder();
     }
-
 }

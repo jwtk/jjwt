@@ -30,28 +30,11 @@ package io.jsonwebtoken.security;
 public interface VerifyDigestRequest extends DigestRequest, DigestSupplier {
 
     /**
-     * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
-     *
-     * @param <P> the instance type returned for method chaining.
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Params<P extends Params<P>> extends DigestRequest.Params<P> {
-
-        /**
-         * The digest to verify against the one computed for the given {@link #getPayload() payload}.
-         *
-         * @param digest the digest to verify against the one computed for the given {@link #getPayload() payload}.
-         * @return the instance for method chaining.
-         */
-        P digest(byte[] digest);
-    }
-
-    /**
      * A builder for creating new immutable {@link VerifyDigestRequest} instances.
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Builder extends Params<Builder>, io.jsonwebtoken.lang.Builder<VerifyDigestRequest> {
+    interface Builder extends DigestAlgorithm.VerifyParams<Builder>, io.jsonwebtoken.lang.Builder<VerifyDigestRequest> {
     }
 
     /**

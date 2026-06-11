@@ -42,25 +42,13 @@ import java.security.Key;
 public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
 
     /**
-     * Named parameters (setters) used to configure a {@link DecryptionKeyRequest DecryptionKeyRequest}
-     * instance.
-     *
-     * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
-     * @param <P> the instance type returned for method chaining.
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Params<K extends Key, P extends Params<K, P>> extends KeyRequest.Params<byte[], P>,
-            SecureRequest.Params<byte[], K, P> {
-    }
-
-    /**
      * A builder for creating new immutable {@link DecryptionKeyRequest} instances used to get a JWE
      * decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
      *
      * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
      * @since JJWT_RELEASE_VERSION
      */
-    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
+    interface Builder<K extends Key> extends KeyAlgorithm.DecryptParams<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
     }
 
     /**

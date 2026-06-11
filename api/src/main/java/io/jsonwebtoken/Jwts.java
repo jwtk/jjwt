@@ -47,8 +47,8 @@ import java.util.function.Supplier;
  * <blockquote><pre>
  * Jwts.// press code-completion hotkeys to suggest available algorithm registry fields
  * {@link Jws.alg Jws.alg}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
- * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual encryption algorithms or utility methods
- * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual key management algorithms or utility methods</pre></blockquote>
+ * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods
+ * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods</pre></blockquote>
  *
  * @since 0.1
  */
@@ -69,11 +69,11 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.alg.A256GCM</b>) // or A128GCM, A192GCM, etc...
+     *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
-     * <p>They are also available together as a {@link Registry} instance via {@link Jwe.alg#registry()}.</p>
+     * <p>They are also available together as a {@link Registry} instance via {@link Jwe.enc#registry()}.</p>
      *
-     * @see Jwe.alg#registry()
+     * @see Jwe.enc#registry()
      * @since 0.12.0
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg}.
      */
@@ -372,13 +372,13 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.enc.ECDH_ES_A256KW</b>, Jwe.alg.A256GCM)
+     *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.alg.A256GCM)
      *    .build();</pre></blockquote>
-     * <p>They are also available together as a {@link Registry} instance via the {@link Jwe.enc#registry()} method.</p>
+     * <p>They are also available together as a {@link Registry} instance via the {@link Jwe.alg#registry()} method.</p>
      *
-     * @see Jwe.enc#registry()
+     * @see Jwe.alg#registry()
      * @since 0.12.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg}.
      */
     @Deprecated
     public static final class KEY {

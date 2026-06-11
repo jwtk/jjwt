@@ -18,7 +18,7 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
-import io.jsonwebtoken.security.SecureRequest
+import io.jsonwebtoken.security.SecureDigestRequest
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
@@ -49,10 +49,10 @@ class EdSignatureAlgorithmTest {
         assertNotNull pair.public
         assertTrue pair.public instanceof PublicKey
         String algName = pair.public.getAlgorithm()
-        assertTrue alg.getId().equals(algName) || algName.equals(alg.preferredCurve.getId())
+        assertTrue alg.getId() == algName || algName == alg.preferredCurve.getId()
 
         algName = pair.private.getAlgorithm()
-        assertTrue alg.getId().equals(algName) || algName.equals(alg.preferredCurve.getId())
+        assertTrue alg.getId() == algName || algName == alg.preferredCurve.getId()
     }
 
     /**
@@ -62,7 +62,7 @@ class EdSignatureAlgorithmTest {
     void testGetRequestJcaNameByKeyAlgorithmNameOnly() {
         def key = new TestKey(algorithm: EdwardsCurve.X25519.OID)
         def payload = [0x00] as byte[]
-        def req = SecureRequest.builder().payload(payload).key(key).build()
+        def req = SecureDigestRequest.builder().payload(payload).key(key).build()
         assertEquals 'X25519', alg.getJcaName(req) // Not the EdDSA default
     }
 
@@ -108,7 +108,7 @@ class EdSignatureAlgorithmTest {
             String exMsg = expected.getMessage()
             String expectedMsg = 'JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.'
             String expectedMsg2 = "Unable to verify EdDSA signature with JCA algorithm 'EdDSA' using key {${pub}}: ${expected.getCause()?.getMessage()}"
-            assertTrue exMsg.equals(expectedMsg) || exMsg.equals(expectedMsg2)
+            assertTrue exMsg == expectedMsg || exMsg == expectedMsg2
         }
     }
 

@@ -53,11 +53,11 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * <p>Callers are expected to {@link InputStream#close() close} or {@link InputStream#reset() reset} any specified
      * request payload {@code InputStream} if necessary after calling this method.</p>
      *
-     * @param p lambda-style consumer for specifying digest algorithm {@link DigestRequest.Params parameters}.
+     * @param p lambda-style consumer for specifying digest algorithm {@link DigestAlgorithm.Params parameters}.
      * @return the computed digest of the request {@link DigestRequest#getPayload() payload}.
      * @since JJWT_RELEASE_VERSION
      */
-    default byte[] digest(Consumer<DigestRequest.Params<?>> p) {
+    default byte[] digest(Consumer<DigestAlgorithm.Params<?>> p) {
         Assert.notNull(p, "Consumer cannot be null");
         DigestRequest.Builder b = DigestRequest.builder();
         p.accept(b);
@@ -107,13 +107,13 @@ public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, Ver
      * <p>Callers are expected to {@link InputStream#close() close} or {@link InputStream#reset() reset} the request
      * payload stream if necessary after calling this method.</p>
      *
-     * @param p params consumer supporting lambda-style specification of {@link VerifyDigestRequest.Params}.
+     * @param p params consumer supporting lambda-style specification of {@link DigestAlgorithm.VerifyParams}.
      * @return {@code true} if the request's specified {@link VerifyDigestRequest#getDigest() digest} matches (equals)
      * the algorithm's computed digest of the request {@link VerifyDigestRequest#getPayload() payload}, {@code false}
      * otherwise.
      * @since JJWT_RELEASE_VERSION
      */
-    default boolean verify(Consumer<VerifyDigestRequest.Params<?>> p) {
+    default boolean verify(Consumer<DigestAlgorithm.VerifyParams<?>> p) {
         Assert.notNull(p, "Consumer cannot be null");
         VerifyDigestRequest.Builder b = VerifyDigestRequest.builder();
         p.accept(b);

@@ -53,31 +53,6 @@ public interface AeadResult extends DigestSupplier, IvSupplier {
     AeadResult setIv(byte[] iv);
 
     /**
-     * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
-     *
-     * @param <M> the instance type returned for method chaining.
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Params<M extends AeadResult.Params<M>> {
-
-        /**
-         * Sets the required initialization vector used during AEAD decryption.
-         *
-         * @param iv the required initialization vector used during AEAD decryption.
-         * @return the instance for method chaining.
-         */
-        M iv(byte[] iv);
-
-        /**
-         * Sets the required AEAD Authentication Tag used to verify message authenticity during AEAD decryption.
-         *
-         * @param digest the required AEAD Authentication Tag used to verify message authenticity during AEAD decryption.
-         * @return the instance for method chaining.
-         */
-        M tag(byte[] digest);
-    }
-
-    /**
      * Returns a new {@link AeadResult} with the specified {@link OutputStream} that will be used to write the
      * resulting ciphertext during encryption or plaintext during decryption.
      *
