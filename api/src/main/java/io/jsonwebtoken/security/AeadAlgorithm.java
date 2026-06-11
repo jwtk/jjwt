@@ -86,7 +86,7 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      * <p>
      * This is a convenience method that constructs an implicit {@link AeadResult} and {@link AeadRequest} using
      * lambda parameters, and then immediately delegates to {@link #encrypt(AeadRequest, AeadResult)}.
-     * <h5>Usage Example</h5>
+     * <h4>Usage Example</h4>
      * <pre><code>
      *     ByteArrayOutputStream out = new ByteArrayOutputStream(8196);
      *     AeadResult result = aeadAlgorithm.encrypt(r -&gt; r.payload(plaintext).aad(aad).key(key), out);
