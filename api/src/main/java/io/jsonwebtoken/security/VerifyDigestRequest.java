@@ -32,10 +32,10 @@ public interface VerifyDigestRequest extends DigestRequest, DigestSupplier {
     /**
      * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
      *
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends DigestRequest.Params<M> {
+    interface Params<P extends Params<P>> extends DigestRequest.Params<P> {
 
         /**
          * The digest to verify against the one computed for the given {@link #getPayload() payload}.
@@ -43,7 +43,7 @@ public interface VerifyDigestRequest extends DigestRequest, DigestSupplier {
          * @param digest the digest to verify against the one computed for the given {@link #getPayload() payload}.
          * @return the instance for method chaining.
          */
-        M digest(byte[] digest);
+        P digest(byte[] digest);
     }
 
     /**

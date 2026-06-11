@@ -30,10 +30,10 @@ public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSuppl
     /**
      * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
      *
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends AeadRequest.Params<M>, AeadResult.Params<M> {
+    interface Params<P extends Params<P>> extends AeadRequest.Params<P>, AeadResult.Params<P> {
     }
 
     /**

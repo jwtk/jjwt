@@ -37,11 +37,11 @@ public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<
      * instance.
      *
      * @param <K> type of key to use to verify the digest.
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<K extends Key, M extends Params<K, M>> extends SecureRequest.Params<InputStream, K, M>,
-            VerifyDigestRequest.Params<M> {
+    interface Params<K extends Key, P extends Params<K, P>> extends SecureRequest.Params<InputStream, K, P>,
+            VerifyDigestRequest.Params<P> {
     }
 
     /**

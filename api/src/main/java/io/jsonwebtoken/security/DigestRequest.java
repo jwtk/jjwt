@@ -25,7 +25,7 @@ import java.io.InputStream;
  */
 public interface DigestRequest extends Request<InputStream> {
 
-    interface Params<T extends Params<T>> extends Request.Params<InputStream, T>, OctetStreamPayloadParams<T> {
+    interface Params<P extends Params<P>> extends OctetStreamPayloadParams<P> {
     }
 
     /**

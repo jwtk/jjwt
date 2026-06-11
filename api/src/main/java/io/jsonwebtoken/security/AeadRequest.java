@@ -32,10 +32,10 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
     /**
      * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
      *
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends SecureRequest.Params<InputStream, SecretKey, M>, OctetStreamPayloadParams<M> {
+    interface Params<P extends Params<P>> extends SecureRequest.Params<InputStream, SecretKey, P>, OctetStreamPayloadParams<P> {
 
         /**
          * Sets any &quot;additional associated data&quot; that must be integrity protected (but not encrypted) when
@@ -47,7 +47,7 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
          * @see AeadAlgorithm#encrypt(AeadRequest, AeadResult)
          * @see AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)
          */
-        M aad(InputStream aad);
+        P aad(InputStream aad);
 
         /**
          * Sets any &quot;additional associated data&quot; that must be integrity protected (but not encrypted) or
@@ -64,7 +64,7 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
          * @see AeadAlgorithm#encrypt(AeadRequest, AeadResult)
          * @see AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)
          */
-        default M aad(byte[] aad) {
+        default P aad(byte[] aad) {
             InputStream is = Suppliers.BYTES_INPUT_STREAM_FACTORY.apply(aad);
             return aad(is);
         }

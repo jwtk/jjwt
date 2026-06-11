@@ -59,10 +59,10 @@ public interface Request<T> extends Message<T> {
      * Named parameters (setters) used to configure a {@link Request Request} instance.
      *
      * @param <T> the type of payload in the request.
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<T, M extends Params<T, M>> {
+    interface Params<T, P extends Params<T, P>> {
 
         /**
          * Sets the JCA provider that should be used for cryptographic operations during the request. A {@code null}
@@ -72,7 +72,7 @@ public interface Request<T> extends Message<T> {
          *                 {@code null} to use the JCA subsystem preferred provider.
          * @return the instance for method chaining.
          */
-        M provider(Provider provider);
+        P provider(Provider provider);
 
         /**
          * Sets the {@code SecureRandom} to use when performing cryptographic operations during the request. A
@@ -82,7 +82,7 @@ public interface Request<T> extends Message<T> {
          *               or {@code null} if a default {@link SecureRandom} should be used.
          * @return the instance for method chaining.
          */
-        M random(SecureRandom random);
+        P random(SecureRandom random);
 
         /**
          * Sets the request payload.
@@ -90,6 +90,6 @@ public interface Request<T> extends Message<T> {
          * @param payload the request payload.
          * @return the instance for method chaining.
          */
-        M payload(T payload);
+        P payload(T payload);
     }
 }

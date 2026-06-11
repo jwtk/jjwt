@@ -20,10 +20,10 @@ import java.io.InputStream;
 /**
  * Request parameters that support an octet (byte array) {@link InputStream} payload.
  *
- * @param <T> The type of the params instance returned for method chaining.
+ * @param <P> The type of the params instance returned for method chaining.
  * @since JJWT_RELEASE_VERSION
  */
-public interface OctetStreamPayloadParams<T extends OctetStreamPayloadParams<T>> extends Request.Params<InputStream, T> {
+public interface OctetStreamPayloadParams<P extends OctetStreamPayloadParams<P>> extends Request.Params<InputStream, P> {
 
     /**
      * Wraps the request byte array in an {@link InputStream} and delegates to the {@link #payload(Object) payload} method.
@@ -31,7 +31,7 @@ public interface OctetStreamPayloadParams<T extends OctetStreamPayloadParams<T>>
      * @param payload the byte array to wrap as an {@link InputStream} and use as the request payload.
      * @return the instance for method chaining.
      */
-    default T payload(byte[] payload) {
+    default P payload(byte[] payload) {
         InputStream stream = Suppliers.BYTES_INPUT_STREAM_FACTORY.apply(payload);
         return payload(stream);
     }

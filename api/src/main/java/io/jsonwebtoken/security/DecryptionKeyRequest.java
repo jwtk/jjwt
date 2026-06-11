@@ -46,11 +46,11 @@ public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[
      * instance.
      *
      * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<K extends Key, M extends Params<K, M>> extends KeyRequest.Params<byte[], M>,
-            SecureRequest.Params<byte[], K, M> {
+    interface Params<K extends Key, P extends Params<K, P>> extends KeyRequest.Params<byte[], P>,
+            SecureRequest.Params<byte[], K, P> {
     }
 
     /**
