@@ -83,6 +83,16 @@ class Pkcs11Test {
               CKA_SENSITIVE = false
               CKA_EXTRACTABLE = true
             }
+            # SoftHSM >= 2.7.0 advertises the combined CKM_ECDSA_SHA* mechanisms, but signing with them fails
+            # with CKR_OPERATION_NOT_INITIALIZED.  Disable them so ECDSA signing uses the working CKM_ECDSA
+            # mechanism instead.  See https://github.com/softhsm/SoftHSMv2/pull/857
+            disabledMechanisms = {
+              CKM_ECDSA_SHA1
+              CKM_ECDSA_SHA224
+              CKM_ECDSA_SHA256
+              CKM_ECDSA_SHA384
+              CKM_ECDSA_SHA512
+            }
             """
             if (Provider.metaClass.respondsTo(Provider, 'configure', String)) { // JDK 9 or later
                 provider = Security.getProvider("SunPKCS11")
