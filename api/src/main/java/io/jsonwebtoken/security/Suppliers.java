@@ -19,6 +19,7 @@ import io.jsonwebtoken.lang.Classes;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Key;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -36,13 +37,13 @@ final class Suppliers {
     static final Supplier<DigestRequest.Builder> DIGEST_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDigestRequest$Builder$Supplier");
 
+    private static final Supplier<SecureDigestRequest.Builder<?>> SECURE_DIGEST_REQUEST_BUILDER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultSecureDigestRequest$Builder$Supplier");
+
     static final Supplier<VerifyDigestRequest.Builder> VERIFY_DIGEST_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultVerifyDigestRequest$Builder$Supplier");
 
-    static final Supplier<SecureRequest.Builder<?, ?>> SECURE_REQUEST_BUILDER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultSecureRequest$Builder$Supplier");
-
-    static final Supplier<VerifySecureDigestRequest.Builder<?>> VERIFY_SECURE_DIGEST_REQUEST_BUILDER =
+    private static final Supplier<VerifySecureDigestRequest.Builder<?>> VERIFY_SECURE_DIGEST_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultVerifySecureDigestRequest$Builder$Supplier");
 
     static final Supplier<KeyRequest.Builder<?>> KEY_REQUEST_BUILDER =
@@ -62,4 +63,14 @@ final class Suppliers {
 
     static final Function<byte[], InputStream> BYTES_INPUT_STREAM_FACTORY =
             Classes.newInstance("io.jsonwebtoken.impl.io.BytesInputStream$Factory");
+
+    @SuppressWarnings("unchecked")
+    static <K extends Key> SecureDigestRequest.Builder<K> secureDigestRequestBuilder() {
+        return (SecureDigestRequest.Builder<K>) SECURE_DIGEST_REQUEST_BUILDER.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    static <K extends Key> VerifySecureDigestRequest.Builder<K> verifySecureDigestRequestBuilder() {
+        return (VerifySecureDigestRequest.Builder<K>) VERIFY_SECURE_DIGEST_REQUEST_BUILDER.get();
+    }
 }

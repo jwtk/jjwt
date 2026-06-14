@@ -241,7 +241,7 @@ public class JavaReadmeTest {
         SecretKeyAlgorithm alg = Jwe.alg.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
         SecretKey key = alg.key().build();
 
-        // Chooose the Encryption Algorithm used to encrypt the payload:
+        // Choose the Encryption Algorithm used to encrypt the payload:
         AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
@@ -306,7 +306,7 @@ public class JavaReadmeTest {
         // Create the compact JWE:
         String jwe = Jwts.builder().issuer("me")
                 // Optional work factor is specified in the header:
-                //.header().pbes2Count(pbkdf2Iterations)).and()
+                //.header().pbes2Count(pbkdf2Iterations).and()
                 .encryptWith(password, alg, enc)
                 .compact();
 

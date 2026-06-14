@@ -1409,16 +1409,16 @@ class JwtsTest {
 
                 // encrypt and compress:
                 String jwe = Jwts.builder()
-                        .content(payload)
-                        .compressWith(zip)
-                        .encryptWith(key, enc)
-                        .compact()
+                    .content(payload)
+                    .compressWith(zip)
+                    .encryptWith(key, enc)
+                    .compact()
 
                 //decompress and decrypt:
                 def jwt = Jwts.parser()
-                        .decryptWith(key)
-                        .build()
-                        .parseEncryptedContent(jwe)
+                    .decryptWith(key)
+                    .build()
+                    .parseEncryptedContent(jwe)
                 assertEquals payload, new String(jwt.getPayload(), StandardCharsets.UTF_8)
             }
         }

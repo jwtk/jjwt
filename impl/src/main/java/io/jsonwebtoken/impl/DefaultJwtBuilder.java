@@ -67,7 +67,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     private Payload payload = Payload.EMPTY;
 
     private SecureDigestAlgorithm<Key, ?> sigAlg = Jws.alg.NONE;
-    private Function<SecureRequest<InputStream, Key>, byte[]> signFunction;
+    private Function<SecureDigestRequest<Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
 
@@ -573,9 +573,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         byte[] signature;
         try {
-            SecureRequest<InputStream, Key> request =
-                    SecureRequest.<InputStream, Key>builder().payload(signingInput).key(key)
-                            .provider(provider).random(secureRandom).build();
+            SecureDigestRequest<Key> request = SecureDigestRequest.builder()
+                    .payload(signingInput).key(key).provider(provider).random(secureRandom)
+                    .build();
             signature = signFunction.apply(request);
 
             // now that we've calculated the signature, if using the b64 extension, and the payload is

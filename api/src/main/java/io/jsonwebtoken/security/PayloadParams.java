@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright © 2026 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,19 @@
  */
 package io.jsonwebtoken.security;
 
-import java.security.Key;
-
 /**
- * A request to a cryptographic algorithm requiring a {@link Key}.
+ * Algorithm parameters that include a payload value required during the cryptographic operation.
  *
- * @param <T> the type of payload in the request
- * @param <K> they type of key used by the algorithm during the request
- * @since 0.12.0
+ * @param <T> the type of payload
+ * @param <P> the subtype returned for method chaining
  */
-public interface SecureRequest<T, K extends Key> extends Request<T>, KeySupplier<K> {
+public interface PayloadParams<T, P extends PayloadParams<T, P>> extends AlgParams<P> {
+
+    /**
+     * Sets the payload used during the cryptographic operation.
+     *
+     * @param payload the payload used during the cryptographic operation.
+     * @return the instance for method chaining.
+     */
+    P payload(T payload);
 }

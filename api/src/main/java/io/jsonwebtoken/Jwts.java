@@ -40,8 +40,8 @@ import java.util.function.Supplier;
  * <blockquote><pre>
  * Jwts.// press code-completion hotkeys to suggest available algorithm registry fields
  * {@link Jws.alg Jws.alg}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
- * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods
- * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods</pre></blockquote>
+ * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods
+ * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods</pre></blockquote>
  *
  * @since 0.1
  */
@@ -62,7 +62,7 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.alg.A256GCM</b>) // or A128GCM, A192GCM, etc...
+     *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via {@link Jwe.enc#registry()}.</p>
      *

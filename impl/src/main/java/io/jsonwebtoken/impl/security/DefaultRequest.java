@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.security.PayloadParams;
 import io.jsonwebtoken.security.Request;
 
 import java.security.Provider;
@@ -41,8 +42,8 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
         return this.secureRandom;
     }
 
-    static abstract class AbstractRequestParams<T, M extends Params<T, M>>
-            implements Params<T, M> {
+    static abstract class AbstractPayloadParams<T, M extends PayloadParams<T, M>>
+            implements PayloadParams<T, M> {
 
         protected Provider provider;
         protected SecureRandom random;

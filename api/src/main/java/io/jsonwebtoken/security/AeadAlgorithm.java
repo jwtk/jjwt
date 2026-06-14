@@ -20,6 +20,7 @@ import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.SecretKey;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 
@@ -70,6 +71,72 @@ import java.util.function.Consumer;
 public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuilderSupplier<SecretKey, SecretKeyBuilder> {
 
     /**
+     * Named parameters used during AEAD encryption.
+     *
+     * @param <P> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<P extends Params<P>> extends OctetStreamPayloadParams<P>, Keyable<SecretKey, P> {
+
+        /**
+         * Sets any &quot;additional associated data&quot; that must be integrity protected (but not encrypted) when
+         * performing <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
+         *
+         * @param aad the {@code InputStream} containing any associated data that must be integrity protected or
+         *            verified during AEAD encryption or decryption.
+         * @return the instance for method chaining.
+         * @see AeadAlgorithm#encrypt(AeadRequest, AeadResult)
+         * @see AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)
+         */
+        P aad(InputStream aad);
+
+        /**
+         * Sets any &quot;additional associated data&quot; that must be integrity protected (but not encrypted) or
+         * verified when performing
+         * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
+         * <p>
+         * This is a convenience method that wraps the specified byte array in an {@link InputStream} and
+         * then delegates to {@link #aad(InputStream)}.
+         *
+         * @param aad any associated data that must be integrity protected or verified during AEAD encryption or
+         *            decryption.
+         * @return the instance for method chaining.
+         * @see #aad(InputStream)
+         * @see AeadAlgorithm#encrypt(AeadRequest, AeadResult)
+         * @see AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)
+         */
+        default P aad(byte[] aad) {
+            InputStream is = Suppliers.BYTES_INPUT_STREAM_FACTORY.apply(aad);
+            return aad(is);
+        }
+    }
+
+    /**
+     * Named parameters used during AEAD decryption.
+     *
+     * @param <P> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface DecryptParams<P extends DecryptParams<P>> extends Params<P> {
+
+        /**
+         * Sets the required initialization vector used during AEAD decryption.
+         *
+         * @param iv the required initialization vector used during AEAD decryption.
+         * @return the instance for method chaining.
+         */
+        P iv(byte[] iv);
+
+        /**
+         * Sets the required AEAD Authentication Tag used to verify message authenticity during AEAD decryption.
+         *
+         * @param digest the required AEAD Authentication Tag used to verify message authenticity during AEAD decryption.
+         * @return the instance for method chaining.
+         */
+        P tag(byte[] digest);
+    }
+
+    /**
      * Encrypts plaintext and signs any optional {@link AeadRequest#getAssociatedData() associated data},
      * placing the resulting ciphertext, initialization vector, and authentication tag in the provided {@code result}.
      *
@@ -104,7 +171,7 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      * @throws SecurityException if there is an encryption problem or AAD authenticity cannot be guaranteed.
      * @since JJWT_RELEASE_VERSION
      */
-    default AeadResult encrypt(Consumer<AeadRequest.Params<?>> p, OutputStream out) throws SecurityException {
+    default AeadResult encrypt(Consumer<Params<?>> p, OutputStream out) throws SecurityException {
         Assert.notNull(p, "Consumer cannot be null");
         AeadRequest.Builder b = AeadRequest.builder();
         p.accept(b);

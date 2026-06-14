@@ -78,6 +78,26 @@ import java.security.PublicKey;
  */
 public interface DigestAlgorithm<R extends Request<InputStream>, V extends VerifyDigestRequest> extends Identifiable {
 
+    interface Params<P extends Params<P>> extends OctetStreamPayloadParams<P> {
+    }
+
+    /**
+     * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
+     *
+     * @param <P> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface VerifyParams<P extends VerifyParams<P>> extends Params<P> {
+
+        /**
+         * The digest to verify against the one computed for the given {@link #payload(Object) payload}.
+         *
+         * @param digest the digest to verify against the one computed for the given  {@link #payload(Object) payload}.
+         * @return the instance for method chaining.
+         */
+        P digest(byte[] digest);
+    }
+
     /**
      * Returns a cryptographic digest of the request {@link Request#getPayload() payload}.
      *

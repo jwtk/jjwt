@@ -18,6 +18,7 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyRequest;
 
 import java.security.Key;
@@ -45,8 +46,8 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
         return this.encryptionAlgorithm;
     }
 
-    static abstract class AbstractKeyRequestParams<T, M extends KeyRequest.Params<T, M>>
-            extends AbstractRequestParams<T, M> implements KeyRequest.Params<T, M> {
+    static abstract class AbstractKeyAlgParams<T, M extends KeyAlgorithm.Params<T, M>>
+            extends AbstractPayloadParams<T, M> implements KeyAlgorithm.Params<T, M> {
 
         protected AeadAlgorithm aeadAlg;
         protected JweHeader header;
@@ -65,7 +66,7 @@ public class DefaultKeyRequest<T> extends DefaultRequest<T> implements KeyReques
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder<K extends Key> extends AbstractKeyRequestParams<K, KeyRequest.Builder<K>>
+    public static class Builder<K extends Key> extends AbstractKeyAlgParams<K, KeyRequest.Builder<K>>
             implements KeyRequest.Builder<K> {
 
         @Override

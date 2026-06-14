@@ -18,12 +18,12 @@ package io.jsonwebtoken.security;
 import java.io.InputStream;
 
 /**
- * Request parameters that support an octet (byte array) {@link InputStream} payload.
+ * Algorithm parameters that support an octet (byte array) payload.
  *
- * @param <P> The type of the params instance returned for method chaining.
+ * @param <P> The subtype returned for method chaining.
  * @since JJWT_RELEASE_VERSION
  */
-public interface OctetStreamPayloadParams<P extends OctetStreamPayloadParams<P>> extends Request.Params<InputStream, P> {
+public interface OctetStreamPayloadParams<P extends OctetStreamPayloadParams<P>> extends PayloadParams<InputStream, P> {
 
     /**
      * Wraps the request byte array in an {@link InputStream} and delegates to the {@link #payload(Object) payload} method.
