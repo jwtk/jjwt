@@ -24,14 +24,7 @@ import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.MacAlgorithm;
-import io.jsonwebtoken.security.MalformedKeyException;
-import io.jsonwebtoken.security.SecretJwk;
-import io.jsonwebtoken.security.SecretKeyAlgorithm;
-import io.jsonwebtoken.security.WeakKeyException;
+import io.jsonwebtoken.security.*;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -127,8 +120,8 @@ class SecretJwkFactory extends AbstractFamilyJwkFactory<SecretKey, SecretJwk> {
 
         //otherwise 'alg' was specified, ensure it's valid for secret key use:
         Identifiable alg = Jws.alg.registry().get(algId);
-        if (alg == null) alg = Jwe.enc.registry().get(algId);
         if (alg == null) alg = Jwe.alg.registry().get(algId);
+        if (alg == null) alg = Jwe.enc.registry().get(algId);
         if (alg != null) assertSymmetric(alg); // if we found a standard alg, it must be a symmetric key algorithm
 
         if (alg instanceof MacAlgorithm) {

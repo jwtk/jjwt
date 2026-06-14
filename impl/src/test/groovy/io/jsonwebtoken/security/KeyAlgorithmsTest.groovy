@@ -23,7 +23,7 @@ import java.security.Key
 import static org.junit.Assert.*
 
 /**
- * Tests {@link Jwe.alg} values.
+ * Tests {@link io.jsonwebtoken.Jwe.alg} values.
  *
  * @since 0.12.0
  */

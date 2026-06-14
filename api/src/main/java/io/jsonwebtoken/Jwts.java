@@ -68,7 +68,7 @@ public final class Jwts {
      *
      * @see Jwe.enc#registry()
      * @since 0.12.0
-     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc}.
      */
     @Deprecated
     public static final class ENC {
@@ -365,7 +365,7 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.alg.A256GCM)
+     *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.enc.A256GCM)
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link Jwe.alg#registry()} method.</p>
      *

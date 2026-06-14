@@ -45,7 +45,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.alg.A256GCM</b>) // or A128GCM, A192GCM, etc...
+     *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
      *
@@ -123,7 +123,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.enc.ECDH_ES_A256KW</b>, Jwe.alg.A256GCM)
+     *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.enc.A256GCM)
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
      *
