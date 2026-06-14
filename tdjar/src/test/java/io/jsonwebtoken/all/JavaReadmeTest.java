@@ -19,23 +19,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.Curve;
-import io.jsonwebtoken.security.EcPrivateJwk;
-import io.jsonwebtoken.security.EcPublicJwk;
-import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.MacAlgorithm;
-import io.jsonwebtoken.security.OctetPrivateJwk;
-import io.jsonwebtoken.security.OctetPublicJwk;
-import io.jsonwebtoken.security.Password;
-import io.jsonwebtoken.security.RsaPrivateJwk;
-import io.jsonwebtoken.security.RsaPublicJwk;
-import io.jsonwebtoken.security.SecretJwk;
-import io.jsonwebtoken.security.SecretKeyAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.*;
 import org.junit.Test;
 
 import javax.crypto.SecretKey;
@@ -207,7 +191,7 @@ public class JavaReadmeTest {
     public void testExampleJweDir() {
         // Create a test key suitable for the desired payload encryption algorithm:
         // (A*GCM algorithms are recommended, but require JDK 8 or later)
-        AeadAlgorithm enc = Jwe.alg.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
         SecretKey key = enc.key().build();
 
         String message = "Live long and prosper.";
@@ -231,9 +215,9 @@ public class JavaReadmeTest {
         KeyPair pair = Jws.alg.RS512.keyPair().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.enc.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.alg.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
         // Choose the Encryption Algorithm to encrypt the payload:
-        AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
         String jwe = Jwts.builder().audience().add("Alice").and()
@@ -254,11 +238,11 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweAESKW() {
         // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-        SecretKeyAlgorithm alg = Jwe.enc.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
+        SecretKeyAlgorithm alg = Jwe.alg.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
         SecretKey key = alg.key().build();
 
-        // Chooose the Encryption Algorithm used to encrypt the payload:
-        AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        // Choose the Encryption Algorithm used to encrypt the payload:
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
         String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
@@ -279,9 +263,9 @@ public class JavaReadmeTest {
         KeyPair pair = Jws.alg.ES512.keyPair().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.enc.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.alg.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
         // Choose the Encryption Algorithm to encrypt the payload:
-        AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's EC public key so only she may read it:
         String jwe = Jwts.builder().audience().add("Alice").and()
@@ -306,7 +290,7 @@ public class JavaReadmeTest {
         Password password = Keys.password(pw.toCharArray());
 
         // Choose the desired PBES2 key derivation algorithm:
-        KeyAlgorithm<Password, Password> alg = Jwe.enc.PBES2_HS512_A256KW; //or PBES2_HS384...
+        KeyAlgorithm<Password, Password> alg = Jwe.alg.PBES2_HS512_A256KW; //or PBES2_HS384...
 
         // Optionally choose the number of PBES2 computational iterations to use to derive the key.
         // This is optional - if you do not specify a value, JJWT will automatically choose a value
@@ -317,12 +301,12 @@ public class JavaReadmeTest {
         //int pbkdf2Iterations = 120000; //for HS512. Needs to be much higher for smaller hash algs.
 
         // Choose the Encryption Algorithm used to encrypt the payload:
-        AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
         String jwe = Jwts.builder().issuer("me")
                 // Optional work factor is specified in the header:
-                //.header().pbes2Count(pbkdf2Iterations)).and()
+                //.header().pbes2Count(pbkdf2Iterations).and()
                 .encryptWith(password, alg, enc)
                 .compact();
 

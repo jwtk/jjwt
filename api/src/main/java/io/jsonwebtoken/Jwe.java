@@ -52,7 +52,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * @see #registry()
      * @since JJWT_RELEASE_VERSION
      */
-    final class alg {
+    final class enc {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms";
         private static final Registry<String, AeadAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
@@ -70,7 +70,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
         }
 
         // prevent instantiation
-        private alg() {
+        private enc() {
         }
 
         /**
@@ -130,7 +130,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * @see #registry()
      * @since JJWT_RELEASE_VERSION
      */
-    final class enc {
+    final class alg {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyAlgorithms";
         private static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
@@ -739,7 +739,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
         public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Jwts.get(REGISTRY, "ECDH-ES+A256KW");
 
         //prevent instantiation
-        private enc() {
+        private alg() {
         }
     }
 

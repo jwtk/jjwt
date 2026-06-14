@@ -1070,7 +1070,7 @@ class JwtsTest {
      */
     @Test
     void testParseJweWithCustomEncryptionAlgorithm() {
-        def realAlg = Jwe.alg.A128GCM // any alg will do, we're going to wrap it
+        def realAlg = Jwe.enc.A128GCM // any alg will do, we're going to wrap it
         def key = realAlg.key().build()
         def enc = realAlg.getId() + 'X' // custom id
         def encAlg = new AeadAlgorithm() {
@@ -1339,13 +1339,13 @@ class JwtsTest {
     @Test
     void testSecretKeyJwes() {
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it instanceof DirectKeyAlgorithm || it instanceof SecretKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+            for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                 SecretKey key = alg instanceof SecretKeyAlgorithm ?
                         ((SecretKeyAlgorithm) alg).key().build() :
@@ -1374,7 +1374,7 @@ class JwtsTest {
 
         for (CompressionCodec codec : codecs) {
 
-            for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+            for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                 SecretKey key = enc.key().build()
 
@@ -1401,7 +1401,7 @@ class JwtsTest {
 
         for (CompressionAlgorithm zip : codecs) {
 
-            for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+            for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                 SecretKey key = enc.key().build()
 
@@ -1409,16 +1409,16 @@ class JwtsTest {
 
                 // encrypt and compress:
                 String jwe = Jwts.builder()
-                        .content(payload)
-                        .compressWith(zip)
-                        .encryptWith(key, enc)
-                        .compact()
+                    .content(payload)
+                    .compressWith(zip)
+                    .encryptWith(key, enc)
+                    .compact()
 
                 //decompress and decrypt:
                 def jwt = Jwts.parser()
-                        .decryptWith(key)
-                        .build()
-                        .parseEncryptedContent(jwe)
+                    .decryptWith(key)
+                    .build()
+                    .parseEncryptedContent(jwe)
                 assertEquals payload, new String(jwt.getPayload(), StandardCharsets.UTF_8)
             }
         }
@@ -1430,7 +1430,7 @@ class JwtsTest {
 
         for (CompressionAlgorithm zip : codecs) {
 
-            for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+            for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                 SecretKey key = enc.key().build()
 
@@ -1460,7 +1460,7 @@ class JwtsTest {
 
         for (CompressionAlgorithm zip : codecs) {
 
-            for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+            for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                 SecretKey key = enc.key().build()
 
@@ -1489,7 +1489,7 @@ class JwtsTest {
     @Test
     void testPasswordJwes() {
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it instanceof Pbes2HsAkwAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1497,7 +1497,7 @@ class JwtsTest {
 
         for (KeyAlgorithm alg : algs) {
 
-            for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+            for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                 // encrypt:
                 String jwe = Jwts.builder()
@@ -1523,7 +1523,7 @@ class JwtsTest {
         // encrypt:
         String jwe = Jwts.builder()
                 .claim('foo', 'bar')
-                .encryptWith(key, Jwe.alg.A256GCM) // should auto choose KeyAlg PBES2_HS512_A256KW
+                .encryptWith(key, Jwe.enc.A256GCM) // should auto choose KeyAlg PBES2_HS512_A256KW
                 .compact()
 
         //decrypt:
@@ -1532,7 +1532,7 @@ class JwtsTest {
                 .build()
                 .parseEncryptedClaims(jwe)
         assertEquals 'bar', jwt.getPayload().get('foo')
-        assertEquals Jwe.enc.PBES2_HS512_A256KW, Jwe.enc.registry().forKey(jwt.getHeader().getAlgorithm())
+        assertEquals Jwe.alg.PBES2_HS512_A256KW, Jwe.alg.registry().forKey(jwt.getHeader().getAlgorithm())
     }
 
     @Test
@@ -1540,7 +1540,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.RS256.pair, TestKeys.RS384.pair, TestKeys.RS512.pair]
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it instanceof DefaultRsaKeyAlgorithm
         })// as Collection<KeyAlgorithm<SecretKey, SecretKey>>
 
@@ -1551,7 +1551,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+                for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
@@ -1575,7 +1575,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.ES256.pair, TestKeys.ES384.pair, TestKeys.ES512.pair]
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1586,7 +1586,7 @@ class JwtsTest {
 
             for (KeyAlgorithm alg : algs) {
 
-                for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+                for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
 
                     // encrypt:
                     String jwe = Jwts.builder()
@@ -1610,7 +1610,7 @@ class JwtsTest {
 
         def pairs = [TestKeys.X25519.pair, TestKeys.X448.pair]
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
@@ -1620,7 +1620,7 @@ class JwtsTest {
             def privKey = pair.getPrivate()
 
             for (KeyAlgorithm alg : algs) {
-                for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+                for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
                     String jwe = encrypt(pubKey, alg, enc)
                     def jwt = decrypt(jwe, privKey)
                     assertEquals 'bar', jwt.getPayload().get('foo')
@@ -1637,14 +1637,14 @@ class JwtsTest {
     void testEdwardsCurveEncryptionWithSigningKeys() {
         def pairs = [TestKeys.Ed25519.pair, TestKeys.Ed448.pair] // signing keys, can't be used
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
         for (KeyPair pair : pairs) {
             def pubKey = pair.getPublic()
             for (KeyAlgorithm alg : algs) {
-                for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+                for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
                     try {
                         encrypt(pubKey, alg, enc)
                         fail()
@@ -1671,13 +1671,13 @@ class JwtsTest {
                       new KeyPair(TestKeys.X448.pair.public, TestKeys.Ed448.pair.private)
         ]
 
-        def algs = Jwe.enc.registry().values().findAll({ it ->
+        def algs = Jwe.alg.registry().values().findAll({ it ->
             it.getId().startsWith("ECDH-ES")
         })
 
         for (KeyPair pair : pairs) {
             for (KeyAlgorithm alg : algs) {
-                for (AeadAlgorithm enc : Jwe.alg.registry().values()) {
+                for (AeadAlgorithm enc : Jwe.enc.registry().values()) {
                     String jwe = encrypt(pair.getPublic(), alg, enc)
                     PrivateKey key = pair.getPrivate()
                     try {

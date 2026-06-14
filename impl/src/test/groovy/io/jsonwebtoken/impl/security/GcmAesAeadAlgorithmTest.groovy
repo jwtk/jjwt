@@ -60,7 +60,7 @@ class GcmAesAeadAlgorithmTest {
     @Test
     void testEncryptionAndDecryption() {
 
-        def alg = Jwe.alg.A256GCM
+        def alg = Jwe.enc.A256GCM
 
         def ins = Streams.of(P)
         def aad = Streams.of(AAD)

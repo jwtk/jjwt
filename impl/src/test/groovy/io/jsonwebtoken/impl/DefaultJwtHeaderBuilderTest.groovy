@@ -406,8 +406,8 @@ class DefaultJwtHeaderBuilderTest {
 
     @Test
     void testEncryptionAlgorithm() {
-        def enc = Jwe.alg.A256GCM.getId()
-        header = builder.add('alg', Jwe.enc.A192KW.getId()).add('enc', enc).build() as JweHeader
+        def enc = Jwe.enc.A256GCM.getId()
+        header = builder.add('alg', Jwe.alg.A192KW.getId()).add('enc', enc).build() as JweHeader
         assertEquals enc, header.getEncryptionAlgorithm()
     }
 
@@ -487,7 +487,7 @@ class DefaultJwtHeaderBuilderTest {
         assertEquals new DefaultJwsHeader([foo: 'bar', alg: 'HS256']), builder.build()
 
         // add JWE required property:
-        builder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), Jwe.alg.A256GCM.getId())
+        builder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), Jwe.enc.A256GCM.getId())
         assertEquals new DefaultJweHeader([foo: 'bar', alg: 'HS256', enc: 'A256GCM']), builder.build()
     }
 

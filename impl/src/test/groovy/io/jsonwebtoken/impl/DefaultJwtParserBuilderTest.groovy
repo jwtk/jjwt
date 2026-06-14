@@ -232,10 +232,10 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testAddEncryptionAlgorithmsOverrideDefaults() {
-        final String standardId = Jwe.alg.A256GCM.getId()
+        final String standardId = Jwe.enc.A256GCM.getId()
         def header = Jwts.header().add('enc', standardId).build()
         def parser = builder.build()
-        assertSame Jwe.alg.A256GCM, parser.encAlgs.apply(header) // standard implementation default
+        assertSame Jwe.enc.A256GCM, parser.encAlgs.apply(header) // standard implementation default
 
         def custom = new TestAeadAlgorithm(id: standardId) // custom impl with standard identifier
         parser = builder.enc().add(custom).and().build()
@@ -259,7 +259,7 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testCaseSensitiveEncryptionAlgorithm() {
-        def alg = Jwe.alg.A256GCM
+        def alg = Jwe.enc.A256GCM
         def standard = Jwts.header().add('alg', 'foo').add('enc', alg.id).build()
         def nonStandard = Jwts.header().add('alg', 'foo').add('enc', alg.id.toLowerCase()).build()
         def parser = builder.build()
@@ -275,10 +275,10 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testAddKeyAlgorithmsOverrideDefaults() {
-        final String standardId = Jwe.enc.A256GCMKW.id
-        def header = Jwts.header().add('enc', Jwe.alg.A256GCM.id).add('alg', standardId).build()
+        final String standardId = Jwe.alg.A256GCMKW.id
+        def header = Jwts.header().add('enc', Jwe.enc.A256GCM.id).add('alg', standardId).build()
         def parser = builder.build()
-        assertSame Jwe.enc.A256GCMKW, parser.keyAlgs.apply(header) // standard implementation default
+        assertSame Jwe.alg.A256GCMKW, parser.keyAlgs.apply(header) // standard implementation default
 
         def custom = new TestKeyAlgorithm(id: standardId) // custom impl with standard identifier
         parser = builder.key().add(custom).and().build()
@@ -304,8 +304,8 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testCaseSensitiveKeyAlgorithm() {
-        def alg = Jwe.enc.A256GCMKW
-        def hb = Jwts.header().add('enc', Jwe.alg.A256GCM.id)
+        def alg = Jwe.alg.A256GCMKW
+        def hb = Jwts.header().add('enc', Jwe.enc.A256GCM.id)
         def standard = hb.add('alg', alg.id).build()
         def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()
         def parser = builder.build()

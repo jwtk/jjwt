@@ -542,7 +542,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactSimplestPayload() {
-        def enc = Jwe.alg.A128GCM
+        def enc = Jwe.enc.A128GCM
         def key = enc.key().build()
         def jwe = builder.setPayload("me").encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseEncryptedContent(jwe)
@@ -551,7 +551,7 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testCompactSimplestClaims() {
-        def enc = Jwe.alg.A128GCM
+        def enc = Jwe.enc.A128GCM
         def key = enc.key().build()
         def jwe = builder.setSubject('joe').encryptWith(key, enc).compact()
         def jwt = Jwts.parser().decryptWith(key).build().parseEncryptedClaims(jwe)
@@ -562,7 +562,7 @@ class DefaultJwtBuilderTest {
     void testSignWithAndEncryptWith() {
         def key = TestKeys.HS256
         try {
-            builder.signWith(key).encryptWith(key, Jwe.alg.A128GCM).compact()
+            builder.signWith(key).encryptWith(key, Jwe.enc.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
             String msg = "Both 'signWith' and 'encryptWith' cannot be specified. Choose either one."
@@ -574,7 +574,7 @@ class DefaultJwtBuilderTest {
     void testEmptyPayloadAndClaimsJwe() {
         def key = TestKeys.HS256
         try {
-            builder.encryptWith(key, Jwe.alg.A128GCM).compact()
+            builder.encryptWith(key, Jwe.enc.A128GCM).compact()
             fail()
         } catch (IllegalStateException expected) {
             String msg = "Encrypted JWTs must have either 'claims' or non-empty 'content'."

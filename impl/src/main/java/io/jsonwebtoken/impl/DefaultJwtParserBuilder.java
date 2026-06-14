@@ -15,16 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.ClaimsBuilder;
-import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.CompressionCodecResolver;
-import io.jsonwebtoken.Jwe;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.JwtParserBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Locator;
-import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.io.DelegateStringDecoder;
 import io.jsonwebtoken.impl.io.StandardCompressionAlgorithms;
 import io.jsonwebtoken.impl.lang.DefaultNestedCollection;
@@ -43,11 +34,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.NestedCollection;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.*;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
@@ -87,9 +74,9 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
     @SuppressWarnings("deprecation") //TODO: remove for 1.0
     private SigningKeyResolver signingKeyResolver = null;
 
-    private Registry<String, AeadAlgorithm> encAlgs = Jwe.alg.registry();
+    private Registry<String, AeadAlgorithm> encAlgs = Jwe.enc.registry();
 
-    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwe.enc.registry();
+    private Registry<String, KeyAlgorithm<?, ?>> keyAlgs = Jwe.alg.registry();
 
     private Registry<String, SecureDigestAlgorithm<?, ?>> sigAlgs = Jws.alg.registry();
 

@@ -86,7 +86,7 @@ class RFC7518AppendixB2Test {
     @Test
     void test() {
 
-        def alg = Jwe.alg.A192CBC_HS384
+        def alg = Jwe.enc.A192CBC_HS384
         def aad = Streams.of(A)
         def out = new ByteArrayOutputStream(8192)
         AeadRequest req = new DefaultAeadRequest(Streams.of(P), null, null, KEY, aad, IV)

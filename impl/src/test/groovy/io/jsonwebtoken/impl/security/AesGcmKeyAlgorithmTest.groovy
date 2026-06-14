@@ -75,7 +75,7 @@ class AesGcmKeyAlgorithmTest {
         def out = new ByteArrayOutputStream(8192)
         def encRequest = new DefaultAeadRequest(Streams.of(cek.getEncoded()), null, null, kek, null, iv)
         def encResult = AeadResult.with(out)
-        Jwe.alg.A256GCM.encrypt(encRequest, encResult)
+        Jwe.enc.A256GCM.encrypt(encRequest, encResult)
 
         assertArrayEquals tag, encResult.digest
         assertArrayEquals iv, encResult.iv

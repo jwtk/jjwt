@@ -19,15 +19,8 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyPairBuilderSupplier;
-import io.jsonwebtoken.security.MacAlgorithm;
-import io.jsonwebtoken.security.Password;
-import io.jsonwebtoken.security.SecretKeyAlgorithm;
-import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.*;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -87,11 +80,11 @@ public final class Jwts {
          * Algorithms Registry</a>.
          *
          * @return all standard JWA content encryption algorithms.
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#registry()}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#registry()}.
          */
         @Deprecated
         public static Registry<String, AeadAlgorithm> get() {
-            return Jwe.alg.registry();
+            return Jwe.enc.registry();
         }
 
         // prevent instantiation
@@ -103,60 +96,60 @@ public final class Jwts {
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.3">RFC 7518, Section 5.2.3</a>.  This algorithm
          * requires a 256-bit (32 byte) key.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A128CBC_HS256}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A128CBC_HS256}.
          */
         @Deprecated
-        public static final AeadAlgorithm A128CBC_HS256 = Jwe.alg.A128CBC_HS256;
+        public static final AeadAlgorithm A128CBC_HS256 = Jwe.enc.A128CBC_HS256;
 
         /**
          * {@code AES_192_CBC_HMAC_SHA_384} authenticated encryption algorithm, as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.4">RFC 7518, Section 5.2.4</a>. This algorithm
          * requires a 384-bit (48 byte) key.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A192CBC_HS384}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A192CBC_HS384}.
          */
         @Deprecated
-        public static final AeadAlgorithm A192CBC_HS384 = Jwe.alg.A192CBC_HS384;
+        public static final AeadAlgorithm A192CBC_HS384 = Jwe.enc.A192CBC_HS384;
 
         /**
          * {@code AES_256_CBC_HMAC_SHA_512} authenticated encryption algorithm, as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.2.5">RFC 7518, Section 5.2.5</a>.  This algorithm
          * requires a 512-bit (64 byte) key.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A256CBC_HS512}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A256CBC_HS512}.
          */
         @Deprecated
-        public static final AeadAlgorithm A256CBC_HS512 = Jwe.alg.A256CBC_HS512;
+        public static final AeadAlgorithm A256CBC_HS512 = Jwe.enc.A256CBC_HS512;
 
         /**
          * &quot;AES GCM using 128-bit key&quot; as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 128-bit (16 byte) key.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A128GCM}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A128GCM}.
          */
         @Deprecated
-        public static final AeadAlgorithm A128GCM = Jwe.alg.A128GCM;
+        public static final AeadAlgorithm A128GCM = Jwe.enc.A128GCM;
 
         /**
          * &quot;AES GCM using 192-bit key&quot; as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 192-bit (24 byte) key.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A192GCM}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A192GCM}.
          */
         @Deprecated
-        public static final AeadAlgorithm A192GCM = Jwe.alg.A192GCM;
+        public static final AeadAlgorithm A192GCM = Jwe.enc.A192GCM;
 
         /**
          * &quot;AES GCM using 256-bit key&quot; as defined by
          * <a href="https://tools.ietf.org/html/rfc7518#section-5.3">RFC 7518, Section 5.3</a>.  This
          * algorithm requires a 256-bit (32 byte) key.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A256GCM}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A256GCM}.
          */
         @Deprecated
-        public static final AeadAlgorithm A256GCM = Jwe.alg.A256GCM;
+        public static final AeadAlgorithm A256GCM = Jwe.enc.A256GCM;
     }
 
     /**
@@ -388,11 +381,11 @@ public final class Jwts {
          * Algorithms for Key Management</a>..
          *
          * @return all standard JWA Key Management algorithms.
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#registry()}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#registry()}
          */
         @Deprecated
         public static Registry<String, KeyAlgorithm<?, ?>> get() {
-            return Jwe.enc.registry();
+            return Jwe.alg.registry();
         }
 
         /**
@@ -400,10 +393,10 @@ public final class Jwts {
          * by <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.5">RFC 7518 (JWA), Section 4.5</a>.  This
          * algorithm does not produce encrypted key ciphertext.
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#DIRECT}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#DIRECT}
          */
         @Deprecated
-        public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Jwe.enc.DIRECT;
+        public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Jwe.alg.DIRECT;
 
         /**
          * AES Key Wrap algorithm with default initial value using a 128-bit key, as defined by
@@ -427,10 +420,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A128KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A128KW}
          */
         @Deprecated
-        public static final SecretKeyAlgorithm A128KW = Jwe.enc.A128KW;
+        public static final SecretKeyAlgorithm A128KW = Jwe.alg.A128KW;
 
         /**
          * AES Key Wrap algorithm with default initial value using a 192-bit key, as defined by
@@ -454,10 +447,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A192KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A192KW}
          */
         @Deprecated
-        public static final SecretKeyAlgorithm A192KW = Jwe.enc.A192KW;
+        public static final SecretKeyAlgorithm A192KW = Jwe.alg.A192KW;
 
         /**
          * AES Key Wrap algorithm with default initial value using a 256-bit key, as defined by
@@ -481,10 +474,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A256KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A256KW}
          */
         @Deprecated
-        public static final SecretKeyAlgorithm A256KW = Jwe.enc.A256KW;
+        public static final SecretKeyAlgorithm A256KW = Jwe.alg.A256KW;
 
         /**
          * Key wrap algorithm with AES GCM using a 128-bit key, as defined by
@@ -523,10 +516,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A128GCMKW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A128GCMKW}
          */
         @Deprecated
-        public static final SecretKeyAlgorithm A128GCMKW = Jwe.enc.A128GCMKW;
+        public static final SecretKeyAlgorithm A128GCMKW = Jwe.alg.A128GCMKW;
 
         /**
          * Key wrap algorithm with AES GCM using a 192-bit key, as defined by
@@ -565,10 +558,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A192GCMKW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A192GCMKW}
          */
         @Deprecated
-        public static final SecretKeyAlgorithm A192GCMKW = Jwe.enc.A192GCMKW;
+        public static final SecretKeyAlgorithm A192GCMKW = Jwe.alg.A192GCMKW;
 
         /**
          * Key wrap algorithm with AES GCM using a 256-bit key, as defined by
@@ -607,10 +600,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#A256GCMKW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#A256GCMKW}
          */
         @Deprecated
-        public static final SecretKeyAlgorithm A256GCMKW = Jwe.enc.A256GCMKW;
+        public static final SecretKeyAlgorithm A256GCMKW = Jwe.alg.A256GCMKW;
 
         /**
          * Key encryption algorithm using <code>PBES2 with HMAC SHA-256 and &quot;A128KW&quot; wrapping</code>
@@ -655,10 +648,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#PBES2_HS256_A128KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#PBES2_HS256_A128KW}
          */
         @Deprecated
-        public static final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = Jwe.enc.PBES2_HS256_A128KW;
+        public static final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = Jwe.alg.PBES2_HS256_A128KW;
 
         /**
          * Key encryption algorithm using <code>PBES2 with HMAC SHA-384 and &quot;A192KW&quot; wrapping</code>
@@ -703,10 +696,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#PBES2_HS384_A192KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#PBES2_HS384_A192KW}
          */
         @Deprecated
-        public static final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = Jwe.enc.PBES2_HS384_A192KW;
+        public static final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = Jwe.alg.PBES2_HS384_A192KW;
 
         /**
          * Key encryption algorithm using <code>PBES2 with HMAC SHA-512 and &quot;A256KW&quot; wrapping</code>
@@ -751,10 +744,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#PBES2_HS512_A256KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#PBES2_HS512_A256KW}
          */
         @Deprecated
-        public static final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = Jwe.enc.PBES2_HS512_A256KW;
+        public static final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = Jwe.alg.PBES2_HS512_A256KW;
 
         /**
          * Key Encryption with {@code RSAES-PKCS1-v1_5}, as defined by
@@ -779,10 +772,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#RSA1_5}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#RSA1_5}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = Jwe.enc.RSA1_5;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = Jwe.alg.RSA1_5;
 
         /**
          * Key Encryption with {@code RSAES OAEP using default parameters}, as defined by
@@ -807,10 +800,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#RSA_OAEP}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#RSA_OAEP}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = Jwe.enc.RSA_OAEP;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = Jwe.alg.RSA_OAEP;
 
         /**
          * Key Encryption with {@code RSAES OAEP using SHA-256 and MGF1 with SHA-256}, as defined by
@@ -835,10 +828,10 @@ public final class Jwts {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#RSA_OAEP_256}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#RSA_OAEP_256}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = Jwe.enc.RSA_OAEP_256;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = Jwe.alg.RSA_OAEP_256;
 
         /**
          * Key Agreement with {@code ECDH-ES using Concat KDF} as defined by
@@ -879,10 +872,10 @@ public final class Jwts {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#ECDH_ES}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#ECDH_ES}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = Jwe.enc.ECDH_ES;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = Jwe.alg.ECDH_ES;
 
         /**
          * Key Agreement with Key Wrapping via
@@ -930,10 +923,10 @@ public final class Jwts {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#ECDH_ES_A128KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#ECDH_ES_A128KW}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = Jwe.enc.ECDH_ES_A128KW;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = Jwe.alg.ECDH_ES_A128KW;
 
         /**
          * Key Agreement with Key Wrapping via
@@ -982,10 +975,10 @@ public final class Jwts {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#ECDH_ES_A192KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#ECDH_ES_A192KW}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = Jwe.enc.ECDH_ES_A192KW;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = Jwe.alg.ECDH_ES_A192KW;
 
         /**
          * Key Agreement with Key Wrapping via
@@ -1034,10 +1027,10 @@ public final class Jwts {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          *
-         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc#ECDH_ES_A256KW}
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.alg#ECDH_ES_A256KW}
          */
         @Deprecated
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Jwe.enc.ECDH_ES_A256KW;
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Jwe.alg.ECDH_ES_A256KW;
 
         //prevent instantiation
         private KEY() {

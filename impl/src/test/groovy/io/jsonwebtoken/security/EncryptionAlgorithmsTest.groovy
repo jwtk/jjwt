@@ -51,7 +51,7 @@ class EncryptionAlgorithmsTest {
     private static final String AAD = 'You can get with this, or you can get with that'
     private static final byte[] AAD_BYTES = AAD.getBytes("UTF-8")
 
-    private static final Registry<String, AeadAlgorithm> registry = Jwe.alg.registry()
+    private static final Registry<String, AeadAlgorithm> registry = Jwe.enc.registry()
 
     static boolean contains(AeadAlgorithm alg) {
         return registry.containsValue(alg)
@@ -60,12 +60,12 @@ class EncryptionAlgorithmsTest {
     @Test
     void testValues() {
         assertEquals 6, registry.values().size()
-        assertTrue(contains(Jwe.alg.A128CBC_HS256) &&
-                contains(Jwe.alg.A192CBC_HS384) &&
-                contains(Jwe.alg.A256CBC_HS512) &&
-                contains(Jwe.alg.A128GCM) &&
-                contains(Jwe.alg.A192GCM) &&
-                contains(Jwe.alg.A256GCM)
+        assertTrue(contains(Jwe.enc.A128CBC_HS256) &&
+                contains(Jwe.enc.A192CBC_HS384) &&
+                contains(Jwe.enc.A256CBC_HS512) &&
+                contains(Jwe.enc.A128GCM) &&
+                contains(Jwe.enc.A192GCM) &&
+                contains(Jwe.enc.A256GCM)
         )
     }
 
