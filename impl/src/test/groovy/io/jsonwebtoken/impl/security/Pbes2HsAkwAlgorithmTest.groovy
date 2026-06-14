@@ -33,9 +33,9 @@ import static org.junit.Assert.fail
 class Pbes2HsAkwAlgorithmTest {
 
     private static Password KEY = Keys.password("12345678".toCharArray())
-    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwe.enc.PBES2_HS256_A128KW,
-                                                     Jwe.enc.PBES2_HS384_A192KW,
-                                                     Jwe.enc.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
+    private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwe.alg.PBES2_HS256_A128KW,
+                                                     Jwe.alg.PBES2_HS384_A192KW,
+                                                     Jwe.alg.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
 
     @Test
     void testInsufficientIterations() {
@@ -44,7 +44,7 @@ class Pbes2HsAkwAlgorithmTest {
             def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
             try {
-                alg.getEncryptionKey(KEY, mutable, Jwe.alg.A256GCM)
+                alg.getEncryptionKey(KEY, mutable, Jwe.enc.A256GCM)
                 fail()
             } catch (IllegalArgumentException iae) {
                 assertEquals Pbes2HsAkwAlgorithm.MIN_ITERATIONS_MSG_PREFIX + iterations, iae.getMessage()

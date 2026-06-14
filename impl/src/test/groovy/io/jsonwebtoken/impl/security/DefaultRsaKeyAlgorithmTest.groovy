@@ -29,11 +29,11 @@ import static org.junit.Assert.assertEquals
 
 class DefaultRsaKeyAlgorithmTest {
 
-    static final algs = [Jwe.enc.RSA1_5, Jwe.enc.RSA_OAEP, Jwe.enc.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
+    static final algs = [Jwe.alg.RSA1_5, Jwe.alg.RSA_OAEP, Jwe.alg.RSA_OAEP_256] as List<DefaultRsaKeyAlgorithm>
 
     @Test
     void testValidateNonRSAKey() {
-        SecretKey key = Jwe.enc.A128KW.key().build()
+        SecretKey key = Jwe.alg.A128KW.key().build()
         for (DefaultRsaKeyAlgorithm alg : algs) {
             try {
                 alg.validate(key, true)

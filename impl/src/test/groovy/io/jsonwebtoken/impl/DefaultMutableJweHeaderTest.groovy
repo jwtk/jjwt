@@ -298,7 +298,7 @@ class DefaultMutableJweHeaderTest {
 
     @Test
     void testEncryptionAlgorithm() {
-        def enc = Jwe.alg.A256GCM.getId()
+        def enc = Jwe.enc.A256GCM.getId()
         header.put('enc', enc)
         assertEquals enc, header.getEncryptionAlgorithm()
     }

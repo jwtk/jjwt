@@ -155,7 +155,7 @@ class RFC8037AppendixATest {
         ]).build() as OctetPrivateJwk
 
         // ensure this is used during key algorithm execution per the RFC test case:
-        def alg = new EcdhKeyAlgorithm(Jwe.enc.A128KW) {
+        def alg = new EcdhKeyAlgorithm(Jwe.alg.A128KW) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
@@ -170,7 +170,7 @@ class RFC8037AppendixATest {
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
-                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.alg.A128GCM)
+                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.enc.A128GCM)
                 .compact()
 
         // the constructed JWE should have the following protected header:
@@ -246,7 +246,7 @@ class RFC8037AppendixATest {
         ]).build() as OctetPrivateJwk
 
         // ensure this is used during key algorithm execution per the RFC test case:
-        def alg = new EcdhKeyAlgorithm(Jwe.enc.A256KW) {
+        def alg = new EcdhKeyAlgorithm(Jwe.alg.A256KW) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {
                 return ephemJwk.toKeyPair().toJavaKeyPair()
@@ -261,7 +261,7 @@ class RFC8037AppendixATest {
         String jwe = Jwts.builder()
                 .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .issuer(issuer)
-                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.alg.A256GCM)
+                .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.enc.A256GCM)
                 .compact()
 
         // the constructed JWE should have the following protected header:

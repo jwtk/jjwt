@@ -2226,7 +2226,7 @@ The JWT specification defines 6 standard Authenticated Encryption algorithms use
 | AES GCM using 256-bit key
 |===
 
-These are all represented as constants in the `io.jsonwebtoken.Jwe.alg` registry singleton as
+These are all represented as constants in the `io.jsonwebtoken.Jwe.enc` registry singleton as
 implementations of the `io.jsonwebtoken.security.AeadAlgorithm` interface.
 
 As shown in the table above, each algorithm requires a key of sufficient length.  The JWT specification
@@ -2371,7 +2371,7 @@ Content Encryption Key (CEK):
 | PBES2 with HMAC SHA-512 and "A256KW" wrapping
 |===
 
-These are all represented as constants in the `io.jsonwebtoken.Jwe.enc` registry singleton as
+These are all represented as constants in the `io.jsonwebtoken.Jwe.alg` registry singleton as
 implementations of the `io.jsonwebtoken.security.KeyAlgorithm` interface.
 
 But 17 algorithms are a lot to choose from.  When would you use them?  The sections below describe when you might

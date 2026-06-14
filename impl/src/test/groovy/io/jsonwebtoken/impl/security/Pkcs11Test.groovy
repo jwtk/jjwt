@@ -119,7 +119,7 @@ class Pkcs11Test {
 
         def algs = [] as List<Identifiable>
         algs.addAll(Jws.alg.registry().values().findAll({ it instanceof KeyBuilderSupplier }))
-        algs.addAll(Jwe.alg.registry().values())
+        algs.addAll(Jwe.enc.registry().values())
 
         algs.each { Identifiable alg ->
             // find any previous one:
@@ -272,7 +272,7 @@ class Pkcs11Test {
         }
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwe.alg.A256GCM).compact()
+        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwe.enc.A256GCM).compact()
 
         // The private key can be null if SunPKCS11 doesn't support the key algorithm directly.  In this case
         // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the
@@ -308,10 +308,10 @@ class Pkcs11Test {
                 if (name == 'RSA') {
                     // SunPKCS11 doesn't support RSA-OAEP* ciphers :(
                     // So we can only try with RSA1_5 and we have to skip RSA_OAEP and RSA_OAEP_256:
-                    encRoundtrip(bundle, Jwe.enc.RSA1_5, provider)
+                    encRoundtrip(bundle, Jwe.alg.RSA1_5, provider)
                 } else if (StandardCurves.findByKey(bundle.pair.public) != null) { // EC or Ed key
                     // try all ECDH key algorithms:
-                    Jwe.enc.registry().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
+                    Jwe.alg.registry().values().findAll({ it.id.startsWith('ECDH-ES') }).each {
                         encRoundtrip(bundle, it, provider)
                     }
                 } else {

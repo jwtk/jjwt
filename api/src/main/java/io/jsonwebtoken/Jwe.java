@@ -45,14 +45,14 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.alg.A256GCM</b>) // or A128GCM, A192GCM, etc...
+     *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
      *
      * @see #registry()
      * @since JJWT_RELEASE_VERSION
      */
-    final class alg {
+    final class enc {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms";
         private static final Registry<String, AeadAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
@@ -70,7 +70,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
         }
 
         // prevent instantiation
-        private alg() {
+        private enc() {
         }
 
         /**
@@ -123,14 +123,14 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.enc.ECDH_ES_A256KW</b>, Jwe.alg.A256GCM)
+     *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.enc.A256GCM)
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
      *
      * @see #registry()
      * @since JJWT_RELEASE_VERSION
      */
-    final class enc {
+    final class alg {
 
         private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyAlgorithms";
         private static final Registry<String, KeyAlgorithm<?, ?>> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
@@ -739,7 +739,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
         public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Jwts.get(REGISTRY, "ECDH-ES+A256KW");
 
         //prevent instantiation
-        private enc() {
+        private alg() {
         }
     }
 
