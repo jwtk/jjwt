@@ -78,6 +78,12 @@ public interface AeadAlgorithm extends Identifiable, KeyLengthSupplier, KeyBuild
      */
     void encrypt(AeadRequest req, AeadResult res) throws SecurityException;
 
+    default AeadResult encrypt(AeadRequest req, OutputStream out) throws SecurityException {
+        AeadResult result = AeadResult.with(out);
+        encrypt(req, result);
+        return result;
+    }
+
     /**
      * Decrypts ciphertext and authenticates any {@link DecryptAeadRequest#getAssociatedData() associated data},
      * writing the decrypted plaintext to the provided {@code out}put stream.

@@ -32,9 +32,9 @@ class DefaultHashAlgorithmTest {
         byte[] data = Strings.utf8('Hello World')
         InputStream payload = Streams.of(data)
         for (HashAlgorithm alg : algs) {
-            byte[] hash = alg.digest(new DefaultRequest<>(payload, null, null))
+            byte[] hash = alg.digest(payload)
             payload.reset()
-            assertTrue alg.verify(new DefaultVerifyDigestRequest(payload, null, null, hash))
+            assertTrue alg.verify(payload, hash)
             payload.reset()
         }
     }

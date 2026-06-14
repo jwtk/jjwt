@@ -54,4 +54,63 @@ public interface Request<T> extends Message<T> {
      * {@code null} if a default {@link SecureRandom} should be used.
      */
     SecureRandom getSecureRandom();
+
+    /**
+     * Named parameters (setters) used to configure a {@link Request Request} instance.
+     *
+     * @param <T> the type of payload in the request.
+     * @param <M> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<T, M extends Params<T, M>> {
+
+        /**
+         * Sets the JCA provider that should be used for cryptographic operations during the request. A {@code null}
+         * value indicates that the JCA subsystem preferred provider should be used by default.
+         *
+         * @param provider the JCA provider that should be used for cryptographic operations during the request, or
+         *                 {@code null} to use the JCA subsystem preferred provider.
+         * @return the instance for method chaining.
+         */
+        M provider(Provider provider);
+
+        /**
+         * Sets the {@code SecureRandom} to use when performing cryptographic operations during the request. A
+         * {@code null} value ensures a default {@link SecureRandom} should be used.
+         *
+         * @param random the {@code SecureRandom} to use when performing cryptographic operations during the request,
+         *               or {@code null} if a default {@link SecureRandom} should be used.
+         * @return the instance for method chaining.
+         */
+        M random(SecureRandom random);
+
+        /**
+         * Sets the request payload.
+         *
+         * @param payload the request payload.
+         * @return the instance for method chaining.
+         */
+        M payload(T payload);
+    }
+
+    /**
+     * A builder for creating new immutable {@link Request} instances.
+     *
+     * @param <T> the type of payload in the request.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder<T> extends io.jsonwebtoken.lang.Builder<Request<T>>, Params<T, Builder<T>> {
+    }
+
+    /**
+     * Returns a new {@link Request.Builder} for creating immutable {@link Request}s.
+     *
+     * @param <T> the type of payload in the request.
+     * @return a new {@link Request.Builder} for creating immutable {@link Request}s.
+     * @since JJWT_RELEASE_VERSION
+     */
+    @SuppressWarnings("unchecked")
+    static <T> Builder<T> builder() {
+        return (Builder<T>) Suppliers.REQUEST_BUILDER.get();
+    }
 }

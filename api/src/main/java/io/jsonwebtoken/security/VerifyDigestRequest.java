@@ -30,4 +30,41 @@ import java.io.InputStream;
  * @since 0.12.0
  */
 public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplier {
+
+    /**
+     * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
+     *
+     * @param <M> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<M extends Params<M>> extends Request.Params<InputStream, M> {
+
+        /**
+         * The digest to verify against the one computed for the given {@link #getPayload() payload}.
+         *
+         * @param digest the digest to verify against the one computed for the given {@link #getPayload() payload}.
+         * @return the instance for method chaining.
+         */
+        M digest(byte[] digest);
+    }
+
+    /**
+     * A builder for creating new immutable {@link VerifyDigestRequest} instances.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder extends Params<Builder>, io.jsonwebtoken.lang.Builder<VerifyDigestRequest> {
+    }
+
+    /**
+     * Returns a new {@link VerifyDigestRequest.Builder} for creating {@link VerifyDigestRequest}s to verify a
+     * digest via {@link HashAlgorithm#verify(VerifyDigestRequest)}.
+     *
+     * @return a new {@link VerifyDigestRequest.Builder} for creating {@link VerifyDigestRequest}s to verify a
+     * digest via {@link HashAlgorithm#verify(VerifyDigestRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static VerifyDigestRequest.Builder builder() {
+        return Suppliers.VERIFY_DIGEST_REQUEST_BUILDER.get();
+    }
 }
