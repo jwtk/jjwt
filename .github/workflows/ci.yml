@@ -5,7 +5,7 @@ on:
   pull_request: # all pull requests
   push:
     branches:
-      - master
+      - main
 
 env:
   MVN_CMD: ./mvnw --no-transfer-progress -B
