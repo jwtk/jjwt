@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue
 class SecureDigestAlgorithmTest {
 
     // only need one each of mac algorithm and signature algorithm - no need to take time for key generation
-    static final def algs = [Jwts.SIG.HS256, Jwts.SIG.ES256]
+    static final def algs = [Jws.alg.HS256, Jws.alg.ES256]
 
     @Test
     void testRoundtrip() {

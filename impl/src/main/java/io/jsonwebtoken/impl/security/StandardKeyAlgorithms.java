@@ -132,7 +132,7 @@ public final class StandardKeyAlgorithms extends IdRegistry<KeyAlgorithm<?, ?>> 
         final int PASSWORD_LENGTH = 8;
 
         final JweHeader HEADER = new DefaultJweHeader();
-        final AeadAlgorithm ENC_ALG = Jwts.ENC.A128GCM; // not used, needed to satisfy API
+        final AeadAlgorithm ENC_ALG = Jwe.alg.A128GCM; // not used, needed to satisfy API
 
         if (alg instanceof Pbes2HsAkwAlgorithm) {
             // Strip away all things that cause time during computation except for the actual hashing algorithm:

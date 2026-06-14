@@ -149,7 +149,7 @@ class DefaultMacAlgorithmTest {
             String msg = 'The signing key\'s size is 192 bits which is not secure enough for the HS256 algorithm. ' +
                     'The JWT JWA Specification (RFC 7518, Section 3.2) states that keys used with HS256 MUST have a ' +
                     'size >= 256 bits (the key size must be greater than or equal to the hash output size). ' +
-                    'Consider using the Jwts.SIG.HS256.key() builder to create a key guaranteed ' +
+                    'Consider using the Jws.alg.HS256.key() builder to create a key guaranteed ' +
                     'to be secure enough for HS256.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more ' +
                     'information.'
             assertEquals msg, expected.getMessage()

@@ -19,12 +19,12 @@ import java.io.InputStream;
 import java.security.Key;
 
 /**
- * A request to a {@link SecureDigestAlgorithm} to verify a previously-computed
+ * A request to a {@link SecureDigestAlgorithm} to verify a previously computed
  * <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature</a> or
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
  * authentication code</a>.
  *
- * <p>The content to verify will be available via {@link #getPayload()}, the previously-computed signature or MAC will
+ * <p>The content to verify will be available via {@link #getPayload()}, the previously computed signature or MAC will
  * be available via {@link #getDigest()}, and the verification key will be available via {@link #getKey()}.</p>
  *
  * @param <K> the type of {@link Key} used to verify a digital signature or message authentication code
@@ -37,15 +37,15 @@ public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<
      * instance.
      *
      * @param <K> type of key to use to verify the digest.
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<K extends Key, M extends Params<K, M>> extends SecureRequest.Params<InputStream, K, M>,
-            VerifyDigestRequest.Params<M> {
+    interface Params<K extends Key, P extends Params<K, P>> extends SecureRequest.Params<InputStream, K, P>,
+            VerifyDigestRequest.Params<P> {
     }
 
     /**
-     * A builder for creating {@link VerifySecureDigestRequest}s used to verify a mac or signature via
+     * A builder for creating {@link VerifySecureDigestRequest}s used to verify a MAC or signature via
      * {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
      *
      * @param <K> type of key used to verify the digest.

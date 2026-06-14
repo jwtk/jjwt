@@ -17,22 +17,24 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Classes;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Package-private on purpose - this is an internal utility use only.
+ * Package-private on purpose - this is for internal utility use only.
  *
  * @since JJWT_RELEASE_VERSION
  */
+// MAINTAINER NOTE: Do not change this class's visibility modifiers - it is not to be exposed in the public API.
 final class Suppliers {
 
     private Suppliers() { // for coverage
     }
 
-    static final Supplier<Request.Builder<?>> REQUEST_BUILDER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultRequest$Builder$Supplier");
+    static final Supplier<DigestRequest.Builder> DIGEST_REQUEST_BUILDER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDigestRequest$Builder$Supplier");
 
     static final Supplier<VerifyDigestRequest.Builder> VERIFY_DIGEST_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultVerifyDigestRequest$Builder$Supplier");
@@ -52,9 +54,12 @@ final class Suppliers {
     static final Supplier<AeadRequest.Builder> AEAD_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadRequest$Builder$Supplier");
 
+    static final Function<OutputStream, AeadResult> AEAD_RESULT_FACTORY =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadResult$Factory");
+
     static final Supplier<DecryptAeadRequest.Builder> DECRYPT_AEAD_REQUEST_BUILDER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDecryptAeadRequest$Builder$Supplier");
 
-    static final Function<OutputStream, AeadResult> AEAD_RESULT_FACTORY =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultAeadResult$Factory");
+    static final Function<byte[], InputStream> BYTES_INPUT_STREAM_FACTORY =
+            Classes.newInstance("io.jsonwebtoken.impl.io.BytesInputStream$Factory");
 }

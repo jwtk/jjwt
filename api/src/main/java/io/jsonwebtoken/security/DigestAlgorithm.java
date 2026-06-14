@@ -46,13 +46,13 @@ import java.security.PublicKey;
  *         </tr>
  *         <tr>
  *             <td>{@link MacAlgorithm}</td>
- *             <td>{@link io.jsonwebtoken.Jwts.SIG Jwts.SIG}</td>
+ *             <td>{@link io.jsonwebtoken.Jws.alg Jws.alg}</td>
  *             <td>Requires a {@link SecretKey} to both compute and verify digests (aka
  *                 &quot;Message Authentication Codes&quot;).</td>
  *         </tr>
  *         <tr>
  *             <td>{@link SignatureAlgorithm}</td>
- *             <td>{@link io.jsonwebtoken.Jwts.SIG Jwts.SIG}</td>
+ *             <td>{@link io.jsonwebtoken.Jws.alg Jws.alg}</td>
  *             <td>Requires a {@link PrivateKey} to compute and {@link PublicKey} to verify digests
  *                 (aka &quot;Digital Signatures&quot;).</td>
  *         </tr>
@@ -73,7 +73,7 @@ import java.security.PublicKey;
  * @param <R> the type of {@link Request} used when computing a digest.
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
  * @see Jwks.HASH
- * @see io.jsonwebtoken.Jwts.SIG Jwts.SIG
+ * @see io.jsonwebtoken.Jws.alg Jws.alg
  * @since 0.12.0
  */
 public interface DigestAlgorithm<R extends Request<InputStream>, V extends VerifyDigestRequest> extends Identifiable {

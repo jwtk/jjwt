@@ -37,7 +37,7 @@ class RFC7797Test {
     @Test
     void testJwe() {
         try {
-            Jwts.builder().content('hello').encryptWith(TestKeys.A128GCM, Jwts.ENC.A128GCM)
+            Jwts.builder().content('hello').encryptWith(TestKeys.A128GCM, Jwe.enc.A128GCM)
                     .encodePayload(false) // not allowed with JWE
                     .compact()
             fail()
@@ -132,7 +132,7 @@ class RFC7797Test {
         String s = Jwts.builder().signWith(key).content(contentStream).encodePayload(false).compact()
 
         // But verify with 3 types of sources: byte array, and two different kinds of InputStreams:
-        InputStream asByteInputStream =Streams.of(content)
+        InputStream asByteInputStream = Streams.of(content)
         InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
@@ -335,7 +335,7 @@ class RFC7797Test {
 
         byte[] content = Strings.utf8('hello world')
 
-        for (def zip : Jwts.ZIP.get().values()) {
+        for (def zip : Jwe.zip.registry().values()) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream()
             OutputStream cos = zip.compress(out); cos.write(content); cos.close()
@@ -383,7 +383,7 @@ class RFC7797Test {
 
         byte[] payload = Strings.utf8('hello world')
 
-        def zip = Jwts.ZIP.DEF
+        def zip = Jwe.zip.DEF
 
         // create a detached unencoded JWS that is compressed:
         String s = Jwts.builder().content(payload).encodePayload(false)

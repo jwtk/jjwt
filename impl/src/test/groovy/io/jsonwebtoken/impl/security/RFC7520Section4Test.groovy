@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Decoders
@@ -200,7 +201,7 @@ class RFC7520Section4Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
-        def alg = Jwts.SIG.RS256
+        def alg = Jws.alg.RS256
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // Serializer here to check the constructed data, and then, after guaranteeing the same data, return
@@ -237,7 +238,7 @@ class RFC7520Section4Test {
         RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
-        def alg = Jwts.SIG.PS384
+        def alg = Jws.alg.PS384
         String kid = 'bilbo.baggins@hobbiton.example'
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
@@ -284,7 +285,7 @@ class RFC7520Section4Test {
         EcPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_2) as EcPrivateJwk
         ECPrivateKey key = jwk.toKey()
 
-        def alg = Jwts.SIG.ES512
+        def alg = Jws.alg.ES512
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // Serializer here to check the constructed data, and then, after guaranteeing the same data, return
@@ -329,7 +330,7 @@ class RFC7520Section4Test {
         SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
-        def alg = Jwts.SIG.HS256
+        def alg = Jws.alg.HS256
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // Serializer here to check the constructed data, and then, after guaranteeing the same data, return
@@ -367,7 +368,7 @@ class RFC7520Section4Test {
         SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
-        def alg = Jwts.SIG.HS256
+        def alg = Jws.alg.HS256
 
         // because Maps are not guaranteed to have the same order as defined in the RFC, we create an asserting
         // Serializer here to check the constructed data, and then, after guaranteeing the same data, return

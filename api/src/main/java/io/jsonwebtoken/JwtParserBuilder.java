@@ -61,7 +61,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the builder for method chaining.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.6">Using the Algorithm &quot;none&quot;</a>
-     * @see Jwts.SIG#NONE
+     * @see Jws.alg#NONE
      * @see #unsecuredDecompression()
      * @since 0.12.0
      */
@@ -90,7 +90,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-8.5">Unsecured JWS Security Considerations</a>
      * @see <a href="https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-pellegrino.pdf">In the
      * Compression Hornet’s Nest: A Security Study of Data Compression in Network Services</a>
-     * @see Jwts.SIG#NONE
+     * @see Jws.alg#NONE
      * @see #unsecured()
      * @since 0.12.0
      */
@@ -574,7 +574,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * <p>All JWA-standard AEAD encryption algorithms in the {@link Jwts.ENC} registry are supported by default and
+     * <p>All JWA-standard AEAD encryption algorithms in the {@link Jwe.enc} registry are supported by default and
      * do not need to be added. The collection may be useful however for removing some algorithms (for example,
      * any algorithms not used by the application, or those not compatible with application security requirements),
      * or for adding custom implementations.</p>
@@ -595,7 +595,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use to configure the AEAD encryption algorithms available when parsing.
      * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
-     * @see Jwts.ENC
+     * @see Jwe.enc
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.2">&quot;enc&quot; (Encryption Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Encryption Algorithm Name (id) requirements</a>
      * @since 0.12.0
@@ -614,7 +614,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * <p>All JWA-standard key encryption algorithms in the {@link Jwts.KEY} registry are supported by default and
+     * <p>All JWA-standard key encryption algorithms in the {@link Jwe.alg} registry are supported by default and
      * do not need to be added. The collection may be useful however for removing some algorithms (for example,
      * any algorithms not used by the application, or those not compatible with application security requirements),
      * or for adding custom implementations.</p>
@@ -635,7 +635,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use to configure the key algorithms available when parsing.
      * @see JwtBuilder#encryptWith(Key, KeyAlgorithm, AeadAlgorithm)
-     * @see Jwts.KEY
+     * @see Jwe.alg
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.1">JWE &quot;alg&quot; (Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Key Algorithm Name (id) requirements</a>
      * @since 0.12.0
@@ -656,7 +656,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * <p>All JWA-standard signature and MAC algorithms in the {@link Jwts.SIG} registry are supported by default and
+     * <p>All JWA-standard signature and MAC algorithms in the {@link Jws.alg} registry are supported by default and
      * do not need to be added. The collection may be useful however for removing some algorithms (for example,
      * any algorithms not used by the application, or those not compatible with application security requirements), or
      * for adding custom implementations.</p>
@@ -677,7 +677,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use to configure the signature and MAC algorithms available when parsing.
      * @see JwtBuilder#signWith(Key, SecureDigestAlgorithm)
-     * @see Jwts.SIG
+     * @see Jws.alg
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7515.html#section-4.1.1">JWS &quot;alg&quot; (Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1.1">Algorithm Name (id) requirements</a>
      * @since 0.12.0
@@ -697,7 +697,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Standard Algorithms and Overrides</b></p>
      *
-     * <p>All JWA-standard compression algorithms in the {@link Jwts.ZIP} registry are supported by default and
+     * <p>All JWA-standard compression algorithms in the {@link Jwe.zip} registry are supported by default and
      * do not need to be added. The collection may be useful however for removing some algorithms (for example,
      * any algorithms not used by the application), or for adding custom implementations.</p>
      *
@@ -717,7 +717,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * @return the {@link NestedCollection} to use to configure the compression algorithms available when parsing.
      * @see JwtBuilder#compressWith(CompressionAlgorithm)
-     * @see Jwts.ZIP
+     * @see Jwe.zip
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7516#section-4.1.3">&quot;zip&quot; (Compression Algorithm) Header Parameter</a>
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3.1">Compression Algorithm Name (id) requirements</a>
      * @since 0.12.0
@@ -743,8 +743,8 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      *
      * <p><b>Default Support</b></p>
      *
-     * <p>JJWT's default {@link JwtParser} implementation supports both the {@link Jwts.ZIP#DEF DEF}
-     * and {@link Jwts.ZIP#GZIP GZIP} algorithms by default - you do not need to
+     * <p>JJWT's default {@link JwtParser} implementation supports both the {@link Jwe.zip#DEF DEF}
+     * and {@link Jwe.zip#GZIP GZIP} algorithms by default - you do not need to
      * specify a {@code CompressionCodecResolver} in these cases.</p>
      *
      * @param compressionCodecResolver the compression codec resolver used to decompress the JWT body.

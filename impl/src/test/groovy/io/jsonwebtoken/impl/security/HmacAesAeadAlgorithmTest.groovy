@@ -15,12 +15,10 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.impl.io.Streams
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.AeadAlgorithm
-import io.jsonwebtoken.security.AeadRequest
 import io.jsonwebtoken.security.DecryptAeadRequest
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
@@ -39,17 +37,17 @@ class HmacAesAeadAlgorithmTest {
         // asserts that key lengths are double than what is usually expected for AES
         // due to the encrypt-then-mac scheme requiring two separate keys
         // (encrypt key is half of the generated key, mac key is the 2nd half of the generated key):
-        assertEquals 256, Jwts.ENC.A128CBC_HS256.getKeyBitLength()
-        assertEquals 384, Jwts.ENC.A192CBC_HS384.getKeyBitLength()
-        assertEquals 512, Jwts.ENC.A256CBC_HS512.getKeyBitLength()
+        assertEquals 256, Jwe.enc.A128CBC_HS256.getKeyBitLength()
+        assertEquals 384, Jwe.enc.A192CBC_HS384.getKeyBitLength()
+        assertEquals 512, Jwe.enc.A256CBC_HS512.getKeyBitLength()
     }
 
     @Test
     void testGenerateKey() {
         def algs = [
-                Jwts.ENC.A128CBC_HS256,
-                Jwts.ENC.A192CBC_HS384,
-                Jwts.ENC.A256CBC_HS512
+                Jwe.enc.A128CBC_HS256,
+                Jwe.enc.A192CBC_HS384,
+                Jwe.enc.A256CBC_HS512
         ]
         for (AeadAlgorithm alg : algs) {
             SecretKey key = alg.key().build()
@@ -60,16 +58,14 @@ class HmacAesAeadAlgorithmTest {
     @Test(expected = SignatureException)
     void testDecryptWithInvalidTag() {
 
-        def alg = Jwts.ENC.A128CBC_HS256
+        def alg = Jwe.enc.A128CBC_HS256
 
         SecretKey key = alg.key().build()
 
         byte[] data = Strings.utf8('Hello World! Nice to meet you!')
-        def plaintext = Streams.of(data)
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(8192)
-        def req = AeadRequest.builder().payload(plaintext).key(key).build()
-        def res = alg.encrypt(req, out)
+        def res = alg.encrypt(r -> r.payload(data).key(key), out)
 
         def iv = res.getIv()
         def realTag = res.getDigest()
@@ -80,8 +76,7 @@ class HmacAesAeadAlgorithmTest {
 
         byte[] ciphertext = out.toByteArray()
         out = new ByteArrayOutputStream(8192)
-        def dreq = DecryptAeadRequest.builder().payload(Streams.of(ciphertext))
-                .key(key).iv(iv).digest(fakeTag).build();
+        def dreq = DecryptAeadRequest.builder().payload(ciphertext).key(key).iv(iv).tag(fakeTag).build();
         alg.decrypt(dreq, out)
     }
 }

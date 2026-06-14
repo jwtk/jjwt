@@ -15,9 +15,10 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.AeadRequest
+import io.jsonwebtoken.security.AeadResult
 import io.jsonwebtoken.security.DecryptAeadRequest
 import org.junit.Test
 
@@ -85,11 +86,12 @@ class RFC7518AppendixB2Test {
     @Test
     void test() {
 
-        def alg = Jwts.ENC.A192CBC_HS384
+        def alg = Jwe.enc.A192CBC_HS384
         def aad = Streams.of(A)
         def out = new ByteArrayOutputStream(8192)
         AeadRequest req = new DefaultAeadRequest(Streams.of(P), null, null, KEY, aad, IV)
-        def result = alg.encrypt(req, out)
+        AeadResult result = AeadResult.with(out)
+        alg.encrypt(req, result)
 
         byte[] ciphertext = out.toByteArray()
         byte[] tag = result.getDigest()
@@ -101,8 +103,9 @@ class RFC7518AppendixB2Test {
 
         // now test decryption:
         out = new ByteArrayOutputStream(8192)
-        def dreq = DecryptAeadRequest.builder().payload(Streams.of(ciphertext))
-        .key(KEY).associatedData(aad).iv(iv).digest(tag).build()
+        def dreq = DecryptAeadRequest.builder()
+                .payload(ciphertext).key(KEY).aad(aad).iv(iv).tag(tag)
+                .build()
         alg.decrypt(dreq, out)
         assertArrayEquals(P, out.toByteArray())
     }

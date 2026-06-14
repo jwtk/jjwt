@@ -21,7 +21,7 @@ import java.io.OutputStream;
 
 /**
  * A request to an {@link AeadAlgorithm} to perform authenticated encryption with a supplied symmetric
- * {@link SecretKey}, allowing for additional data to be authenticated and integrity-protected.
+ * {@link SecretKey}, allowing for additional data to be integrity-protected.
  *
  * @see SecureRequest
  * @see AssociatedDataSupplier
@@ -32,14 +32,14 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
     /**
      * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
      *
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<M extends Params<M>> extends SecureRequest.Params<InputStream, SecretKey, M> {
+    interface Params<P extends Params<P>> extends SecureRequest.Params<InputStream, SecretKey, P>, OctetStreamPayloadParams<P> {
 
         /**
-         * Sets any &quot;associated data&quot; that must be integrity protected (but not encrypted) when performing
-         * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
+         * Sets any &quot;additional associated data&quot; that must be integrity protected (but not encrypted) when
+         * performing <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
          *
          * @param aad the {@code InputStream} containing any associated data that must be integrity protected or
          *            verified during AEAD encryption or decryption.
@@ -47,7 +47,27 @@ public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, Asso
          * @see AeadAlgorithm#encrypt(AeadRequest, AeadResult)
          * @see AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)
          */
-        M associatedData(InputStream aad);
+        P aad(InputStream aad);
+
+        /**
+         * Sets any &quot;additional associated data&quot; that must be integrity protected (but not encrypted) or
+         * verified when performing
+         * <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">AEAD encryption or decryption</a>.
+         * <p>
+         * This is a convenience method that wraps the specified byte array in an {@link InputStream} and
+         * then delegates to {@link #aad(InputStream)}.
+         *
+         * @param aad any associated data that must be integrity protected or verified during AEAD encryption or
+         *            decryption.
+         * @return the instance for method chaining.
+         * @see #aad(InputStream)
+         * @see AeadAlgorithm#encrypt(AeadRequest, AeadResult)
+         * @see AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)
+         */
+        default P aad(byte[] aad) {
+            InputStream is = Suppliers.BYTES_INPUT_STREAM_FACTORY.apply(aad);
+            return aad(is);
+        }
     }
 
     /**

@@ -20,6 +20,7 @@ import io.jsonwebtoken.security.IvSupplier;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
@@ -61,8 +62,10 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
 
         protected InputStream aad;
 
+        protected OutputStream result;
+
         @Override
-        public M associatedData(InputStream aad) {
+        public M aad(InputStream aad) {
             this.aad = aad;
             return self();
         }

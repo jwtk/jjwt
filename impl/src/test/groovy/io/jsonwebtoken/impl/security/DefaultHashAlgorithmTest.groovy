@@ -28,7 +28,7 @@ class DefaultHashAlgorithmTest {
     static final def algs = [DefaultHashAlgorithm.SHA1, Jwks.HASH.SHA256]
 
     @Test
-    void testDigestAndVerify() {
+    void testDigestInputStreamAndVerify() {
         byte[] data = Strings.utf8('Hello World')
         InputStream payload = Streams.of(data)
         for (HashAlgorithm alg : algs) {
@@ -36,6 +36,15 @@ class DefaultHashAlgorithmTest {
             payload.reset()
             assertTrue alg.verify(payload, hash)
             payload.reset()
+        }
+    }
+
+    @Test
+    void testDigestByteArrayAndVerify() {
+        byte[] data = Strings.utf8('Hello World')
+        for (HashAlgorithm alg : algs) {
+            byte[] hash = alg.digest(data)
+            assertTrue alg.verify(data, hash)
         }
     }
 }

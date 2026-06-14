@@ -24,7 +24,7 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.SIG
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jws.alg
 public final class StandardSecureDigestAlgorithms extends IdRegistry<SecureDigestAlgorithm<?, ?>> {
 
     public static final String NAME = "JWS Digital Signature or MAC";

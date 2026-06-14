@@ -83,10 +83,10 @@ public interface KeyRequest<T> extends Request<T> {
      * @param <T> the type of request payload. For an encryption key request, this will be the
      *            key used to obtain the encryption key. For a decryption key request, this will be the encrypted CEK
      *            (Content Encryption Key) ciphertext byte array.
-     * @param <M> the instance type returned for method chaining.
+     * @param <P> the instance type returned for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    interface Params<T, M extends Params<T, M>> extends Request.Params<T, M> {
+    interface Params<T, P extends Params<T, P>> extends Request.Params<T, P> {
 
         /**
          * Sets the {@link JweHeader} that will be used to construct the final JWE header, available for
@@ -106,7 +106,7 @@ public interface KeyRequest<T> extends Request<T> {
          *               reading or writing any {@link KeyAlgorithm}-specific information.
          * @return the instance for method chaining.
          */
-        M header(JweHeader header);
+        P header(JweHeader header);
 
         /**
          * Sets the {@link AeadAlgorithm} that will be called for encryption or decryption after processing the
@@ -119,7 +119,7 @@ public interface KeyRequest<T> extends Request<T> {
          *            {@code KeyRequest}.
          * @return the instance for method chaining.
          */
-        M encryptionAlgorithm(AeadAlgorithm alg);
+        P encryptionAlgorithm(AeadAlgorithm alg);
     }
 
     /**

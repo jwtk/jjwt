@@ -15,10 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.JweHeader
-import io.jsonwebtoken.JwsHeader
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.ProtectedHeader
+import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
@@ -409,8 +406,8 @@ class DefaultJwtHeaderBuilderTest {
 
     @Test
     void testEncryptionAlgorithm() {
-        def enc = Jwts.ENC.A256GCM.getId()
-        header = builder.add('alg', Jwts.KEY.A192KW.getId()).add('enc', enc).build() as JweHeader
+        def enc = Jwe.enc.A256GCM.getId()
+        header = builder.add('alg', Jwe.alg.A192KW.getId()).add('enc', enc).build() as JweHeader
         assertEquals enc, header.getEncryptionAlgorithm()
     }
 
@@ -490,7 +487,7 @@ class DefaultJwtHeaderBuilderTest {
         assertEquals new DefaultJwsHeader([foo: 'bar', alg: 'HS256']), builder.build()
 
         // add JWE required property:
-        builder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), Jwts.ENC.A256GCM.getId())
+        builder.put(DefaultJweHeader.ENCRYPTION_ALGORITHM.getId(), Jwe.enc.A256GCM.getId())
         assertEquals new DefaultJweHeader([foo: 'bar', alg: 'HS256', enc: 'A256GCM']), builder.build()
     }
 
