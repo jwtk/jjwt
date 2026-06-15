@@ -680,12 +680,12 @@ class JwtsTest {
 
     @Test
     void testEd25519() {
-        testEC(Jws.alg.EdDSA, TestKeys.forAlgorithm(Jwks.CRV.Ed25519).pair)
+        testEC(Jws.alg.EdDSA, TestKeys.forAlgorithm(Jwk.crv.Ed25519).pair)
     }
 
     @Test
     void testEd448() {
-        testEC(Jws.alg.EdDSA, TestKeys.forAlgorithm(Jwks.CRV.Ed448).pair)
+        testEC(Jws.alg.EdDSA, TestKeys.forAlgorithm(Jwk.crv.Ed448).pair)
     }
 
     @Test

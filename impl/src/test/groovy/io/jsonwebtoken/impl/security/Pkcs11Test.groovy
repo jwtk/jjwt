@@ -164,7 +164,7 @@ class Pkcs11Test {
         algs.addAll(Jws.alg.registry().values().findAll({
             it instanceof KeyPairBuilderSupplier && it.id != 'EdDSA'
         }))
-        algs.addAll(Jwks.CRV.get().values().findAll({ it instanceof EdwardsCurve }))
+        algs.addAll(Jwk.crv.registry().values().findAll({ it instanceof EdwardsCurve }))
 
         for (Identifiable alg : algs) {
             def priv = getKey(ks, alg, PIN)
@@ -223,8 +223,8 @@ class Pkcs11Test {
 
         def algs = [] as List<Identifiable>
         algs.addAll(Jws.alg.registry().values().findAll({ it != Jws.alg.EdDSA })) // EdDSA accounted for by next two:
-        algs.add(Jwks.CRV.Ed25519)
-        algs.add(Jwks.CRV.Ed448)
+        algs.add(Jwk.crv.Ed25519)
+        algs.add(Jwk.crv.Ed448)
 
         for (Identifiable alg : algs) {
             def signKey, verifyKey // same for Mac algorithms, priv/pub for sig algorithms
@@ -306,8 +306,8 @@ class Pkcs11Test {
         // For Edwards key agreement, we can look up the public key via the X.509 cert, but SunPKCS11 doesn't
         // support reading the private keys :(
         // With the public key, we can at least encrypt, but we won't be able to decrypt since that needs the private key
-        algs.add(Jwks.CRV.X25519)
-        algs.add(Jwks.CRV.X448)
+        algs.add(Jwk.crv.X25519)
+        algs.add(Jwk.crv.X448)
 
         algs.each {
 

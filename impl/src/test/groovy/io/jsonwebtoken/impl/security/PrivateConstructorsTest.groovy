@@ -20,6 +20,7 @@ import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.Suppliers
 import org.junit.Test
@@ -39,11 +40,12 @@ class PrivateConstructorsTest {
         new Jwe.enc()
         new Jwe.alg()
         new Jwe.zip()
+        new Jwk.crv()
         new Jwts.SIG(); assertSame(Jws.alg.registry(), Jwts.SIG.get())
         new Jwts.ENC(); assertSame(Jwe.enc.registry(), Jwts.ENC.get())
         new Jwts.KEY(); assertSame(Jwe.alg.registry(), Jwts.KEY.get())
         new Jwts.ZIP(); assertSame(Jwe.zip.registry(), Jwts.ZIP.get())
-        new Jwks.CRV()
+        new Jwks.CRV(); assertSame(Jwk.crv.registry(), Jwks.CRV.get())
         new Jwks.HASH()
         new Jwks.OP()
         new Suppliers()

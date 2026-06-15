@@ -158,11 +158,10 @@ public final class Jwks {
      *
      * @see #get()
      * @since 0.12.0
+     * @deprecated in favor of {@link Jwk.crv}
      */
+    @Deprecated
     public static final class CRV {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardCurves";
-        private static final Registry<String, Curve> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
          * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
@@ -171,9 +170,11 @@ public final class Jwks {
          * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
          *
          * @return a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#registry()}
          */
+        @Deprecated
         public static Registry<String, Curve> get() {
-            return REGISTRY;
+            return Jwk.crv.registry();
         }
 
         /**
@@ -182,8 +183,10 @@ public final class Jwks {
          * using the native Java JCA {@code secp256r1} algorithm.
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#P256}
          */
-        public static final Curve P256 = get().forKey("P-256");
+        @Deprecated
+        public static final Curve P256 = Jwk.crv.P256;
 
         /**
          * {@code P-384} Elliptic Curve defined by
@@ -191,8 +194,10 @@ public final class Jwks {
          * using the native Java JCA {@code secp384r1} algorithm.
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#P384}
          */
-        public static final Curve P384 = get().forKey("P-384");
+        @Deprecated
+        public static final Curve P384 = Jwk.crv.P384;
 
         /**
          * {@code P-521} Elliptic Curve defined by
@@ -200,8 +205,10 @@ public final class Jwks {
          * using the native Java JCA {@code secp521r1} algorithm.
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#P521}
          */
-        public static final Curve P521 = get().forKey("P-521");
+        @Deprecated
+        public static final Curve P521 = Jwk.crv.P521;
 
         /**
          * {@code Ed25519} Elliptic Curve defined by
@@ -213,8 +220,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#Ed25519}
          */
-        public static final Curve Ed25519 = get().forKey("Ed25519");
+        @Deprecated
+        public static final Curve Ed25519 = Jwk.crv.Ed25519;
 
         /**
          * {@code Ed448} Elliptic Curve defined by
@@ -226,8 +235,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#Ed448}
          */
-        public static final Curve Ed448 = get().forKey("Ed448");
+        @Deprecated
+        public static final Curve Ed448 = Jwk.crv.Ed448;
 
         /**
          * {@code X25519} Elliptic Curve defined by
@@ -239,8 +250,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#X25519}
          */
-        public static final Curve X25519 = get().forKey("X25519");
+        @Deprecated
+        public static final Curve X25519 = Jwk.crv.X25519;
 
         /**
          * {@code X448} Elliptic Curve defined by
@@ -252,8 +265,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#X448}
          */
-        public static final Curve X448 = get().forKey("X448");
+        @Deprecated
+        public static final Curve X448 = Jwk.crv.X448;
 
         //prevent instantiation
         private CRV() {

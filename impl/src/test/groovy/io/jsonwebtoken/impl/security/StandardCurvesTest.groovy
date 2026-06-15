@@ -15,14 +15,14 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import org.junit.Test
 
 import static org.junit.Assert.*
 
 class StandardCurvesTest {
 
-    static final StandardCurves curves = (StandardCurves) Jwks.CRV.get()
+    static final StandardCurves curves = (StandardCurves) Jwk.crv.registry()
 
     @Test
     void testFindById() {

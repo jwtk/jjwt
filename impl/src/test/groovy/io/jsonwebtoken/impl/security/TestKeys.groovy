@@ -19,7 +19,7 @@ import io.jsonwebtoken.Identifiable
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.lang.Collections
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
@@ -79,8 +79,8 @@ class TestKeys {
     static Bundle ES512 = TestCertificates.readBundle(Jws.alg.ES512)
     static Set<Bundle> EC = Collections.setOf(ES256, ES384, ES512)
 
-    static Bundle Ed25519 = TestCertificates.readBundle(Jwks.CRV.Ed25519)
-    static Bundle Ed448 = TestCertificates.readBundle(Jwks.CRV.Ed448)
+    static Bundle Ed25519 = TestCertificates.readBundle(Jwk.crv.Ed25519)
+    static Bundle Ed448 = TestCertificates.readBundle(Jwk.crv.Ed448)
     // just an alias for Ed448 for now:
     static Bundle EdDSA = Ed448
     static Bundle X25519 = TestCertificates.readBundle(EdwardsCurve.X25519)

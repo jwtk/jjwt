@@ -168,7 +168,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsEdDSA() {
         // Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
-        Curve curve = Jwks.CRV.Ed25519; //or Ed448
+        Curve curve = Jwk.crv.Ed25519; //or Ed448
         KeyPair pair = curve.keyPair().build();
 
         // Bob creates the compact JWS with his Edwards Curve private key:
@@ -406,7 +406,7 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleEdEcPublicJwk() {
-        PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
+        PublicKey key = Jwk.crv.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
         OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -421,7 +421,7 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleEdEcPrivateJwk() {
-        KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
+        KeyPair pair = Jwk.crv.Ed448.keyPair().build(); // or Ed25519, X25519, X448
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 

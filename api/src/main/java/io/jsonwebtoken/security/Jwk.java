@@ -16,6 +16,8 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.lang.Classes;
+import io.jsonwebtoken.lang.Registry;
 
 import java.security.Key;
 import java.util.Map;
@@ -83,6 +85,122 @@ import java.util.Set;
  * @since 0.12.0
  */
 public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
+
+    /**
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1">crv (Curve)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">JSON Web Key Elliptic
+     * Curve Registry</a> (including its
+     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">Edwards Elliptic Curve additions</a>).
+     * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
+     * reference in application code. For example:
+     * <blockquote><pre>
+     * Jwks.crv.P256.keyPair().build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
+     *
+     * @see #registry()
+     * @since 0.12.0
+     */
+    final class crv {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardCurves";
+        private static final Registry<String, Curve> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        /**
+         * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6</a>
+         * (for Weierstrass Elliptic Curves) and
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
+         *
+         * @return a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}.
+         */
+        public static Registry<String, Curve> registry() {
+            return REGISTRY;
+        }
+
+        /**
+         * {@code P-256} Elliptic Curve defined by
+         * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1">RFC 7518, Section 6.2.1.1</a>
+         * using the native Java JCA {@code secp256r1} algorithm.
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve P256 = registry().forKey("P-256");
+
+        /**
+         * {@code P-384} Elliptic Curve defined by
+         * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1">RFC 7518, Section 6.2.1.1</a>
+         * using the native Java JCA {@code secp384r1} algorithm.
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve P384 = registry().forKey("P-384");
+
+        /**
+         * {@code P-521} Elliptic Curve defined by
+         * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1">RFC 7518, Section 6.2.1.1</a>
+         * using the native Java JCA {@code secp521r1} algorithm.
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve P521 = registry().forKey("P-521");
+
+        /**
+         * {@code Ed25519} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>
+         * using the native Java JCA {@code Ed25519}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 14 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve Ed25519 = registry().forKey("Ed25519");
+
+        /**
+         * {@code Ed448} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>
+         * using the native Java JCA {@code Ed448}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 14 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve Ed448 = registry().forKey("Ed448");
+
+        /**
+         * {@code X25519} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.2">RFC 8037, Section 3.2</a>
+         * using the native Java JCA {@code X25519}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve X25519 = registry().forKey("X25519");
+
+        /**
+         * {@code X448} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.2">RFC 8037, Section 3.2</a>
+         * using the native Java JCA {@code X448}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve X448 = registry().forKey("X448");
+
+        //prevent instantiation
+        private crv() {
+        }
+    }
 
     /**
      * Returns the JWK
