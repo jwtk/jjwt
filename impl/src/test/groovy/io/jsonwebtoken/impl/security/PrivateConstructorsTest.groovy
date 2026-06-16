@@ -41,13 +41,14 @@ class PrivateConstructorsTest {
         new Jwe.alg()
         new Jwe.zip()
         new Jwk.crv()
+        new Jwk.op();
         new Jwts.SIG(); assertSame(Jws.alg.registry(), Jwts.SIG.get())
         new Jwts.ENC(); assertSame(Jwe.enc.registry(), Jwts.ENC.get())
         new Jwts.KEY(); assertSame(Jwe.alg.registry(), Jwts.KEY.get())
         new Jwts.ZIP(); assertSame(Jwe.zip.registry(), Jwts.ZIP.get())
         new Jwks.CRV(); assertSame(Jwk.crv.registry(), Jwks.CRV.get())
+        new Jwks.OP(); assertSame(Jwk.op.registry(), Jwks.OP.get())
         new Jwks.HASH()
-        new Jwks.OP()
         new Suppliers()
     }
 }

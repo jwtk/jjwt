@@ -25,12 +25,12 @@ import java.util.Collection;
 /**
  * A {@code KeyOperationPolicyBuilder} produces a {@link KeyOperationPolicy} that determines
  * which {@link KeyOperation}s may be assigned to a JWK. Custom {@code KeyOperation}s (such as those created by a
- * {@link Jwks.OP#builder()}) may be added to a policy via the {@link #add(KeyOperation)} or {@link #add(Collection)}
+ * {@link Jwk.op#builder()}) may be added to a policy via the {@link #add(KeyOperation)} or {@link #add(Collection)}
  * methods.
  *
- * @see Jwks.OP#policy()
+ * @see Jwk.op#policy()
  * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
- * @see Jwks.OP#builder()
+ * @see Jwk.op#builder()
  * @since 0.12.0
  */
 public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperation, KeyOperationPolicyBuilder>,
@@ -60,19 +60,19 @@ public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperatio
      *
      * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
      *
-     * <p>The RFC standard {@link Jwks.OP} key operations are supported by default and do not need
+     * <p>The RFC standard {@link Jwk.op} key operations are supported by default and do not need
      * to be added via this method, but beware: <b>If the {@code op} argument has a JWK standard
      * {@link Identifiable#getId() id}, it will replace the JJWT standard operation implementation</b>.
      * This is to allow application developers to favor their own implementations over JJWT's default implementations
      * if necessary (for example, to support legacy or custom behavior).</p>
      *
-     * <p>If a custom {@code KeyOperation} is desired, one may be easily created with a {@link Jwks.OP#builder()}.</p>
+     * <p>If a custom {@code KeyOperation} is desired, one may be easily created with a {@link Jwk.op#builder()}.</p>
      *
      * @param op a key operation to add to the policy's total set of supported operations, replacing any
      *           existing one with the same exact (CaSe-SeNsItIvE) {@link KeyOperation#getId() id}.
      * @return the builder for method chaining.
-     * @see Jwks.OP
-     * @see Jwks.OP#builder()
+     * @see Jwk.op
+     * @see Jwk.op#builder()
      * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
      * @see JwkBuilder#operations()
      */
@@ -91,19 +91,19 @@ public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperatio
      *
      * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
      *
-     * <p>The RFC standard {@link Jwks.OP} key operations are supported by default and do not need
+     * <p>The RFC standard {@link Jwk.op} key operations are supported by default and do not need
      * to be added via this method, but beware: <b>any operation in the {@code ops} argument with a
      * JWK standard {@link Identifiable#getId() id} will replace the JJWT standard operation implementation</b>.
      * This is to allow application developers to favor their own implementations over JJWT's default implementations
      * if necessary (for example, to support legacy or custom behavior).</p>
      *
-     * <p>If custom {@code KeyOperation}s are desired, they may be easily created with a {@link Jwks.OP#builder()}.</p>
+     * <p>If custom {@code KeyOperation}s are desired, they may be easily created with a {@link Jwk.op#builder()}.</p>
      *
      * @param ops collection of key operations to add to the policy's total set of supported operations, replacing any
      *            existing ones with the same exact (CaSe-SeNsItIvE) {@link KeyOperation#getId() id}s.
      * @return the builder for method chaining.
-     * @see Jwks.OP
-     * @see Jwks.OP#builder()
+     * @see Jwk.op
+     * @see Jwk.op#builder()
      * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
      * @see JwkBuilder#operations()
      */

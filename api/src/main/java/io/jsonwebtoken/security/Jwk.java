@@ -22,6 +22,7 @@ import io.jsonwebtoken.lang.Registry;
 import java.security.Key;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * A JWK is an immutable set of name/value pairs that represent a cryptographic key as defined by
@@ -214,7 +215,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
     /**
      * Returns the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
      * (Key Operations) parameter</a> values or {@code null} if not present.  All JWK standard Key Operations are
-     * available via the {@link Jwks.OP} registry, but other (custom) values <em>MAY</em> be present in the returned
+     * available via the {@link op} registry, but other (custom) values <em>MAY</em> be present in the returned
      * set.
      *
      * @return the JWK {@code key_ops} value or {@code null} if not present.
@@ -291,4 +292,137 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * @return the JWK's corresponding Java {@link Key} instance for use with Java cryptographic APIs.
      */
     K toKey();
+
+    /**
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key_ops (Key Operations)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">JSON Web Key Operations
+     * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
+     * direct type-safe reference in application code. For example:
+     * <blockquote><pre>
+     * Jwks.builder()
+     *     .operations(Jwk.op.SIGN)
+     *     // ... etc ...
+     *     .build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
+     *
+     * @see #registry()
+     * @since JJWT_RELEASE_VERSION
+     */
+    final class op {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
+        private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
+        private static final Supplier<KeyOperationBuilder> BUILDER_SUPPLIER =
+                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier");
+
+        // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
+        private static final Supplier<KeyOperationPolicyBuilder> POLICY_BUILDER_SUPPLIER =
+                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
+
+        /**
+         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         *
+         * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         */
+        public static KeyOperationBuilder builder() {
+            return BUILDER_SUPPLIER.get();
+        }
+
+        /**
+         * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         *
+         * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         */
+        public static KeyOperationPolicyBuilder policy() {
+            return POLICY_BUILDER_SUPPLIER.get();
+        }
+
+        /**
+         * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
+         *
+         * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
+         */
+        public static Registry<String, KeyOperation> registry() {
+            return REGISTRY;
+        }
+
+        /**
+         * {@code sign} operation indicating a key is intended to be used to compute digital signatures or
+         * MACs. It's related operation is {@link #VERIFY}.
+         *
+         * @see #VERIFY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation SIGN = registry().forKey("sign");
+
+        /**
+         * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
+         * MACs. It's related operation is {@link #SIGN}.
+         *
+         * @see #SIGN
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation VERIFY = registry().forKey("verify");
+
+        /**
+         * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It's
+         * related operation is {@link #DECRYPT}.
+         *
+         * @see #DECRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation ENCRYPT = registry().forKey("encrypt");
+
+        /**
+         * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It's
+         * related operation is {@link #ENCRYPT}.
+         *
+         * @see #ENCRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DECRYPT = registry().forKey("decrypt");
+
+        /**
+         * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
+         * related operation is {@link #UNWRAP_KEY}.
+         *
+         * @see #UNWRAP_KEY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation WRAP_KEY = registry().forKey("wrapKey");
+
+        /**
+         * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
+         * decryption, if applicable. It's related operation is
+         * {@link #WRAP_KEY}.
+         *
+         * @see #WRAP_KEY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation UNWRAP_KEY = registry().forKey("unwrapKey");
+
+        /**
+         * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
+         * a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DERIVE_KEY = registry().forKey("deriveKey");
+
+        /**
+         * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
+         * used as key. It does not have a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DERIVE_BITS = registry().forKey("deriveBits");
+
+        //prevent instantiation
+        private op() {
+        }
+    }
 }

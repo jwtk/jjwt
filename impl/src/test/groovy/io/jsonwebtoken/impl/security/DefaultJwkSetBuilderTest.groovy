@@ -281,8 +281,8 @@ class DefaultJwkSetBuilderTest {
         String msg = "Invalid Map ${DefaultJwkSet.KEYS} value: " +
                 "[{kty=${badMap.kty}, k=${badMap.k}, key_ops=${badMap.key_ops}}]. " +
                 "Unable to create JWK: Unrelated key " +
-                "operations are not allowed. KeyOperation [${Jwks.OP.ENCRYPT}] is unrelated to " +
-                "[${Jwks.OP.SIGN}]."
+                "operations are not allowed. KeyOperation [${Jwk.op.ENCRYPT}] is unrelated to " +
+                "[${Jwk.op.SIGN}]."
 
         assertIllegal msg, { builder.add('keys', [badMap]).build() }
     }
@@ -295,7 +295,7 @@ class DefaultJwkSetBuilderTest {
                 k      : Encoders.BASE64URL.encode(key.getEncoded()),
                 key_ops: ['sign', 'encrypt'] // unrelated, but we'll allow next:
         ]
-        def policy = new DefaultKeyOperationPolicy(Jwks.OP.get().values(), true) // unrelated allowed
+        def policy = new DefaultKeyOperationPolicy(Jwk.op.registry().values(), true) // unrelated allowed
         builder = builder.operationPolicy(policy) as DefaultJwkSetBuilder
         builder.add('keys', [badMap]).build() // no exception thrown
     }
@@ -318,7 +318,7 @@ class DefaultJwkSetBuilderTest {
                 k      : Encoders.BASE64URL.encode(key.getEncoded()),
                 key_ops: ['sign', 'encrypt'] // unrelated, but we'll allow next:
         ]
-        KeyOperationPolicy policy = Jwks.OP.policy().unrelated().build()
+        KeyOperationPolicy policy = Jwk.op.policy().unrelated().build()
         def jwk = Jwks.builder().operationPolicy(policy).add(badMap).build()
 
         builder.operationPolicy(policy)
@@ -327,7 +327,7 @@ class DefaultJwkSetBuilderTest {
         //now enable new more restrictive policy:
         policy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY
         String msg = "Unrelated key operations are not allowed. KeyOperation " +
-                "[${Jwks.OP.ENCRYPT}] is unrelated to [${Jwks.OP.SIGN}]."
+                "[${Jwk.op.ENCRYPT}] is unrelated to [${Jwk.op.SIGN}]."
         assertIllegal msg, { builder.operationPolicy(policy) }
     }
 }

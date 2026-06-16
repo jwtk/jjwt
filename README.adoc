@@ -3145,7 +3145,7 @@ SecretJwk = Jwks.set()              // 1
     //.add(aCollection)             //    append multiple keys
     //.keys(allJwks)                //    sets/replaces all keys
     //.add("aName", "aValue")       // 3, optional
-    //.operationPolicy(Jwks.OP      // 3, optional
+    //.operationPolicy(Jwk.op      // 3, optional
     //     .policy()
     //     /* etc... */
     //     .build())
@@ -3157,7 +3157,7 @@ As shown, you can optionally configure the `.operationPolicy(KeyOperationPolicy)
 `Jwts.OP.policy()` builder.  A `KeyOperationPolicy` allows you control what operations are allowed for any JWK
 before being added to the JWK Set; any JWK that does not match the policy will be rejected and not added to the set.
 JJWT internally defaults to a standard RFC-compliant policy, but you can create a
-policy to override the default if desired using the `Jwks.OP.policy()` builder method.
+policy to override the default if desired using the `Jwk.op.policy()` builder method.
 
 +++<a name="jwkset-read">++++++</a>+++
 
@@ -3180,7 +3180,7 @@ jwkSet.forEach(jwk -> System.out.println(jwk));
 
 As shown above, you can specify a custom JCA Provider, <<json,JSON deserializer>> or `KeyOperationPolicy` in the
 same way as the `JwkSetBuilder`. Any JWK that does not match the default (or configured) policy will be
-rejected. You can create a policy to override the default if desired using the `Jwks.OP.policy()` builder method.
+rejected. You can create a policy to override the default if desired using the `Jwk.op.policy()` builder method.
 
 +++<a name="compression">++++++</a>+++
 

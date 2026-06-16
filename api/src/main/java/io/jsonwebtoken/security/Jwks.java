@@ -160,8 +160,9 @@ public final class Jwks {
      * @since 0.12.0
      * @deprecated in favor of {@link Jwk.crv}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
-    public static final class CRV {
+    public static final class CRV { //TODO: delete for 1.0
 
         /**
          * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
@@ -386,43 +387,39 @@ public final class Jwks {
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
      * Jwks.builder()
-     *     .operations(Jwks.OP.SIGN)
+     *     .operations(Jwk.op.SIGN)
      *     // ... etc ...
      *     .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op}
      */
-    public static final class OP {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
-        private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
-
-        // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-        private static final Supplier<KeyOperationBuilder> BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier");
-
-        // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-        private static final Supplier<KeyOperationPolicyBuilder> POLICY_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
+    public static final class OP { //TODO: delete for 1.0
 
         /**
          * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
          *
          * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#builder()}
          */
+        @Deprecated
         public static KeyOperationBuilder builder() {
-            return BUILDER_SUPPLIER.get();
+            return Jwk.op.builder();
         }
 
         /**
          * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
          *
          * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#policy()}
          */
+        @Deprecated
         public static KeyOperationPolicyBuilder policy() {
-            return POLICY_BUILDER_SUPPLIER.get();
+            return Jwk.op.policy();
         }
 
         /**
@@ -430,9 +427,11 @@ public final class Jwks {
          * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
          *
          * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#registry()}
          */
+        @Deprecated
         public static Registry<String, KeyOperation> get() {
-            return REGISTRY;
+            return Jwk.op.registry();
         }
 
         /**
@@ -441,8 +440,10 @@ public final class Jwks {
          *
          * @see #VERIFY
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#SIGN}
          */
-        public static final KeyOperation SIGN = get().forKey("sign");
+        @Deprecated
+        public static final KeyOperation SIGN = Jwk.op.SIGN;
 
         /**
          * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
@@ -450,8 +451,10 @@ public final class Jwks {
          *
          * @see #SIGN
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#VERIFY}
          */
-        public static final KeyOperation VERIFY = get().forKey("verify");
+        @Deprecated
+        public static final KeyOperation VERIFY = Jwk.op.VERIFY;
 
         /**
          * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It's
@@ -459,8 +462,10 @@ public final class Jwks {
          *
          * @see #DECRYPT
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#ENCRYPT}
          */
-        public static final KeyOperation ENCRYPT = get().forKey("encrypt");
+        @Deprecated
+        public static final KeyOperation ENCRYPT = Jwk.op.ENCRYPT;
 
         /**
          * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It's
@@ -468,8 +473,10 @@ public final class Jwks {
          *
          * @see #ENCRYPT
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#DECRYPT}
          */
-        public static final KeyOperation DECRYPT = get().forKey("decrypt");
+        @Deprecated
+        public static final KeyOperation DECRYPT = Jwk.op.DECRYPT;
 
         /**
          * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
@@ -477,8 +484,10 @@ public final class Jwks {
          *
          * @see #UNWRAP_KEY
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#WRAP_KEY}
          */
-        public static final KeyOperation WRAP_KEY = get().forKey("wrapKey");
+        @Deprecated
+        public static final KeyOperation WRAP_KEY = Jwk.op.WRAP_KEY;
 
         /**
          * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
@@ -487,24 +496,30 @@ public final class Jwks {
          *
          * @see #WRAP_KEY
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#UNWRAP_KEY}
          */
-        public static final KeyOperation UNWRAP_KEY = get().forKey("unwrapKey");
+        @Deprecated
+        public static final KeyOperation UNWRAP_KEY = Jwk.op.UNWRAP_KEY;
 
         /**
          * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
          * a related operation.
          *
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#DERIVE_KEY}
          */
-        public static final KeyOperation DERIVE_KEY = get().forKey("deriveKey");
+        @Deprecated
+        public static final KeyOperation DERIVE_KEY = Jwk.op.DERIVE_KEY;
 
         /**
          * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
          * used as key. It does not have a related operation.
          *
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#DERIVE_BITS}
          */
-        public static final KeyOperation DERIVE_BITS = get().forKey("deriveBits");
+        @Deprecated
+        public static final KeyOperation DERIVE_BITS = Jwk.op.DERIVE_BITS;
 
         //prevent instantiation
         private OP() {

@@ -21,10 +21,10 @@ import io.jsonwebtoken.lang.Builder;
  * A {@code KeyOperationBuilder} produces {@link KeyOperation} instances that may be added to a JWK's
  * {@link JwkBuilder#operations() key operations} parameter. This is primarily only useful for creating
  * custom (non-standard) {@code KeyOperation}s for use with a custom {@link KeyOperationPolicy}, as all standard ones
- * are available already via the {@link Jwks.OP} registry singleton.
+ * are available already via the {@link Jwk.op} registry singleton.
  *
- * @see Jwks.OP#builder()
- * @see Jwks.OP#policy()
+ * @see Jwk.op#builder()
+ * @see Jwk.op#policy()
  * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
  * @since 0.12.0
  */
@@ -54,7 +54,7 @@ public interface KeyOperationBuilder extends Builder<KeyOperation> {
      *
      * <p>More concretely, calling this method will ensure the following:</p>
      * <blockquote><pre>
-     *     KeyOperation built = Jwks.operation()&#47;*...*&#47;.related(otherId).build();
+     *     KeyOperation built = Jwk.op.builder()&#47;*...*&#47;.related(otherId).build();
      *     KeyOperation other = getKeyOperation(otherId);
      *     assert built.isRelated(other);</pre></blockquote>
      *

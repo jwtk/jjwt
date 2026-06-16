@@ -22,6 +22,7 @@ import io.jsonwebtoken.io.AbstractDeserializer
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
 import io.jsonwebtoken.security.SecretJwk
@@ -103,7 +104,7 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testOperationPolicyOverride() {
-        def policy = Jwks.OP.policy().unrelated().build()
+        def policy = Jwk.op.policy().unrelated().build()
         def parser = Jwks.parser().operationPolicy(policy).build()
         assertNotNull parser.parse(UNRELATED_OPS_JSON) // no exception because policy allows it
     }

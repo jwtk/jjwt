@@ -118,20 +118,20 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      *
      * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
      *
-     * <p>All RFC-standard JWK Key Operations in the {@link Jwks.OP} registry are supported via the builder's default
+     * <p>All RFC-standard JWK Key Operations in the {@link Jwk.op} registry are supported via the builder's default
      * {@link #operationPolicy(KeyOperationPolicy) operationPolicy}, but other (custom) values
-     * <em>MAY</em> be specified (for example, using a {@link Jwks.OP#builder()}).</p>
+     * <em>MAY</em> be specified (for example, using a {@link Jwk.op#builder()}).</p>
      *
      * <p>If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
      * should be enabled by configuring an {@link #operationPolicy(KeyOperationPolicy) operationPolicy}
      * that includes the custom values (e.g. via
-     * {@link Jwks.OP#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
+     * {@link Jwk.op#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
      *
-     * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwks.OP}
+     * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwk.op}
      * constants.</p>
      *
      * @return the {@link NestedCollection} to use for {@code key_ops} configuration.
-     * @see Jwks.OP
+     * @see Jwk.op
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517: key_ops (Key Operations) Parameter</a>
      */
     NestedCollection<KeyOperation, T> operations();

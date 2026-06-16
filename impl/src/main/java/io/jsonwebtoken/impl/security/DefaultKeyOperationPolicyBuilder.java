@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.lang.DefaultCollectionMutator;
 import io.jsonwebtoken.lang.Collections;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyOperation;
 import io.jsonwebtoken.security.KeyOperationPolicy;
 import io.jsonwebtoken.security.KeyOperationPolicyBuilder;
@@ -28,7 +28,7 @@ public class DefaultKeyOperationPolicyBuilder extends DefaultCollectionMutator<K
     private boolean unrelated = false;
 
     public DefaultKeyOperationPolicyBuilder() {
-        super(Jwks.OP.get().values());
+        super(Jwk.op.registry().values());
     }
 
     @Override

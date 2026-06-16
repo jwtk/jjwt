@@ -144,7 +144,7 @@ class JwksTest {
 
     @Test
     void testSingleOperation() {
-        def op = Jwks.OP.ENCRYPT
+        def op = Jwk.op.ENCRYPT
         def expected = [op] as Set<KeyOperation>
         def canonical = [op.getId()] as Set<String>
         def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(op).and().build()
@@ -162,16 +162,16 @@ class JwksTest {
 
     @Test
     void testSingleOperationAppends() {
-        def expected = [Jwks.OP.ENCRYPT, Jwks.OP.DECRYPT] as Set<KeyOperation>
+        def expected = [Jwk.op.ENCRYPT, Jwk.op.DECRYPT] as Set<KeyOperation>
         def jwk = Jwks.builder().key(TestKeys.A128GCM)
-                .operations().add(Jwks.OP.ENCRYPT).add(Jwks.OP.DECRYPT).and()
+                .operations().add(Jwk.op.ENCRYPT).add(Jwk.op.DECRYPT).and()
                 .build()
         assertEquals expected, jwk.getOperations()
     }
 
     @Test
     void testOperations() {
-        def val = [Jwks.OP.SIGN, Jwks.OP.VERIFY] as Set<KeyOperation>
+        def val = [Jwk.op.SIGN, Jwk.op.VERIFY] as Set<KeyOperation>
         def jwk = Jwks.builder().key(TestKeys.NA256).operations().add(val).and().build()
         assertEquals val, jwk.getOperations()
     }
