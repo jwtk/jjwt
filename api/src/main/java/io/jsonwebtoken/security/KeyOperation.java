@@ -52,4 +52,14 @@ public interface KeyOperation extends Identifiable {
      * this operation, {@code false} otherwise.
      */
     boolean isRelated(KeyOperation operation);
+
+    /**
+     * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+     *
+     * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static KeyOperationBuilder builder() {
+        return Suppliers.KEY_OPERATION_BUILDER_SUPPLIER.get();
+    }
 }

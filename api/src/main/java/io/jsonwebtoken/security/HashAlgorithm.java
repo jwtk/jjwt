@@ -38,9 +38,9 @@ import java.util.function.Consumer;
  *
  * <p>Constant definitions and utility methods for common (<em>but not all</em>)
  * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
- * Algorithms</a> are available via {@link Jwks.HASH}.</p>
+ * Algorithms</a> are available via {@link JwkThumbprint.alg}.</p>
  *
- * @see Jwks.HASH
+ * @see JwkThumbprint.alg
  * @since 0.12.0
  */
 public interface HashAlgorithm extends DigestAlgorithm<Request<InputStream>, VerifyDigestRequest> {

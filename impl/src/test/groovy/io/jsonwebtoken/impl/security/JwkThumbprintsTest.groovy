@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals
 
 class JwkThumbprintsTest {
 
-    static final HashAlgorithm SHA256 = Jwks.HASH.@SHA256
+    static final HashAlgorithm SHA256 = JwkThumbprint.alg.@SHA256
 
     static byte[] digest(String json, HashAlgorithm alg) {
         def payload = Streams.of(json)

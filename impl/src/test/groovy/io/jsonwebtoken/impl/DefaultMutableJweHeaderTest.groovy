@@ -23,6 +23,7 @@ import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.JwkThumbprint
 import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
@@ -286,7 +287,7 @@ class DefaultMutableJweHeaderTest {
     @Test
     void testX509Sha256Thumbprint() {
         def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
-        def x5tS256 = Jwks.HASH.@SHA256.digest(payload)
+        def x5tS256 = JwkThumbprint.alg.@SHA256.digest(payload)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
 
         header.x509Sha256Thumbprint(x5tS256)

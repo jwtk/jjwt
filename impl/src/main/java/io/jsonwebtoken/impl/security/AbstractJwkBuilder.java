@@ -83,7 +83,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T idFromThumbprint() {
-        return idFromThumbprint(Jwks.HASH.SHA256);
+        return idFromThumbprint(JwkThumbprint.alg.SHA256);
     }
 
     @Override

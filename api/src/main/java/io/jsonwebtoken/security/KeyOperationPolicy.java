@@ -39,4 +39,14 @@ public interface KeyOperationPolicy {
      * @param ops the operations to validate
      */
     void validate(Collection<? extends KeyOperation> ops) throws IllegalArgumentException;
+
+    /**
+     * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+     *
+     * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static KeyOperationPolicyBuilder builder() {
+        return Suppliers.KEY_OPERATION_POLICY_BUILDER_SUPPLIER.get();
+    }
 }

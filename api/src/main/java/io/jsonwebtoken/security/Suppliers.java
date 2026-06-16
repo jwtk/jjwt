@@ -64,6 +64,12 @@ final class Suppliers {
     static final Function<byte[], InputStream> BYTES_INPUT_STREAM_FACTORY =
             Classes.newInstance("io.jsonwebtoken.impl.io.BytesInputStream$Factory");
 
+    static final Supplier<KeyOperationBuilder> KEY_OPERATION_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier");
+
+    static final Supplier<KeyOperationPolicyBuilder> KEY_OPERATION_POLICY_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
+
     @SuppressWarnings("unchecked")
     static <K extends Key> SecureDigestRequest.Builder<K> secureDigestRequestBuilder() {
         return (SecureDigestRequest.Builder<K>) SECURE_DIGEST_REQUEST_BUILDER.get();

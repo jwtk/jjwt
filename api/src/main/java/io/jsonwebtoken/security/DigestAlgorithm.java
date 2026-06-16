@@ -41,7 +41,7 @@ import java.security.PublicKey;
  *     <tbody>
  *         <tr>
  *             <td>{@link HashAlgorithm}</td>
- *             <td>{@link Jwks.HASH}</td>
+ *             <td>{@link JwkThumbprint.alg}</td>
  *             <td>Unsecured (unkeyed), does not require a key to compute or verify digests.</td>
  *         </tr>
  *         <tr>
@@ -72,7 +72,7 @@ import java.security.PublicKey;
  *
  * @param <R> the type of {@link Request} used when computing a digest.
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
- * @see Jwks.HASH
+ * @see JwkThumbprint.alg
  * @see io.jsonwebtoken.Jws.alg Jws.alg
  * @since 0.12.0
  */

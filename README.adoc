@@ -2953,13 +2953,13 @@ All `Jwk` instances support https://www.rfc-editor.org/rfc/rfc7638.html[JWK Thum
 
 [,java]
 ----
-HashAlgorithm hashAlg = Jwks.HASH.SHA256; // or SHA384, SHA512, etc.
+HashAlgorithm hashAlg = JwkThumbprint.alg.SHA256; // or SHA384, SHA512, etc.
 
 Jwk<?> jwk = Jwks.builder(). /* ... */ .build();
 
 JwkThumbprint sha256Thumbprint = jwk.thumbprint(); // SHA-256 thumbprint by default
 
-JwkThumbprint anotherThumbprint = jwk.thumbprint(Jwks.HASH.SHA512); // or a specified hash algorithm
+JwkThumbprint anotherThumbprint = jwk.thumbprint(JwkThumbprint.alg.SHA512); // or a specified hash algorithm
 ----
 
 The resulting `JwkThumbprint` instance provides some useful methods:
@@ -2967,7 +2967,7 @@ The resulting `JwkThumbprint` instance provides some useful methods:
 * `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the raw output from the hash algorithm
 * `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
 * `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint. Many standard IANA
-                                    hash algorithms are available as constants in the `Jwks.HASH` utility class.
+                                    hash algorithms are available as constants in the `JwkThumbprint.alg` utility class.
 * `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the https://www.rfc-editor.org/rfc/rfc9278.html[JWK Thumbprint URI] specification
 
 +++<a name="jwk-thumbprint-kid">++++++</a>+++
