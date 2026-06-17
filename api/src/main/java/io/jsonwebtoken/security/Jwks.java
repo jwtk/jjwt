@@ -467,7 +467,7 @@ public final class Jwks {
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA256}
          */
         @Deprecated
-        public static final HashAlgorithm SHA256 = get().forKey("sha-256");
+        public static final HashAlgorithm SHA256 = JwkThumbprint.alg.SHA256;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -478,7 +478,7 @@ public final class Jwks {
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA384}
          */
         @Deprecated
-        public static final HashAlgorithm SHA384 = get().forKey("sha-384");
+        public static final HashAlgorithm SHA384 = JwkThumbprint.alg.SHA384;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -489,7 +489,7 @@ public final class Jwks {
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA512}
          */
         @Deprecated
-        public static final HashAlgorithm SHA512 = get().forKey("sha-512");
+        public static final HashAlgorithm SHA512 = JwkThumbprint.alg.SHA512;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -502,7 +502,7 @@ public final class Jwks {
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA3_256}
          */
         @Deprecated
-        public static final HashAlgorithm SHA3_256 = get().forKey("sha3-256");
+        public static final HashAlgorithm SHA3_256 = JwkThumbprint.alg.SHA3_256;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -515,7 +515,7 @@ public final class Jwks {
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA3_384}
          */
         @Deprecated
-        public static final HashAlgorithm SHA3_384 = get().forKey("sha3-384");
+        public static final HashAlgorithm SHA3_384 = JwkThumbprint.alg.SHA3_384;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -528,7 +528,7 @@ public final class Jwks {
          * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA3_256}
          */
         @Deprecated
-        public static final HashAlgorithm SHA3_512 = get().forKey("sha3-512");
+        public static final HashAlgorithm SHA3_512 = JwkThumbprint.alg.SHA3_512;
 
         //prevent instantiation
         private HASH() {
