@@ -644,6 +644,11 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <supportedProjectTypes>
+                        <supportedProjectType>jar</supportedProjectType>
+                        <supportedProjectType>bundle</supportedProjectType>
+                        <supportedProjectType>pom</supportedProjectType> <!-- build warning without this line -->
+                    </supportedProjectTypes>
                     <instructions>
                         <_include>-bnd.bnd</_include>
                     </instructions>
