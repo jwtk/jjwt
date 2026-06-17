@@ -125,6 +125,20 @@ class JwksTest {
         assertTrue Jwk.parser() instanceof DefaultJwkParserBuilder
     }
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testOpBuilder() {
+        assertTrue Jwks.OP.builder() instanceof DefaultKeyOperationBuilder
+        assertTrue Jwk.op.builder() instanceof DefaultKeyOperationBuilder
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testOpPolicyBuilder() {
+        assertTrue Jwks.OP.policy() instanceof DefaultKeyOperationPolicyBuilder
+        assertTrue Jwk.op.policy() instanceof DefaultKeyOperationPolicyBuilder
+    }
+
     @Test
     void testBuilderWithoutState() {
         try {
