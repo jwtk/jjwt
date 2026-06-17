@@ -18,14 +18,14 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.HashAlgorithm
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.JwkThumbprint
 import org.junit.Test
 
 import static org.junit.Assert.assertTrue
 
 class DefaultHashAlgorithmTest {
 
-    static final def algs = [DefaultHashAlgorithm.SHA1, Jwks.HASH.SHA256]
+    static final def algs = [DefaultHashAlgorithm.SHA1, JwkThumbprint.alg.SHA256]
 
     @Test
     void testDigestInputStreamAndVerify() {

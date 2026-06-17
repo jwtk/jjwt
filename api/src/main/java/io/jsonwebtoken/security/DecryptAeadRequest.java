@@ -28,21 +28,12 @@ import java.io.OutputStream;
 public interface DecryptAeadRequest extends AeadRequest, IvSupplier, DigestSupplier {
 
     /**
-     * Named parameters (setters) used to configure an {@link AeadRequest AeadRequest} instance.
-     *
-     * @param <P> the instance type returned for method chaining.
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Params<P extends Params<P>> extends AeadRequest.Params<P>, AeadResult.Params<P> {
-    }
-
-    /**
      * A builder for creating new immutable {@link DecryptAeadRequest}s used for AEAD decryption via
      * {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream)}.
      *
      * @since JJWT_RELEASE_VERSION
      */
-    interface Builder extends io.jsonwebtoken.lang.Builder<DecryptAeadRequest>, Params<Builder> {
+    interface Builder extends io.jsonwebtoken.lang.Builder<DecryptAeadRequest>, AeadAlgorithm.DecryptParams<Builder> {
     }
 
     /**

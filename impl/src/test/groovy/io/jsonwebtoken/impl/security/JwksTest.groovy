@@ -55,14 +55,14 @@ class JwksTest {
 
         //test non-null value:
         //noinspection GroovyAssignabilityCheck
-        def builder = Jwks.builder().key(key).delete('alg') // delete alg put there by SecretKeyBuilder
+        def builder = Jwk.builder().key(key).delete('alg') // delete alg put there by SecretKeyBuilder
         builder."$name"(val)
         def jwk = builder.build()
         assertEquals val, jwk."get${cap}"()
         assertEquals expectedFieldValue, jwk."${id}"
 
         //test null value:
-        builder = Jwks.builder().key(key).delete('alg')
+        builder = Jwk.builder().key(key).delete('alg')
         try {
             builder."$name"(null)
             fail("IAE should have been thrown")
@@ -74,7 +74,7 @@ class JwksTest {
         assertFalse jwk.containsKey(id)
 
         //test empty string value
-        builder = Jwks.builder().key(key).delete('alg')
+        builder = Jwk.builder().key(key).delete('alg')
         if (val instanceof String) {
             try {
                 builder."$name"('   ' as String)
@@ -111,10 +111,56 @@ class JwksTest {
         new Jwks() // for code coverage only
     }
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testBuilder() {
+        assertTrue Jwks.builder() instanceof DefaultDynamicJwkBuilder
+        assertTrue Jwk.builder() instanceof DefaultDynamicJwkBuilder
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testParser() {
+        assertTrue Jwks.parser() instanceof DefaultJwkParserBuilder
+        assertTrue Jwk.parser() instanceof DefaultJwkParserBuilder
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testOpBuilder() {
+        assertTrue Jwks.OP.builder() instanceof DefaultKeyOperationBuilder
+        assertTrue Jwk.op.builder() instanceof DefaultKeyOperationBuilder
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testOpPolicyBuilder() {
+        assertTrue Jwks.OP.policy() instanceof DefaultKeyOperationPolicyBuilder
+        assertTrue Jwk.op.policy() instanceof DefaultKeyOperationPolicyBuilder
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testJson() {
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public).build()
+        String jwkJson = Jwk.json(jwk)
+        String jwksJson = Jwks.json(jwk)
+        assertEquals jwkJson, jwksJson
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testUnsafeJson() {
+        def jwk = Jwk.builder().key(TestKeys.HS256).build()
+        String jwkJson = Jwk.UNSAFE_JSON(jwk)
+        String jwksJson = Jwks.UNSAFE_JSON(jwk)
+        assertEquals jwkJson, jwksJson
+    }
+
     @Test
     void testBuilderWithoutState() {
         try {
-            Jwks.builder().build()
+            Jwk.builder().build()
             fail()
         } catch (IllegalStateException ise) {
             String msg = 'A java.security.Key or one or more name/value pairs must be provided to create a JWK.'
@@ -124,7 +170,7 @@ class JwksTest {
 
     @Test
     void testBuilderWithSecretKey() {
-        def jwk = Jwks.builder().key(SKEY).build()
+        def jwk = Jwk.builder().key(SKEY).build()
         assertEquals 'oct', jwk.getType()
         assertEquals 'oct', jwk.kty
         String k = jwk.k.get() as String
@@ -144,17 +190,17 @@ class JwksTest {
 
     @Test
     void testSingleOperation() {
-        def op = Jwks.OP.ENCRYPT
+        def op = Jwk.op.ENCRYPT
         def expected = [op] as Set<KeyOperation>
         def canonical = [op.getId()] as Set<String>
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(op).and().build()
+        def jwk = Jwk.builder().key(TestKeys.A128GCM).operations().add(op).and().build()
         assertEquals expected, jwk.getOperations()
         assertEquals canonical, jwk.get(AbstractJwk.KEY_OPS.id)
     }
 
     @Test
     void testSingleOperationNull() {
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add((KeyOperation) null).and().build()
+        def jwk = Jwk.builder().key(TestKeys.A128GCM).operations().add((KeyOperation) null).and().build()
         //ignored null
         assertNull jwk.getOperations() //nothing added
         assertFalse jwk.containsKey(AbstractJwk.KEY_OPS.id)
@@ -162,30 +208,30 @@ class JwksTest {
 
     @Test
     void testSingleOperationAppends() {
-        def expected = [Jwks.OP.ENCRYPT, Jwks.OP.DECRYPT] as Set<KeyOperation>
-        def jwk = Jwks.builder().key(TestKeys.A128GCM)
-                .operations().add(Jwks.OP.ENCRYPT).add(Jwks.OP.DECRYPT).and()
+        def expected = [Jwk.op.ENCRYPT, Jwk.op.DECRYPT] as Set<KeyOperation>
+        def jwk = Jwk.builder().key(TestKeys.A128GCM)
+                .operations().add(Jwk.op.ENCRYPT).add(Jwk.op.DECRYPT).and()
                 .build()
         assertEquals expected, jwk.getOperations()
     }
 
     @Test
     void testOperations() {
-        def val = [Jwks.OP.SIGN, Jwks.OP.VERIFY] as Set<KeyOperation>
-        def jwk = Jwks.builder().key(TestKeys.NA256).operations().add(val).and().build()
+        def val = [Jwk.op.SIGN, Jwk.op.VERIFY] as Set<KeyOperation>
+        def jwk = Jwk.builder().key(TestKeys.NA256).operations().add(val).and().build()
         assertEquals val, jwk.getOperations()
     }
 
     @Test
     void testOperationsNull() {
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add((Collection) null).and().build()
+        def jwk = Jwk.builder().key(TestKeys.A128GCM).operations().add((Collection) null).and().build()
         assertNull jwk.getOperations()
         assertFalse jwk.containsKey(AbstractJwk.KEY_OPS.id)
     }
 
     @Test
     void testOperationsEmpty() {
-        def jwk = Jwks.builder().key(TestKeys.A128GCM).operations().add(Collections.emptyList()).and().build()
+        def jwk = Jwk.builder().key(TestKeys.A128GCM).operations().add(Collections.emptyList()).and().build()
         assertNull jwk.getOperations()
     }
 
@@ -215,13 +261,13 @@ class JwksTest {
     @Test
     void testRandom() {
         def random = new SecureRandom()
-        def jwk = Jwks.builder().key(SKEY).random(random).build()
+        def jwk = Jwk.builder().key(SKEY).random(random).build()
         assertSame random, jwk.@context.getRandom()
     }
 
     @Test
     void testNullRandom() {
-        assertNotNull Jwks.builder().key(SKEY).random(null).build()
+        assertNotNull Jwk.builder().key(SKEY).random(null).build()
     }
 
     static void testX509Thumbprint(int number) {
@@ -230,7 +276,7 @@ class JwksTest {
         for (def alg : algs) {
             //get test cert:
             X509Certificate cert = TestKeys.forAlgorithm(alg).cert
-            def builder = Jwks.builder().chain(Arrays.asList(cert))
+            def builder = Jwk.builder().chain(Arrays.asList(cert))
 
             if (number == 1) {
                 builder.x509Sha1Thumbprint(true)
@@ -241,7 +287,7 @@ class JwksTest {
             assertNotNull thumbprint
 
             //ensure base64url encoding/decoding of the thumbprint works:
-            def jwkFromValues = Jwks.builder().add(jwkFromKey).build() as PublicJwk
+            def jwkFromValues = Jwk.builder().add(jwkFromKey).build() as PublicJwk
             assertArrayEquals thumbprint, jwkFromValues."getX509Sha${number}Thumbprint"() as byte[]
         }
     }
@@ -251,7 +297,7 @@ class JwksTest {
         Collection<MacAlgorithm> algs = Jws.alg.registry().values().findAll({ it instanceof MacAlgorithm }) as Collection<MacAlgorithm>
         for (def alg : algs) {
             SecretKey secretKey = alg.key().build()
-            def jwk = Jwks.builder().key(secretKey).id('id').build()
+            def jwk = Jwk.builder().key(secretKey).id('id').build()
             assertEquals 'oct', jwk.getType()
             assertTrue jwk.containsKey('k')
             assertEquals 'id', jwk.getId()
@@ -263,7 +309,7 @@ class JwksTest {
     void testSecretKeyGetEncodedReturnsNull() {
         SecretKey key = new TestSecretKey(algorithm: "AES")
         try {
-            Jwks.builder().key(key).build()
+            Jwk.builder().key(key).build()
             fail()
         } catch (InvalidKeyException expected) {
             String causeMsg = "Missing required encoded bytes for key [${KeysBridge.toString(key)}]."
@@ -285,7 +331,7 @@ class JwksTest {
             }
         }
         try {
-            Jwks.builder().key(key).build()
+            Jwk.builder().key(key).build()
             fail()
         } catch (InvalidKeyException expected) {
             String causeMsg = "Cannot obtain required encoded bytes from key [${KeysBridge.toString(key)}]: $encodedMsg"
@@ -310,10 +356,10 @@ class JwksTest {
             PrivateKey priv = pair.getPrivate()
 
             // test individual keys
-            PublicJwk pubJwk = Jwks.builder().key(pub).publicKeyUse("sig").build()
+            PublicJwk pubJwk = Jwk.builder().key(pub).publicKeyUse("sig").build()
             assertEquals pub, pubJwk.toKey()
 
-            def builder = Jwks.builder().key(priv).publicKeyUse('sig')
+            def builder = Jwk.builder().key(priv).publicKeyUse('sig')
             PrivateJwk privJwk = builder.build()
             assertEquals priv, privJwk.toKey()
             PublicJwk privPubJwk = privJwk.toPublicJwk()
@@ -324,7 +370,7 @@ class JwksTest {
             assertEquals priv, jwkPair.getPrivate()
 
             // test pair
-            builder = Jwks.builder()
+            builder = Jwk.builder()
             if (pub instanceof ECKey) {
                 builder = builder.ecKeyPair(pair)
             } else if (pub instanceof RSAKey) {
@@ -352,12 +398,12 @@ class JwksTest {
             def pair = alg.keyPair().build()
             ECPublicKey pubKey = pair.getPublic() as ECPublicKey
 
-            EcPublicJwk jwk = Jwks.builder().key(pubKey).build()
+            EcPublicJwk jwk = Jwk.builder().key(pubKey).build()
 
             //try creating a JWK with a bad point:
             def badPubKey = new InvalidECPublicKey(pubKey)
             try {
-                Jwks.builder().key(badPubKey).build()
+                Jwk.builder().key(badPubKey).build()
             } catch (InvalidKeyException ike) {
                 String curveId = jwk.get('crv')
                 String msg = EcPublicJwkFactory.keyContainsErrorMessage(curveId)
@@ -370,7 +416,7 @@ class JwksTest {
                 Map<String, ?> modified = new LinkedHashMap<>(jwk)
                 modified.put('x', Converters.BIGINT.applyTo(x))
                 try {
-                    Jwks.builder().add(modified).build()
+                    Jwk.builder().add(modified).build()
                 } catch (InvalidKeyException ike) {
                     String expected = EcPublicJwkFactory.jwkContainsErrorMessage(jwk.crv as String, modified)
                     assertEquals(expected, ike.getMessage())
@@ -380,7 +426,7 @@ class JwksTest {
                 Map<String, ?> modified = new LinkedHashMap<>(jwk)
                 modified.put('y', Converters.BIGINT.applyTo(y))
                 try {
-                    Jwks.builder().add(modified).build()
+                    Jwk.builder().add(modified).build()
                 } catch (InvalidKeyException ike) {
                     String expected = EcPublicJwkFactory.jwkContainsErrorMessage(jwk.crv as String, modified)
                     assertEquals(expected, ike.getMessage())
@@ -393,7 +439,7 @@ class JwksTest {
     void testPublicJwkBuilderWithRSAPublicKey() {
         def key = TestKeys.RS256.pair.public
         // must cast to PublicKey to avoid Groovy's dynamic type dispatch to the key(RSAPublicKey) method:
-        def jwk = Jwks.builder().key((PublicKey) key).build()
+        def jwk = Jwk.builder().key((PublicKey) key).build()
         assertNotNull jwk
         assertTrue jwk instanceof RsaPublicJwk
     }
@@ -402,7 +448,7 @@ class JwksTest {
     void testPublicJwkBuilderWithECPublicKey() {
         def key = TestKeys.ES256.pair.public
         // must cast to PublicKey to avoid Groovy's dynamic type dispatch to the key(ECPublicKey) method:
-        def jwk = Jwks.builder().key((PublicKey) key).build()
+        def jwk = Jwk.builder().key((PublicKey) key).build()
         assertNotNull jwk
         assertTrue jwk instanceof EcPublicJwk
     }
@@ -412,7 +458,7 @@ class JwksTest {
         def key = new TestPublicKey()
         // must cast to PublicKey to avoid Groovy's dynamic type dispatch to the key(ECPublicKey) method:
         try {
-            Jwks.builder().key((PublicKey) key)
+            Jwk.builder().key((PublicKey) key)
         } catch (UnsupportedKeyException expected) {
             String msg = "There is no builder that supports specified key [${KeysBridge.toString(key)}]."
             assertEquals(msg, expected.getMessage())
@@ -424,7 +470,7 @@ class JwksTest {
     void testPrivateJwkBuilderWithRSAPrivateKey() {
         def key = TestKeys.RS256.pair.private
         // must cast to PrivateKey to avoid Groovy's dynamic type dispatch to the key(RSAPrivateKey) method:
-        def jwk = Jwks.builder().key((PrivateKey) key).build()
+        def jwk = Jwk.builder().key((PrivateKey) key).build()
         assertNotNull jwk
         assertTrue jwk instanceof RsaPrivateJwk
     }
@@ -433,7 +479,7 @@ class JwksTest {
     void testPrivateJwkBuilderWithECPrivateKey() {
         def key = TestKeys.ES256.pair.private
         // must cast to PrivateKey to avoid Groovy's dynamic type dispatch to the key(ECPrivateKey) method:
-        def jwk = Jwks.builder().key((PrivateKey) key).build()
+        def jwk = Jwk.builder().key((PrivateKey) key).build()
         assertNotNull jwk
         assertTrue jwk instanceof EcPrivateJwk
     }
@@ -442,7 +488,7 @@ class JwksTest {
     void testPrivateJwkBuilderWithUnsupportedKey() {
         def key = new TestPrivateKey()
         try {
-            Jwks.builder().key((PrivateKey) key)
+            Jwk.builder().key((PrivateKey) key)
         } catch (UnsupportedKeyException expected) {
             String msg = "There is no builder that supports specified key [${KeysBridge.toString(key)}]."
             assertEquals(msg, expected.getMessage())
@@ -454,7 +500,7 @@ class JwksTest {
     void testEcChain() {
         TestKeys.EC.each {
             ECPublicKey key = it.pair.public as ECPublicKey
-            def jwk = Jwks.builder().ecChain(it.chain).build()
+            def jwk = Jwk.builder().ecChain(it.chain).build()
             assertEquals key, jwk.toKey()
             assertEquals it.chain, jwk.getX509Chain()
         }
@@ -464,7 +510,7 @@ class JwksTest {
     void testRsaChain() {
         TestKeys.RSA.each {
             RSAPublicKey key = it.pair.public as RSAPublicKey
-            def jwk = Jwks.builder().rsaChain(it.chain).build()
+            def jwk = Jwk.builder().rsaChain(it.chain).build()
             assertEquals key, jwk.toKey()
             assertEquals it.chain, jwk.getX509Chain()
         }
@@ -474,7 +520,7 @@ class JwksTest {
     void testOctetChain() {
         TestKeys.EdEC.each { // no chains for XEC keys
             PublicKey key = it.pair.public
-            def jwk = Jwks.builder().octetChain(it.chain).build()
+            def jwk = Jwk.builder().octetChain(it.chain).build()
             assertEquals key, jwk.toKey()
             assertEquals it.chain, jwk.getX509Chain()
         }
@@ -484,7 +530,7 @@ class JwksTest {
     void testRsaKeyPair() {
         TestKeys.RSA.each {
             java.security.KeyPair pair = it.pair
-            PrivateJwk jwk = Jwks.builder().rsaKeyPair(pair).build()
+            PrivateJwk jwk = Jwk.builder().rsaKeyPair(pair).build()
             assertEquals it.pair.public, jwk.toPublicJwk().toKey()
             assertEquals it.pair.private, jwk.toKey()
         }
@@ -494,7 +540,7 @@ class JwksTest {
     void testEcKeyPair() {
         TestKeys.EC.each {
             java.security.KeyPair pair = it.pair
-            PrivateJwk jwk = Jwks.builder().ecKeyPair(pair).build()
+            PrivateJwk jwk = Jwk.builder().ecKeyPair(pair).build()
             assertEquals it.pair.public, jwk.toPublicJwk().toKey()
             assertEquals it.pair.private, jwk.toKey()
         }
@@ -504,7 +550,7 @@ class JwksTest {
     void testOctetKeyPair() {
         TestKeys.EdEC.each {
             java.security.KeyPair pair = it.pair
-            PrivateJwk jwk = Jwks.builder().octetKeyPair(pair).build()
+            PrivateJwk jwk = Jwk.builder().octetKeyPair(pair).build()
             assertEquals it.pair.public, jwk.toPublicJwk().toKey()
             assertEquals it.pair.private, jwk.toKey()
         }
@@ -514,7 +560,7 @@ class JwksTest {
     void testKeyPair() {
         TestKeys.ASYM.each {
             java.security.KeyPair pair = it.pair
-            PrivateJwk jwk = Jwks.builder().keyPair(pair).build()
+            PrivateJwk jwk = Jwk.builder().keyPair(pair).build()
             assertEquals it.pair.public, jwk.toPublicJwk().toKey()
             assertEquals it.pair.private, jwk.toKey()
         }

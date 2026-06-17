@@ -40,8 +40,8 @@ import java.util.function.Supplier;
  * <blockquote><pre>
  * Jwts.// press code-completion hotkeys to suggest available algorithm registry fields
  * {@link Jws.alg Jws.alg}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
- * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods
- * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods</pre></blockquote>
+ * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods
+ * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods</pre></blockquote>
  *
  * @since 0.1
  */
@@ -62,7 +62,7 @@ public final class Jwts {
      * <blockquote><pre>
      * Jwts.builder()
      *    // ... etc ...
-     *    .encryptWith(aKey, <b>Jwe.alg.A256GCM</b>) // or A128GCM, A192GCM, etc...
+     *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via {@link Jwe.enc#registry()}.</p>
      *
@@ -342,11 +342,11 @@ public final class Jwts {
          *
          * <p>This instance's {@link KeyPairBuilderSupplier#keyPair() keyPair()} builder creates {@code Ed448} keys,
          * and is essentially an alias for
-         * <code>{@link io.jsonwebtoken.security.Jwks.CRV Jwks.CRV}.{@link io.jsonwebtoken.security.Jwks.CRV#Ed448 Ed448}.{@link KeyPairBuilderSupplier#keyPair() keyPair()}</code>.</p>
+         * <code>{@link io.jsonwebtoken.security.Jwk.crv Jwk.crv}.{@link io.jsonwebtoken.security.Jwk.crv#Ed448 Ed448}.{@link KeyPairBuilderSupplier#keyPair() keyPair()}</code>.</p>
          *
          * <p>If you would like to generate an {@code Ed25519} {@code KeyPair} for use with the {@code EdDSA} algorithm,
          * you may use the
-         * <code>{@link io.jsonwebtoken.security.Jwks.CRV Jwks.CRV}.{@link io.jsonwebtoken.security.Jwks.CRV#Ed25519 Ed25519}.{@link KeyPairBuilderSupplier#keyPair() keyPair()}</code>
+         * <code>{@link io.jsonwebtoken.security.Jwk.crv Jwk.crv}.{@link io.jsonwebtoken.security.Jwk.crv#Ed25519 Ed25519}.{@link KeyPairBuilderSupplier#keyPair() keyPair()}</code>
          * builder instead.</p>
          *
          * <p><b><sup>1</sup>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime

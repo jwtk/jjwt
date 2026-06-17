@@ -29,7 +29,7 @@ public class DefaultDigestRequest extends DefaultRequest<InputStream> implements
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder extends AbstractRequestParams<InputStream, DigestRequest.Builder>
+    public static class Builder extends AbstractPayloadParams<InputStream, DigestRequest.Builder>
             implements DigestRequest.Builder {
 
         @Override

@@ -90,10 +90,10 @@ class Pbes2HsAkwAlgorithmTest {
     @Test
     void test() {
 
-        def alg = Jwe.enc.PBES2_HS256_A128KW
+        def alg = Jwe.alg.PBES2_HS256_A128KW
 
         int desiredMillis = 100
-        int iterations = Jwe.enc.estimateIterations(alg, desiredMillis)
+        int iterations = Jwe.alg.estimateIterations(alg, desiredMillis)
         println "Estimated iterations: $iterations"
 
         int tries = 30
@@ -103,7 +103,7 @@ class Pbes2HsAkwAlgorithmTest {
         def password = 'hellowor'.toCharArray()
         def header = new DefaultJweHeader().pbes2Count(iterations)
         def key = Keys.password(password)
-        def req = new DefaultKeyRequest(null, null, key, header, Jwe.alg.A128GCM)
+        def req = new DefaultKeyRequest(null, null, key, header, Jwe.enc.A128GCM)
         int sum = 0
         for (int i = 0; i < tries; i++) {
             long start = System.currentTimeMillis()

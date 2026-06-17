@@ -20,28 +20,17 @@ import io.jsonwebtoken.impl.lang.Nameable;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.impl.lang.Parameters;
+import io.jsonwebtoken.lang.*;
 import io.jsonwebtoken.lang.Arrays;
-import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Objects;
-import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.ConfidentialValue;
-import io.jsonwebtoken.security.HashAlgorithm;
-import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.JwkThumbprint;
-import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.KeyOperation;
+import io.jsonwebtoken.security.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterReadable, Nameable {
 
@@ -143,7 +132,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterRea
 
     @Override
     public JwkThumbprint thumbprint() {
-        return thumbprint(Jwks.HASH.SHA256);
+        return thumbprint(JwkThumbprint.alg.SHA256);
     }
 
     @Override

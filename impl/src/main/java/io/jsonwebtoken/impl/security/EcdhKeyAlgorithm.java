@@ -22,31 +22,14 @@ import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.lang.Arrays;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.security.AeadAlgorithm;
-import io.jsonwebtoken.security.Curve;
-import io.jsonwebtoken.security.DecryptionKeyRequest;
-import io.jsonwebtoken.security.DynamicJwkBuilder;
-import io.jsonwebtoken.security.EcPublicJwk;
+import io.jsonwebtoken.security.*;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.Jwks;
-import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.KeyLengthSupplier;
-import io.jsonwebtoken.security.KeyRequest;
-import io.jsonwebtoken.security.KeyResult;
-import io.jsonwebtoken.security.OctetPublicJwk;
-import io.jsonwebtoken.security.PublicJwk;
-import io.jsonwebtoken.security.Request;
-import io.jsonwebtoken.security.SecureRequest;
 import io.jsonwebtoken.security.SecurityException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
+import java.security.*;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
 
 /**
@@ -174,12 +157,12 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         Curve curve = assertCurve(publicKey);
         // note: we don't need to validate if specified key's point is on a supported curve here
-        // because that will automatically be asserted when using Jwks.builder().... below
+        // because that will automatically be asserted when using Jwk.builder().... below
         Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
 
         // Generate our ephemeral key pair:
         final SecureRandom random = ensureSecureRandom(request);
-        DynamicJwkBuilder<?, ?> jwkBuilder = Jwks.builder().random(random);
+        DynamicJwkBuilder<?, ?> jwkBuilder = Jwk.builder().random(random);
         KeyPair pair = generateKeyPair(curve, null, random);
 
         Assert.stateNotNull(pair, "Internal implementation state: KeyPair cannot be null.");

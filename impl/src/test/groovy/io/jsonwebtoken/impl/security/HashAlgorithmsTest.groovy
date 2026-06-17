@@ -18,14 +18,14 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.lang.Registry
 import io.jsonwebtoken.security.HashAlgorithm
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.JwkThumbprint
 import org.junit.Test
 
 import static org.junit.Assert.*
 
 class HashAlgorithmsTest {
 
-    static final Registry<String, HashAlgorithm> reg = Jwks.HASH.get()
+    static final Registry<String, HashAlgorithm> reg = JwkThumbprint.alg.registry()
 
     static boolean contains(HashAlgorithm alg) {
         return reg.values().contains(alg)
@@ -34,7 +34,7 @@ class HashAlgorithmsTest {
     @Test
     void testValues() {
         assertEquals 6, reg.values().size()
-        assertTrue(contains(Jwks.HASH.SHA256)) // add more later
+        assertTrue(contains(JwkThumbprint.alg.SHA256)) // add more later
     }
 
     @Test
@@ -88,31 +88,31 @@ class HashAlgorithmsTest {
 
     @Test
     void testSha256() {
-        testSha(Jwks.HASH.SHA256)
+        testSha(JwkThumbprint.alg.SHA256)
     }
 
     @Test
     void testSha384() {
-        testSha(Jwks.HASH.SHA384)
+        testSha(JwkThumbprint.alg.SHA384)
     }
 
     @Test
     void testSha512() {
-        testSha(Jwks.HASH.SHA512)
+        testSha(JwkThumbprint.alg.SHA512)
     }
 
     @Test
     void testSha3_256() {
-        testSha(Jwks.HASH.SHA3_256)
+        testSha(JwkThumbprint.alg.SHA3_256)
     }
 
     @Test
     void testSha3_384() {
-        testSha(Jwks.HASH.SHA3_384)
+        testSha(JwkThumbprint.alg.SHA3_384)
     }
 
     @Test
     void testSha3_512() {
-        testSha(Jwks.HASH.SHA3_512)
+        testSha(JwkThumbprint.alg.SHA3_512)
     }
 }

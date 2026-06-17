@@ -238,7 +238,7 @@ and conditional branch variant in the entire codebase is tested and required to 
 | `OctetPrivateJwk`
 |===
 +
-^*1*.{sp}{fn-require-java15-plus}^
+^*1*.{sp}{fn-require-java11-plus}^
 +
 ^*2*.{sp}{fn-require-java15-plus}^
 
@@ -593,7 +593,7 @@ If you're building a (non-Android) JDK project, you will want to define the foll
      It is unnecessary for these algorithms on JDK 15 or later.
 <dependency>
     <groupId>org.bouncycastle</groupId>
-    <artifactId>bcprov-jdk18on</artifactId> or bcprov-jdk15to18 on JDK 7
+    <artifactId>bcprov-jdk18on</artifactId>
     <version>1.76</version>
     <scope>runtime</scope>
 </dependency>
@@ -617,7 +617,7 @@ dependencies {
        - JDK 14 or earlier, and you want to use EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.
       It is unnecessary for these algorithms on JDK 15 or later.
     */
-    // runtimeOnly 'org.bouncycastle:bcprov-jdk18on:1.76' // or bcprov-jdk15to18 on JDK 7
+    // runtimeOnly 'org.bouncycastle:bcprov-jdk18on:1.76'
 }
 ----
 
@@ -649,7 +649,7 @@ dependencies {
        - EdDSA (Ed25519 or Ed448) Elliptic Curve signature algorithms.
       ** AND ALSO ensure you enable the BouncyCastle provider as shown below **
     */
-    //implementation('org.bouncycastle:bcprov-jdk18on:1.76') // or bcprov-jdk15to18 for JDK 7
+    //implementation('org.bouncycastle:bcprov-jdk18on:1.76')
 }
 ----
 
@@ -2808,7 +2808,7 @@ seen for JWTs.
 
 You create a JWK as follows:
 
-. Use the `Jwks.builder()` method to create a `JwkBuilder` instance.
+. Use the `Jwk.builder()` method to create a `JwkBuilder` instance.
 . Call the `key` method with the Java key you wish to represent as a JWK.
 . Call builder methods to set any additional key parameters or metadata, such as a `kid` (Key ID), X509 Certificates,
 etc as desired.
@@ -2819,7 +2819,7 @@ For example:
 [,java]
 ----
 SecretKey key = getSecretKey();     // or RSA or EC PublicKey or PrivateKey
-SecretJwk = Jwks.builder().key(key) // (1) and (2)
+SecretJwk = Jwk.builder().key(key) // (1) and (2)
 
     .id("mySecretKeyId")            // (3)
     // ... etc ...
@@ -2836,7 +2836,7 @@ If you have a `Map<String,?>` of name/value pairs that reflect an existing JWK, 
 ----
 Map<String,?> jwkValues = getMyJwkMap();
 
-Jwk<?> jwk = Jwks.builder().add(jwkValues).build();
+Jwk<?> jwk = Jwk.builder().add(jwkValues).build();
 ----
 
 +++<a name="jwk-read">++++++</a>+++
@@ -2848,7 +2848,7 @@ You can read/parse a JWK by building a `JwkParser` and parsing the JWK JSON stri
 [,java]
 ----
 String json = getJwkJsonString();
-Jwk<?> jwk = Jwks.parser()
+Jwk<?> jwk = Jwk.parser()
     //.provider(aJcaProvider)     // optional
     //.deserializer(deserializer) // optional
     .build()                      // create the parser
@@ -2885,7 +2885,7 @@ For example:
 ----
 RSAPrivateKey rsaPrivateKey = getRSAPrivateKey(); // or ECPrivateKey
 
-RsaPrivateJwk jwk = Jwks.builder().key(rsaPrivateKey)
+RsaPrivateJwk jwk = Jwk.builder().key(rsaPrivateKey)
 
         //.publicKey(rsaPublicKey)  // optional, but recommended to avoid extra computation work
 
@@ -2902,13 +2902,13 @@ If you have a Java `KeyPair` instance, then you have both the public and private
 [,java]
 ----
 KeyPair rsaKeyPair = getRSAKeyPair();
-RsaPrivateJwk rsaPrivJwk = Jwks.builder().rsaKeyPair(rsaKeyPair).build();
+RsaPrivateJwk rsaPrivJwk = Jwk.builder().rsaKeyPair(rsaKeyPair).build();
 
 KeyPair ecKeyPair = getECKeyPair();
-EcPrivateJwk ecPrivJwk = Jwks.builder().ecKeyPair(ecKeyPair).build();
+EcPrivateJwk ecPrivJwk = Jwk.builder().ecKeyPair(ecKeyPair).build();
 
 KeyPair edEcKeyPair = getEdECKeyPair();
-OctetPrivateJwk edEcPrivJwk = Jwks.builder().octetKeyPair(edEcKeyPair).build();
+OctetPrivateJwk edEcPrivJwk = Jwk.builder().octetKeyPair(edEcKeyPair).build();
 ----
 
 Note that:
@@ -2930,7 +2930,7 @@ Java `PublicKey` or `KeyPair`.  For example:
 
 [,java]
 ----
-RsaPrivateJwk privateJwk = Jwks.builder().key(rsaPrivateKey).build(); // or ecPrivateKey or edEcPrivateKey
+RsaPrivateJwk privateJwk = Jwk.builder().key(rsaPrivateKey).build(); // or ecPrivateKey or edEcPrivateKey
 
 // Get the matching public JWK and/or PublicKey:
 RsaPublicJwk pubJwk = privateJwk.toPublicJwk();       // JWK instance
@@ -2953,13 +2953,13 @@ All `Jwk` instances support https://www.rfc-editor.org/rfc/rfc7638.html[JWK Thum
 
 [,java]
 ----
-HashAlgorithm hashAlg = Jwks.HASH.SHA256; // or SHA384, SHA512, etc.
+HashAlgorithm hashAlg = JwkThumbprint.alg.SHA256; // or SHA384, SHA512, etc.
 
-Jwk<?> jwk = Jwks.builder(). /* ... */ .build();
+Jwk<?> jwk = Jwk.builder(). /* ... */ .build();
 
 JwkThumbprint sha256Thumbprint = jwk.thumbprint(); // SHA-256 thumbprint by default
 
-JwkThumbprint anotherThumbprint = jwk.thumbprint(Jwks.HASH.SHA512); // or a specified hash algorithm
+JwkThumbprint anotherThumbprint = jwk.thumbprint(JwkThumbprint.alg.SHA512); // or a specified hash algorithm
 ----
 
 The resulting `JwkThumbprint` instance provides some useful methods:
@@ -2967,7 +2967,7 @@ The resulting `JwkThumbprint` instance provides some useful methods:
 * `jwkThumbprint.toByteArray()`: the thumbprint's actual digest bytes - i.e. the raw output from the hash algorithm
 * `jwkThumbprint.toString()`: the digest bytes as a Base64URL-encoded string
 * `jwkThumbprint.getHashAlgorithm()`: the specific `HashAlgorithm` used to compute the thumbprint. Many standard IANA
-                                    hash algorithms are available as constants in the `Jwks.HASH` utility class.
+                                    hash algorithms are available as constants in the `JwkThumbprint.alg` utility class.
 * `jwkThumbprint.toURI()`: the thumbprint's canonical URI as defined by the https://www.rfc-editor.org/rfc/rfc9278.html[JWK Thumbprint URI] specification
 
 +++<a name="jwk-thumbprint-kid">++++++</a>+++
@@ -3000,7 +3000,7 @@ Instead, you may use the `idFromThumbprint` methods on the `JwkBuilder` when cre
 
 [,java]
 ----
-Jwk<?> jwk = Jwks.builder().key(aKey)
+Jwk<?> jwk = Jwk.builder().key(aKey)
 
     .idFromThumbprint() // or idFromThumbprint(HashAlgorithm)
 
@@ -3075,7 +3075,7 @@ instead print the string literal `<redacted>` for any secret or private key data
 [,java]
 ----
 String json = getExampleSecretKeyJson();
-Jwk<?> jwk = Jwks.parser().build().parse(json);
+Jwk<?> jwk = Jwk.parser().build().parse(json);
 
 System.out.printn(jwk);
 ----
@@ -3129,7 +3129,7 @@ concepts we've seen above.
 
 You create a JWK Set as follows:
 
-. Use the `Jwks.set()` method to create a `JwkSetBuilder` instance.
+. Use the `JwkSet.builder()` method to create a `JwkSetBuilder` instance.
 . Call the `add(Jwk)` method any number of times to add one or more JWKs to the set.
 . Call builder methods to set any additional JSON members if desired, or the `operationPolicy(KeyOperationPolicy)`
 builder method to control what key operations may be assigned to any given JWK added to the set.
@@ -3140,12 +3140,12 @@ For example:
 [,java]
 ----
 Jwk<?> jwk = Jwks.builder()/* ... */.build();
-SecretJwk = Jwks.set()              // 1
+SecretJwk = JwkSet.builder()        // 1
     .add(jwk)                       // 2, appends a key
     //.add(aCollection)             //    append multiple keys
     //.keys(allJwks)                //    sets/replaces all keys
     //.add("aName", "aValue")       // 3, optional
-    //.operationPolicy(Jwks.OP      // 3, optional
+    //.operationPolicy(Jwk.op      // 3, optional
     //     .policy()
     //     /* etc... */
     //     .build())
@@ -3157,7 +3157,7 @@ As shown, you can optionally configure the `.operationPolicy(KeyOperationPolicy)
 `Jwts.OP.policy()` builder.  A `KeyOperationPolicy` allows you control what operations are allowed for any JWK
 before being added to the JWK Set; any JWK that does not match the policy will be rejected and not added to the set.
 JJWT internally defaults to a standard RFC-compliant policy, but you can create a
-policy to override the default if desired using the `Jwks.OP.policy()` builder method.
+policy to override the default if desired using the `Jwk.op.policy()` builder method.
 
 +++<a name="jwkset-read">++++++</a>+++
 
@@ -3180,7 +3180,7 @@ jwkSet.forEach(jwk -> System.out.println(jwk));
 
 As shown above, you can specify a custom JCA Provider, <<json,JSON deserializer>> or `KeyOperationPolicy` in the
 same way as the `JwkSetBuilder`. Any JWK that does not match the default (or configured) policy will be
-rejected. You can create a policy to override the default if desired using the `Jwks.OP.policy()` builder method.
+rejected. You can create a policy to override the default if desired using the `Jwk.op.policy()` builder method.
 
 +++<a name="compression">++++++</a>+++
 
@@ -3886,7 +3886,7 @@ JWT specifications define <<jwe-enc,6 standard AEAD Encryption algorithms>>:
 512-bit (64 byte) `SecretKey`.
 
 The AES GCM (`A128GCM`, `A192GCM` and `A256GCM`) algorithms are strongly recommended - they are faster and more
-efficient than the `A*CBC-HS*` variants, but they do require JDK 8 or later (or JDK 7 + BouncyCastle).
+efficient than the `A*CBC-HS*` variants.
 
 Example:
 
@@ -3958,7 +3958,7 @@ key.  This approach requires the AES Key Wrap algorithms to be paired with an AE
 as shown below.
 
 The AES GCM Key Wrap algorithms (`A128GCMKW`, `A192GCMKW` and `A256GCMKW`) are preferred - they are faster and more
-efficient than the `A*KW` variants, but they do require JDK 8 or later (or JDK 7 + BouncyCastle).
+efficient than the `A*KW` variants.
 
 [,java]
 ----

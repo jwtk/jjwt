@@ -23,7 +23,7 @@ import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.security.DecryptionKeyRequest
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.KeyRequest
 import org.junit.Test
 
@@ -106,7 +106,7 @@ class EcdhKeyAlgorithmTest {
         ECPrivateKey decryptionKey = TestKeys.ES256.pair.private as ECPrivateKey // Expected curve for this is P-256
 
         // This uses curve P-384 instead, does not match private key, so it's unexpected:
-        def jwk = Jwks.builder().key(TestKeys.ES384.pair.public as ECPublicKey).build()
+        def jwk = Jwk.builder().key(TestKeys.ES384.pair.public as ECPublicKey).build()
         JweHeader header = jwe().add('epk', jwk).build() as JweHeader
 
         DecryptionKeyRequest req = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwe.enc.A128GCM, decryptionKey)
@@ -140,7 +140,7 @@ class EcdhKeyAlgorithmTest {
     void testDecryptionWithInvalidPrivateKey() {
         def alg = new EcdhKeyAlgorithm()
         PrivateKey key = TestKeys.RS256.pair.private as PrivateKey // not an elliptic curve key, must fail
-        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
         JweHeader header = jwe().add('epk', jwk).build() as JweHeader
         def request = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwe.enc.A128GCM, key)
         try {
@@ -171,7 +171,7 @@ class EcdhKeyAlgorithmTest {
     void testECDecryptionWithNonECEpk() {
         def alg = new EcdhKeyAlgorithm()
         PrivateKey key = TestKeys.ES256.pair.private as PrivateKey // valid key
-        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build() // invalid epk
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build() // invalid epk
         JweHeader header = jwe().add('epk', jwk).build() as JweHeader
         def request = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwe.enc.A128GCM, key)
         try {
@@ -187,7 +187,7 @@ class EcdhKeyAlgorithmTest {
     void testEdwardsDecryptionWithNonEdwardsEpk() {
         def alg = new EcdhKeyAlgorithm()
         PrivateKey key = TestKeys.X25519.pair.private as PrivateKey // valid key
-        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build() // invalid epk
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build() // invalid epk
         JweHeader header = jwe().add('epk', jwk).build() as JweHeader
         def request = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwe.enc.A128GCM, key)
         try {
@@ -203,7 +203,7 @@ class EcdhKeyAlgorithmTest {
     void testEdwardsDecryptionWithEpkOnDifferentCurve() {
         def alg = new EcdhKeyAlgorithm()
         PrivateKey key = TestKeys.X25519.pair.private as PrivateKey // valid key
-        def jwk = Jwks.builder().key(TestKeys.X448.pair.public as PublicKey).build() // epk is not on X25519
+        def jwk = Jwk.builder().key(TestKeys.X448.pair.public as PublicKey).build() // epk is not on X25519
         JweHeader header = jwe().add('epk', jwk).build() as JweHeader
         def request = new DefaultDecryptionKeyRequest('test'.getBytes(), null, null, header, Jwe.enc.A128GCM, key)
         try {

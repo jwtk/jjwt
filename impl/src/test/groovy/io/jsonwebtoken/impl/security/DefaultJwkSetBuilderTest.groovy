@@ -16,10 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.KeyOperationPolicy
-import io.jsonwebtoken.security.MalformedKeySetException
+import io.jsonwebtoken.security.*
 import org.junit.Before
 import org.junit.Test
 
@@ -59,9 +56,11 @@ class DefaultJwkSetBuilderTest {
         builder = new DefaultJwkSetBuilder()
     }
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
     @Test
     void testStaticFactoryMethod() {
         assertTrue Jwks.set() instanceof DefaultJwkSetBuilder
+        assertTrue JwkSet.builder() instanceof DefaultJwkSetBuilder
     }
 
     @Test
@@ -125,7 +124,7 @@ class DefaultJwkSetBuilderTest {
                 kty: 'oct',
                 k  : Encoders.BASE64URL.encode(key.getEncoded())
         ]
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         def expected = [jwk] as Set
         def set = builder.add('keys', [jwkMap]).build()
         assertEquals expected, set.getKeys()
@@ -147,8 +146,8 @@ class DefaultJwkSetBuilderTest {
                 kty: 'oct',
                 k  : Encoders.BASE64URL.encode(key2.getEncoded())
         ]
-        def jwk1 = Jwks.builder().key(key1).build()
-        def jwk2 = Jwks.builder().key(key2).build()
+        def jwk1 = Jwk.builder().key(key1).build()
+        def jwk2 = Jwk.builder().key(key2).build()
         def expected = [jwk1, jwk2] as Set
         def set = builder.add('keys', [jwk1Map, jwk2Map]).build()
         assertEquals expected, set.getKeys()
@@ -157,7 +156,7 @@ class DefaultJwkSetBuilderTest {
     @Test
     void testAddKeySingle() {
         def key = TestKeys.HS256
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         def expected = [jwk] as Set
         def set = builder.add(jwk).build()
         assertEquals expected, set.getKeys()
@@ -166,7 +165,7 @@ class DefaultJwkSetBuilderTest {
     @Test
     void testAddKeyNull() {
         def key = TestKeys.HS256
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         def expected = [jwk] as Set
         assertNotNull builder.add((Jwk<? extends Key>) null) // no exception thrown
         def set = builder.add(jwk).build()
@@ -177,8 +176,8 @@ class DefaultJwkSetBuilderTest {
     void testAddKeyMultiple() {
         def key1 = TestKeys.HS256
         def key2 = TestKeys.HS384
-        def jwk1 = Jwks.builder().key(key1).build()
-        def jwk2 = Jwks.builder().key(key2).build()
+        def jwk1 = Jwk.builder().key(key1).build()
+        def jwk2 = Jwk.builder().key(key2).build()
         def expected = [jwk1, jwk2] as Set
         def set = builder.add(jwk1).add(jwk2).build()
         assertEquals expected, set.getKeys()
@@ -187,7 +186,7 @@ class DefaultJwkSetBuilderTest {
     @Test
     void testAddKeysSingle() {
         def key = TestKeys.HS256
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         def expected = [jwk] as Set
         def set = builder.add(expected).build()
         assertEquals expected, set.getKeys()
@@ -197,8 +196,8 @@ class DefaultJwkSetBuilderTest {
     void testAddKeysMultiple() {
         def key1 = TestKeys.HS256
         def key2 = TestKeys.HS384
-        def jwk1 = Jwks.builder().key(key1).build()
-        def jwk2 = Jwks.builder().key(key2).build()
+        def jwk1 = Jwk.builder().key(key1).build()
+        def jwk2 = Jwk.builder().key(key2).build()
         def expected = [jwk1, jwk2] as Set
         def set = builder.add(expected).build()
         assertEquals expected, set.getKeys()
@@ -208,8 +207,8 @@ class DefaultJwkSetBuilderTest {
     void testAddKeysEmpty() {
         def key1 = TestKeys.HS256
         def key2 = TestKeys.HS384
-        def jwk1 = Jwks.builder().key(key1).build()
-        def jwk2 = Jwks.builder().key(key2).build()
+        def jwk1 = Jwk.builder().key(key1).build()
+        def jwk2 = Jwk.builder().key(key2).build()
         def expected = [jwk1, jwk2] as Set
         assertNotNull builder.add([]) // no exception thrown
         def set = builder.add(expected).build()
@@ -219,7 +218,7 @@ class DefaultJwkSetBuilderTest {
     @Test
     void testSetKeysSingle() {
         def key = TestKeys.HS256
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         def expected = [jwk] as Set
         def set = builder.keys(expected).build()
         assertEquals expected, set.getKeys()
@@ -229,8 +228,8 @@ class DefaultJwkSetBuilderTest {
     void testSetKeysMultiple() {
         def key1 = TestKeys.HS256
         def key2 = TestKeys.HS384
-        def jwk1 = Jwks.builder().key(key1).build()
-        def jwk2 = Jwks.builder().key(key2).build()
+        def jwk1 = Jwk.builder().key(key1).build()
+        def jwk2 = Jwk.builder().key(key2).build()
         def expected = [jwk1, jwk2] as Set
         def set = builder.keys(expected).build()
         assertEquals expected, set.getKeys()
@@ -240,8 +239,8 @@ class DefaultJwkSetBuilderTest {
     void testKeysFullReplacement() {
         def key1 = TestKeys.HS256
         def key2 = TestKeys.HS384
-        def jwk1 = Jwks.builder().key(key1).build()
-        def jwk2 = Jwks.builder().key(key2).build()
+        def jwk1 = Jwk.builder().key(key1).build()
+        def jwk2 = Jwk.builder().key(key2).build()
         def expected = [jwk2] as Set
         def set = builder.add(jwk1).keys(expected).build() // jwk1 won't be in the result
         assertEquals expected, set.getKeys()
@@ -255,7 +254,7 @@ class DefaultJwkSetBuilderTest {
                 kty: 'oct',
                 k  : Encoders.BASE64URL.encode(key.getEncoded())
         ]
-        def jwk = Jwks.builder().provider(provider).key(key).build()
+        def jwk = Jwk.builder().provider(provider).key(key).build()
         def set = builder.provider(TestKeys.BC).add('keys', [jwkMap]).build()
         assertEquals jwk, set.getKeys().iterator().next()
     }
@@ -281,8 +280,8 @@ class DefaultJwkSetBuilderTest {
         String msg = "Invalid Map ${DefaultJwkSet.KEYS} value: " +
                 "[{kty=${badMap.kty}, k=${badMap.k}, key_ops=${badMap.key_ops}}]. " +
                 "Unable to create JWK: Unrelated key " +
-                "operations are not allowed. KeyOperation [${Jwks.OP.ENCRYPT}] is unrelated to " +
-                "[${Jwks.OP.SIGN}]."
+                "operations are not allowed. KeyOperation [${Jwk.op.ENCRYPT}] is unrelated to " +
+                "[${Jwk.op.SIGN}]."
 
         assertIllegal msg, { builder.add('keys', [badMap]).build() }
     }
@@ -295,7 +294,7 @@ class DefaultJwkSetBuilderTest {
                 k      : Encoders.BASE64URL.encode(key.getEncoded()),
                 key_ops: ['sign', 'encrypt'] // unrelated, but we'll allow next:
         ]
-        def policy = new DefaultKeyOperationPolicy(Jwks.OP.get().values(), true) // unrelated allowed
+        def policy = new DefaultKeyOperationPolicy(Jwk.op.registry().values(), true) // unrelated allowed
         builder = builder.operationPolicy(policy) as DefaultJwkSetBuilder
         builder.add('keys', [badMap]).build() // no exception thrown
     }
@@ -318,8 +317,8 @@ class DefaultJwkSetBuilderTest {
                 k      : Encoders.BASE64URL.encode(key.getEncoded()),
                 key_ops: ['sign', 'encrypt'] // unrelated, but we'll allow next:
         ]
-        KeyOperationPolicy policy = Jwks.OP.policy().unrelated().build()
-        def jwk = Jwks.builder().operationPolicy(policy).add(badMap).build()
+        KeyOperationPolicy policy = Jwk.op.policy().unrelated().build()
+        def jwk = Jwk.builder().operationPolicy(policy).add(badMap).build()
 
         builder.operationPolicy(policy)
         builder.add(jwk) // allowed due to less restrictive policy
@@ -327,7 +326,7 @@ class DefaultJwkSetBuilderTest {
         //now enable new more restrictive policy:
         policy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY
         String msg = "Unrelated key operations are not allowed. KeyOperation " +
-                "[${Jwks.OP.ENCRYPT}] is unrelated to [${Jwks.OP.SIGN}]."
+                "[${Jwk.op.ENCRYPT}] is unrelated to [${Jwk.op.SIGN}]."
         assertIllegal msg, { builder.operationPolicy(policy) }
     }
 }

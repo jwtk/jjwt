@@ -16,6 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.Keyable;
+import io.jsonwebtoken.security.PayloadParams;
 import io.jsonwebtoken.security.SecureRequest;
 
 import java.security.Key;
@@ -36,8 +38,8 @@ public class DefaultSecureRequest<T, K extends Key> extends DefaultRequest<T> im
         return this.KEY;
     }
 
-    static abstract class AbstractSecureRequestParams<T, K extends Key, M extends SecureRequest.Params<T, K, M>>
-            extends AbstractRequestParams<T, M> implements SecureRequest.Params<T, K, M> {
+    static abstract class AbstractKeyedPayloadParams<T, K extends Key, M extends Keyable<K, M> & PayloadParams<T, M>>
+            extends AbstractPayloadParams<T, M> implements Keyable<K, M> {
 
         protected K key;
 
@@ -45,23 +47,6 @@ public class DefaultSecureRequest<T, K extends Key> extends DefaultRequest<T> im
         public M key(K key) {
             this.key = key;
             return self();
-        }
-    }
-
-    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder<T, K extends Key> extends AbstractSecureRequestParams<T, K, SecureRequest.Builder<T, K>>
-            implements SecureRequest.Builder<T, K> {
-
-        @Override
-        public SecureRequest<T, K> build() {
-            return new DefaultSecureRequest<>(this.payload, this.provider, this.random, this.key);
-        }
-
-        public static class Supplier<T, K extends Key> implements java.util.function.Supplier<SecureRequest.Builder<T, K>> {
-            @Override
-            public Builder<T, K> get() {
-                return new Builder<>();
-            }
         }
     }
 }

@@ -59,7 +59,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         return "A" + keyLength + "CBC-HS" + digestLength(keyLength);
     }
 
-    public HmacAesAeadAlgorithm(String id, DefaultMacAlgorithm sigAlg) {
+    private HmacAesAeadAlgorithm(String id, DefaultMacAlgorithm sigAlg) {
         super(id, TRANSFORMATION_STRING, sigAlg.getKeyBitLength());
         this.SIGALG = sigAlg;
     }

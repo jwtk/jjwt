@@ -22,14 +22,10 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.HashAlgorithm;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyOperation;
 
-import java.security.Key;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -233,7 +229,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
         if (Collections.isEmpty(ops)) {
             return false;
         }
-        return ops.contains(Jwks.OP.SIGN) || ops.contains(Jwks.OP.VERIFY);
+        return ops.contains(Jwk.op.SIGN) || ops.contains(Jwk.op.VERIFY);
     }
 
     @Override

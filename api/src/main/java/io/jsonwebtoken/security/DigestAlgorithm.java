@@ -41,7 +41,7 @@ import java.security.PublicKey;
  *     <tbody>
  *         <tr>
  *             <td>{@link HashAlgorithm}</td>
- *             <td>{@link Jwks.HASH}</td>
+ *             <td>{@link JwkThumbprint.alg}</td>
  *             <td>Unsecured (unkeyed), does not require a key to compute or verify digests.</td>
  *         </tr>
  *         <tr>
@@ -72,11 +72,31 @@ import java.security.PublicKey;
  *
  * @param <R> the type of {@link Request} used when computing a digest.
  * @param <V> the type of {@link VerifyDigestRequest} used when verifying a digest.
- * @see Jwks.HASH
+ * @see JwkThumbprint.alg
  * @see io.jsonwebtoken.Jws.alg Jws.alg
  * @since 0.12.0
  */
 public interface DigestAlgorithm<R extends Request<InputStream>, V extends VerifyDigestRequest> extends Identifiable {
+
+    interface Params<P extends Params<P>> extends OctetStreamPayloadParams<P> {
+    }
+
+    /**
+     * Named parameters (setters) used to configure a {@link VerifyDigestRequest VerifyDigestRequest} instance.
+     *
+     * @param <P> the instance type returned for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface VerifyParams<P extends VerifyParams<P>> extends Params<P> {
+
+        /**
+         * The digest to verify against the one computed for the given {@link #payload(Object) payload}.
+         *
+         * @param digest the digest to verify against the one computed for the given  {@link #payload(Object) payload}.
+         * @return the instance for method chaining.
+         */
+        P digest(byte[] digest);
+    }
 
     /**
      * Returns a cryptographic digest of the request {@link Request#getPayload() payload}.
