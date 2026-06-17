@@ -33,20 +33,10 @@ public interface KeyOperationPolicy {
     Collection<KeyOperation> getOperations();
 
     /**
-     * Returns quietly if all of the specified key operations are allowed to be assigned to a JWK,
+     * Returns quietly if all the specified key operations are allowed to be assigned to a JWK,
      * or throws an {@link IllegalArgumentException} otherwise.
      *
      * @param ops the operations to validate
      */
     void validate(Collection<? extends KeyOperation> ops) throws IllegalArgumentException;
-
-    /**
-     * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
-     *
-     * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
-     * @since JJWT_RELEASE_VERSION
-     */
-    static KeyOperationPolicyBuilder builder() {
-        return Suppliers.KEY_OPERATION_POLICY_BUILDER_SUPPLIER.get();
-    }
 }

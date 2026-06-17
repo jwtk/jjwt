@@ -88,6 +88,126 @@ import java.util.Set;
 public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 
     /**
+     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     *
+     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static DynamicJwkBuilder<?, ?> builder() {
+        return Suppliers.JWK_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
+     * <blockquote><pre>
+     * Jwk&lt;?&gt; jwk = Jwk.parser()
+     *         //.provider(aJcaProvider)     // optional
+     *         //.deserializer(deserializer) // optional
+     *         //.operationPolicy(policy)    // optional
+     *         .build()
+     *         .parse(jwkString);</pre></blockquote>
+     *
+     * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwkParserBuilder parser() {
+        return Suppliers.JWK_PARSER_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Returns the JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)</a> value
+     * or {@code null} if not present.
+     *
+     * @return the JWK {@code alg} value or {@code null} if not present.
+     */
+    String getAlgorithm();
+
+    /**
+     * Returns the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
+     * (Key Operations) parameter</a> values or {@code null} if not present.  All JWK standard Key Operations are
+     * available via the {@link op} registry, but other (custom) values <em>MAY</em> be present in the returned
+     * set.
+     *
+     * @return the JWK {@code key_ops} value or {@code null} if not present.
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3"><code>key_ops</code>(Key Operations) Parameter</a>
+     */
+    Set<KeyOperation> getOperations();
+
+    /**
+     * Returns the required JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.1">{@code kty} (Key Type)
+     * parameter</a> value. A value is required and may not be {@code null}.
+     *
+     * <p>The JWA specification <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.1">defines</a> the
+     * following {@code kty} values:</p>
+     *
+     * <table>
+     * <caption>JWK Key Types</caption>
+     * <thead>
+     * <tr>
+     * <th>Value</th>
+     * <th>Key Type</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td><b>{@code EC}</b></td>
+     * <td>Elliptic Curve [<a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf">DSS</a>]</td>
+     * </tr>
+     * <tr>
+     * <td><b>{@code RSA}</b></td>
+     * <td>RSA [<a href="https://datatracker.ietf.org/doc/html/rfc3447">RFC 3447</a>]</td>
+     * </tr>
+     * <tr>
+     * <td><b>{@code oct}</b></td>
+     * <td>Octet sequence (used to represent symmetric keys)</td>
+     * </tr>
+     * <tr>
+     * <td><b>{@code OKP}</b></td>
+     * <td><a href="https://www.rfc-editor.org/rfc/rfc8037#section-2">Octet Key Pair</a> (used to represent Edwards
+     * Elliptic Curve keys)</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     *
+     * @return the JWK {@code kty} (Key Type) value.
+     */
+    String getType();
+
+    /**
+     * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the {@code SHA-256} hash algorithm.  This is a convenience method that delegates to
+     * {@link #thumbprint(HashAlgorithm)} with a {@code SHA-256} {@link HashAlgorithm} instance.
+     *
+     * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the {@code SHA-256} hash algorithm.
+     * @see #thumbprint(HashAlgorithm)
+     * @see JwkThumbprint.alg
+     */
+    JwkThumbprint thumbprint();
+
+    /**
+     * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the specified hash algorithm. JWK Thumbprint standard hash algorithms are available in the
+     * {@link JwkThumbprint.alg} registry, but custom algorithms may be used as well.
+     *
+     * @param alg the hash algorithm to use to compute the digest of the canonical JWK Thumbprint JSON form of this JWK.
+     * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
+     * JWK using the specified hash algorithm.
+     * @see JwkThumbprint.alg
+     */
+    JwkThumbprint thumbprint(HashAlgorithm alg);
+
+    /**
+     * Represents the JWK as its corresponding Java {@link Key} instance for use with Java cryptographic
+     * APIs.
+     *
+     * @return the JWK's corresponding Java {@link Key} instance for use with Java cryptographic APIs.
+     */
+    K toKey();
+
+    /**
      * Constants for all standard JWK
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1">crv (Curve)</a> parameter values
      * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">JSON Web Key Elliptic
@@ -225,23 +345,21 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
         private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
-         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances. This is a
-         * convenience alias for {@link KeyOperation#builder()}
+         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
          *
          * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
          */
         public static KeyOperationBuilder builder() {
-            return KeyOperation.builder();
+            return Suppliers.KEY_OPERATION_BUILDER_SUPPLIER.get();
         }
 
         /**
          * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
-         * This is a convenience alias for {@link KeyOperationPolicy#builder()}.
          *
          * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
          */
         public static KeyOperationPolicyBuilder policy() {
-            return KeyOperationPolicy.builder();
+            return Suppliers.KEY_OPERATION_POLICY_BUILDER_SUPPLIER.get();
         }
 
         /**
@@ -329,140 +447,4 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
         private op() {
         }
     }
-
-    /**
-     * Returns the JWK
-     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)</a> value
-     * or {@code null} if not present.
-     *
-     * @return the JWK {@code alg} value or {@code null} if not present.
-     */
-    String getAlgorithm();
-
-    /**
-     * Returns the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
-     * (Key Operations) parameter</a> values or {@code null} if not present.  All JWK standard Key Operations are
-     * available via the {@link op} registry, but other (custom) values <em>MAY</em> be present in the returned
-     * set.
-     *
-     * @return the JWK {@code key_ops} value or {@code null} if not present.
-     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3"><code>key_ops</code>(Key Operations) Parameter</a>
-     */
-    Set<KeyOperation> getOperations();
-
-    /**
-     * Returns the required JWK
-     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.1">{@code kty} (Key Type)
-     * parameter</a> value. A value is required and may not be {@code null}.
-     *
-     * <p>The JWA specification <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.1">defines</a> the
-     * following {@code kty} values:</p>
-     *
-     * <table>
-     * <caption>JWK Key Types</caption>
-     * <thead>
-     * <tr>
-     * <th>Value</th>
-     * <th>Key Type</th>
-     * </tr>
-     * </thead>
-     * <tbody>
-     * <tr>
-     * <td><b>{@code EC}</b></td>
-     * <td>Elliptic Curve [<a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf">DSS</a>]</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code RSA}</b></td>
-     * <td>RSA [<a href="https://datatracker.ietf.org/doc/html/rfc3447">RFC 3447</a>]</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code oct}</b></td>
-     * <td>Octet sequence (used to represent symmetric keys)</td>
-     * </tr>
-     * <tr>
-     * <td><b>{@code OKP}</b></td>
-     * <td><a href="https://www.rfc-editor.org/rfc/rfc8037#section-2">Octet Key Pair</a> (used to represent Edwards
-     * Elliptic Curve keys)</td>
-     * </tr>
-     * </tbody>
-     * </table>
-     *
-     * @return the JWK {@code kty} (Key Type) value.
-     */
-    String getType();
-
-    /**
-     * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
-     * JWK using the {@code SHA-256} hash algorithm.  This is a convenience method that delegates to
-     * {@link #thumbprint(HashAlgorithm)} with a {@code SHA-256} {@link HashAlgorithm} instance.
-     *
-     * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
-     * JWK using the {@code SHA-256} hash algorithm.
-     * @see #thumbprint(HashAlgorithm)
-     * @see JwkThumbprint.alg
-     */
-    JwkThumbprint thumbprint();
-
-    /**
-     * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
-     * JWK using the specified hash algorithm. JWK Thumbprint standard hash algorithms are available in the
-     * {@link JwkThumbprint.alg} registry, but custom algorithms may be used as well.
-     *
-     * @param alg the hash algorithm to use to compute the digest of the canonical JWK Thumbprint JSON form of this JWK.
-     * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
-     * JWK using the specified hash algorithm.
-     * @see JwkThumbprint.alg
-     */
-    JwkThumbprint thumbprint(HashAlgorithm alg);
-
-    /**
-     * Represents the JWK as its corresponding Java {@link Key} instance for use with Java cryptographic
-     * APIs.
-     *
-     * @return the JWK's corresponding Java {@link Key} instance for use with Java cryptographic APIs.
-     */
-    K toKey();
-
-    /**
-     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
-     *
-     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
-     * @since JJWT_RELEASE_VERSION
-     */
-    static DynamicJwkBuilder<?, ?> builder() {
-        return Suppliers.JWK_BUILDER_SUPPLIER.get();
-    }
-
-    /**
-     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
-     * <blockquote><pre>
-     * Jwk&lt;?&gt; jwk = Jwk.parser()
-     *         //.provider(aJcaProvider)     // optional
-     *         //.deserializer(deserializer) // optional
-     *         //.operationPolicy(policy)    // optional
-     *         .build()
-     *         .parse(jwkString);</pre></blockquote>
-     *
-     * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
-     * @since JJWT_RELEASE_VERSION
-     */
-    static JwkParserBuilder parser() {
-        return Suppliers.JWK_PARSER_BUILDER_SUPPLIER.get();
-    }
-//
-//    /**
-//     * Creates a new {@link Parser} from lambda parameters that can parse JSON into a single {@link Jwk} instance.
-//     * For example:
-//     * <blockquote><pre>
-//     * Jwk&lt;?&gt; jwk = Jwk.parser(p -> p.operationPolicy(policy)).parse(jwkSetJsonString);
-//     * </pre></blockquote>
-//     *
-//     * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
-//     * @since JJWT_RELEASE_VERSION
-//     */
-//    static Parser<Jwk<?>> parser(Consumer<JwkParserBuilder> p) {
-//        JwkParserBuilder builder = parser();
-//        p.accept(builder);
-//        return builder.build();
-//    }
 }
