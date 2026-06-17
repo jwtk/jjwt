@@ -30,6 +30,33 @@ import java.net.URI;
 public interface JwkThumbprint {
 
     /**
+     * Returns the {@link HashAlgorithm} used to compute the thumbprint.
+     *
+     * @return the {@link HashAlgorithm} used to compute the thumbprint.
+     */
+    HashAlgorithm getHashAlgorithm();
+
+    /**
+     * Returns the actual thumbprint (aka digest) byte array value.
+     *
+     * @return the actual thumbprint (aka digest) byte array value.
+     */
+    byte[] toByteArray();
+
+    /**
+     * Returns the canonical URI representation of this thumbprint as defined by the
+     * <a href="https://www.rfc-editor.org/rfc/rfc9278.html">JWK Thumbprint URI</a> specification.
+     *
+     * @return a canonical JWK Thumbprint URI
+     */
+    URI toURI();
+
+    /**
+     * Returns the {@link #toByteArray()} value as a Base64URL-encoded string.
+     */
+    String toString();
+
+    /**
      * Various (<em>but not all</em>)
      * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
      * Algorithms</a> commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
@@ -131,31 +158,4 @@ public interface JwkThumbprint {
         private alg() {
         }
     }
-
-    /**
-     * Returns the {@link HashAlgorithm} used to compute the thumbprint.
-     *
-     * @return the {@link HashAlgorithm} used to compute the thumbprint.
-     */
-    HashAlgorithm getHashAlgorithm();
-
-    /**
-     * Returns the actual thumbprint (aka digest) byte array value.
-     *
-     * @return the actual thumbprint (aka digest) byte array value.
-     */
-    byte[] toByteArray();
-
-    /**
-     * Returns the canonical URI representation of this thumbprint as defined by the
-     * <a href="https://www.rfc-editor.org/rfc/rfc9278.html">JWK Thumbprint URI</a> specification.
-     *
-     * @return a canonical JWK Thumbprint URI
-     */
-    URI toURI();
-
-    /**
-     * Returns the {@link #toByteArray()} value as a Base64URL-encoded string.
-     */
-    String toString();
 }

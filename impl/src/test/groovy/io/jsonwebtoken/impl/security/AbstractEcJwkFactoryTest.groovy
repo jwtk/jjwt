@@ -20,7 +20,6 @@ import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
 
@@ -55,7 +54,7 @@ class AbstractEcJwkFactoryTest {
             def key = alg.keyPair().build().getPrivate() as ECPrivateKey
             def jwk = Jwk.builder().key(key).build()
 
-            def json = Jwks.UNSAFE_JSON(jwk)
+            def json = Jwk.UNSAFE_JSON(jwk)
             def map = Services.get(Deserializer).deserialize(new StringReader(json)) as Map<String, ?>
             def xs = map.get("x") as String
             def ys = map.get("y") as String

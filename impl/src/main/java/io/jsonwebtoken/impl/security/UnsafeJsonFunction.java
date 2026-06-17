@@ -29,7 +29,7 @@ import java.util.function.Function;
 /**
  * @since JJWT_RELEASE_VERSION, moved from former JwksBridge class.
  */
-@SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
+@SuppressWarnings("unused") // used via reflection by io.jsonwebtoken.security.Suppliers
 public final class UnsafeJsonFunction implements Function<Jwk<?>, String> {
 
     @SuppressWarnings("unchecked")

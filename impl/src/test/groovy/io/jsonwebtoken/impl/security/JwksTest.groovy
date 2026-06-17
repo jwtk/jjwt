@@ -139,6 +139,24 @@ class JwksTest {
         assertTrue Jwk.op.policy() instanceof DefaultKeyOperationPolicyBuilder
     }
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testJson() {
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public).build()
+        String jwkJson = Jwk.json(jwk)
+        String jwksJson = Jwks.json(jwk)
+        assertEquals jwkJson, jwksJson
+    }
+
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testUnsafeJson() {
+        def jwk = Jwk.builder().key(TestKeys.HS256).build()
+        String jwkJson = Jwk.UNSAFE_JSON(jwk)
+        String jwksJson = Jwks.UNSAFE_JSON(jwk)
+        assertEquals jwkJson, jwksJson
+    }
+
     @Test
     void testBuilderWithoutState() {
         try {

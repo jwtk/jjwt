@@ -324,7 +324,7 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(jwk); // returns raw key material
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(jwk); // returns raw key material
         Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof SecretJwk;
@@ -339,7 +339,7 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String jwkJson = Jwks.json(jwk);
+        String jwkJson = Jwk.json(jwk);
         Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof RsaPublicJwk;
@@ -360,7 +360,7 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(privJwk); // returns raw key material
         Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof RsaPrivateJwk;
@@ -375,7 +375,7 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String jwkJson = Jwks.json(jwk);
+        String jwkJson = Jwk.json(jwk);
         Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof EcPublicJwk;
@@ -396,7 +396,7 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(privJwk); // returns raw key material
         Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof EcPrivateJwk;
@@ -411,7 +411,7 @@ public class JavaReadmeTest {
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String jwkJson = Jwks.json(jwk);
+        String jwkJson = Jwk.json(jwk);
         Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof OctetPublicJwk;
@@ -432,7 +432,7 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(privJwk); // returns raw key material
         Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof OctetPrivateJwk;

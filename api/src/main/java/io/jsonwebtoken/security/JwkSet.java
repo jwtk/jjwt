@@ -37,20 +37,12 @@ import java.util.Set;
  *
  * @since 0.12.0
  */
-@SuppressWarnings("GrazieInspection")
 public interface JwkSet extends Map<String, Object>, Iterable<Jwk<?>> {
-
-    /**
-     * Returns the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
-     *
-     * @return the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
-     */
-    Set<Jwk<?>> getKeys();
 
     /**
      * Return a new builder used to create {@link JwkSet}s.  For example:
      * <blockquote><pre>
-     * JwkSet jwkSet = JwkSet.builder()
+     * JwkSet set = JwkSet.builder()
      *     //.provider(aJcaProvider)     // optional
      *     //.operationPolicy(policy)    // optional
      *     .add(aSingleJwk)              // appends a jwk
@@ -65,33 +57,17 @@ public interface JwkSet extends Map<String, Object>, Iterable<Jwk<?>> {
     static JwkSetBuilder builder() {
         return Suppliers.JWK_SET_BUILDER_SUPPLIER.get();
     }
-//
-//    /**
-//     * Creates a new JwkSet defined from lambada parameters. For example:
-//     * <blockquote><pre>
-//     * JwkSet jwkSet = JwkSet.build(set -> set.add(jwk).add(anotherJwk))
-//     * </pre></blockquote>
-//     *
-//     * @param set the consumer used to configure the JwkSet
-//     * @return a new JwkSet configured via lambda parameters.
-//     * @since JJWT_RELEASE_VERSION
-//     */
-//    static JwkSet build(Consumer<JwkSetBuilder> set) {
-//        JwkSetBuilder builder = builder();
-//        set.accept(builder);
-//        return builder.build();
-//    }
 
     /**
      * Creates a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances. For example:
      * <blockquote><pre>
-     * JwkSet jwkSet = JwkSet.parser()
-     *         //.provider(aJcaProvider)      // optional
-     *         //.deserializer(deserializer)  // optional
-     *         //.operationPolicy(policy)     // optional
-     *         //.ignoreUnsupported(aBoolean) // optional
-     *         .build()
-     *         .parse(jwkSetString);</pre></blockquote>
+     * JwkSet set = JwkSet.parser()
+     *     //.provider(aJcaProvider)      // optional
+     *     //.deserializer(deserializer)  // optional
+     *     //.operationPolicy(policy)     // optional
+     *     //.ignoreUnsupported(aBoolean) // optional
+     *     .build()
+     *     .parse(jwkSetString);</pre></blockquote>
      *
      * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
      * @since JJWT_RELEASE_VERSION
@@ -99,21 +75,11 @@ public interface JwkSet extends Map<String, Object>, Iterable<Jwk<?>> {
     static JwkSetParserBuilder parser() {
         return Suppliers.JWK_SET_PARSER_BUILDER_SUPPLIER.get();
     }
-//
-//    /**
-//     * Creates a new {@link Parser} from lambda parameters that can parse JSON into {@link JwkSet} instances.
-//     * For example:
-//     * <blockquote><pre>
-//     * JwkSet jwkSet = JwkSet.parser(p -> p.operationPolicy(policy)).parse(jwkSetJsonString);
-//     * </pre></blockquote>
-//     *
-//     * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
-//     * @since JJWT_RELEASE_VERSION
-//     */
-//    static Parser<JwkSet> parser(Consumer<JwkSetParserBuilder> p) {
-//        JwkSetParserBuilder builder = parser();
-//        p.accept(builder);
-//        return builder.build();
-//    }
-//
+
+    /**
+     * Returns the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
+     *
+     * @return the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
+     */
+    Set<Jwk<?>> getKeys();
 }

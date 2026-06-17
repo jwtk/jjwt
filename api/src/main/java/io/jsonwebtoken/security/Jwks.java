@@ -34,8 +34,17 @@ import io.jsonwebtoken.lang.Registry;
  *
  * @see Jwk#builder()
  * @since 0.12.0
+ * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk}, {@link JwkSet}, and {@link JwkThumbprint}
+ * static interface methods and registries.
+ * @see Jwk
+ * @see JwkSet
+ * @see JwkThumbprint
+ * @see Jwk.op
+ * @see Jwk.crv
+ * @see JwkThumbprint.alg
  */
 @SuppressWarnings("GrazieInspection")
+@Deprecated
 public final class Jwks {
 
     private Jwks() {
@@ -115,9 +124,11 @@ public final class Jwks {
      *
      * @param publicJwk the {@code PublicJwk} to convert to JSON
      * @return the JWK's canonical JSON value
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#json(PublicJwk)}.
      */
+    @Deprecated
     public static String json(PublicJwk<?> publicJwk) {
-        return UNSAFE_JSON(publicJwk); // safe by nature of it being a Public JWK
+        return Jwk.json(publicJwk);
     }
 
     /**
@@ -128,9 +139,12 @@ public final class Jwks {
      *
      * @param jwk the JWK to convert to JSON
      * @return the JWK's canonical JSON value
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#UNSAFE_JSON(Jwk)}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public static String UNSAFE_JSON(Jwk<?> jwk) {
-        return Suppliers.UNSAFE_JSON_FUNCTION.apply(jwk);
+        return Jwk.UNSAFE_JSON(jwk);
     }
 
     /**

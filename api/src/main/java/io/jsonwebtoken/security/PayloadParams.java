@@ -20,6 +20,7 @@ package io.jsonwebtoken.security;
  *
  * @param <T> the type of payload
  * @param <P> the subtype returned for method chaining
+ * @since JJWT_RELEASE_VERSION
  */
 public interface PayloadParams<T, P extends PayloadParams<T, P>> extends AlgParams<P> {
 

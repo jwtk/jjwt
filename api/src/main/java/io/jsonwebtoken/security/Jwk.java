@@ -28,15 +28,15 @@ import java.util.Set;
  * A JWK is an immutable set of name/value pairs that represent a cryptographic key as defined by
  * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}
  * interface represents properties common to all JWKs.  Subtypes will have additional properties specific to
- * different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
+ * different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc.).
  *
  * <p><b>Immutability</b></p>
  *
  * <p>JWKs are immutable and cannot be changed after they are created.  {@code Jwk} extends the
- * {@link Map} interface purely out of convenience: to allow easy marshalling to JSON as well as name/value
+ * {@link Map} interface purely out of convenience: to allow easy marshaling to JSON as well as name/value
  * pair access and key/value iteration, and other conveniences provided by the Map interface.  Attempting to call any of
  * the {@link Map} interface's mutation methods however (such as {@link Map#put(Object, Object) put},
- * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
+ * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc.) will throw an
  * {@link UnsupportedOperationException}.</p>
  *
  * <p><b>Identification</b></p>
@@ -112,6 +112,31 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      */
     static JwkParserBuilder parser() {
         return Suppliers.JWK_PARSER_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Converts the specified {@link PublicJwk} into JSON. Because {@link PublicJwk}s do not contain secret or private
+     * key material, they are safe to be printed to application logs or {@code System.out}.
+     *
+     * @param publicJwk the {@code PublicJwk} to convert to JSON
+     * @return the JWK's canonical JSON value
+     * @since JJWT_RELEASE_VERSION
+     */
+    static String json(PublicJwk<?> publicJwk) {
+        return UNSAFE_JSON(publicJwk); // safe by nature of it being a Public JWK
+    }
+
+    /**
+     * <b>WARNING - UNSAFE OPERATION - RETURN VALUES CONTAIN RAW KEY MATERIAL, DO NOT LOG OR PRINT TO SYSTEM.OUT.</b>
+     * Converts the specified JWK into JSON, including raw key material.  If the specified JWK
+     * is a {@link SecretJwk} or a {@link PrivateJwk}, be very careful with the return value, ensuring it is not
+     * printed to application logs or system.out.
+     *
+     * @param jwk the JWK to convert to JSON
+     * @return the JWK's canonical JSON value
+     */
+    static String UNSAFE_JSON(Jwk<?> jwk) {
+        return Suppliers.UNSAFE_JSON_FUNCTION.apply(jwk);
     }
 
     /**

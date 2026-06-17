@@ -17,18 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.DynamicJwkBuilder;
-import io.jsonwebtoken.security.EcPrivateJwkBuilder;
-import io.jsonwebtoken.security.EcPublicJwkBuilder;
-import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.OctetPrivateJwkBuilder;
-import io.jsonwebtoken.security.OctetPublicJwkBuilder;
-import io.jsonwebtoken.security.PrivateJwkBuilder;
-import io.jsonwebtoken.security.PublicJwkBuilder;
-import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
-import io.jsonwebtoken.security.RsaPublicJwkBuilder;
-import io.jsonwebtoken.security.SecretJwkBuilder;
-import io.jsonwebtoken.security.UnsupportedKeyException;
+import io.jsonwebtoken.security.*;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -42,7 +31,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
-@SuppressWarnings("unused") //used via reflection by io.jsonwebtoken.security.Jwks
+@SuppressWarnings("unused") //used via reflection by io.jsonwebtoken.security.Suppliers
 public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
         extends AbstractJwkBuilder<K, J, DynamicJwkBuilder<K, J>> implements DynamicJwkBuilder<K, J> {
 
@@ -211,7 +200,7 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
     }
 
     // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
+    @SuppressWarnings("unused") // used via reflection in the api module's io.jsonwebtoken.security.Suppliers class.
     public static final class Supplier<K extends Key, J extends Jwk<K>> implements java.util.function.Supplier<DynamicJwkBuilder<K, J>> {
         @Override
         public DynamicJwkBuilder<K, J> get() {

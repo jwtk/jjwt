@@ -66,15 +66,15 @@ final class Suppliers {
     static final Function<byte[], InputStream> BYTES_INPUT_STREAM_FACTORY =
             Classes.newInstance("io.jsonwebtoken.impl.io.BytesInputStream$Factory");
 
+    /* =====================================================================================================
+     * JWK utilities
+     * ===================================================================================================== */
     static final Supplier<KeyOperationBuilder> KEY_OPERATION_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier");
 
     static final Supplier<KeyOperationPolicyBuilder> KEY_OPERATION_POLICY_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
 
-    /* =====================================================================================================
-     * JWK utilities
-     * ===================================================================================================== */
     static final Function<Jwk<?>, String> UNSAFE_JSON_FUNCTION =
             Classes.newInstance("io.jsonwebtoken.impl.security.UnsafeJsonFunction");
 

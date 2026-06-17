@@ -23,7 +23,6 @@ import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
 import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
@@ -122,7 +121,7 @@ class DefaultJwkParserBuilderTest {
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwk.builder().key(key).build()
-            String json = Jwks.UNSAFE_JSON(jwk)
+            String json = Jwk.UNSAFE_JSON(jwk)
 
             def parser = Jwk.parser().build()
 
@@ -155,7 +154,7 @@ class DefaultJwkParserBuilderTest {
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
             def jwk = Jwk.builder().provider(provider).key(key).build()
-            String json = Jwks.UNSAFE_JSON(jwk)
+            String json = Jwk.UNSAFE_JSON(jwk)
             def parsed = Jwk.parser().provider(provider).build().parse(json)
             assertEquals jwk, parsed
             assertSame provider, parsed.@context.@provider
