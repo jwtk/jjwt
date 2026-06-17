@@ -23,8 +23,8 @@ import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.JwkThumbprint
-import io.jsonwebtoken.security.Jwks
 import org.junit.Before
 import org.junit.Test
 
@@ -299,7 +299,7 @@ class DefaultJwtHeaderBuilderTest {
      */
     @Test
     void testJwk() {
-        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
         header = jws().jwk(jwk).build() as JwsHeader
         assertEquals jwk, header.getJwk()
     }
@@ -415,7 +415,7 @@ class DefaultJwtHeaderBuilderTest {
     @Test
     void testEphemeralPublicKey() {
         def key = TestKeys.ES256.pair.public
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         header = jwe().add('epk', jwk).build() as JweHeader
         assertEquals jwk, header.getEphemeralPublicKey()
     }

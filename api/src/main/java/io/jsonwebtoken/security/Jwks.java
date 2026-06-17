@@ -17,10 +17,7 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.io.Parser;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-
-import java.util.function.Supplier;
 
 /**
  * Utility methods for creating
@@ -35,39 +32,24 @@ import java.util.function.Supplier;
  * <blockquote><pre>
  * {@link JwkThumbprint.alg}.// press hotkeys to suggest individual hash algorithms or utility methods</pre></blockquote>
  *
- * @see #builder()
+ * @see Jwk#builder()
  * @since 0.12.0
  */
+@SuppressWarnings("GrazieInspection")
 public final class Jwks {
 
     private Jwks() {
     } //prevent instantiation
 
-    private static final String JWKS_BRIDGE_FQCN = "io.jsonwebtoken.impl.security.JwksBridge";
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<DynamicJwkBuilder<?, ?>> BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder$Supplier");
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<JwkParserBuilder> PARSER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkParserBuilder$Supplier");
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<JwkSetBuilder> SET_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetBuilder$Supplier");
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<JwkSetParserBuilder> SET_PARSER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder$Supplier");
-
     /**
      * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
      *
      * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#builder()}.
      */
+    @Deprecated
     public static DynamicJwkBuilder<?, ?> builder() {
-        return BUILDER_SUPPLIER.get();
+        return Jwk.builder();
     }
 
     /**
@@ -81,9 +63,11 @@ public final class Jwks {
      *         .parse(jwkString);</pre></blockquote>
      *
      * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#parser()}
      */
+    @Deprecated
     public static JwkParserBuilder parser() {
-        return PARSER_BUILDER_SUPPLIER.get();
+        return Jwk.parser();
     }
 
     /**
@@ -99,9 +83,11 @@ public final class Jwks {
      * </pre></blockquote>
      *
      * @return a new builder used to create {@link JwkSet}s
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkSet#builder()}.
      */
+    @Deprecated
     public static JwkSetBuilder set() {
-        return SET_BUILDER_SUPPLIER.get();
+        return Suppliers.JWK_SET_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -115,9 +101,12 @@ public final class Jwks {
      *         .parse(jwkSetString);</pre></blockquote>
      *
      * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkSet#parser()}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public static JwkSetParserBuilder setParser() {
-        return SET_PARSER_BUILDER_SUPPLIER.get();
+        return Suppliers.JWK_SET_PARSER_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -141,7 +130,7 @@ public final class Jwks {
      * @return the JWK's canonical JSON value
      */
     public static String UNSAFE_JSON(Jwk<?> jwk) {
-        return Classes.invokeStatic(JWKS_BRIDGE_FQCN, "UNSAFE_JSON", new Class[]{Jwk.class}, jwk);
+        return Suppliers.UNSAFE_JSON_FUNCTION.apply(jwk);
     }
 
     /**
@@ -431,7 +420,7 @@ public final class Jwks {
      * Each algorithm is made available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.{@link Jwks#builder}()
+     * Jwks.{@link Jwk#builder}()
      *     // ... etc ...
      *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(JwkThumbprint.alg.{@link JwkThumbprint.alg#SHA256 SHA256}) // &lt;---
      *     .build()</pre></blockquote>
@@ -448,6 +437,7 @@ public final class Jwks {
      * @since 0.12.0
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg}.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static final class HASH {
 

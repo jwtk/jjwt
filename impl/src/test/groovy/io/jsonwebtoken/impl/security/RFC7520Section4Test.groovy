@@ -22,7 +22,7 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.EcPrivateJwk
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.RsaPrivateJwk
 import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
@@ -198,7 +198,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_1() {
 
-        RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwk.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
         def alg = Jws.alg.RS256
@@ -235,7 +235,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_2() {
 
-        RsaPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwk.parser().build().parse(RFC7520Section3Test.FIGURE_4) as RsaPrivateJwk
         RSAPrivateKey key = jwk.toKey()
 
         def alg = Jws.alg.PS384
@@ -282,7 +282,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_3() {
 
-        EcPrivateJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_2) as EcPrivateJwk
+        EcPrivateJwk jwk = Jwk.parser().build().parse(RFC7520Section3Test.FIGURE_2) as EcPrivateJwk
         ECPrivateKey key = jwk.toKey()
 
         def alg = Jws.alg.ES512
@@ -327,7 +327,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_4() {
 
-        SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
+        SecretJwk jwk = Jwk.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
         def alg = Jws.alg.HS256
@@ -365,7 +365,7 @@ class RFC7520Section4Test {
     @Test
     void testSection4_5() {
 
-        SecretJwk jwk = Jwks.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
+        SecretJwk jwk = Jwk.parser().build().parse(RFC7520Section3Test.FIGURE_5) as SecretJwk
         SecretKey key = jwk.toKey()
 
         def alg = Jws.alg.HS256

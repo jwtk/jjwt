@@ -24,8 +24,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Package-private on purpose - this is for internal utility use only.
+ * Package-private on purpose - this is for internal utility use only, see
+ * <a href="https://github.com/jwtk/jjwt/issues/988">Issue 988</a> for why this class is necessary.
  *
+ * @see <a href="https://github.com/jwtk/jjwt/issues/988">Issue 988</a>.
  * @since JJWT_RELEASE_VERSION
  */
 // MAINTAINER NOTE: Do not change this class's visibility modifiers - it is not to be exposed in the public API.
@@ -69,6 +71,24 @@ final class Suppliers {
 
     static final Supplier<KeyOperationPolicyBuilder> KEY_OPERATION_POLICY_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
+
+    /* =====================================================================================================
+     * JWK utilities
+     * ===================================================================================================== */
+    static final Function<Jwk<?>, String> UNSAFE_JSON_FUNCTION =
+            Classes.newInstance("io.jsonwebtoken.impl.security.UnsafeJsonFunction");
+
+    static final Supplier<DynamicJwkBuilder<?, ?>> JWK_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder$Supplier");
+
+    static final Supplier<JwkParserBuilder> JWK_PARSER_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkParserBuilder$Supplier");
+
+    static final Supplier<JwkSetBuilder> JWK_SET_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetBuilder$Supplier");
+
+    static final Supplier<JwkSetParserBuilder> JWK_SET_PARSER_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder$Supplier");
 
     @SuppressWarnings("unchecked")
     static <K extends Key> SecureDigestRequest.Builder<K> secureDigestRequestBuilder() {

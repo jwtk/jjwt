@@ -135,4 +135,43 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517: key_ops (Key Operations) Parameter</a>
      */
     NestedCollection<KeyOperation, T> operations();
+//
+//    /**
+//     * Sets the <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key operations</a> for which
+//     * the JWK is intended to be used, removing any previous operations that may have been specified.
+//     * A {@code null} or empty value removes all operations.
+//     TODO: should this replace all? Or append?  I think replace since they can append with operations() if necessary.
+//     *
+//     * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
+//     *
+//     * <p>All RFC-standard JWK Key Operations in the {@link Jwk.op} registry are already supported via the builder's
+//     * default {@link #operationPolicy(KeyOperationPolicy) operationPolicy}, but other (custom) values
+//     * <em>MAY</em> be specified (for example, using a {@link Jwk.op#builder()}).</p>
+//     *
+//     * <p>If the {@code JwkBuilder} is being used to rebuild or parse an existing JWK however, any custom operations
+//     * should be enabled by configuring an {@link #operationPolicy(KeyOperationPolicy) operationPolicy}
+//     * that includes the custom values (e.g. via
+//     * {@link Jwk.op#policy()}.{@link KeyOperationPolicyBuilder#add(KeyOperation) add(customKeyOperation)}).</p>
+//     *
+//     * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwk.op}
+//     * constants.</p>
+//     *
+//     * @return the builder for method chaining.
+//     * @throws IllegalArgumentException if any of the specified
+//     *                                  {@code KeyOperation} elements are not permitted by the JWK's
+//     *                                  {@link #operationPolicy(KeyOperationPolicy) operationPolicy}. See that
+//     *                                  documentation for more information on security vulnerabilities when using the
+//     *                                  same key with multiple algorithms.
+//     * @see Jwk.op
+//     * @see KeyOperationPolicy
+//     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517: key_ops (Key Operations) Parameter</a>
+//     * @since JJWT_RELEASE_VERSION
+//     */
+//    default T operations(Collection<KeyOperation> ops) throws IllegalArgumentException {
+//        NestedCollection<KeyOperation, T> nested = operations().clear();
+//        if (!Collections.isEmpty(ops)) {
+//            nested.add(ops);
+//        }
+//        return nested.and();
+//    }
 }

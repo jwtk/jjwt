@@ -37,7 +37,7 @@ public interface JwkThumbprint {
      * Each algorithm is made available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.{@link Jwks#builder builder}()
+     * Jwks.{@link Jwk#builder builder}()
      *     // ... etc ...
      *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(JwkThumbprint.alg.{@link JwkThumbprint.alg#SHA256 SHA256}) // &lt;---
      *     .build()</pre></blockquote>

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.io.Parser;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 
@@ -398,16 +399,19 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
      * JWK using the {@code SHA-256} hash algorithm.
      * @see #thumbprint(HashAlgorithm)
+     * @see JwkThumbprint.alg
      */
     JwkThumbprint thumbprint();
 
     /**
      * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
-     * JWK using the specified hash algorithm.
+     * JWK using the specified hash algorithm. JWK Thumbprint standard hash algorithms are available in the
+     * {@link JwkThumbprint.alg} registry, but custom algorithms may be used as well.
      *
      * @param alg the hash algorithm to use to compute the digest of the canonical JWK Thumbprint JSON form of this JWK.
      * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
      * JWK using the specified hash algorithm.
+     * @see JwkThumbprint.alg
      */
     JwkThumbprint thumbprint(HashAlgorithm alg);
 
@@ -418,4 +422,47 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * @return the JWK's corresponding Java {@link Key} instance for use with Java cryptographic APIs.
      */
     K toKey();
+
+    /**
+     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     *
+     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static DynamicJwkBuilder<?, ?> builder() {
+        return Suppliers.JWK_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
+     * <blockquote><pre>
+     * Jwk&lt;?&gt; jwk = Jwk.parser()
+     *         //.provider(aJcaProvider)     // optional
+     *         //.deserializer(deserializer) // optional
+     *         //.operationPolicy(policy)    // optional
+     *         .build()
+     *         .parse(jwkString);</pre></blockquote>
+     *
+     * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwkParserBuilder parser() {
+        return Suppliers.JWK_PARSER_BUILDER_SUPPLIER.get();
+    }
+//
+//    /**
+//     * Creates a new {@link Parser} from lambda parameters that can parse JSON into a single {@link Jwk} instance.
+//     * For example:
+//     * <blockquote><pre>
+//     * Jwk&lt;?&gt; jwk = Jwk.parser(p -> p.operationPolicy(policy)).parse(jwkSetJsonString);
+//     * </pre></blockquote>
+//     *
+//     * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
+//     * @since JJWT_RELEASE_VERSION
+//     */
+//    static Parser<Jwk<?>> parser(Consumer<JwkParserBuilder> p) {
+//        JwkParserBuilder builder = parser();
+//        p.accept(builder);
+//        return builder.build();
+//    }
 }

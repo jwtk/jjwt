@@ -35,7 +35,6 @@ class PrivateConstructorsTest {
     void testPrivateCtors() { // for code coverage only
         new Classes()
         new KeysBridge()
-        new JwksBridge()
         new Functions()
         new Jws.alg()
         new Jwe.enc()

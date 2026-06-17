@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.Jwks
 import io.jsonwebtoken.security.MalformedKeyException
 import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
@@ -30,7 +29,7 @@ import static org.junit.Assert.*
 class AbstractJwkBuilderTest {
 
     private static AbstractJwkBuilder<SecretKey, SecretJwk, AbstractJwkBuilder> builder() {
-        return (AbstractJwkBuilder) Jwks.builder().key(TestKeys.NA256)
+        return (AbstractJwkBuilder) Jwk.builder().key(TestKeys.NA256)
     }
 
     @Test

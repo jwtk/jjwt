@@ -54,23 +54,23 @@ class DefaultJwkParserBuilderTest {
 
     @Test(expected = IllegalArgumentException)
     void parseNull() {
-        Jwks.parser().build().parse((CharSequence) null)
+        Jwk.parser().build().parse((CharSequence) null)
     }
 
     @Test(expected = IllegalArgumentException)
     void parseEmpty() {
-        Jwks.parser().build().parse(Strings.EMPTY)
+        Jwk.parser().build().parse(Strings.EMPTY)
     }
 
     @Test
     void testStaticFactoryMethod() {
-        assertTrue Jwks.parser() instanceof DefaultJwkParserBuilder
+        assertTrue Jwk.parser() instanceof DefaultJwkParserBuilder
     }
 
     @Test
     void testProvider() {
         Provider provider = createMock(Provider)
-        def parser = Jwks.parser().provider(provider).build() as ConvertingParser
+        def parser = Jwk.parser().provider(provider).build() as ConvertingParser
         assertSame provider, parser.converter.supplier.provider
     }
 
@@ -80,7 +80,7 @@ class DefaultJwkParserBuilderTest {
         def m = RFC7516AppendixA3Test.KEK_VALUES // any test key will do
         expect(deser.deserialize((Reader) anyObject(Reader))).andReturn(m)
         replay deser
-        def jwk = Jwks.parser().json(deser).build().parse('foo')
+        def jwk = Jwk.parser().json(deser).build().parse('foo')
         verify deser
         assertTrue jwk instanceof SecretJwk
         assertEquals m.kty, jwk.kty
@@ -89,7 +89,7 @@ class DefaultJwkParserBuilderTest {
 
     @Test
     void testOperationPolicy() {
-        def parser = Jwks.parser().build() as ConvertingParser
+        def parser = Jwk.parser().build() as ConvertingParser
 
         try {
             // parse a JWK that has unrelated operations (prevented by default):
@@ -105,7 +105,7 @@ class DefaultJwkParserBuilderTest {
     @Test
     void testOperationPolicyOverride() {
         def policy = Jwk.op.policy().unrelated().build()
-        def parser = Jwks.parser().operationPolicy(policy).build()
+        def parser = Jwk.parser().operationPolicy(policy).build()
         assertNotNull parser.parse(UNRELATED_OPS_JSON) // no exception because policy allows it
     }
 
@@ -121,10 +121,10 @@ class DefaultJwkParserBuilderTest {
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().key(key).build()
+            def jwk = Jwk.builder().key(key).build()
             String json = Jwks.UNSAFE_JSON(jwk)
 
-            def parser = Jwks.parser().build()
+            def parser = Jwk.parser().build()
 
             // CharSequence parsing:
             def parsed = parser.parse(json)
@@ -154,9 +154,9 @@ class DefaultJwkParserBuilderTest {
 
         for (Key key : keys) {
             //noinspection GroovyAssignabilityCheck
-            def jwk = Jwks.builder().provider(provider).key(key).build()
+            def jwk = Jwk.builder().provider(provider).key(key).build()
             String json = Jwks.UNSAFE_JSON(jwk)
-            def parsed = Jwks.parser().provider(provider).build().parse(json)
+            def parsed = Jwk.parser().provider(provider).build().parse(json)
             assertEquals jwk, parsed
             assertSame provider, parsed.@context.@provider
         }

@@ -427,7 +427,7 @@ class RFC7520Section5Test {
     @Test
     void testSection5_1() {
 
-        RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_73) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwk.parser().build().parse(FIGURE_73) as RsaPrivateJwk
         RSAPublicKey key = jwk.toPublicJwk().toKey()
 
         def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA1_5_ID, StandardKeyAlgorithms.RSA1_5_TRANSFORMATION) {
@@ -489,7 +489,7 @@ class RFC7520Section5Test {
     @Test
     void testSection5_2() {
 
-        RsaPrivateJwk jwk = Jwks.parser().build().parse(FIGURE_84) as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwk.parser().build().parse(FIGURE_84) as RsaPrivateJwk
         RSAPublicKey key = jwk.toPublicJwk().toKey()
 
         def alg = new DefaultRsaKeyAlgorithm(StandardKeyAlgorithms.RSA_OAEP_ID, StandardKeyAlgorithms.RSA_OAEP_TRANSFORMATION) {
@@ -617,7 +617,7 @@ class RFC7520Section5Test {
     @Test
     void testSection5_4() {
 
-        def jwk = Jwks.parser().build().parse(FIGURE_108) as EcPrivateJwk
+        def jwk = Jwk.parser().build().parse(FIGURE_108) as EcPrivateJwk
         def encKey = jwk.toPublicJwk().toKey()
 
         def wrapAlg = new AesWrapKeyAlgorithm(128) {
@@ -627,7 +627,7 @@ class RFC7520Section5Test {
                 return new SecretKeySpec(encoded, "AES")
             }
         }
-        def RFC_EPK = Jwks.parser().build().parse(FIGURE_111) as EcPrivateJwk
+        def RFC_EPK = Jwk.parser().build().parse(FIGURE_111) as EcPrivateJwk
         def alg = new EcdhKeyAlgorithm(wrapAlg) {
             @Override
             protected KeyPair generateKeyPair(Curve curve, Provider provider, SecureRandom random) {

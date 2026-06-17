@@ -33,7 +33,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
 
-import static io.jsonwebtoken.security.Jwks.builder;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
@@ -320,13 +319,13 @@ public class JavaReadmeTest {
     @Test
     public void testExampleSecretJwk() {
         SecretKey key = Jws.alg.HS512.key().build(); // or HS384 or HS256
-        SecretJwk jwk = builder().key(key).idFromThumbprint().build();
+        SecretJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
         String unsafeJwkJson = Jwks.UNSAFE_JSON(jwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof SecretJwk;
         assert jwk.equals(parsed);
@@ -335,13 +334,13 @@ public class JavaReadmeTest {
     @Test
     public void testExampleRsaPublicJwk() {
         RSAPublicKey key = (RSAPublicKey) Jws.alg.RS512.keyPair().build().getPublic();
-        RsaPublicJwk jwk = builder().key(key).idFromThumbprint().build();
+        RsaPublicJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
         String jwkJson = Jwks.json(jwk);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof RsaPublicJwk;
         assert jwk.equals(parsed);
@@ -353,7 +352,7 @@ public class JavaReadmeTest {
         RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
         RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
-        RsaPrivateJwk privJwk = builder().key(privKey).idFromThumbprint().build();
+        RsaPrivateJwk privJwk = Jwk.builder().key(privKey).idFromThumbprint().build();
         RsaPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -362,7 +361,7 @@ public class JavaReadmeTest {
         assert pubKey.equals(pubJwk.toKey());
 
         String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof RsaPrivateJwk;
         assert privJwk.equals(parsed);
@@ -371,13 +370,13 @@ public class JavaReadmeTest {
     @Test
     public void testExampleEcPublicJwk() {
         ECPublicKey key = (ECPublicKey) Jws.alg.ES512.keyPair().build().getPublic();
-        EcPublicJwk jwk = builder().key(key).idFromThumbprint().build();
+        EcPublicJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
         String jwkJson = Jwks.json(jwk);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof EcPublicJwk;
         assert jwk.equals(parsed);
@@ -389,7 +388,7 @@ public class JavaReadmeTest {
         ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 
-        EcPrivateJwk privJwk = builder().key(privKey).idFromThumbprint().build();
+        EcPrivateJwk privJwk = Jwk.builder().key(privKey).idFromThumbprint().build();
         EcPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -398,7 +397,7 @@ public class JavaReadmeTest {
         assert pubKey.equals(pubJwk.toKey());
 
         String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof EcPrivateJwk;
         assert privJwk.equals(parsed);
@@ -407,13 +406,13 @@ public class JavaReadmeTest {
     @Test
     public void testExampleEdEcPublicJwk() {
         PublicKey key = Jwk.crv.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
-        OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
+        OctetPublicJwk<PublicKey> jwk = Jwk.builder().octetKey(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
         String jwkJson = Jwks.json(jwk);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof OctetPublicJwk;
         assert jwk.equals(parsed);
@@ -425,7 +424,7 @@ public class JavaReadmeTest {
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 
-        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().octetKey(privKey).idFromThumbprint().build();
+        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = Jwk.builder().octetKey(privKey).idFromThumbprint().build();
         OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -434,7 +433,7 @@ public class JavaReadmeTest {
         assert pubKey.equals(pubJwk.toKey());
 
         String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof OctetPrivateJwk;
         assert privJwk.equals(parsed);
@@ -446,7 +445,7 @@ public class JavaReadmeTest {
                 "\"k\":\"AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow\"," +
                 "\"kid\":\"HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.\"}";
 
-        Jwk<?> jwk = Jwks.parser().build().parse(json);
+        Jwk<?> jwk = Jwk.parser().build().parse(json);
 
         String expected = "{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}";
         assert expected.equals(jwk.toString());

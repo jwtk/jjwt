@@ -18,8 +18,8 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.security.HashAlgorithm
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.JwkThumbprint
-import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -43,7 +43,7 @@ class JwkThumbprintsTest {
     @Test
     void testSecretJwks() {
         TestKeys.SECRET.each { SecretKey key ->
-            def jwk = Jwks.builder().key((SecretKey) key).idFromThumbprint().build()
+            def jwk = Jwk.builder().key((SecretKey) key).idFromThumbprint().build()
             def json = RfcTests.stripws("""
             {"k":"${jwk.get('k').get()}","kty":"oct"}
             """)
@@ -57,7 +57,7 @@ class JwkThumbprintsTest {
     @Test
     void testRsaKeyPair() {
         def pair = TestKeys.RS256.pair
-        def privJwk = Jwks.builder().rsaKeyPair(pair).idFromThumbprint().build()
+        def privJwk = Jwk.builder().rsaKeyPair(pair).idFromThumbprint().build()
         def pubJwk = privJwk.toPublicJwk()
         def json = RfcTests.stripws("""
         {"e":"${pubJwk.get('e')}","kty":"RSA","n":"${pubJwk.get('n')}"}
@@ -79,7 +79,7 @@ class JwkThumbprintsTest {
     @Test
     void testEcKeyPair() {
         def pair = TestKeys.ES256.pair
-        def privJwk = Jwks.builder().ecKeyPair(pair).idFromThumbprint().build()
+        def privJwk = Jwk.builder().ecKeyPair(pair).idFromThumbprint().build()
         def pubJwk = privJwk.toPublicJwk()
         def json = RfcTests.stripws("""
         {"crv":"${pubJwk.get('crv')}","kty":"EC","x":"${pubJwk.get('x')}","y":"${pubJwk.get('y')}"}
@@ -101,7 +101,7 @@ class JwkThumbprintsTest {
     @Test
     void testEdECKeyPair() {
         def pair = TestKeys.Ed25519.pair
-        def privJwk = Jwks.builder().octetKeyPair(pair).idFromThumbprint().build()
+        def privJwk = Jwk.builder().octetKeyPair(pair).idFromThumbprint().build()
         def pubJwk = privJwk.toPublicJwk()
         def json = RfcTests.stripws("""
         {"crv":"${pubJwk.get('crv')}","kty":"OKP","x":"${pubJwk.get('x')}"}
