@@ -70,6 +70,7 @@ public final class Jwts {
      * @since 0.12.0
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.enc}.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static final class ENC {
 
@@ -169,6 +170,7 @@ public final class Jwts {
      * @since 0.12.0
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jws.alg}.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static final class SIG {
 
@@ -1053,6 +1055,7 @@ public final class Jwts {
      * @since 0.12.0
      * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.zip}.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static final class ZIP {
 
@@ -1061,7 +1064,9 @@ public final class Jwts {
          * Compression Algorithms</a>.
          *
          * @return various standard and non-standard useful compression algorithms.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.zip#registry()}
          */
+        @Deprecated
         public static Registry<String, CompressionAlgorithm> get() {
             return Jwe.zip.registry();
         }
@@ -1071,8 +1076,10 @@ public final class Jwts {
          * compression algorithm with a {@code zip} header value of {@code "DEF"}.
          *
          * @see <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-4.1.3">JWE RFC 7516, Section 4.1.3</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.zip#DEF}
          */
-        public static final CompressionAlgorithm DEF = get().forKey("DEF");
+        @Deprecated
+        public static final CompressionAlgorithm DEF = Jwe.zip.DEF;
 
         /**
          * A commonly used, but <b>NOT JWA-STANDARD</b>
@@ -1086,9 +1093,11 @@ public final class Jwts {
          *
          * <p>If you're concerned about compatibility, {@link #DEF DEF} is the only JWA standards-compliant algorithm.</p>
          *
-         * @see #DEF
+         * @see Jwe.zip#DEF
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwe.zip#GZIP}
          */
-        public static final CompressionAlgorithm GZIP = get().forKey("GZIP");
+        @Deprecated
+        public static final CompressionAlgorithm GZIP = Jwe.zip.GZIP;
 
         //prevent instantiation
         private ZIP() {

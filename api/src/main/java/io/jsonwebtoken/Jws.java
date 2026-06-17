@@ -32,6 +32,47 @@ import java.security.Key;
 public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
 
     /**
+     * Visitor implementation that ensures the visited JWT is a JSON Web Signature ('JWS') message with a
+     * cryptographically authenticated/verified {@code byte[]} array payload, and rejects all others with an
+     * {@link UnsupportedJwtException}.
+     *
+     * @see SupportedJwtVisitor#onVerifiedContent(Jws)
+     * @since 0.12.0
+     */
+    @SuppressWarnings("UnnecessaryModifier")
+    public static final JwtVisitor<Jws<byte[]>> CONTENT = new SupportedJwtVisitor<Jws<byte[]>>() {
+        @Override
+        public Jws<byte[]> onVerifiedContent(Jws<byte[]> jws) {
+            return jws;
+        }
+    };
+
+    /**
+     * Visitor implementation that ensures the visited JWT is a JSON Web Signature ('JWS') message with a
+     * cryptographically authenticated/verified {@link Claims} payload, and rejects all others with an
+     * {@link UnsupportedJwtException}.
+     *
+     * @see SupportedJwtVisitor#onVerifiedClaims(Jws)
+     * @since 0.12.0
+     */
+    @SuppressWarnings("UnnecessaryModifier")
+    public static final JwtVisitor<Jws<Claims>> CLAIMS = new SupportedJwtVisitor<Jws<Claims>>() {
+        @Override
+        public Jws<Claims> onVerifiedClaims(Jws<Claims> jws) {
+            return jws;
+        }
+    };
+
+    /**
+     * Returns the verified JWS signature as a Base64Url string.
+     *
+     * @return the verified JWS signature as a Base64Url string.
+     * @deprecated since 0.12.0 in favor of {@link #getDigest() getDigest()}.
+     */
+    @Deprecated
+    String getSignature(); //TODO for 1.0: return a byte[]
+
+    /**
      * Constants for all JWA (RFC 7518) standard <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3">
      * Cryptographic Algorithms for Digital Signatures and MACs</a> defined in the
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.1">JSON Web Signature and Encryption Algorithms
@@ -193,45 +234,4 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
          */
         public static final io.jsonwebtoken.security.SignatureAlgorithm EdDSA = Jwts.get(REGISTRY, "EdDSA");
     }
-
-    /**
-     * Visitor implementation that ensures the visited JWT is a JSON Web Signature ('JWS') message with a
-     * cryptographically authenticated/verified {@code byte[]} array payload, and rejects all others with an
-     * {@link UnsupportedJwtException}.
-     *
-     * @see SupportedJwtVisitor#onVerifiedContent(Jws)
-     * @since 0.12.0
-     */
-    @SuppressWarnings("UnnecessaryModifier")
-    public static final JwtVisitor<Jws<byte[]>> CONTENT = new SupportedJwtVisitor<Jws<byte[]>>() {
-        @Override
-        public Jws<byte[]> onVerifiedContent(Jws<byte[]> jws) {
-            return jws;
-        }
-    };
-
-    /**
-     * Visitor implementation that ensures the visited JWT is a JSON Web Signature ('JWS') message with a
-     * cryptographically authenticated/verified {@link Claims} payload, and rejects all others with an
-     * {@link UnsupportedJwtException}.
-     *
-     * @see SupportedJwtVisitor#onVerifiedClaims(Jws)
-     * @since 0.12.0
-     */
-    @SuppressWarnings("UnnecessaryModifier")
-    public static final JwtVisitor<Jws<Claims>> CLAIMS = new SupportedJwtVisitor<Jws<Claims>>() {
-        @Override
-        public Jws<Claims> onVerifiedClaims(Jws<Claims> jws) {
-            return jws;
-        }
-    };
-
-    /**
-     * Returns the verified JWS signature as a Base64Url string.
-     *
-     * @return the verified JWS signature as a Base64Url string.
-     * @deprecated since 0.12.0 in favor of {@link #getDigest() getDigest()}.
-     */
-    @Deprecated
-    String getSignature(); //TODO for 1.0: return a byte[]
 }
