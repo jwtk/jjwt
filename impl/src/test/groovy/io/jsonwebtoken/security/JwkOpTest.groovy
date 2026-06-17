@@ -32,13 +32,13 @@ class JwkOpTest {
     @SuppressWarnings('GrDeprecatedAPIUsage')
     @Test
     void testBuilder() {
-        assertTrue Jwks.OP.builder() instanceof DefaultKeyOperationBuilder
+        assertTrue Jwk.op.builder() instanceof DefaultKeyOperationBuilder
     }
 
     @SuppressWarnings('GrDeprecatedAPIUsage')
     @Test
     void testPolicy() {
-        assertTrue Jwks.OP.policy() instanceof DefaultKeyOperationPolicyBuilder
+        assertTrue Jwk.op.policy() instanceof DefaultKeyOperationPolicyBuilder
     }
 
     static void testInstance(KeyOperation op, String id, String description, KeyOperation related) {

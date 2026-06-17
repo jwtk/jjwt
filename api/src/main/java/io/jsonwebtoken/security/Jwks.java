@@ -55,7 +55,7 @@ public final class Jwks {
     /**
      * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
      * <blockquote><pre>
-     * Jwk&lt;?&gt; jwk = Jwks.parser()
+     * Jwk&lt;?&gt; jwk = Jwk.parser()
      *         //.provider(aJcaProvider)     // optional
      *         //.deserializer(deserializer) // optional
      *         //.operationPolicy(policy)    // optional
@@ -73,7 +73,7 @@ public final class Jwks {
     /**
      * Return a new builder used to create {@link JwkSet}s.  For example:
      * <blockquote><pre>
-     * JwkSet jwkSet = Jwks.set()
+     * JwkSet jwkSet = JwkSet.builder()
      *     //.provider(aJcaProvider)     // optional
      *     //.operationPolicy(policy)    // optional
      *     .add(aJwk)                    // appends a key
@@ -93,7 +93,7 @@ public final class Jwks {
     /**
      * Returns a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances. For example:
      * <blockquote><pre>
-     * JwkSet jwkSet = Jwks.setParser()
+     * JwkSet jwkSet = JwkSet.parser()
      *         //.provider(aJcaProvider)     // optional
      *         //.deserializer(deserializer) // optional
      *         //.operationPolicy(policy)    // optional
@@ -142,7 +142,7 @@ public final class Jwks {
      * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.CRV.P256.keyPair().build();</pre></blockquote>
+     * Jwk.crv.P256.keyPair().build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
@@ -272,7 +272,7 @@ public final class Jwks {
      * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.builder()
+     * Jwk.builder()
      *     .operations(Jwk.op.SIGN)
      *     // ... etc ...
      *     .build();</pre></blockquote>
@@ -420,7 +420,7 @@ public final class Jwks {
      * Each algorithm is made available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.{@link Jwk#builder}()
+     * Jwk.{@link Jwk#builder}()
      *     // ... etc ...
      *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(JwkThumbprint.alg.{@link JwkThumbprint.alg#SHA256 SHA256}) // &lt;---
      *     .build()</pre></blockquote>

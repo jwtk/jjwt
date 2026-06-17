@@ -60,7 +60,7 @@ public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkB
      * <code>B</code> is parameterized as well. This ensures that any subsequent call to the builder's
      * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;chain(edECPublicKeyX509CertificateChain)
+     * <blockquote><pre>Jwk.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;chain(edECPublicKeyX509CertificateChain)
      *     .privateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
@@ -149,7 +149,7 @@ public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkB
      * <code>B</code> is parameterized as well. This ensures that any subsequent call to the builder's
      * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;key(anEdECPublicKey)
+     * <blockquote><pre>Jwk.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;key(anEdECPublicKey)
      *     .privateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
@@ -186,7 +186,7 @@ public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkB
      * <code>A</code> is parameterized as well. This ensures that any subsequent call to the builder's
      * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;key(anEdECPrivateKey)
+     * <blockquote><pre>Jwk.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;key(anEdECPrivateKey)
      *     .publicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
@@ -224,7 +224,7 @@ public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkB
      * <code>A</code> is parameterized as well. This ensures that any subsequent call to the builder's
      * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;keyPair(anEdECKeyPair)
+     * <blockquote><pre>Jwk.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;keyPair(anEdECKeyPair)
      *     .publicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
@@ -257,7 +257,7 @@ public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkB
      * <code>B</code> is parameterized as well. This ensures that any subsequent call to the builder's
      * {@link PublicJwkBuilder#privateKey(PrivateKey) privateKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;key(anEdECPublicKey)
+     * <blockquote><pre>Jwk.builder().&lt;EdECPublicKey, <b>EdECPrivateKey</b>&gt;key(anEdECPublicKey)
      *     .privateKey(<b>aPrivateKey</b>) // &lt;-- must be an EdECPrivateKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>
@@ -291,7 +291,7 @@ public interface DynamicJwkBuilder<K extends Key, J extends Jwk<K>> extends JwkB
      * <code>A</code> is parameterized as well. This ensures that any subsequent call to the builder's
      * {@link PrivateJwkBuilder#publicKey(PublicKey) publicKey} method will be type-safe.  For example:</p>
      *
-     * <blockquote><pre>Jwks.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;key(anEdECPrivateKey)
+     * <blockquote><pre>Jwk.builder().&lt;<b>EdECPublicKey</b>, EdECPrivateKey&gt;key(anEdECPrivateKey)
      *     .publicKey(<b>aPublicKey</b>) // &lt;-- must be an EdECPublicKey instance
      *     ... etc ...
      *     .build();</pre></blockquote>

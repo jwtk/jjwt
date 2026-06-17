@@ -157,7 +157,7 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         Curve curve = assertCurve(publicKey);
         // note: we don't need to validate if specified key's point is on a supported curve here
-        // because that will automatically be asserted when using Jwks.builder().... below
+        // because that will automatically be asserted when using Jwk.builder().... below
         Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
 
         // Generate our ephemeral key pair:

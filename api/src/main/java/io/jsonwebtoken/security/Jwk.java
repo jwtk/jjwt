@@ -96,7 +96,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.crv.P256.keyPair().build();</pre></blockquote>
+     * Jwk.crv.P256.keyPair().build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
      *
      * @see #registry()
@@ -210,7 +210,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.builder()
+     * Jwk.builder()
      *     .operations(Jwk.op.SIGN)
      *     // ... etc ...
      *     .build();</pre></blockquote>
