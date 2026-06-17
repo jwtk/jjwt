@@ -1217,7 +1217,7 @@ specified on the `JwtParserBuilder`. For example:
 ----
 Jwts.parser()
 
-  .decryptWith(secretKey) // <---- or a Password from Keys.password(charArray)
+  .decryptWith(secretKey) // <---- or a Password from Password.of(charArray)
 
   .build()
   .parseEncryptedClaims(jweString);
@@ -1392,7 +1392,7 @@ on the type of JWS or JWE algorithm used.  That is:
  ** For JWE direct encryption, the returned decryption key should be a `SecretKey`.
  ** For password-based key derivation algorithms, the returned decryption key should be a
 `io.jsonwebtoken.security.Password`.  You can create a `Password` instance by calling
-`Keys.password(char[] passwordCharacters)`.
+`Password.of(char[] passwordCharacters)`.
  ** For asymmetric key management algorithms, the returned decryption key should be a `PrivateKey` (not a `PublicKey`).
 
 +++<a name="key-locator-provider">++++++</a>+++
@@ -1853,7 +1853,7 @@ SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretString));
 +
 [,java]
 ----
-Password key = Keys.password(secretString.toCharArray());
+Password key = Paswword.from(secretString.toCharArray());
 ----
 
 [WARNING]
@@ -2685,7 +2685,7 @@ Jwts.parser()
 +
 [,java]
 ----
-Password password = Keys.password(passwordChars);
+Password password = Password.of(passwordChars);
 
 Jwts.parser()
 
@@ -4035,7 +4035,7 @@ as shown below.
 ----
 //DO NOT use this example password in a real app, it is well-known to password crackers:
 String pw = "correct horse battery staple";
-Password password = Keys.password(pw.toCharArray());
+Password password = Password.of(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
 KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW

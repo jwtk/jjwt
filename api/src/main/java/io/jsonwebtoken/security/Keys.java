@@ -17,7 +17,6 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -32,16 +31,6 @@ import java.security.PublicKey;
  * @since 0.10.0
  */
 public final class Keys {
-
-    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
-    private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
-    private static final Class<?>[] FOR_PASSWORD_ARG_TYPES = new Class[]{char[].class};
-    private static final Class<?>[] SECRET_BUILDER_ARG_TYPES = new Class[]{SecretKey.class};
-    private static final Class<?>[] PRIVATE_BUILDER_ARG_TYPES = new Class[]{PrivateKey.class};
-
-    private static <T> T invokeStatic(String method, Class<?>[] argTypes, Object... args) {
-        return Classes.invokeStatic(BRIDGE_CLASS, method, argTypes, args);
-    }
 
     //prevent instantiation
     private Keys() {
@@ -272,9 +261,11 @@ public final class Keys {
      * @return a new {@link Password} instance that wraps a new clone of the specified {@code password} character array.
      * @see Password#toCharArray()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Password#of(char[])}
      */
+    @Deprecated
     public static Password password(char[] password) {
-        return invokeStatic("password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
+        return Password.of(password);
     }
 
     /**
@@ -299,8 +290,7 @@ public final class Keys {
      * @since 0.12.0
      */
     public static SecretKeyBuilder builder(SecretKey key) {
-        Assert.notNull(key, "SecretKey cannot be null.");
-        return invokeStatic("builder", SECRET_BUILDER_ARG_TYPES, key);
+        return Suppliers.SECRET_KEY_BUILDER_FACTORY.apply(key);
     }
 
     /**
@@ -326,7 +316,6 @@ public final class Keys {
      * @since 0.12.0
      */
     public static PrivateKeyBuilder builder(PrivateKey key) {
-        Assert.notNull(key, "PrivateKey cannot be null.");
-        return invokeStatic("builder", PRIVATE_BUILDER_ARG_TYPES, key);
+        return Suppliers.PRIVATE_KEY_BUILDER_FACTORY.apply(key);
     }
 }

@@ -286,7 +286,7 @@ public class JavaReadmeTest {
     public void testExampleJwePassword() {
         //DO NOT use this example password in a real app, it is well-known to password crackers
         String pw = "correct horse battery staple";
-        Password password = Keys.password(pw.toCharArray());
+        Password password = Password.of(pw.toCharArray());
 
         // Choose the desired PBES2 key derivation algorithm:
         KeyAlgorithm<Password, Password> alg = Jwe.alg.PBES2_HS512_A256KW; //or PBES2_HS384...

@@ -17,9 +17,11 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.lang.Classes;
 
+import javax.crypto.SecretKey;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
+import java.security.PrivateKey;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -65,6 +67,15 @@ final class Suppliers {
 
     static final Function<byte[], InputStream> BYTES_INPUT_STREAM_FACTORY =
             Classes.newInstance("io.jsonwebtoken.impl.io.BytesInputStream$Factory");
+
+    static final Function<char[], Password> PASSWORD_FACTORY =
+            Classes.newInstance("io.jsonwebtoken.impl.security.PasswordSpec$Factory");
+
+    static final Function<SecretKey, SecretKeyBuilder> SECRET_KEY_BUILDER_FACTORY =
+            Classes.newInstance("io.jsonwebtoken.impl.security.ProvidedSecretKeyBuilder$Factory");
+
+    static final Function<PrivateKey, PrivateKeyBuilder> PRIVATE_KEY_BUILDER_FACTORY =
+            Classes.newInstance("io.jsonwebtoken.impl.security.ProvidedPrivateKeyBuilder$Factory");
 
     /* =====================================================================================================
      * JWK utilities

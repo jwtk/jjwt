@@ -145,7 +145,7 @@ public final class StandardKeyAlgorithms extends IdRegistry<KeyAlgorithm<?, ?>> 
         for (int i = 0; points.size() < NUM_SAMPLES; i++) {
 
             char[] password = randomChars(PASSWORD_LENGTH);
-            Password key = Keys.password(password);
+            Password key = Password.of(password);
             HEADER.pbes2Count(workFactor);
             KeyRequest<Password> request = new DefaultKeyRequest<>(null, null, key, HEADER, ENC_ALG);
 

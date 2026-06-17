@@ -47,13 +47,6 @@ class KeysTest {
     }
 
     @Test
-    void testPrivateCtor() { //for code coverage purposes only
-        //noinspection GroovyResultOfObjectAllocationIgnored
-        new Keys()
-        new KeysBridge()
-    }
-
-    @Test
     void testHmacShaKeyForWithNullArgument() {
         try {
             Keys.hmacShaKeyFor(null)
@@ -282,9 +275,11 @@ class KeysTest {
     @Test
     void testForPassword() {
         def password = "whatever".toCharArray()
+        Password expected = Password.of(password)
         Password key = Keys.password(password)
         assertArrayEquals password, key.toCharArray()
         assertTrue key instanceof PasswordSpec
+        assertEquals(expected, key)
     }
 
     @Test

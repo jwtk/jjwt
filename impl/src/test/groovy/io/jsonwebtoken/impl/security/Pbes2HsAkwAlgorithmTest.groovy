@@ -22,7 +22,6 @@ import io.jsonwebtoken.impl.DefaultJweHeaderMutator
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.Password
 import org.junit.Test
 
@@ -32,7 +31,7 @@ import static org.junit.Assert.fail
 @SuppressWarnings('SpellCheckingInspection')
 class Pbes2HsAkwAlgorithmTest {
 
-    private static Password KEY = Keys.password("12345678".toCharArray())
+    private static Password KEY = Password.of("12345678".toCharArray())
     private static List<Pbes2HsAkwAlgorithm> ALGS = [Jwe.alg.PBES2_HS256_A128KW,
                                                      Jwe.alg.PBES2_HS384_A192KW,
                                                      Jwe.alg.PBES2_HS512_A256KW] as List<Pbes2HsAkwAlgorithm>
@@ -58,7 +57,7 @@ class Pbes2HsAkwAlgorithmTest {
     @Test
     void testExceedsMaxIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
-            def password = Keys.password('correct horse battery staple'.toCharArray())
+            def password = Password.of('correct horse battery staple'.toCharArray())
             def iterations = alg.MAX_ITERATIONS + 1
             // we make the JWE string directly from JSON here (instead of using Jwts.builder()) to avoid
             // the computational time it would take to create such JWEs with excessive iterations as well as
@@ -102,7 +101,7 @@ class Pbes2HsAkwAlgorithmTest {
 
         def password = 'hellowor'.toCharArray()
         def header = new DefaultJweHeader().pbes2Count(iterations)
-        def key = Keys.password(password)
+        def key = Password.of(password)
         def req = new DefaultKeyRequest(null, null, key, header, Jwe.enc.A128GCM)
         int sum = 0
         for (int i = 0; i < tries; i++) {

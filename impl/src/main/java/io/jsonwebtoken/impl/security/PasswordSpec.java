@@ -20,6 +20,7 @@ import io.jsonwebtoken.lang.Objects;
 import io.jsonwebtoken.security.Password;
 
 import java.security.spec.KeySpec;
+import java.util.function.Function;
 
 public class PasswordSpec implements Password, KeySpec {
 
@@ -96,5 +97,13 @@ public class PasswordSpec implements Password, KeySpec {
     @Override
     public final String toString() {
         return "<redacted>";
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection as io.jsonwebtoken.security.Suppliers.PASSWORD_FACTORY
+    public static class Factory implements Function<char[], Password> {
+        @Override
+        public Password apply(char[] buf) {
+            return new PasswordSpec(buf);
+        }
     }
 }

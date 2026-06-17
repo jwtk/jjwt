@@ -20,10 +20,7 @@ import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
-import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.JwkThumbprint
-import io.jsonwebtoken.security.Jwks
-import io.jsonwebtoken.security.Suppliers
+import io.jsonwebtoken.security.*
 import org.junit.Test
 
 import static org.junit.Assert.assertSame
@@ -34,8 +31,10 @@ class PrivateConstructorsTest {
     @Test
     void testPrivateCtors() { // for code coverage only
         new Classes()
+        new Keys()
         new KeysBridge()
         new Functions()
+        new Suppliers()
         new Jws.alg()
         new Jwe.enc()
         new Jwe.alg()
@@ -50,6 +49,6 @@ class PrivateConstructorsTest {
         new Jwks.CRV(); assertSame(Jwk.crv.registry(), Jwks.CRV.get())
         new Jwks.OP(); assertSame(Jwk.op.registry(), Jwks.OP.get())
         new Jwks.HASH(); assertSame(JwkThumbprint.alg.registry(), Jwks.HASH.get())
-        new Suppliers()
+
     }
 }
