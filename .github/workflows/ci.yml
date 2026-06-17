@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distribution: [ 'oracle', 'temurin', 'zulu', 'corretto', 'semeru' ]
+        distribution: [ 'oracle', 'zulu', 'corretto', 'semeru' ]
         java-version: [ 8, 11, 17, 21, 25 ]
         # Oracle only provides JDK 17+, so exclude earlier versions:
         exclude:
