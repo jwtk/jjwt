@@ -188,7 +188,7 @@ class AbstractJwkBuilderTest {
     @Test
     void testOperationsFullReplacement() {
         def first = Collections.setOf(Jwk.op.SIGN, Jwk.op.VERIFY)
-        def second = Set.of(Jwk.op.ENCRYPT, Jwk.op.DECRYPT)
+        def second = Collections.setOf(Jwk.op.ENCRYPT, Jwk.op.DECRYPT)
         def builder = builder()
 
         def jwk = builder.operations(first).build()
