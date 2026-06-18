@@ -29,7 +29,7 @@ public interface KeyOperationPolicied<T extends KeyOperationPolicied<T>> {
     /**
      * Sets the key operation policy that determines which {@link KeyOperation}s may be assigned to a JWK.
      *
-     * <p>Unless overridden by this method, the default RFC-recommended policy is used where:
+     * <p>Unless overridden by this method, the default RFC-recommended policy is used where:</p>
      * <ul>
      *     <li>All {@link Jwk.op RFC-standard key operations} are supported.</li>
      *     <li>Multiple unrelated operations may <b>not</b> be assigned to the JWK per the
@@ -42,7 +42,6 @@ public interface KeyOperationPolicied<T extends KeyOperationPolicied<T>> {
      * "{@link Jwk.op#UNWRAP_KEY unwrapKey}" are permitted, but other combinations SHOULD NOT be used.</pre></blockquote>
      * </li>
      * </ul>
-     * </p>
      *
      * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
      * one may be created and configured using the {@link #operationPolicy(Consumer)} method, or by using a

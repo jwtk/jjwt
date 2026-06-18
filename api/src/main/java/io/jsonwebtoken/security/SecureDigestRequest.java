@@ -35,6 +35,7 @@ public interface SecureDigestRequest<K extends Key> extends DigestRequest, Secur
     /**
      * Returns a new {@link DigestRequest.Builder} for creating immutable {@link DigestRequest}s.
      *
+     * @param <K> the type of key used by the algorithm during the request
      * @return a new {@link DigestRequest.Builder} for creating immutable {@link DigestRequest}s.
      */
     static <K extends Key> SecureDigestRequest.Builder<K> builder() {

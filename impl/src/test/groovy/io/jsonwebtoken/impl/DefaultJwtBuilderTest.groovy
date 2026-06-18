@@ -152,6 +152,13 @@ class DefaultJwtBuilderTest {
     }
 
     @Test
+    void testHeaderConsumer() {
+        def h = Jwts.header().add('foo', 'bar').build()
+        builder.header(header -> header.add('foo', 'bar'))
+        assertEquals h, builder.headerBuilder.build()
+    }
+
+    @Test
     void testSetHeaderFromMap() {
         def m = [foo: 'bar']
         builder.setHeader(m)
@@ -193,6 +200,17 @@ class DefaultJwtBuilderTest {
         def b = new DefaultJwtBuilder()
         def c = Jwts.claims([initial: 'initial'])
         b.claims().add(c)
+        def c2 = [foo: 'bar', baz: 'buz']
+        b.addClaims(c2)
+        assertEquals 'initial', b.claimsBuilder.get('initial')
+        assertEquals 'bar', b.claimsBuilder.get('foo')
+    }
+
+    @Test
+    void testClaimsConsumer() {
+        def b = new DefaultJwtBuilder()
+        def c = Jwts.claims([initial: 'initial'])
+        b.claims(claims -> claims.add(c))
         def c2 = [foo: 'bar', baz: 'buz']
         b.addClaims(c2)
         assertEquals 'initial', b.claimsBuilder.get('initial')

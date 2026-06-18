@@ -31,6 +31,7 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * A builder for constructing Unprotected JWTs, Signed JWTs (aka 'JWS's) and Encrypted JWTs (aka 'JWE's).
@@ -84,6 +85,30 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.12.0
      */
     BuilderHeader header();
+
+    /**
+     * Modifies the JWT's header name/value pairs as desired, allowing for in-line configuration. For example:
+     *
+     * <blockquote><pre>
+     * String jwt = Jwts.builder()
+     *     .header(<b>header -> header
+     *         .keyId("keyId")
+     *         .add("aName", aValue)
+     *         // ... etc ...
+     *         .add(myHeaderMap)</b>)
+     *     .subject("Joe") // resume JwtBuilder calls
+     *     // ... etc ...
+     *     .compact();</pre></blockquote>
+     *
+     * @param header the consumer used to configure the JWT header
+     * @return the {@code JwtBuilder} for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    default JwtBuilder header(Consumer<BuilderHeader> header) {
+        BuilderHeader h = header();
+        header.accept(h);
+        return h.and();
+    }
 
     /**
      * Per standard Java idiom 'setter' conventions, this method sets (and fully replaces) any existing header with the
@@ -408,6 +433,33 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @since 0.12.0
      */
     BuilderClaims claims();
+
+    /**
+     * Modifies the JWT {@code Claims} payload, allowing for in-line configuration. For example:
+     *
+     * <blockquote><pre>
+     * String jwt = Jwts.builder()
+     *
+     *     <b>.claims(claims -> claims
+     *         .issuer("me")
+     *         .subject("Joe")
+     *         .audience().add("you").and()
+     *         .add("customClaim", customValue)
+     *         .add(myClaimsMap))</b>
+     *
+     *     .signWith(key) // resume JwtBuilder calls
+     *     // ... etc ...
+     *     .compact();</pre></blockquote>
+     *
+     * @param claims the consumer used to configure the JWT claims
+     * @return the {@code JwtBuilder} for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    default JwtBuilder claims(Consumer<BuilderClaims> claims) {
+        BuilderClaims c = claims();
+        claims.accept(c);
+        return c.and();
+    }
 
     /**
      * Replaces the JWT Claims payload with the specified name/value pairs. This is an alias for:

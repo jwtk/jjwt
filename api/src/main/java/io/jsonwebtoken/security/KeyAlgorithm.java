@@ -124,6 +124,29 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      */
     KeyResult getEncryptionKey(KeyRequest<E> request) throws SecurityException;
 
+    /**
+     * Return the {@link SecretKey} that should be used to encrypt a JWE via configured algorithm parameters along with
+     * any (optional) content encryption key ciphertext to be embedded in the JWE. The following parameter
+     * values must be specified at a minimum:
+     * <ul>
+     *     <li>The {@link Params#payload(Object) payload} must be the cryptographic key used by the KeyAlgorithm</li>
+     *     <li>The {@link Params#header(JweHeader) header}, which may be used for reading or writing any
+     *     {@link KeyAlgorithm}-specific information.</li>
+     *     <li>The {@link Params#encryptionAlgorithm(AeadAlgorithm) encryptionAlgorithm} that will be used
+     *     to encrypt the JWE.</li>
+     * </ul>
+     * <p>If the key algorithm uses key encryption or key agreement to produce an encrypted key value that must be
+     * included in the JWE, the encrypted key ciphertext will be available via the result's
+     * {@link KeyResult#getPayload() result.getPayload()} method.  If the key algorithm does not produce encrypted
+     * key ciphertext, {@link KeyResult#getPayload() result.getPayload()} will be a non-null empty byte array.</p>
+     *
+     * @param p the consumer that allows configuration of algorithm parameters used to produce the CEK and its optional
+     *          encrypted ciphertext
+     * @return the {@link SecretKey} that should be used to encrypt a JWE via the request's specified
+     * {@link KeyRequest#getEncryptionAlgorithm() AeadAlgorithm}, along with any optional encrypted key ciphertext.
+     * @throws SecurityException if there is a problem obtaining or encrypting the AEAD {@code SecretKey}.
+     * @since JJWT_RELEASE_VERSION
+     */
     default KeyResult getEncryptionKey(Consumer<Params<E, ?>> p) throws SecurityException {
         Assert.notNull(p, "Consumer cannot be null");
         KeyRequest.Builder<E> builder = KeyRequest.builder();
@@ -131,6 +154,23 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
         return getEncryptionKey(builder.build());
     }
 
+    /**
+     * Return the {@link SecretKey} that should be used to encrypt a JWE via configured algorithm parameters along with
+     * any (optional) content encryption key ciphertext to be embedded in the JWE.
+     *
+     * <p>If the key algorithm uses key encryption or key agreement to produce an encrypted key value that must be
+     * included in the JWE, the encrypted key ciphertext will be available via the result's
+     * {@link KeyResult#getPayload() result.getPayload()} method.  If the key algorithm does not produce encrypted
+     * key ciphertext, {@link KeyResult#getPayload() result.getPayload()} will be a non-null empty byte array.</p>
+     *
+     * @param key    he cryptographic key used by the KeyAlgorithm for key encryption or key agreement
+     * @param header the JWE header to use for reading or writing any {@link KeyAlgorithm}-specific information.
+     * @param enc    the AEAD encryption algorithm that will be used to encrypt the JWE.
+     * @return the {@link SecretKey} that should be used to encrypt a JWE via the request's specified
+     * {@link KeyRequest#getEncryptionAlgorithm() AeadAlgorithm}, along with any optional encrypted key ciphertext.
+     * @throws SecurityException if there is a problem obtaining or encrypting the AEAD {@code SecretKey}.
+     * @since JJWT_RELEASE_VERSION
+     */
     default KeyResult getEncryptionKey(E key, JweHeader header, AeadAlgorithm enc) throws SecurityException {
         return getEncryptionKey(p -> p.payload(key).header(header).encryptionAlgorithm(enc));
     }
@@ -159,8 +199,10 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      *
      * @param p a Consumer that will customize {@link DecryptParams} used to create and
      *          {@link #getDecryptionKey(DecryptionKeyRequest) execute} a {@link DecryptionKeyRequest}.
-     * @return
-     * @throws SecurityException
+     * @return the {@link SecretKey} that should be used to decrypt a JWE according to the in-line constructed
+     * request parameters.
+     * @throws SecurityException if there is a problem obtaining or decrypting the AEAD {@code SecretKey}.
+     * @since JJWT_RELEASE_VERSION
      */
     default SecretKey getDecryptionKey(Consumer<DecryptParams<D, ?>> p) throws SecurityException {
         Assert.notNull(p, "Consumer cannot be null");
@@ -169,6 +211,20 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
         return getDecryptionKey(builder.build());
     }
 
+    /**
+     * Return the {@link SecretKey} that should be used to decrypt a JWE according to the in-line constructed
+     * request parameters.
+     *
+     * @param cekCiphertext the AEAD encrypted key ciphertext to be decrypted
+     * @param decryptionKey the key to use decrypt the {@code cekCiphertext}
+     * @param header        the immutable JWE header that may be inspected to obtain any key algorithm-specific
+     *                      public information used to decrypt the {@code cekCiphertext}.
+     * @param enc           the AEAD algorithm used to decrypt the JWE with the returned {@code SecretKey}
+     * @return the {@link SecretKey} that should be used to decrypt a JWE according to the in-line constructed
+     * request parameters.
+     * @throws SecurityException if there is a problem obtaining or decrypting the AEAD {@code SecretKey}.
+     * @since JJWT_RELEASE_VERSION
+     */
     default SecretKey getDecryptionKey(byte[] cekCiphertext, D decryptionKey, JweHeader header, AeadAlgorithm enc) throws SecurityException {
         return getDecryptionKey(p -> p.payload(cekCiphertext).key(decryptionKey).header(header).encryptionAlgorithm(enc));
     }

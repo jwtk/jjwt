@@ -3139,7 +3139,7 @@ For example:
 
 [,java]
 ----
-Jwk<?> jwk = Jwks.builder()/* ... */.build();
+Jwk<?> jwk = Jwk.builder()/* ... */.build();
 SecretJwk = JwkSet.builder()        // 1
     .add(jwk)                       // 2, appends a key
     //.add(aCollection)             //    append multiple keys
@@ -3154,7 +3154,7 @@ SecretJwk = JwkSet.builder()        // 1
 ----
 
 As shown, you can optionally configure the `.operationPolicy(KeyOperationPolicy)` method using a
-`Jwts.OP.policy()` builder.  A `KeyOperationPolicy` allows you control what operations are allowed for any JWK
+`Jwts.op.policy()` builder.  A `KeyOperationPolicy` allows you to control what operations are allowed for any JWK
 before being added to the JWK Set; any JWK that does not match the policy will be rejected and not added to the set.
 JJWT internally defaults to a standard RFC-compliant policy, but you can create a
 policy to override the default if desired using the `Jwk.op.policy()` builder method.
@@ -3168,7 +3168,7 @@ You can read/parse a JWK Set by building a JWK Set `Parser` and parsing the JWK 
 
 [,java]
 ----
-JwkSet jwkSet = Jwks.setParser()
+JwkSet jwkSet = JwkSet.parser()
     //.provider(aJcaProvider)      // optional
     //.deserializer(deserializer)  // optional
     //.policy(aKeyOperationPolicy) // optional
@@ -3852,7 +3852,7 @@ using Bob's Edwards Curve public key:
 [,java]
 ----
 // Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
-Curve curve = Jwks.CRV.Ed25519; //or Ed448
+Curve curve = Jwk.crv.Ed25519; //or Ed448
 KeyPair pair = curve.keyPair().build();
 
 // Bob creates the compact JWS with his Edwards Curve private key:
@@ -4074,14 +4074,14 @@ Example creating and parsing a secret JWK:
 [,java]
 ----
 SecretKey key = Jws.alg.HS512.key().build(); // or HS384 or HS256
-SecretJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
+SecretJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof SecretJwk;
 assert jwk.equals(parsed);
@@ -4096,14 +4096,14 @@ Example creating and parsing an RSA Public JWK:
 [,java]
 ----
 RSAPublicKey key = (RSAPublicKey)Jws.alg.RS512.keyPair().build().getPublic();
-RsaPublicJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
+RsaPublicJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof RsaPublicJwk;
 assert jwk.equals(parsed);
@@ -4121,7 +4121,7 @@ KeyPair pair = Jws.alg.RS512.keyPair().build();
 RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
 RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
-RsaPrivateJwk privJwk = Jwks.builder().key(privKey).idFromThumbprint().build();
+RsaPrivateJwk privJwk = Jwk.builder().key(privKey).idFromThumbprint().build();
 RsaPublicJwk pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -4131,7 +4131,7 @@ assert pubKey.equals(pubJwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof RsaPrivateJwk;
 assert privJwk.equals(parsed);
@@ -4146,14 +4146,14 @@ Example creating and parsing an Elliptic Curve Public JWK:
 [,java]
 ----
 ECPublicKey key = (ECPublicKey) Jws.alg.ES512.keyPair().build().getPublic();
-EcPublicJwk jwk = Jwks.builder().key(key).idFromThumbprint().build();
+EcPublicJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof EcPublicJwk;
 assert jwk.equals(parsed);
@@ -4171,7 +4171,7 @@ KeyPair pair = Jws.alg.ES512.keyPair().build();
 ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
 ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 
-EcPrivateJwk privJwk = Jwks.builder().key(privKey).idFromThumbprint().build();
+EcPrivateJwk privJwk = Jwk.builder().key(privKey).idFromThumbprint().build();
 EcPublicJwk pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -4181,7 +4181,7 @@ assert pubKey.equals(pubJwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof EcPrivateJwk;
 assert privJwk.equals(parsed);
@@ -4197,7 +4197,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 
 [,java]
 ----
-PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
+PublicKey key = Jwk.crv.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
 OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
@@ -4205,7 +4205,7 @@ assert key.equals(jwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(jwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof OctetPublicJwk;
 assert jwk.equals(parsed);
@@ -4221,7 +4221,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 
 [,java]
 ----
-KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
+KeyPair pair = Jwk.crv.Ed448.keyPair().build(); // or Ed25519, X25519, X448
 PublicKey pubKey = pair.getPublic();
 PrivateKey privKey = pair.getPrivate();
 
@@ -4235,7 +4235,7 @@ assert pubKey.equals(pubJwk.toKey());
 
 byte[] utf8Bytes = new JacksonSerializer().serialize(privJwk); // or GsonSerializer(), etc
 String jwkJson = new String(utf8Bytes, StandardCharsets.UTF_8);
-Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
 assert parsed instanceof OctetPrivateJwk;
 assert privJwk.equals(parsed);

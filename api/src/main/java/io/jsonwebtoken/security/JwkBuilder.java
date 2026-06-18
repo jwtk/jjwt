@@ -171,6 +171,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * <p>For best interoperability with other applications however, it is recommended to use only {@link Jwk.op}
      * constants.</p>
      *
+     * @param ops the consumer used to configure the key operations allowed to be used with the constructed JWK.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if any of the specified
      *                                  {@code KeyOperation} elements are not permitted by the JWK's
@@ -207,6 +208,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      * <p>For best interoperability with other applications however, it is recommended to use only the {@link Jwk.op}
      * constants.</p>
      *
+     * @param ops the key operations allowed to be used with the constructed JWK.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if any of the specified
      *                                  {@code KeyOperation} elements are not permitted by the JWK's
