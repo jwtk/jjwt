@@ -180,6 +180,7 @@ public interface JwkBuilder<K extends Key, J extends Jwk<K>, T extends JwkBuilde
      *                                  same key with multiple algorithms.
      * @see Jwk.op
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517: key_ops (Key Operations) Parameter</a>
+     * @since JJWT_RELEASE_VERSION
      */
     default T operations(Consumer<CollectionMutator<KeyOperation, ?>> ops) throws IllegalArgumentException {
         NestedCollection<KeyOperation, T> operations = operations();

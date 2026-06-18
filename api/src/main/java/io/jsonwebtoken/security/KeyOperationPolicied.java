@@ -23,6 +23,7 @@ import java.util.function.Consumer;
  *
  * @param <T> the implementing instance for method chaining
  */
+@SuppressWarnings("SpellCheckingInspection")
 @FunctionalInterface
 public interface KeyOperationPolicied<T extends KeyOperationPolicied<T>> {
 
