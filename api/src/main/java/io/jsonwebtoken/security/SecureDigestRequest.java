@@ -18,12 +18,16 @@ package io.jsonwebtoken.security;
 import java.io.InputStream;
 import java.security.Key;
 
+/**
+ * A request to a {@link SecureDigestAlgorithm} requiring a cryptographic {@link #getKey() key}.
+ *
+ * @param <K> they type of key used by the algorithm during the request
+ * @since JJWT_RELEASE_VERSION
+ */
 public interface SecureDigestRequest<K extends Key> extends DigestRequest, SecureRequest<InputStream, K> {
 
     /**
      * A builder for creating new immutable {@link SecureDigestRequest} instances.
-     *
-     * @since JJWT_RELEASE_VERSION
      */
     interface Builder<K extends Key> extends io.jsonwebtoken.lang.Builder<SecureDigestRequest<K>>, SecureDigestAlgorithm.Params<K, Builder<K>> {
     }
@@ -32,7 +36,6 @@ public interface SecureDigestRequest<K extends Key> extends DigestRequest, Secur
      * Returns a new {@link DigestRequest.Builder} for creating immutable {@link DigestRequest}s.
      *
      * @return a new {@link DigestRequest.Builder} for creating immutable {@link DigestRequest}s.
-     * @since JJWT_RELEASE_VERSION
      */
     static <K extends Key> SecureDigestRequest.Builder<K> builder() {
         return Suppliers.secureDigestRequestBuilder();

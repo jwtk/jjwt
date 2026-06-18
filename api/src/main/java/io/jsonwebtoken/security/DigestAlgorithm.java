@@ -78,6 +78,13 @@ import java.security.PublicKey;
  */
 public interface DigestAlgorithm<R extends Request<InputStream>, V extends VerifyDigestRequest> extends Identifiable {
 
+
+    /**
+     * Algorithm parameters relevant for all {@link DigestAlgorithm}s.
+     *
+     * @param <P> the subtype for method chaining
+     * @since JJWT_RELEASE_VERSION
+     */
     interface Params<P extends Params<P>> extends OctetStreamPayloadParams<P> {
     }
 

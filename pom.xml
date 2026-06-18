@@ -98,7 +98,7 @@
 
         <maven.jar.version>3.4.2</maven.jar.version>
         <maven.compiler.version>3.14.0</maven.compiler.version>
-        <maven.javadoc.version>3.11.3</maven.javadoc.version>
+        <maven.javadoc.version>3.12.0</maven.javadoc.version>
         <maven.source.version>3.3.1</maven.source.version>
         <maven.resources.version>3.3.1</maven.resources.version>
         <maven.gpg.version>3.2.8</maven.gpg.version>

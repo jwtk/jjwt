@@ -21,6 +21,7 @@ import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.lang.Assert;
 
 import javax.crypto.SecretKey;
+import java.io.OutputStream;
 import java.security.Key;
 import java.util.function.Consumer;
 
@@ -135,7 +136,8 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
     }
 
     /**
-     * Return the {@link SecretKey} that should be used to decrypt a JWE via the request's specified
+     * Return the {@link SecretKey} that will be used to
+     * {@link AeadAlgorithm#decrypt(DecryptAeadRequest, OutputStream) decrypt} a JWE using the request
      * {@link DecryptionKeyRequest#getEncryptionAlgorithm() AeadAlgorithm}.
      *
      * <p>If the key algorithm used key encryption or key agreement to produce an encrypted key value, the encrypted
@@ -151,6 +153,15 @@ public interface KeyAlgorithm<E extends Key, D extends Key> extends Identifiable
      */
     SecretKey getDecryptionKey(DecryptionKeyRequest<D> request) throws SecurityException;
 
+    /**
+     * Return the {@link SecretKey} that should be used to decrypt a JWE according to the in-line constructed
+     * request parameters.
+     *
+     * @param p a Consumer that will customize {@link DecryptParams} used to create and
+     *          {@link #getDecryptionKey(DecryptionKeyRequest) execute} a {@link DecryptionKeyRequest}.
+     * @return
+     * @throws SecurityException
+     */
     default SecretKey getDecryptionKey(Consumer<DecryptParams<D, ?>> p) throws SecurityException {
         Assert.notNull(p, "Consumer cannot be null");
         DecryptionKeyRequest.Builder<D> builder = DecryptionKeyRequest.builder();
