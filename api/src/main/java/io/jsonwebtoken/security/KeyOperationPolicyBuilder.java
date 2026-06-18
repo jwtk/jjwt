@@ -20,6 +20,7 @@ import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.CollectionMutator;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 
 /**
@@ -66,7 +67,8 @@ public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperatio
      * This is to allow application developers to favor their own implementations over JJWT's default implementations
      * if necessary (for example, to support legacy or custom behavior).</p>
      *
-     * <p>If a custom {@code KeyOperation} is desired, one may be easily created with a {@link Jwk.op#builder()}.</p>
+     * <p>If a custom {@code KeyOperation} is desired, one may be easily created with a {@link Jwk.op#builder()} or
+     * by using the {@link #add(Consumer)} method directly.</p>
      *
      * @param op a key operation to add to the policy's total set of supported operations, replacing any
      *           existing one with the same exact (CaSe-SeNsItIvE) {@link KeyOperation#getId() id}.
@@ -79,6 +81,37 @@ public interface KeyOperationPolicyBuilder extends CollectionMutator<KeyOperatio
     @Override
     // for better JavaDoc
     KeyOperationPolicyBuilder add(KeyOperation op);
+
+    /**
+     * Configures a new {@link KeyOperation} and then adds it to the policy's total set of supported key operations
+     * used to validate a key's intended usage, replacing any existing one with an identical (CaSe-SeNsItIvE)
+     * {@link Identifiable#getId() id}.
+     *
+     * <p><b>Standard {@code KeyOperation}s and Overrides</b></p>
+     *
+     * <p>The RFC standard {@link Jwk.op} key operations are supported by default and do not need
+     * to be added via this method, but beware: <b>If the {@code op} argument has a JWK standard
+     * {@link Identifiable#getId() id}, it will replace the JJWT standard operation implementation</b>.
+     * This is to allow application developers to favor their own implementations over JJWT's default implementations
+     * if necessary (for example, to support legacy or custom behavior).</p>
+     *
+     * <p>If the configured {@code KeyOperation} must be referenced before or after this method, it is better to use
+     * a {@link Jwk.op#builder()} to create it first, and then call the {@link #add(KeyOperation)} method instead.</p>
+     *
+     * @param op the consumer that will configure the key operation before adding it to the policy.  If the resulting
+     *           key operation has the exact (CaSe-SeNsItIvE) {@link KeyOperation#getId() id} as an existing key
+     *           operation, the existing key operation will be replaced.
+     * @return the builder for method chaining.
+     * @see JwkBuilder#operationPolicy(KeyOperationPolicy)
+     * @see JwkBuilder#operations()
+     * @since JJWT_RELEASE_VERSION
+     */
+    default KeyOperationPolicyBuilder add(Consumer<KeyOperationBuilder> op) {
+        KeyOperationBuilder builder = Jwk.op.builder();
+        op.accept(builder);
+        KeyOperation keyOp = builder.build();
+        return add(keyOp);
+    }
 
     /**
      * Adds the specified key operations to the policy's total set of supported key operations

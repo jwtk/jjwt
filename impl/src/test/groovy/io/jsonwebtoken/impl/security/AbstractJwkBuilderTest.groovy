@@ -186,6 +186,20 @@ class AbstractJwkBuilderTest {
     }
 
     @Test
+    void testOperationsFullReplacement() {
+        def first = Collections.setOf(Jwk.op.SIGN, Jwk.op.VERIFY)
+        def second = Set.of(Jwk.op.ENCRYPT, Jwk.op.DECRYPT)
+        def builder = builder()
+
+        def jwk = builder.operations(first).build()
+        assertEquals first, jwk.getOperations()
+
+        // now fully replace using same builder with existing state:
+        jwk = builder.operations(second).build()
+        assertEquals second, jwk.getOperations()
+    }
+
+    @Test
     void testOperationsUnrelated() {
         try {
             // exception thrown on setter, before calling build:
@@ -236,7 +250,7 @@ class AbstractJwkBuilderTest {
     void testCustomOperationOverridesDefault() {
         def op = Jwk.op.builder().id('sign').description('Different Description')
                 .related(Jwk.op.VERIFY.id).build()
-        def builder = builder().operationPolicy(Jwk.op.policy().add(op).build())
+        def builder = builder().operationPolicy(p -> p.add(op))
         def jwk = builder.operations().add(Collections.setOf(op, Jwk.op.VERIFY)).and().build() as Jwk
         assertSame op, jwk.getOperations().find({ it.id == 'sign' })
     }

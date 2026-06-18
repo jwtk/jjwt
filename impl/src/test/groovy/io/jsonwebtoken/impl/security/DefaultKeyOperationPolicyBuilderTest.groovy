@@ -55,6 +55,13 @@ class DefaultKeyOperationPolicyBuilderTest {
     }
 
     @Test
+    void testAddConsumer() {
+        def op = Jwk.op.builder().id('foo').build()
+        def policy = builder.add(b -> b.id('foo')).build()
+        assertTrue policy.operations.contains(op)
+    }
+
+    @Test
     void testAddNull() {
         def orig = builder.build()
         def policy = builder.add((KeyOperation) null).build()

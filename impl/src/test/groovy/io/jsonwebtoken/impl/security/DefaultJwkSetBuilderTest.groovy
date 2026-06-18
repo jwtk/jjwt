@@ -301,7 +301,7 @@ class DefaultJwkSetBuilderTest {
 
     @Test
     void testNullPolicy() {
-        builder.operationPolicy(null)
+        builder.operationPolicy(null as KeyOperationPolicy)
         // assert that the default policy has been applied instead of null:
         def defaultPolicy = AbstractJwkBuilder.DEFAULT_OPERATION_POLICY
         // ensure default has been applied instead of null:
