@@ -210,34 +210,38 @@ public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
      */
     protected byte[] doGetKeyMaterial(Key key) {
         byte[] encoded = KeysBridge.getEncoded(key);
-        int i = Bytes.indexOf(encoded, ASN1_OID);
-        Assert.gt(i, -1, "Missing or incorrect algorithm OID.");
-        i = i + ASN1_OID.length;
-        int keyLen = 0;
-        if (encoded[i] == 0x05) { // NULL terminator, next should be zero byte indicator
-            int unusedBytes = encoded[++i];
-            Assert.eq(unusedBytes, 0, "OID NULL terminator should indicate zero unused bytes.");
-            i++;
-        }
-        if (encoded[i] == 0x03) { // ASN.1 bit stream, Public Key
-            i++;
-            keyLen = encoded[i++];
-            int unusedBytes = encoded[i++];
-            Assert.eq(unusedBytes, 0, "BIT STREAM should not indicate unused bytes.");
-            keyLen--;
-        } else if (encoded[i] == 0x04) { // ASN.1 octet sequence, Private Key.  Key length follows as next byte.
-            i++;
-            keyLen = encoded[i++];
-            if (encoded[i] == 0x04) { // ASN.1 octet sequence, key length follows as next byte.
-                i++; // skip sequence marker
-                keyLen = encoded[i++]; // next byte is length
+        try {
+            int i = Bytes.indexOf(encoded, ASN1_OID);
+            Assert.gt(i, -1, "Missing or incorrect algorithm OID.");
+            i = i + ASN1_OID.length;
+            int keyLen = 0;
+            if (encoded[i] == 0x05) { // NULL terminator, next should be zero byte indicator
+                int unusedBytes = encoded[++i];
+                Assert.eq(unusedBytes, 0, "OID NULL terminator should indicate zero unused bytes.");
+                i++;
             }
+            if (encoded[i] == 0x03) { // ASN.1 bit stream, Public Key
+                i++;
+                keyLen = encoded[i++];
+                int unusedBytes = encoded[i++];
+                Assert.eq(unusedBytes, 0, "BIT STREAM should not indicate unused bytes.");
+                keyLen--;
+            } else if (encoded[i] == 0x04) { // ASN.1 octet sequence, Private Key.  Key length follows as next byte.
+                i++;
+                keyLen = encoded[i++];
+                if (encoded[i] == 0x04) { // ASN.1 octet sequence, key length follows as next byte.
+                    i++; // skip sequence marker
+                    keyLen = encoded[i++]; // next byte is length
+                }
+            }
+            Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
+            byte[] result = Arrays.copyOfRange(encoded, i, i + keyLen);
+            keyLen = Bytes.length(result);
+            Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
+            return result;
+        } finally {
+            Bytes.clear(encoded);
         }
-        Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
-        byte[] result = Arrays.copyOfRange(encoded, i, i + keyLen);
-        keyLen = Bytes.length(result);
-        Assert.eq(keyLen, this.encodedKeyByteLength, "Invalid key length.");
-        return result;
     }
 
     private void assertLength(byte[] raw, boolean isPublic) {
@@ -323,19 +327,25 @@ public class EdwardsCurve extends AbstractCurve implements KeyLengthSupplier {
 
         // try to perform oid and/or length checks:
         byte[] encoded = KeysBridge.findEncoded(key);
-
-        if (curve == null && !Bytes.isEmpty(encoded)) { // Try to find the Key ASN.1 algorithm OID:
-            int oidTerminalNode = findOidTerminalNode(encoded);
-            curve = BY_OID_TERMINAL_NODE.get(oidTerminalNode);
-        }
-        if (curve != null && !Bytes.isEmpty(encoded)) {
-            // found a curve, and we have encoded bytes, let's make sure that the encoding represents
-            // the correct key length:
-            try {
-                curve.getKeyMaterial(key);
-            } catch (Throwable ignored) {
-                curve = null; // key length is invalid for its indicated curve, not a match
+        try {
+            if (curve == null && !Bytes.isEmpty(encoded)) { // Try to find the Key ASN.1 algorithm OID:
+                int oidTerminalNode = findOidTerminalNode(encoded);
+                curve = BY_OID_TERMINAL_NODE.get(oidTerminalNode);
             }
+            if (curve != null && !Bytes.isEmpty(encoded)) {
+                // found a curve, and we have encoded bytes, let's make sure that the encoding represents
+                // the correct key length:
+                byte[] mat = Bytes.EMPTY;
+                try {
+                    mat = curve.getKeyMaterial(key);
+                } catch (Throwable ignored) {
+                    curve = null; // key length is invalid for its indicated curve, not a match
+                } finally {
+                    Bytes.clear(mat);
+                }
+            }
+        } finally {
+            Bytes.clear(encoded);
         }
 
         //TODO: check if key exists on discovered curve via equation

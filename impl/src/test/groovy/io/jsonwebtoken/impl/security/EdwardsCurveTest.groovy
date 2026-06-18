@@ -103,8 +103,9 @@ class EdwardsCurveTest {
     void testFindByKeyUsingEncoding() {
         curves.each {
             def pair = TestKeys.forAlgorithm(it).pair
-            def key = new TestKey(algorithm: 'foo', encoded: pair.public.getEncoded())
-            def found = EdwardsCurve.findByKey(key)
+            def found = EdwardsCurve.findByKey(pair.public)
+            assertEquals(it, found)
+            found = EdwardsCurve.findByKey(pair.private)
             assertEquals(it, found)
         }
     }

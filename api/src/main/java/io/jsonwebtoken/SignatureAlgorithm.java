@@ -117,6 +117,8 @@ public enum SignatureAlgorithm {
     private static final List<SignatureAlgorithm> PREFERRED_EC_ALGS = Collections.unmodifiableList(Arrays.asList(
             SignatureAlgorithm.ES512, SignatureAlgorithm.ES384, SignatureAlgorithm.ES256));
 
+    private static final byte[] EMPTY_BYTES = new byte[0];
+
     private final String value;
     private final String description;
     private final String familyName;
@@ -355,38 +357,45 @@ public enum SignatureAlgorithm {
             }
             SecretKey secretKey = (SecretKey) key;
 
-            byte[] encoded = secretKey.getEncoded();
-            if (encoded == null) {
-                throw new InvalidKeyException("The " + keyType(signing) + " key's encoded bytes cannot be null.");
-            }
+            byte[] encoded = EMPTY_BYTES;
+            try {
+                encoded = secretKey.getEncoded();
+                if (encoded == null) {
+                    throw new InvalidKeyException("The " + keyType(signing) + " key's encoded bytes cannot be null.");
+                }
 
-            String alg = secretKey.getAlgorithm();
-            if (alg == null) {
-                throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm cannot be null.");
-            }
+                String alg = secretKey.getAlgorithm();
+                if (alg == null) {
+                    throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm cannot be null.");
+                }
 
-            // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
-            if (!HS256.jcaName.equalsIgnoreCase(alg) &&
-                    !HS384.jcaName.equalsIgnoreCase(alg) &&
-                    !HS512.jcaName.equalsIgnoreCase(alg) &&
-                    !HS256.pkcs12Name.equals(alg) &&
-                    !HS384.pkcs12Name.equals(alg) &&
-                    !HS512.pkcs12Name.equals(alg)) {
-                throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
-                        "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
-            }
+                // These next checks use equalsIgnoreCase per https://github.com/jwtk/jjwt/issues/381#issuecomment-412912272
+                if (!HS256.jcaName.equalsIgnoreCase(alg) &&
+                        !HS384.jcaName.equalsIgnoreCase(alg) &&
+                        !HS512.jcaName.equalsIgnoreCase(alg) &&
+                        !HS256.pkcs12Name.equals(alg) &&
+                        !HS384.pkcs12Name.equals(alg) &&
+                        !HS512.pkcs12Name.equals(alg)) {
+                    throw new InvalidKeyException("The " + keyType(signing) + " key's algorithm '" + alg +
+                            "' does not equal a valid HmacSHA* algorithm name and cannot be used with " + name() + ".");
+                }
 
-            int size = encoded.length * 8; //size in bits
-            if (size < this.minKeyLength) {
-                String msg = "The " + keyType(signing) + " key's size is " + size + " bits which " +
-                        "is not secure enough for the " + name() + " algorithm.  The JWT " +
-                        "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + name() + " MUST have a " +
-                        "size >= " + minKeyLength + " bits (the key size must be greater than or equal to the hash " +
-                        "output size).  Consider using the " + Keys.class.getName() + " class's " +
-                        "'secretKeyFor(SignatureAlgorithm." + name() + ")' method to create a key guaranteed to be " +
-                        "secure enough for " + name() + ".  See " +
-                        "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
-                throw new WeakKeyException(msg);
+                int size = encoded.length * 8; //size in bits
+                if (size < this.minKeyLength) {
+                    String msg = "The " + keyType(signing) + " key's size is " + size + " bits which " +
+                            "is not secure enough for the " + name() + " algorithm.  The JWT " +
+                            "JWA Specification (RFC 7518, Section 3.2) states that keys used with " + name() + " MUST have a " +
+                            "size >= " + minKeyLength + " bits (the key size must be greater than or equal to the hash " +
+                            "output size).  Consider using the " + Keys.class.getName() + " class's " +
+                            "'secretKeyFor(SignatureAlgorithm." + name() + ")' method to create a key guaranteed to be " +
+                            "secure enough for " + name() + ".  See " +
+                            "https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
+                    throw new WeakKeyException(msg);
+                }
+            } finally {
+                if (encoded != null) {
+                    Arrays.fill(encoded, (byte) 0);
+                }
             }
 
         } else { //EC or RSA
@@ -575,7 +584,14 @@ public enum SignatureAlgorithm {
         if (key instanceof SecretKey) {
 
             SecretKey secretKey = (SecretKey) key;
-            int bitLength = io.jsonwebtoken.lang.Arrays.length(secretKey.getEncoded()) * Byte.SIZE;
+            byte[] encoded = EMPTY_BYTES;
+            int bitLength;
+            try {
+                encoded = secretKey.getEncoded();
+                bitLength = io.jsonwebtoken.lang.Arrays.length(encoded) * Byte.SIZE;
+            } finally {
+                Arrays.fill(encoded, (byte) 0);
+            }
 
             for (SignatureAlgorithm alg : PREFERRED_HMAC_ALGS) {
                 // ensure compatibility check is based on key length. See https://github.com/jwtk/jjwt/issues/381
