@@ -15,11 +15,13 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.IvSupplier;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
@@ -55,22 +57,23 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
         return this.IV;
     }
 
-    static abstract class AbstractAeadRequestParams<M extends AeadRequest.Params<M>>
-            extends AbstractSecureRequestParams<InputStream, SecretKey, M>
-            implements AeadRequest.Params<M> {
+    static abstract class AbstractAeadParams<M extends AeadAlgorithm.Params<M>>
+            extends AbstractKeyedPayloadParams<InputStream, SecretKey, M>
+            implements AeadAlgorithm.Params<M> {
 
         protected InputStream aad;
 
+        protected OutputStream result;
+
         @Override
-        public M associatedData(InputStream aad) {
+        public M aad(InputStream aad) {
             this.aad = aad;
             return self();
         }
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder extends AbstractAeadRequestParams<AeadRequest.Builder>
-            implements AeadRequest.Builder {
+    public static class Builder extends AbstractAeadParams<AeadRequest.Builder> implements AeadRequest.Builder {
 
         @Override
         public AeadRequest build() {

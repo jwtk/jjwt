@@ -21,15 +21,33 @@ import io.jsonwebtoken.lang.Assert;
 
 import java.io.Reader;
 
+/**
+ * Deserializer using a {@link Gson} instance.
+ *
+ * @param <T> the type of objects that will be deserialized.
+ * @since 0.11.0
+ */
 public class GsonDeserializer<T> extends AbstractDeserializer<T> {
 
     private final Class<T> returnType;
+
+    /**
+     * The {@code Gson} instance used to deserialize objects.
+     */
     protected final Gson gson;
 
+    /**
+     * Creates a new {@code GsonDeserilizer} with a {@link GsonSerializer#DEFAULT_GSON} instance.
+     */
     public GsonDeserializer() {
         this(GsonSerializer.DEFAULT_GSON);
     }
 
+    /**
+     * Creates a new {@code GsonDeserializer} using the specified {@code gson} instance.
+     *
+     * @param gson the {@code Gson} instance to use to deserialize objects.
+     */
     @SuppressWarnings("unchecked")
     public GsonDeserializer(Gson gson) {
         this(gson, (Class<T>) Object.class);

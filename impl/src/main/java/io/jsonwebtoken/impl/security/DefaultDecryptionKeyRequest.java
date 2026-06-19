@@ -45,7 +45,7 @@ public class DefaultDecryptionKeyRequest<K extends Key> extends DefaultKeyReques
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder<K extends Key> extends AbstractKeyRequestParams<byte[], DecryptionKeyRequest.Builder<K>>
+    public static class Builder<K extends Key> extends AbstractKeyAlgParams<byte[], DecryptionKeyRequest.Builder<K>>
             implements DecryptionKeyRequest.Builder<K> {
 
         private K decryptionKey;

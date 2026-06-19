@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
@@ -22,7 +23,8 @@ import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
+import io.jsonwebtoken.security.JwkThumbprint
 import org.junit.Before
 import org.junit.Test
 
@@ -218,7 +220,7 @@ class DefaultMutableJweHeaderTest {
      */
     @Test
     void testJwk() {
-        def jwk = Jwks.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
+        def jwk = Jwk.builder().key(TestKeys.RS256.pair.public as RSAPublicKey).build()
         assertSymmetry('jwk', jwk)
     }
 
@@ -285,7 +287,7 @@ class DefaultMutableJweHeaderTest {
     @Test
     void testX509Sha256Thumbprint() {
         def payload = Streams.of(TestKeys.RS256.cert.getEncoded())
-        def x5tS256 = Jwks.HASH.@SHA256.digest(payload)
+        def x5tS256 = JwkThumbprint.alg.@SHA256.digest(payload)
         String encoded = Encoders.BASE64URL.encode(x5tS256)
 
         header.x509Sha256Thumbprint(x5tS256)
@@ -297,7 +299,7 @@ class DefaultMutableJweHeaderTest {
 
     @Test
     void testEncryptionAlgorithm() {
-        def enc = Jwts.ENC.A256GCM.getId()
+        def enc = Jwe.enc.A256GCM.getId()
         header.put('enc', enc)
         assertEquals enc, header.getEncryptionAlgorithm()
     }
@@ -305,7 +307,7 @@ class DefaultMutableJweHeaderTest {
     @Test
     void testEphemeralPublicKey() {
         def key = TestKeys.ES256.pair.public
-        def jwk = Jwks.builder().key(key).build()
+        def jwk = Jwk.builder().key(key).build()
         header.put('epk', jwk)
         assertEquals jwk, header.getEphemeralPublicKey()
     }

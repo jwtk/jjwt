@@ -28,7 +28,7 @@ import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.InvalidKeyException;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.KeyLengthSupplier;
 import io.jsonwebtoken.security.KeyRequest;
@@ -174,12 +174,12 @@ class EcdhKeyAlgorithm extends CryptoAlgorithm implements KeyAlgorithm<PublicKey
 
         Curve curve = assertCurve(publicKey);
         // note: we don't need to validate if specified key's point is on a supported curve here
-        // because that will automatically be asserted when using Jwks.builder().... below
+        // because that will automatically be asserted when using Jwk.builder().... below
         Assert.stateNotNull(curve, "Internal implementation state: Curve cannot be null.");
 
         // Generate our ephemeral key pair:
         final SecureRandom random = ensureSecureRandom(request);
-        DynamicJwkBuilder<?, ?> jwkBuilder = Jwks.builder().random(random);
+        DynamicJwkBuilder<?, ?> jwkBuilder = Jwk.builder().random(random);
         KeyPair pair = generateKeyPair(curve, null, random);
 
         Assert.stateNotNull(pair, "Internal implementation state: KeyPair cannot be null.");

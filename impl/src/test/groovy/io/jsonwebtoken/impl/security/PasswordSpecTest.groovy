@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Keys
+
 import io.jsonwebtoken.security.Password
 import org.junit.Before
 import org.junit.Test
@@ -91,7 +91,7 @@ class PasswordSpecTest {
 
     @Test
     void testEquals() {
-        Password key2 = Keys.password(PASSWORD)
+        Password key2 = Password.of(PASSWORD)
         assertArrayEquals KEY.toCharArray(), key2.toCharArray()
         assertEquals KEY, key2
         assertNotEquals KEY, new Object()
@@ -99,14 +99,14 @@ class PasswordSpecTest {
 
     @Test
     void testIdentityEquals() {
-        Password key = Keys.password(PASSWORD)
+        Password key = Password.of(PASSWORD)
         assertTrue key.equals(key)
         assertNotEquals KEY, new Object()
     }
 
     @Test
     void testHashCode() {
-        Password key2 = Keys.password(PASSWORD)
+        Password key2 = Password.of(PASSWORD)
         assertArrayEquals KEY.toCharArray(), key2.toCharArray()
         assertEquals KEY.hashCode(), key2.hashCode()
     }
@@ -114,7 +114,7 @@ class PasswordSpecTest {
     @Test
     void testToString() {
         assertEquals '<redacted>', KEY.toString()
-        Password key2 = Keys.password(PASSWORD)
+        Password key2 = Password.of(PASSWORD)
         assertArrayEquals KEY.toCharArray(), key2.toCharArray()
         assertEquals KEY.toString(), key2.toString()
     }

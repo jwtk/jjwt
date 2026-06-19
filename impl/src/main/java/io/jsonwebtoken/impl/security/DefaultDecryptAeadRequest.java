@@ -40,7 +40,7 @@ public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements Dec
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder extends AbstractAeadRequestParams<DecryptAeadRequest.Builder>
+    public static class Builder extends AbstractAeadParams<DecryptAeadRequest.Builder>
             implements DecryptAeadRequest.Builder {
 
         private byte[] iv;
@@ -53,7 +53,7 @@ public class DefaultDecryptAeadRequest extends DefaultAeadRequest implements Dec
         }
 
         @Override
-        public DecryptAeadRequest.Builder digest(byte[] digest) {
+        public DecryptAeadRequest.Builder tag(byte[] digest) {
             this.tag = digest;
             return self();
         }

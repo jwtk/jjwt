@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodec;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.impl.io.Streams;
 import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.io.CompressionAlgorithm;
@@ -125,7 +125,7 @@ class Payload {
         Assert.notNull(alg, "CompressionAlgorithm cannot be null.");
         Payload payload = this;
         if (!isString() && isConsumable()) {
-            if (alg.equals(Jwts.ZIP.DEF) && !Bytes.isEmpty(this.bytes)) { // backwards compatibility
+            if (alg.equals(Jwe.zip.DEF) && !Bytes.isEmpty(this.bytes)) { // backwards compatibility
                 byte[] data = ((CompressionCodec) alg).decompress(this.bytes);
                 payload = new Payload(claims, string, data, null, getContentType());
             } else {

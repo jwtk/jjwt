@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.RfcTests
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import org.junit.Test
 
 import java.nio.charset.StandardCharsets
@@ -96,7 +96,7 @@ class RFC7638Section3Dot1Test extends RfcTests {
         assertEquals(KEY_S256_DIGEST_B64URL, encode(KEY_S256_DIGEST))
         assertArrayEquals(KEY_THUMBPRINT_JSON_UTF8_BYTES, KEY_THUMBPRINT_JSON.getBytes(StandardCharsets.UTF_8))
 
-        def jwk = Jwks.parser().build().parse(KEY_JSON)
+        def jwk = Jwk.parser().build().parse(KEY_JSON)
 
         def thumbprint = jwk.thumbprint()
 

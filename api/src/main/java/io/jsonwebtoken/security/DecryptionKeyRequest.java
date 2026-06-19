@@ -18,22 +18,22 @@ package io.jsonwebtoken.security;
 import java.security.Key;
 
 /**
- * A {@link KeyRequest} to obtain a decryption key that will be used to decrypt a JWE using an {@link AeadAlgorithm}.
- * The AEAD algorithm used for decryption is accessible via {@link #getEncryptionAlgorithm()}.
+ * A request to a {@link KeyAlgorithm} to {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest) produce}
+ * a JWE decryption key.
  *
- * <p>The key used to perform cryptographic operations, for example a direct shared key, or a
+ * <p>The key used for cryptographic operations, for example a direct shared key, or a
  * JWE &quot;key decryption key&quot; will be accessible via {@link #getKey()}. This is always required and
  * never {@code null}.</p>
  *
- * <p>Any encrypted key material (what the JWE specification calls the
+ * <p>Any encrypted key ciphertext (what the JWE specification calls the
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">JWE Encrypted Key</a>) will
  * be accessible via {@link #getPayload()}. If present, the {@link KeyAlgorithm} will decrypt it to obtain the resulting
  * <a href="https://www.rfc-editor.org/rfc/rfc7516.html#section-2">Content Encryption Key (CEK)</a>.
  * This may be empty however depending on which {@link KeyAlgorithm} was used during JWE encryption.</p>
  *
- * <p>Finally, any public information necessary by the called {@link KeyAlgorithm} to decrypt any
- * {@code JWE Encrypted Key} (such as an initialization vector, authentication tag, ephemeral key, etc) is expected
- * to be available in the JWE protected header, accessible via {@link #getHeader()}.</p>
+ * <p>Finally, public information necessary to decrypt any {@code JWE Encrypted Key} ciphertext (such as an
+ * initialization vector, authentication tag, ephemeral key, etc.) is expected to be available in the JWE protected
+ * header accessible via {@link #getHeader()}.</p>
  *
  * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
  * @see KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)
@@ -42,25 +42,13 @@ import java.security.Key;
 public interface DecryptionKeyRequest<K extends Key> extends SecureRequest<byte[], K>, KeyRequest<byte[]> {
 
     /**
-     * Named parameters (setters) used to configure a {@link DecryptionKeyRequest DecryptionKeyRequest}
-     * instance.
-     *
-     * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
-     * @param <M> the instance type returned for method chaining.
-     * @since JJWT_RELEASE_VERSION
-     */
-    interface Params<K extends Key, M extends Params<K, M>> extends KeyRequest.Params<byte[], M>,
-            SecureRequest.Params<byte[], K, M> {
-    }
-
-    /**
      * A builder for creating new immutable {@link DecryptionKeyRequest} instances used to get a JWE
      * decryption key via {@link KeyAlgorithm#getDecryptionKey(DecryptionKeyRequest)}.
      *
      * @param <K> the type of key used by the {@link KeyAlgorithm} to obtain the JWE Content Encryption Key (CEK).
      * @since JJWT_RELEASE_VERSION
      */
-    interface Builder<K extends Key> extends Params<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
+    interface Builder<K extends Key> extends KeyAlgorithm.DecryptParams<K, Builder<K>>, io.jsonwebtoken.lang.Builder<DecryptionKeyRequest<K>> {
     }
 
     /**

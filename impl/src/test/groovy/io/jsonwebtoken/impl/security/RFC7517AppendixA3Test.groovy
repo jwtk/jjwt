@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
 
@@ -51,7 +51,7 @@ class RFC7517AppendixA3Test {
     void test() { // asserts we can parse and verify RFC values
 
         def m = keys[0]
-        SecretJwk jwk = Jwks.builder().add(m).build() as SecretJwk
+        SecretJwk jwk = Jwk.builder().add(m).build() as SecretJwk
         def key = jwk.toKey() as SecretKey
         assertNotNull key
         assertEquals m.size(), jwk.size()
@@ -61,7 +61,7 @@ class RFC7517AppendixA3Test {
         assertEquals m.k, encode(key)
 
         m = keys[1]
-        jwk = Jwks.builder().add(m).build() as SecretJwk
+        jwk = Jwk.builder().add(m).build() as SecretJwk
         key = jwk.toKey() as SecretKey
         assertNotNull key
         assertEquals m.size(), jwk.size()

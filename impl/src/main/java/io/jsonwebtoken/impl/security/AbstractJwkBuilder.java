@@ -26,7 +26,7 @@ import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkBuilder;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.JwkThumbprint;
 import io.jsonwebtoken.security.KeyOperation;
 import io.jsonwebtoken.security.KeyOperationPolicy;
 import io.jsonwebtoken.security.MalformedKeyException;
@@ -46,7 +46,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     protected final JwkFactory<K, J> jwkFactory;
 
-    static final KeyOperationPolicy DEFAULT_OPERATION_POLICY = Jwks.OP.policy().build();
+    static final KeyOperationPolicy DEFAULT_OPERATION_POLICY = Jwk.op.policy().build();
 
     protected KeyOperationPolicy opsPolicy = DEFAULT_OPERATION_POLICY; // default
 
@@ -68,13 +68,13 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T provider(Provider provider) {
-        this.DELEGATE.setProvider(provider);
+        this.DELEGATE.provider(provider);
         return self();
     }
 
     @Override
     public T random(SecureRandom random) {
-        this.DELEGATE.setRandom(random);
+        this.DELEGATE.random(random);
         return self();
     }
 
@@ -95,7 +95,7 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T idFromThumbprint() {
-        return idFromThumbprint(Jwks.HASH.SHA256);
+        return idFromThumbprint(JwkThumbprint.alg.SHA256);
     }
 
     @Override

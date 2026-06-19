@@ -22,7 +22,7 @@ import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.Collections
 import io.jsonwebtoken.security.EcPrivateJwk
 import io.jsonwebtoken.security.EcPublicJwk
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.SecretJwk
 import org.junit.Test
 
@@ -109,7 +109,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithJwk() {
-        EcPrivateJwk jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwk.builder().ecKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         def header = h([jwk: pubJwk])
         assertEquals pubJwk, header.getJwk()
@@ -117,7 +117,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithMap() {
-        EcPrivateJwk jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwk.builder().ecKeyPair(TestKeys.ES256.pair).build()
         EcPublicJwk pubJwk = jwk.toPublicJwk()
         Map<String, ?> m = new LinkedHashMap<>(pubJwk)
         def header = h([jwk: m])
@@ -139,7 +139,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithSecretJwk() {
-        SecretJwk jwk = Jwks.builder().key(TestKeys.HS256).build()
+        SecretJwk jwk = Jwk.builder().key(TestKeys.HS256).build()
         try {
             h([jwk: jwk])
             fail()
@@ -152,7 +152,7 @@ class AbstractProtectedHeaderTest {
 
     @Test
     void testJwkWithPrivateJwk() {
-        EcPrivateJwk jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).build()
+        EcPrivateJwk jwk = Jwk.builder().ecKeyPair(TestKeys.ES256.pair).build()
         try {
             h([jwk: jwk])
             fail()

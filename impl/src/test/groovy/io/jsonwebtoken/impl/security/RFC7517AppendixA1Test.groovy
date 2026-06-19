@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.security.EcPublicJwk
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.RsaPublicJwk
 import org.junit.Test
 
@@ -58,7 +58,7 @@ class RFC7517AppendixA1Test {
     void test() { // asserts we can parse and verify RFC values
 
         def m = keys[0]
-        EcPublicJwk ecPubJwk = Jwks.builder().add(m).build() as EcPublicJwk
+        EcPublicJwk ecPubJwk = Jwk.builder().add(m).build() as EcPublicJwk
         assertTrue ecPubJwk.toKey() instanceof ECPublicKey
         assertEquals m.size(), ecPubJwk.size()
         assertEquals m.kty, ecPubJwk.getType()
@@ -69,7 +69,7 @@ class RFC7517AppendixA1Test {
         assertEquals m.kid, ecPubJwk.getId()
 
         m = keys[1]
-        RsaPublicJwk rsaPublicJwk = Jwks.builder().add(m).build() as RsaPublicJwk
+        RsaPublicJwk rsaPublicJwk = Jwk.builder().add(m).build() as RsaPublicJwk
         assertTrue rsaPublicJwk.toKey() instanceof RSAPublicKey
         assertEquals m.size(), rsaPublicJwk.size()
         assertEquals m.kty, rsaPublicJwk.getType()

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import org.junit.Before
 import org.junit.Test
 
@@ -36,7 +36,7 @@ class DefaultKeyOperationBuilderTest {
         def op = builder.id(id).build() as DefaultKeyOperation
         assertEquals id, op.id
         assertEquals DefaultKeyOperation.CUSTOM_DESCRIPTION, op.description
-        assertFalse op.isRelated(Jwks.OP.SIGN)
+        assertFalse op.isRelated(Jwk.op.SIGN)
     }
 
     @Test
@@ -58,8 +58,8 @@ class DefaultKeyOperationBuilderTest {
         assertEquals related, opB.id
         assertTrue opA.isRelated(opB)
         assertTrue opB.isRelated(opA)
-        assertFalse opA.isRelated(Jwks.OP.SIGN)
-        assertFalse opA.isRelated(Jwks.OP.SIGN)
+        assertFalse opA.isRelated(Jwk.op.SIGN)
+        assertFalse opA.isRelated(Jwk.op.SIGN)
     }
 
     @Test

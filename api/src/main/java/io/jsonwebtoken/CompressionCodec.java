@@ -26,8 +26,8 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
  * {@link Identifiable#getId() getId()} will be used as the JWT
  * <a href="https://tools.ietf.org/html/rfc7516#section-4.1.3"><code>zip</code></a> header value.</p>
  *
- * @see Jwts.ZIP#DEF
- * @see Jwts.ZIP#GZIP
+ * @see Jwe.zip#DEF
+ * @see Jwe.zip#GZIP
  * @since 0.6.0
  * @deprecated since 0.12.0 in favor of {@link io.jsonwebtoken.io.CompressionAlgorithm} to equal the RFC name for this concept.
  */

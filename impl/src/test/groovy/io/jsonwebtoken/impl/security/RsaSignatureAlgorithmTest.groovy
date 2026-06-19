@@ -15,13 +15,13 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.SecureRequest
+import io.jsonwebtoken.security.SecureDigestRequest
 import io.jsonwebtoken.security.WeakKeyException
 import org.junit.Test
 
@@ -36,10 +36,11 @@ import static org.junit.Assert.*
 
 class RsaSignatureAlgorithmTest {
 
-    static final Collection<RsaSignatureAlgorithm> algs = Jwts.SIG.get().values().findAll({
+    static final Collection<RsaSignatureAlgorithm> algs = Jws.alg.registry().values().findAll({
         it instanceof RsaSignatureAlgorithm
     }) as Collection<RsaSignatureAlgorithm>
 
+    @SuppressWarnings('GroovyAssignabilityCheck')
     @Test
     void testKeyPairBuilder() {
         algs.each {
@@ -89,9 +90,10 @@ class RsaSignatureAlgorithmTest {
     @Test
     void testValidateSigningKeyNotPrivate() {
         RSAPublicKey key = createMock(RSAPublicKey)
-        def request = SecureRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
+        def request = SecureDigestRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
         try {
-            Jwts.SIG.RS256.digest(request)
+            //noinspection GroovyAssignabilityCheck
+            Jws.alg.RS256.digest(request)
             fail()
         } catch (InvalidKeyException e) {
             String expected = "RS256 signing keys must be PrivateKeys (implement java.security.PrivateKey). " +
@@ -126,7 +128,7 @@ class RsaSignatureAlgorithmTest {
                 String msg = "The RSA signing key size (aka modulus bit length) is 1024 bits which is not secure " +
                         "enough for the ${it.getId()} algorithm.  The JWT JWA Specification (RFC 7518, Section " +
                         "${section}) states that RSA keys " +
-                        "MUST have a size >= 2048 bits.  Consider using the Jwts.SIG.${id}.keyPair() " +
+                        "MUST have a size >= 2048 bits.  Consider using the Jws.alg.${id}.keyPair() " +
                         "builder to create a KeyPair guaranteed to be secure enough for ${id}.  See " +
                         "https://tools.ietf.org/html/rfc7518#section-${section} for more information."
                 assertEquals msg, expected.getMessage()

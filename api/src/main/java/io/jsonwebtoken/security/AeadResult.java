@@ -18,8 +18,9 @@ package io.jsonwebtoken.security;
 import java.io.OutputStream;
 
 /**
- * The result of authenticated encryption, providing access to the ciphertext {@link #getOutputStream() output stream}
- * and resulting {@link #setTag(byte[]) AAD tag} and {@link #setIv(byte[]) initialization vector}.
+ * The result of authenticated encryption, providing access to AEAD authentication tag
+ * (via {@link #getDigest() getDigest()}) and {@link #getIv() initialization vector}.
+ * <p>
  * The AAD tag and initialization vector must be supplied with the ciphertext to decrypt.
  *
  * @since 0.12.0
@@ -63,5 +64,4 @@ public interface AeadResult extends DigestSupplier, IvSupplier {
     static AeadResult with(OutputStream out) {
         return Suppliers.AEAD_RESULT_FACTORY.apply(out);
     }
-
 }

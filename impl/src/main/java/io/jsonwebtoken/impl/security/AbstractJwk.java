@@ -29,7 +29,6 @@ import io.jsonwebtoken.security.ConfidentialValue;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.JwkThumbprint;
-import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyOperation;
 
 import java.nio.charset.StandardCharsets;
@@ -143,7 +142,7 @@ public abstract class AbstractJwk<K extends Key> implements Jwk<K>, ParameterRea
 
     @Override
     public JwkThumbprint thumbprint() {
-        return thumbprint(Jwks.HASH.SHA256);
+        return thumbprint(JwkThumbprint.alg.SHA256);
     }
 
     @Override

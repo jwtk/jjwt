@@ -23,7 +23,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 
 @SuppressWarnings("unused")
-public class DefaultVerifyDigestRequest extends DefaultRequest<InputStream> implements VerifyDigestRequest {
+public class DefaultVerifyDigestRequest extends DefaultDigestRequest implements VerifyDigestRequest {
 
     private final byte[] digest;
 
@@ -38,7 +38,7 @@ public class DefaultVerifyDigestRequest extends DefaultRequest<InputStream> impl
     }
 
     @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
-    public static class Builder extends AbstractRequestParams<InputStream, VerifyDigestRequest.Builder>
+    public static class Builder extends AbstractPayloadParams<InputStream, VerifyDigestRequest.Builder>
             implements VerifyDigestRequest.Builder {
 
         private byte[] digest;
