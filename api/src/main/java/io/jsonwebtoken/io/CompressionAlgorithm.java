@@ -16,9 +16,9 @@
 package io.jsonwebtoken.io;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParserBuilder;
-import io.jsonwebtoken.Jwts;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,8 +40,8 @@ import java.io.OutputStream;
  * <p>To ensure that parsing is possible, the parser must be aware of the implementation by adding it to the
  * {@link JwtParserBuilder#zip()} collection during parser construction.</p>
  *
- * @see Jwts.ZIP#DEF
- * @see Jwts.ZIP#GZIP
+ * @see Jwe.zip#DEF
+ * @see Jwe.zip#GZIP
  * @see <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-7.3">JSON Web Encryption Compression Algorithms Registry</a>
  * @since 0.12.0
  */

@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.JweHeader;
 import io.jsonwebtoken.impl.DefaultJweHeader;
 import io.jsonwebtoken.impl.lang.Bytes;
-import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.io.Encoders;
@@ -55,12 +54,9 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         final byte[] iv = ensureInitializationVector(request);
         final AlgorithmParameterSpec ivSpec = getIvSpec(iv);
 
-        byte[] taggedCiphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
-            @Override
-            public byte[] apply(Cipher cipher) throws Exception {
-                cipher.init(Cipher.WRAP_MODE, kek, ivSpec);
-                return cipher.wrap(cek);
-            }
+        byte[] taggedCiphertext = jca(request).withCipher(cipher -> {
+            cipher.init(Cipher.WRAP_MODE, kek, ivSpec);
+            return cipher.wrap(cek);
         });
 
         int tagByteLength = this.tagBitLength / Byte.SIZE;
@@ -94,14 +90,11 @@ public class AesGcmKeyAlgorithm extends AesAlgorithm implements SecretKeyAlgorit
         //for tagged GCM, the JCA spec requires that the tag be appended to the end of the ciphertext byte array:
         final byte[] taggedCiphertext = Bytes.concat(cekBytes, tag);
 
-        return jca(request).withCipher(new CheckedFunction<Cipher, SecretKey>() {
-            @Override
-            public SecretKey apply(Cipher cipher) throws Exception {
-                cipher.init(Cipher.UNWRAP_MODE, kek, ivSpec);
-                Key key = cipher.unwrap(taggedCiphertext, KEY_ALG_NAME, Cipher.SECRET_KEY);
-                Assert.state(key instanceof SecretKey, "cipher.unwrap must produce a SecretKey instance.");
-                return (SecretKey) key;
-            }
+        return jca(request).withCipher(cipher -> {
+            cipher.init(Cipher.UNWRAP_MODE, kek, ivSpec);
+            Key key = cipher.unwrap(taggedCiphertext, KEY_ALG_NAME, Cipher.SECRET_KEY);
+            Assert.state(key instanceof SecretKey, "cipher.unwrap must produce a SecretKey instance.");
+            return (SecretKey) key;
         });
     }
 }

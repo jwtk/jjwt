@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -25,7 +25,7 @@ class KeyOperationConverterTest {
 
     @Test
     void testApplyFromStandardId() {
-        Jwks.OP.get().values().each {
+        Jwk.op.registry().values().each {
             def id = it.id
             def op = KeyOperationConverter.DEFAULT.applyFrom(id)
             assertSame it, op

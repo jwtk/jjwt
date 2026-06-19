@@ -20,11 +20,32 @@ import java.io.InputStream;
 
 /**
  * A request to an {@link AeadAlgorithm} to perform authenticated encryption with a supplied symmetric
- * {@link SecretKey}, allowing for additional data to be authenticated and integrity-protected.
+ * {@link SecretKey}, allowing for additional data to be integrity-protected.
  *
  * @see SecureRequest
  * @see AssociatedDataSupplier
  * @since 0.12.0
  */
 public interface AeadRequest extends SecureRequest<InputStream, SecretKey>, AssociatedDataSupplier {
+
+    /**
+     * A builder for creating new immutable {@link AeadRequest} instances used for AEAD encryption via
+     * {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder extends AeadAlgorithm.Params<Builder>, io.jsonwebtoken.lang.Builder<AeadRequest> {
+    }
+
+    /**
+     * Returns a new {@link AeadRequest.Builder} for creating immutable {@link AeadRequest}s used for AEAD encryption
+     * via {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}.
+     *
+     * @return a new {@link AeadRequest.Builder} for creating immutable {@link AeadRequest}s used for AEAD encryption
+     * via {@link AeadAlgorithm#encrypt(AeadRequest, AeadResult)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static AeadRequest.Builder builder() {
+        return Suppliers.AEAD_REQUEST_BUILDER.get();
+    }
 }

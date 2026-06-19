@@ -15,11 +15,13 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.AeadRequest;
 import io.jsonwebtoken.security.IvSupplier;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
@@ -40,7 +42,7 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
         this.IV = iv;
     }
 
-    public DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
+    private DefaultAeadRequest(InputStream payload, Provider provider, SecureRandom secureRandom,
                               SecretKey key, InputStream aad) {
         this(payload, provider, secureRandom, key, aad, null);
     }
@@ -53,5 +55,36 @@ public class DefaultAeadRequest extends DefaultSecureRequest<InputStream, Secret
     @Override
     public byte[] getIv() {
         return this.IV;
+    }
+
+    static abstract class AbstractAeadParams<M extends AeadAlgorithm.Params<M>>
+            extends AbstractKeyedPayloadParams<InputStream, SecretKey, M>
+            implements AeadAlgorithm.Params<M> {
+
+        protected InputStream aad;
+
+        protected OutputStream result;
+
+        @Override
+        public M aad(InputStream aad) {
+            this.aad = aad;
+            return self();
+        }
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Builder extends AbstractAeadParams<AeadRequest.Builder> implements AeadRequest.Builder {
+
+        @Override
+        public AeadRequest build() {
+            return new DefaultAeadRequest(this.payload, this.provider, this.random, this.key, this.aad);
+        }
+
+        public static class Supplier implements java.util.function.Supplier<AeadRequest.Builder> {
+            @Override
+            public AeadRequest.Builder get() {
+                return new Builder();
+            }
+        }
     }
 }

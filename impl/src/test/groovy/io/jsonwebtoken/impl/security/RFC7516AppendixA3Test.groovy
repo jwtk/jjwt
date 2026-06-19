@@ -102,7 +102,7 @@ class RFC7516AppendixA3Test {
         assertArrayEquals TAG, decode(encodedTag)
 
         //read the RFC Test JWK to get the private key for decrypting
-        SecretJwk jwk = Jwks.builder().add(KEK_VALUES).build() as SecretJwk
+        SecretJwk jwk = Jwk.builder().add(KEK_VALUES).build() as SecretJwk
         SecretKey kek = jwk.toKey()
 
         // test decryption per the RFC
@@ -128,7 +128,7 @@ class RFC7516AppendixA3Test {
 
         String compact = Jwts.builder()
                 .setPayload(PLAINTEXT)
-                .encryptWith(kek, Jwts.KEY.A128KW, enc)
+                .encryptWith(kek, Jwe.alg.A128KW, enc)
                 .compact()
 
         assertEquals COMPLETE_JWE, compact

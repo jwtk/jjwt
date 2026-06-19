@@ -25,11 +25,7 @@ import org.json.JSONTokener;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @since 0.10.0
@@ -38,6 +34,9 @@ public class OrgJsonDeserializer extends AbstractDeserializer<Object> {
 
     private final JSONTokenerFactory TOKENER_FACTORY;
 
+    /**
+     * Creates a new {@code OrgJsonDeserializer} using a default {@link JSONTokener}.
+     */
     public OrgJsonDeserializer() {
         this(JSONTokenerFactory.INSTANCE);
     }

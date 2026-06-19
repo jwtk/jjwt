@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
@@ -23,11 +24,13 @@ import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.lang.Arrays
+import io.jsonwebtoken.security.AeadResult
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.Cipher
+import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 import static org.junit.Assert.*
@@ -71,8 +74,8 @@ class AesGcmKeyAlgorithmTest {
 
         def out = new ByteArrayOutputStream(8192)
         def encRequest = new DefaultAeadRequest(Streams.of(cek.getEncoded()), null, null, kek, null, iv)
-        def encResult = new DefaultAeadResult(out)
-        Jwts.ENC.A256GCM.encrypt(encRequest, encResult)
+        def encResult = AeadResult.with(out)
+        Jwe.enc.A256GCM.encrypt(encRequest, encResult)
 
         assertArrayEquals tag, encResult.digest
         assertArrayEquals iv, encResult.iv
@@ -87,7 +90,7 @@ class AesGcmKeyAlgorithmTest {
         def template = new JcaTemplate('AES')
 
         def header = Jwts.header().add('alg', alg.id).add('enc', 'foo')
-        def kek = template.generateSecretKey(keyLength)
+        SecretKey kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
@@ -97,9 +100,7 @@ class AesGcmKeyAlgorithmTest {
         }
 
         def delegate = new DefaultMutableJweHeader(header)
-        def ereq = new DefaultKeyRequest(kek, null, null, delegate, enc)
-
-        def result = alg.getEncryptionKey(ereq)
+        def result = alg.getEncryptionKey(kek, delegate, enc)
 
         byte[] encryptedKeyBytes = result.getPayload()
         assertFalse "encryptedKey must be populated", Arrays.length(encryptedKeyBytes) == 0
@@ -135,8 +136,7 @@ class AesGcmKeyAlgorithmTest {
             }
         }
         def delegate = new DefaultMutableJweHeader(headerBuilder)
-        def ereq = new DefaultKeyRequest(kek, null, null, delegate, enc)
-        def result = alg.getEncryptionKey(ereq)
+        def result = alg.getEncryptionKey(kek, delegate, enc)
 
         headerBuilder.remove(headerName)
 
@@ -147,7 +147,7 @@ class AesGcmKeyAlgorithmTest {
         def header = headerBuilder.build() as JweHeader
 
         try {
-            alg.getDecryptionKey(new DefaultDecryptionKeyRequest(encryptedKeyBytes, null, null, header, enc, kek))
+            alg.getDecryptionKey(encryptedKeyBytes, kek, header, enc)
             fail()
         } catch (MalformedJwtException iae) {
             assertEquals exmsg, iae.getMessage()

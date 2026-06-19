@@ -16,8 +16,8 @@
 package io.jsonwebtoken.io;
 
 import io.jsonwebtoken.lang.Builder;
+import io.jsonwebtoken.security.Providable;
 
-import java.security.Provider;
 import java.util.Map;
 
 /**
@@ -27,17 +27,7 @@ import java.util.Map;
  * @param <B> builder type used for method chaining
  * @since 0.12.0
  */
-public interface ParserBuilder<T, B extends ParserBuilder<T, B>> extends Builder<Parser<T>> {
-
-    /**
-     * Sets the JCA Provider to use during cryptographic operations, or {@code null} if the
-     * JCA subsystem preferred provider should be used.
-     *
-     * @param provider the JCA Provider to use during cryptographic key factory operations, or {@code null}
-     *                 if the JCA subsystem preferred provider should be used.
-     * @return the builder for method chaining.
-     */
-    B provider(Provider provider);
+public interface ParserBuilder<T, B extends ParserBuilder<T, B>> extends Providable<B>, Builder<Parser<T>> {
 
     /**
      * Uses the specified {@code Deserializer} to convert JSON Strings (UTF-8 byte streams) into Java Map objects.  The

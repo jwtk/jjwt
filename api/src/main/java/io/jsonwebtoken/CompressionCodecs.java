@@ -18,10 +18,10 @@ package io.jsonwebtoken;
 /**
  * Provides default implementations of the {@link CompressionCodec} interface.
  *
- * @see Jwts.ZIP#DEF
- * @see Jwts.ZIP#GZIP
+ * @see Jwe.zip#DEF
+ * @see Jwe.zip#GZIP
  * @since 0.7.0
- * @deprecated in favor of {@link Jwts.ZIP}.
+ * @deprecated in favor of {@link Jwe.zip}.
  */
 @Deprecated //TODO: delete for 1.0
 public final class CompressionCodecs {
@@ -33,10 +33,10 @@ public final class CompressionCodecs {
      * Codec implementing the <a href="https://tools.ietf.org/html/rfc7518">JWA</a> standard
      * <a href="https://en.wikipedia.org/wiki/DEFLATE">deflate</a> compression algorithm
      *
-     * @deprecated in favor of {@link Jwts.ZIP#DEF}.
+     * @deprecated in favor of {@link Jwe.zip#DEF}.
      */
     @Deprecated
-    public static final CompressionCodec DEFLATE = (CompressionCodec) Jwts.ZIP.DEF;
+    public static final CompressionCodec DEFLATE = (CompressionCodec) Jwe.zip.DEF;
 
     /**
      * Codec implementing the <a href="https://en.wikipedia.org/wiki/Gzip">gzip</a> compression algorithm.
@@ -46,11 +46,11 @@ public final class CompressionCodecs {
      * <p><b>This is not a standard JWA compression algorithm</b>.  Be sure to use this only when you are confident
      * that all parties accessing the token support the gzip algorithm.</p>
      *
-     * <p>If you're concerned about compatibility, the {@link Jwts.ZIP#DEF DEF} code is JWA standards-compliant.</p>
+     * <p>If you're concerned about compatibility, the {@link Jwe.zip#DEF DEF} code is JWA standards-compliant.</p>
      *
-     * @deprecated in favor of {@link Jwts.ZIP#GZIP}
+     * @deprecated in favor of {@link Jwe.zip#GZIP}
      */
     @Deprecated
-    public static final CompressionCodec GZIP = (CompressionCodec) Jwts.ZIP.GZIP;
+    public static final CompressionCodec GZIP = (CompressionCodec) Jwe.zip.GZIP;
 
 }

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -32,29 +32,29 @@ class DefaultKeyOperationTest {
 
     @Test
     void testUnrelated() {
-        assertFalse new DefaultKeyOperation('foo').isRelated(Jwks.OP.SIGN)
+        assertFalse new DefaultKeyOperation('foo').isRelated(Jwk.op.SIGN)
     }
 
     @Test
     void testRelatedNull() {
-        assertFalse Jwks.OP.SIGN.isRelated(null)
+        assertFalse Jwk.op.SIGN.isRelated(null)
     }
 
     @Test
     void testRelatedEquals() {
-        def op = Jwks.OP.SIGN as DefaultKeyOperation
+        def op = Jwk.op.SIGN as DefaultKeyOperation
         assertTrue op.isRelated(op)
     }
 
     @Test
     void testRelatedTrue() {
-        def op = Jwks.OP.SIGN as DefaultKeyOperation
-        assertTrue op.isRelated(Jwks.OP.VERIFY)
+        def op = Jwk.op.SIGN as DefaultKeyOperation
+        assertTrue op.isRelated(Jwk.op.VERIFY)
     }
 
     @Test
     void testRelatedFalse() {
-        def op = Jwks.OP.SIGN as DefaultKeyOperation
-        assertFalse op.isRelated(Jwks.OP.ENCRYPT)
+        def op = Jwk.op.SIGN as DefaultKeyOperation
+        assertFalse op.isRelated(Jwk.op.ENCRYPT)
     }
 }

@@ -26,7 +26,6 @@ import io.jsonwebtoken.orgjson.io.OrgJsonDeserializer
 import io.jsonwebtoken.orgjson.io.OrgJsonSerializer
 import io.jsonwebtoken.security.ConfidentialValue
 import io.jsonwebtoken.security.Jwk
-import io.jsonwebtoken.security.Jwks
 import org.junit.Test
 
 import java.security.Key
@@ -98,7 +97,7 @@ class JwkSerializationTest {
     static void testSecretJwk(Serializer ser, Deserializer des) {
 
         def key = TestKeys.NA256
-        def jwk = Jwks.builder().key(key).id('id').build()
+        def jwk = Jwk.builder().key(key).id('id').build()
         assertWrapped(jwk, ['k'])
 
         // Ensure no Groovy or Java toString prints out secret values:
@@ -114,7 +113,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserialize(des, json)
-        def jwk2 = Jwks.builder().add(map).build()
+        def jwk2 = Jwk.builder().add(map).build()
         assertTrue jwk.k instanceof ConfidentialValue
         assertEquals jwk, jwk2
         assertEquals jwk.k, jwk2.k
@@ -123,7 +122,7 @@ class JwkSerializationTest {
 
     static void testPrivateEcJwk(Serializer ser, Deserializer des) {
 
-        def jwk = Jwks.builder().ecKeyPair(TestKeys.ES256.pair).id('id').build()
+        def jwk = Jwk.builder().ecKeyPair(TestKeys.ES256.pair).id('id').build()
         assertWrapped(jwk, ['d'])
 
         // Ensure no Groovy or Java toString prints out secret values:
@@ -144,7 +143,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserialize(des, json)
-        def jwk2 = Jwks.builder().add(map).build()
+        def jwk2 = Jwk.builder().add(map).build()
         assertTrue jwk.d instanceof ConfidentialValue
         assertEquals jwk, jwk2
         assertEquals jwk.d, jwk2.d
@@ -172,7 +171,7 @@ class JwkSerializationTest {
 
     static void testPrivateRsaJwk(Serializer ser, Deserializer des) {
 
-        def jwk = Jwks.builder().rsaKeyPair(TestKeys.RS256.pair).id('id').build()
+        def jwk = Jwk.builder().rsaKeyPair(TestKeys.RS256.pair).id('id').build()
         def privateFieldNames = ['d', 'p', 'q', 'dp', 'dq', 'qi']
         assertWrapped(jwk, privateFieldNames)
 
@@ -198,7 +197,7 @@ class JwkSerializationTest {
 
         //now ensure it deserializes back to a JWK:
         def map = deserialize(des, json)
-        def jwk2 = Jwks.builder().add(map).build()
+        def jwk2 = Jwk.builder().add(map).build()
         assertEquals(jwk, jwk2, privateFieldNames)
     }
 }

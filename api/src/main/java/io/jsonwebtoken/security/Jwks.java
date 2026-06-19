@@ -17,10 +17,7 @@ package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
 import io.jsonwebtoken.io.Parser;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-
-import java.util.function.Supplier;
 
 /**
  * Utility methods for creating
@@ -30,50 +27,44 @@ import java.util.function.Supplier;
  * <p>Standard <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
  * Algorithms</a> commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
  * <a href="https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier">JWK Thumbprint URIs</a>
- * are available via the {@link Jwks.HASH} registry constants to allow for easy code-completion in IDEs. For example, when
+ * are available via the {@link JwkThumbprint.alg} registry constants to allow for easy code-completion in IDEs. For example, when
  * typing:</p>
  * <blockquote><pre>
- * Jwks.{@link Jwks.HASH HASH}.// press hotkeys to suggest individual hash algorithms or utility methods</pre></blockquote>
+ * {@link JwkThumbprint.alg}.// press hotkeys to suggest individual hash algorithms or utility methods</pre></blockquote>
  *
- * @see #builder()
+ * @see Jwk#builder()
  * @since 0.12.0
+ * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk}, {@link JwkSet}, and {@link JwkThumbprint}
+ * static interface methods and registries.
+ * @see Jwk
+ * @see JwkSet
+ * @see JwkThumbprint
+ * @see Jwk.op
+ * @see Jwk.crv
+ * @see JwkThumbprint.alg
  */
+@SuppressWarnings("GrazieInspection")
+@Deprecated
 public final class Jwks {
 
     private Jwks() {
     } //prevent instantiation
 
-    private static final String JWKS_BRIDGE_FQCN = "io.jsonwebtoken.impl.security.JwksBridge";
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<DynamicJwkBuilder<?, ?>> BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultDynamicJwkBuilder$Supplier");
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<JwkParserBuilder> PARSER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkParserBuilder$Supplier");
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<JwkSetBuilder> SET_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetBuilder$Supplier");
-
-    // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    private static final Supplier<JwkSetParserBuilder> SET_PARSER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.security.DefaultJwkSetParserBuilder$Supplier");
-
     /**
      * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
      *
      * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#builder()}.
      */
+    @Deprecated
     public static DynamicJwkBuilder<?, ?> builder() {
-        return BUILDER_SUPPLIER.get();
+        return Jwk.builder();
     }
 
     /**
      * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
      * <blockquote><pre>
-     * Jwk&lt;?&gt; jwk = Jwks.parser()
+     * Jwk&lt;?&gt; jwk = Jwk.parser()
      *         //.provider(aJcaProvider)     // optional
      *         //.deserializer(deserializer) // optional
      *         //.operationPolicy(policy)    // optional
@@ -81,15 +72,17 @@ public final class Jwks {
      *         .parse(jwkString);</pre></blockquote>
      *
      * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#parser()}
      */
+    @Deprecated
     public static JwkParserBuilder parser() {
-        return PARSER_BUILDER_SUPPLIER.get();
+        return Jwk.parser();
     }
 
     /**
      * Return a new builder used to create {@link JwkSet}s.  For example:
      * <blockquote><pre>
-     * JwkSet jwkSet = Jwks.set()
+     * JwkSet jwkSet = JwkSet.builder()
      *     //.provider(aJcaProvider)     // optional
      *     //.operationPolicy(policy)    // optional
      *     .add(aJwk)                    // appends a key
@@ -99,15 +92,17 @@ public final class Jwks {
      * </pre></blockquote>
      *
      * @return a new builder used to create {@link JwkSet}s
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkSet#builder()}.
      */
+    @Deprecated
     public static JwkSetBuilder set() {
-        return SET_BUILDER_SUPPLIER.get();
+        return Suppliers.JWK_SET_BUILDER_SUPPLIER.get();
     }
 
     /**
      * Returns a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances. For example:
      * <blockquote><pre>
-     * JwkSet jwkSet = Jwks.setParser()
+     * JwkSet jwkSet = JwkSet.parser()
      *         //.provider(aJcaProvider)     // optional
      *         //.deserializer(deserializer) // optional
      *         //.operationPolicy(policy)    // optional
@@ -115,9 +110,12 @@ public final class Jwks {
      *         .parse(jwkSetString);</pre></blockquote>
      *
      * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkSet#parser()}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public static JwkSetParserBuilder setParser() {
-        return SET_PARSER_BUILDER_SUPPLIER.get();
+        return Suppliers.JWK_SET_PARSER_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -126,9 +124,11 @@ public final class Jwks {
      *
      * @param publicJwk the {@code PublicJwk} to convert to JSON
      * @return the JWK's canonical JSON value
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#json(PublicJwk)}.
      */
+    @Deprecated
     public static String json(PublicJwk<?> publicJwk) {
-        return UNSAFE_JSON(publicJwk); // safe by nature of it being a Public JWK
+        return Jwk.json(publicJwk);
     }
 
     /**
@@ -139,9 +139,12 @@ public final class Jwks {
      *
      * @param jwk the JWK to convert to JSON
      * @return the JWK's canonical JSON value
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk#UNSAFE_JSON(Jwk)}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public static String UNSAFE_JSON(Jwk<?> jwk) {
-        return Classes.invokeStatic(JWKS_BRIDGE_FQCN, "UNSAFE_JSON", new Class[]{Jwk.class}, jwk);
+        return Jwk.UNSAFE_JSON(jwk);
     }
 
     /**
@@ -153,16 +156,16 @@ public final class Jwks {
      * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.CRV.P256.keyPair().build();</pre></blockquote>
+     * Jwk.crv.P256.keyPair().build();</pre></blockquote>
      * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
      *
      * @see #get()
      * @since 0.12.0
+     * @deprecated in favor of {@link Jwk.crv}
      */
-    public static final class CRV {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardCurves";
-        private static final Registry<String, Curve> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
+    public static final class CRV { //TODO: delete for 1.0
 
         /**
          * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
@@ -171,9 +174,11 @@ public final class Jwks {
          * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
          *
          * @return a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#registry()}
          */
+        @Deprecated
         public static Registry<String, Curve> get() {
-            return REGISTRY;
+            return Jwk.crv.registry();
         }
 
         /**
@@ -182,8 +187,10 @@ public final class Jwks {
          * using the native Java JCA {@code secp256r1} algorithm.
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#P256}
          */
-        public static final Curve P256 = get().forKey("P-256");
+        @Deprecated
+        public static final Curve P256 = Jwk.crv.P256;
 
         /**
          * {@code P-384} Elliptic Curve defined by
@@ -191,8 +198,10 @@ public final class Jwks {
          * using the native Java JCA {@code secp384r1} algorithm.
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#P384}
          */
-        public static final Curve P384 = get().forKey("P-384");
+        @Deprecated
+        public static final Curve P384 = Jwk.crv.P384;
 
         /**
          * {@code P-521} Elliptic Curve defined by
@@ -200,8 +209,10 @@ public final class Jwks {
          * using the native Java JCA {@code secp521r1} algorithm.
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#P521}
          */
-        public static final Curve P521 = get().forKey("P-521");
+        @Deprecated
+        public static final Curve P521 = Jwk.crv.P521;
 
         /**
          * {@code Ed25519} Elliptic Curve defined by
@@ -213,8 +224,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#Ed25519}
          */
-        public static final Curve Ed25519 = get().forKey("Ed25519");
+        @Deprecated
+        public static final Curve Ed25519 = Jwk.crv.Ed25519;
 
         /**
          * {@code Ed448} Elliptic Curve defined by
@@ -226,8 +239,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#Ed448}
          */
-        public static final Curve Ed448 = get().forKey("Ed448");
+        @Deprecated
+        public static final Curve Ed448 = Jwk.crv.Ed448;
 
         /**
          * {@code X25519} Elliptic Curve defined by
@@ -239,8 +254,10 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#X25519}
          */
-        public static final Curve X25519 = get().forKey("X25519");
+        @Deprecated
+        public static final Curve X25519 = Jwk.crv.X25519;
 
         /**
          * {@code X448} Elliptic Curve defined by
@@ -252,11 +269,160 @@ public final class Jwks {
          * classpath.</p>
          *
          * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.crv#X448}
          */
-        public static final Curve X448 = get().forKey("X448");
+        @Deprecated
+        public static final Curve X448 = Jwk.crv.X448;
 
         //prevent instantiation
         private CRV() {
+        }
+    }
+
+    /**
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key_ops (Key Operations)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">JSON Web Key Operations
+     * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
+     * direct type-safe reference in application code. For example:
+     * <blockquote><pre>
+     * Jwk.builder()
+     *     .operations(Jwk.op.SIGN)
+     *     // ... etc ...
+     *     .build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
+     *
+     * @see #get()
+     * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op}
+     */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
+    public static final class OP { //TODO: delete for 1.0
+
+        /**
+         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         *
+         * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#builder()}
+         */
+        @Deprecated
+        public static KeyOperationBuilder builder() {
+            return Jwk.op.builder();
+        }
+
+        /**
+         * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         *
+         * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#policy()}
+         */
+        @Deprecated
+        public static KeyOperationPolicyBuilder policy() {
+            return Jwk.op.policy();
+        }
+
+        /**
+         * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
+         *
+         * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#registry()}
+         */
+        @Deprecated
+        public static Registry<String, KeyOperation> get() {
+            return Jwk.op.registry();
+        }
+
+        /**
+         * {@code sign} operation indicating a key is intended to be used to compute digital signatures or
+         * MACs. It's related operation is {@link #VERIFY}.
+         *
+         * @see #VERIFY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#SIGN}
+         */
+        @Deprecated
+        public static final KeyOperation SIGN = Jwk.op.SIGN;
+
+        /**
+         * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
+         * MACs. It's related operation is {@link #SIGN}.
+         *
+         * @see #SIGN
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#VERIFY}
+         */
+        @Deprecated
+        public static final KeyOperation VERIFY = Jwk.op.VERIFY;
+
+        /**
+         * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It's
+         * related operation is {@link #DECRYPT}.
+         *
+         * @see #DECRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#ENCRYPT}
+         */
+        @Deprecated
+        public static final KeyOperation ENCRYPT = Jwk.op.ENCRYPT;
+
+        /**
+         * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It's
+         * related operation is {@link #ENCRYPT}.
+         *
+         * @see #ENCRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#DECRYPT}
+         */
+        @Deprecated
+        public static final KeyOperation DECRYPT = Jwk.op.DECRYPT;
+
+        /**
+         * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
+         * related operation is {@link #UNWRAP_KEY}.
+         *
+         * @see #UNWRAP_KEY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#WRAP_KEY}
+         */
+        @Deprecated
+        public static final KeyOperation WRAP_KEY = Jwk.op.WRAP_KEY;
+
+        /**
+         * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
+         * decryption, if applicable. It's related operation is
+         * {@link #WRAP_KEY}.
+         *
+         * @see #WRAP_KEY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#UNWRAP_KEY}
+         */
+        @Deprecated
+        public static final KeyOperation UNWRAP_KEY = Jwk.op.UNWRAP_KEY;
+
+        /**
+         * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
+         * a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#DERIVE_KEY}
+         */
+        @Deprecated
+        public static final KeyOperation DERIVE_KEY = Jwk.op.DERIVE_KEY;
+
+        /**
+         * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
+         * used as key. It does not have a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwk.op#DERIVE_BITS}
+         */
+        @Deprecated
+        public static final KeyOperation DERIVE_BITS = Jwk.op.DERIVE_BITS;
+
+        //prevent instantiation
+        private OP() {
         }
     }
 
@@ -268,13 +434,13 @@ public final class Jwks {
      * Each algorithm is made available as a ({@code public static final}) constant for direct type-safe
      * reference in application code. For example:
      * <blockquote><pre>
-     * Jwks.{@link Jwks#builder}()
+     * Jwk.{@link Jwk#builder}()
      *     // ... etc ...
-     *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(Jwts.HASH.{@link Jwks.HASH#SHA256 SHA256}) // &lt;---
+     *     .{@link JwkBuilder#idFromThumbprint(HashAlgorithm) idFromThumbprint}(JwkThumbprint.alg.{@link JwkThumbprint.alg#SHA256 SHA256}) // &lt;---
      *     .build()</pre></blockquote>
      * <p>or</p>
      * <blockquote><pre>
-     * HashAlgorithm hashAlg = Jwks.HASH.{@link Jwks.HASH#SHA256 SHA256};
+     * HashAlgorithm hashAlg = JwkThumbprint.alg.{@link JwkThumbprint.alg#SHA256 SHA256};
      * {@link JwkThumbprint} thumbprint = aJwk.{@link Jwk#thumbprint(HashAlgorithm) thumbprint}(hashAlg);
      * String <a href="https://www.rfc-editor.org/rfc/rfc9278#section-3">rfcMandatoryPrefix</a> = "urn:ietf:params:oauth:jwk-thumbprint:" + hashAlg.getId();
      * assert thumbprint.toURI().toString().startsWith(rfcMandatoryPrefix);
@@ -283,11 +449,11 @@ public final class Jwks {
      *
      * @see #get()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg}.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public static final class HASH {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardHashAlgorithms";
-        private static final Registry<String, HashAlgorithm> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
 
         /**
          * Returns a registry of various (<em>but not all</em>)
@@ -299,9 +465,11 @@ public final class Jwks {
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA Hash
          * Algorithms</a> commonly used to compute {@link JwkThumbprint JWK Thumbprint}s and ensure valid
          * <a href="https://www.rfc-editor.org/rfc/rfc9278#name-hash-algorithms-identifier">JWK Thumbprint URIs</a>.
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#registry()}
          */
+        @Deprecated
         public static Registry<String, HashAlgorithm> get() {
-            return REGISTRY;
+            return JwkThumbprint.alg.registry();
         }
 
         /**
@@ -309,24 +477,33 @@ public final class Jwks {
          * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
          * value of {@code sha-256}. It is a {@code HashAlgorithm} alias for the native
          * Java JCA {@code SHA-256} {@code MessageDigest} algorithm.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA256}
          */
-        public static final HashAlgorithm SHA256 = get().forKey("sha-256");
+        @Deprecated
+        public static final HashAlgorithm SHA256 = JwkThumbprint.alg.SHA256;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
          * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
          * value of {@code sha-384}. It is a {@code HashAlgorithm} alias for the native
          * Java JCA {@code SHA-384} {@code MessageDigest} algorithm.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA384}
          */
-        public static final HashAlgorithm SHA384 = get().forKey("sha-384");
+        @Deprecated
+        public static final HashAlgorithm SHA384 = JwkThumbprint.alg.SHA384;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
          * hash algorithm</a> with an {@link Identifiable#getId() id} (aka IANA &quot;{@code Hash Name String}&quot;)
          * value of {@code sha-512}. It is a {@code HashAlgorithm} alias for the native
          * Java JCA {@code SHA-512} {@code MessageDigest} algorithm.
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA512}
          */
-        public static final HashAlgorithm SHA512 = get().forKey("sha-512");
+        @Deprecated
+        public static final HashAlgorithm SHA512 = JwkThumbprint.alg.SHA512;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -335,8 +512,11 @@ public final class Jwks {
          * Java JCA {@code SHA3-256} {@code MessageDigest} algorithm.
          * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA3_256}
          */
-        public static final HashAlgorithm SHA3_256 = get().forKey("sha3-256");
+        @Deprecated
+        public static final HashAlgorithm SHA3_256 = JwkThumbprint.alg.SHA3_256;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -345,8 +525,11 @@ public final class Jwks {
          * Java JCA {@code SHA3-384} {@code MessageDigest} algorithm.
          * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA3_384}
          */
-        public static final HashAlgorithm SHA3_384 = get().forKey("sha3-384");
+        @Deprecated
+        public static final HashAlgorithm SHA3_384 = JwkThumbprint.alg.SHA3_384;
 
         /**
          * <a href="https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg">IANA
@@ -355,144 +538,14 @@ public final class Jwks {
          * Java JCA {@code SHA3-512} {@code MessageDigest} algorithm.
          * <p><b>This algorithm requires at least JDK 9 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
+         *
+         * @deprecated since JJWT_RELEASE_VERSION in favor of {@link JwkThumbprint.alg#SHA3_256}
          */
-        public static final HashAlgorithm SHA3_512 = get().forKey("sha3-512");
+        @Deprecated
+        public static final HashAlgorithm SHA3_512 = JwkThumbprint.alg.SHA3_512;
 
         //prevent instantiation
         private HASH() {
-        }
-    }
-
-    /**
-     * Constants for all standard JWK
-     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key_ops (Key Operations)</a> parameter values
-     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">JSON Web Key Operations
-     * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
-     * direct type-safe reference in application code. For example:
-     * <blockquote><pre>
-     * Jwks.builder()
-     *     .operations(Jwks.OP.SIGN)
-     *     // ... etc ...
-     *     .build();</pre></blockquote>
-     * <p>They are also available together as a {@link Registry} instance via the {@link #get()} method.</p>
-     *
-     * @see #get()
-     * @since 0.12.0
-     */
-    public static final class OP {
-
-        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
-        private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
-
-        // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-        private static final Supplier<KeyOperationBuilder> BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier");
-
-        // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-        private static final Supplier<KeyOperationPolicyBuilder> POLICY_BUILDER_SUPPLIER =
-                Classes.newInstance("io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier");
-
-        /**
-         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
-         *
-         * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
-         */
-        public static KeyOperationBuilder builder() {
-            return BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
-         *
-         * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
-         */
-        public static KeyOperationPolicyBuilder policy() {
-            return POLICY_BUILDER_SUPPLIER.get();
-        }
-
-        /**
-         * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
-         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
-         *
-         * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
-         */
-        public static Registry<String, KeyOperation> get() {
-            return REGISTRY;
-        }
-
-        /**
-         * {@code sign} operation indicating a key is intended to be used to compute digital signatures or
-         * MACs. It's related operation is {@link #VERIFY}.
-         *
-         * @see #VERIFY
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation SIGN = get().forKey("sign");
-
-        /**
-         * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
-         * MACs. It's related operation is {@link #SIGN}.
-         *
-         * @see #SIGN
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation VERIFY = get().forKey("verify");
-
-        /**
-         * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It's
-         * related operation is {@link #DECRYPT}.
-         *
-         * @see #DECRYPT
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation ENCRYPT = get().forKey("encrypt");
-
-        /**
-         * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It's
-         * related operation is {@link #ENCRYPT}.
-         *
-         * @see #ENCRYPT
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation DECRYPT = get().forKey("decrypt");
-
-        /**
-         * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
-         * related operation is {@link #UNWRAP_KEY}.
-         *
-         * @see #UNWRAP_KEY
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation WRAP_KEY = get().forKey("wrapKey");
-
-        /**
-         * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
-         * decryption, if applicable. It's related operation is
-         * {@link #WRAP_KEY}.
-         *
-         * @see #WRAP_KEY
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation UNWRAP_KEY = get().forKey("unwrapKey");
-
-        /**
-         * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
-         * a related operation.
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation DERIVE_KEY = get().forKey("deriveKey");
-
-        /**
-         * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
-         * used as key. It does not have a related operation.
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
-         */
-        public static final KeyOperation DERIVE_BITS = get().forKey("deriveBits");
-
-        //prevent instantiation
-        private OP() {
         }
     }
 }

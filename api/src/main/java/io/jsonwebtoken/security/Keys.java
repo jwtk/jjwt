@@ -15,9 +15,8 @@
  */
 package io.jsonwebtoken.security;
 
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.lang.Assert;
-import io.jsonwebtoken.lang.Classes;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -32,16 +31,6 @@ import java.security.PublicKey;
  * @since 0.10.0
  */
 public final class Keys {
-
-    private static final String BRIDGE_CLASSNAME = "io.jsonwebtoken.impl.security.KeysBridge";
-    private static final Class<?> BRIDGE_CLASS = Classes.forName(BRIDGE_CLASSNAME);
-    private static final Class<?>[] FOR_PASSWORD_ARG_TYPES = new Class[]{char[].class};
-    private static final Class<?>[] SECRET_BUILDER_ARG_TYPES = new Class[]{SecretKey.class};
-    private static final Class<?>[] PRIVATE_BUILDER_ARG_TYPES = new Class[]{PrivateKey.class};
-
-    private static <T> T invokeStatic(String method, Class<?>[] argTypes, Object... args) {
-        return Classes.invokeStatic(BRIDGE_CLASS, method, argTypes, args);
-    }
 
     //prevent instantiation
     private Keys() {
@@ -77,7 +66,7 @@ public final class Keys {
                 "is not secure enough for any JWT HMAC-SHA algorithm.  The JWT " +
                 "JWA Specification (RFC 7518, Section 3.2) states that keys used with HMAC-SHA algorithms MUST have a " +
                 "size >= 256 bits (the key size must be greater than or equal to the hash " +
-                "output size).  Consider using the Jwts.SIG.HS256.key() builder (or HS384.key() " +
+                "output size).  Consider using the Jws.alg.HS256.key() builder (or HS384.key() " +
                 "or HS512.key()) to create a key guaranteed to be secure enough for your preferred HMAC-SHA " +
                 "algorithm.  See https://tools.ietf.org/html/rfc7518#section-3.2 for more information.";
         throw new WeakKeyException(msg);
@@ -90,9 +79,9 @@ public final class Keys {
      * length for that specific algorithm by calling their {@code key()} builder method directly. For example:</p>
      *
      * <pre><code>
-     * {@link Jwts.SIG#HS256}.key().build();
-     * {@link Jwts.SIG#HS384}.key().build();
-     * {@link Jwts.SIG#HS512}.key().build();
+     * {@link Jws.alg#HS256}.key().build();
+     * {@link Jws.alg#HS384}.key().build();
+     * {@link Jws.alg#HS512}.key().build();
      * </code></pre>
      *
      * <p>Call those methods as needed instead of this static {@code secretKeyFor} helper method - the returned
@@ -139,7 +128,7 @@ public final class Keys {
     @Deprecated
     public static SecretKey secretKeyFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get().get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jws.alg.registry().get(alg.name());
         if (!(salg instanceof MacAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support shared secret keys.";
             throw new IllegalArgumentException(msg);
@@ -154,11 +143,11 @@ public final class Keys {
      * for that specific algorithm by calling their {@code keyPair()} builder method directly. For example:</p>
      *
      * <blockquote><pre>
-     * Jwts.SIG.{@link Jwts.SIG#RS256 RS256}.keyPair().build();
-     * Jwts.SIG.{@link Jwts.SIG#RS384 RS384}.keyPair().build();
-     * Jwts.SIG.{@link Jwts.SIG#RS512 RS512}.keyPair().build();
+     * Jws.alg.{@link Jws.alg#RS256 RS256}.keyPair().build();
+     * Jws.alg.{@link Jws.alg#RS384 RS384}.keyPair().build();
+     * Jws.alg.{@link Jws.alg#RS512 RS512}.keyPair().build();
      * ... etc ...
-     * Jwts.SIG.{@link Jwts.SIG#ES512 ES512}.keyPair().build();</pre></blockquote>
+     * Jws.alg.{@link Jws.alg#ES512 ES512}.keyPair().build();</pre></blockquote>
      *
      * <p>Call those methods as needed instead of this static {@code keyPairFor} helper method - the returned
      * {@link KeyPairBuilder} allows callers to specify a preferred Provider or SecureRandom on the builder if
@@ -244,7 +233,7 @@ public final class Keys {
     @Deprecated
     public static KeyPair keyPairFor(io.jsonwebtoken.SignatureAlgorithm alg) throws IllegalArgumentException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
-        SecureDigestAlgorithm<?, ?> salg = Jwts.SIG.get().get(alg.name());
+        SecureDigestAlgorithm<?, ?> salg = Jws.alg.registry().get(alg.name());
         if (!(salg instanceof SignatureAlgorithm)) {
             String msg = "The " + alg.name() + " algorithm does not support Key Pairs.";
             throw new IllegalArgumentException(msg);
@@ -272,9 +261,11 @@ public final class Keys {
      * @return a new {@link Password} instance that wraps a new clone of the specified {@code password} character array.
      * @see Password#toCharArray()
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Password#of(char[])}
      */
+    @Deprecated
     public static Password password(char[] password) {
-        return invokeStatic("password", FOR_PASSWORD_ARG_TYPES, new Object[]{password});
+        return Password.of(password);
     }
 
     /**
@@ -299,8 +290,7 @@ public final class Keys {
      * @since 0.12.0
      */
     public static SecretKeyBuilder builder(SecretKey key) {
-        Assert.notNull(key, "SecretKey cannot be null.");
-        return invokeStatic("builder", SECRET_BUILDER_ARG_TYPES, key);
+        return Suppliers.SECRET_KEY_BUILDER_FACTORY.apply(key);
     }
 
     /**
@@ -326,7 +316,6 @@ public final class Keys {
      * @since 0.12.0
      */
     public static PrivateKeyBuilder builder(PrivateKey key) {
-        Assert.notNull(key, "PrivateKey cannot be null.");
-        return invokeStatic("builder", PRIVATE_BUILDER_ARG_TYPES, key);
+        return Suppliers.PRIVATE_KEY_BUILDER_FACTORY.apply(key);
     }
 }

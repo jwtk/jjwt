@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.security.InvalidKeyException
 import io.jsonwebtoken.security.MalformedKeyException
 import org.junit.Test
@@ -48,7 +48,7 @@ class EcPrivateJwkFactoryTest {
     @Test
     void testDerivePublicFails() {
 
-        def pair = Jwts.SIG.ES256.keyPair().build()
+        def pair = Jws.alg.ES256.keyPair().build()
         def priv = pair.getPrivate() as ECPrivateKey
 
         final def context = new DefaultJwkContext(DefaultEcPrivateJwk.PARAMS)

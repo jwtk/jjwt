@@ -22,7 +22,8 @@ import java.io.InputStream;
 import java.security.Provider;
 import java.security.SecureRandom;
 
-public class DefaultVerifyDigestRequest extends DefaultRequest<InputStream> implements VerifyDigestRequest {
+@SuppressWarnings("unused")
+public class DefaultVerifyDigestRequest extends DefaultDigestRequest implements VerifyDigestRequest {
 
     private final byte[] digest;
 
@@ -34,5 +35,30 @@ public class DefaultVerifyDigestRequest extends DefaultRequest<InputStream> impl
     @Override
     public byte[] getDigest() {
         return this.digest;
+    }
+
+    @SuppressWarnings("unused") // instantiated via reflection in io.jsonwebtoken.security.Suppliers
+    public static class Builder extends AbstractPayloadParams<InputStream, VerifyDigestRequest.Builder>
+            implements VerifyDigestRequest.Builder {
+
+        private byte[] digest;
+
+        @Override
+        public VerifyDigestRequest.Builder digest(byte[] digest) {
+            this.digest = digest;
+            return self();
+        }
+
+        @Override
+        public VerifyDigestRequest build() {
+            return new DefaultVerifyDigestRequest(this.payload, this.provider, this.random, this.digest);
+        }
+
+        public static class Supplier implements java.util.function.Supplier<VerifyDigestRequest.Builder> {
+            @Override
+            public Builder get() {
+                return new Builder();
+            }
+        }
     }
 }
