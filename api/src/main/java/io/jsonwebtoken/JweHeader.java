@@ -169,9 +169,8 @@ public interface JweHeader extends ProtectedHeader {
      */
     byte[] getPbes2Salt();
 
-
     /**
-     * Parameters used that may be used to build a JWE Header.
+     * Parameters that may be used to build a JWE Header.
      *
      * @param <T> the params subtype for method chaining.
      * @since JJWT_RELEASE_VERSION

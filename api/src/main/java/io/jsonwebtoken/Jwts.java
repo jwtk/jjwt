@@ -1102,8 +1102,6 @@ public final class Jwts {
         }
     }
 
-
-
     /**
      * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
      *
@@ -1173,7 +1171,7 @@ public final class Jwts {
      */
     @Deprecated
     public static JwtParserBuilder parser() {
-        return Suppliers.JWT_PARSER_BUILDER_SUPPLIER.get();
+        return Jwt.parser();
     }
 
     /**
