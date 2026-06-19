@@ -27,6 +27,8 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.Providable;
+import io.jsonwebtoken.security.Randomizable;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.WeakKeyException;
 import io.jsonwebtoken.security.X509Builder;
@@ -36,8 +38,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
 import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.Date;
@@ -49,29 +49,7 @@ import java.util.function.Consumer;
  *
  * @since 0.1
  */
-public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
-
-    /**
-     * Sets the JCA Provider to use during cryptographic signing or encryption operations, or {@code null} if the
-     * JCA subsystem preferred provider should be used.
-     *
-     * @param provider the JCA Provider to use during cryptographic signing or encryption operations, or {@code null} if the
-     *                 JCA subsystem preferred provider should be used.
-     * @return the builder for method chaining.
-     * @since 0.12.0
-     */
-    JwtBuilder provider(Provider provider);
-
-    /**
-     * Sets the {@link SecureRandom} to use during cryptographic signing or encryption operations, or {@code null} if
-     * a default {@link SecureRandom} should be used.
-     *
-     * @param secureRandom the {@link SecureRandom} to use during cryptographic signing or encryption operations, or
-     *                     {@code null} if a default {@link SecureRandom} should be used.
-     * @return the builder for method chaining.
-     * @since 0.12.0
-     */
-    JwtBuilder random(SecureRandom secureRandom);
+public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuilder>, ClaimsMutator<JwtBuilder> {
 
     /**
      * Returns the {@code Header} to use to modify the constructed JWT's header name/value pairs as desired.

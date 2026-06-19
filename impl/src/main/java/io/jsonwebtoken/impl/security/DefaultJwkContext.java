@@ -25,7 +25,11 @@ import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyOperation;
 
-import java.security.*;
+import java.security.Key;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -260,7 +264,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
-    public JwkContext<K> setProvider(Provider provider) {
+    public JwkContext<K> provider(Provider provider) {
         this.provider = provider;
         return this;
     }
@@ -271,7 +275,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
-    public JwkContext<K> setRandom(SecureRandom random) {
+    public JwkContext<K> random(SecureRandom random) {
         this.random = random;
         return this;
     }

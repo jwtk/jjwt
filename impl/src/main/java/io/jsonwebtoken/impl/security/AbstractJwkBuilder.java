@@ -68,13 +68,13 @@ abstract class AbstractJwkBuilder<K extends Key, J extends Jwk<K>, T extends Jwk
 
     @Override
     public T provider(Provider provider) {
-        this.DELEGATE.setProvider(provider);
+        this.DELEGATE.provider(provider);
         return self();
     }
 
     @Override
     public T random(SecureRandom random) {
-        this.DELEGATE.setRandom(random);
+        this.DELEGATE.random(random);
         return self();
     }
 

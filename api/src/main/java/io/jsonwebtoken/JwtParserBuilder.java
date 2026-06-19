@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.lang.NestedCollection;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.Providable;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import javax.crypto.SecretKey;
@@ -47,7 +48,7 @@ import java.util.Map;
  * @since 0.11.0
  */
 @SuppressWarnings("JavadocLinkAsPlainText")
-public interface JwtParserBuilder extends Builder<JwtParser> {
+public interface JwtParserBuilder extends Providable<JwtParserBuilder>, Builder<JwtParser> {
 
     /**
      * Enables parsing of Unsecured JWTs (JWTs with an 'alg' (Algorithm) header value of
@@ -125,17 +126,6 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @since 0.12.0
      */
     NestedCollection<String, JwtParserBuilder> critical();
-
-    /**
-     * Sets the JCA Provider to use during cryptographic signature and key decryption operations, or {@code null} if the
-     * JCA subsystem preferred provider should be used.
-     *
-     * @param provider the JCA Provider to use during cryptographic signature and decryption operations, or {@code null}
-     *                 if the JCA subsystem preferred provider should be used.
-     * @return the builder for method chaining.
-     * @since 0.12.0
-     */
-    JwtParserBuilder provider(Provider provider);
 
     /**
      * Ensures that the specified {@code jti} exists in the parsed JWT.  If missing or if the parsed

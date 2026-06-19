@@ -15,20 +15,23 @@
  */
 package io.jsonwebtoken.security;
 
+import java.security.SecureRandom;
+
 /**
- * Algorithm parameters that include a payload value required during the cryptographic operation.
+ * Interface implemented by {@code Object}s that allow configuration of a JCA {@link SecureRandom}.
  *
- * @param <T> the type of payload
- * @param <P> the subtype returned for method chaining
+ * @param <T> the type of {@code Object} returned after setting the {@code SecureRandom}, usually for method chaining.
  * @since JJWT_RELEASE_VERSION
  */
-public interface PayloadParams<T, P extends PayloadParams<T, P>> extends Providable<P>, Randomizable<P> {
+@FunctionalInterface
+public interface Randomizable<T> {
 
     /**
-     * Sets the payload used during the cryptographic operation.
+     * Sets the JCA {@link SecureRandom} to use during cryptographic operations.  This is an optional property -
+     * if not specified, a default {@code SecureRandom} will be used if necessary.
      *
-     * @param payload the payload used during the cryptographic operation.
-     * @return the instance for method chaining.
+     * @param random the JCA {@code SecureRandom} instance to use during cryptographic operations.
+     * @return the associated object for method chaining.
      */
-    P payload(T payload);
+    T random(SecureRandom random);
 }

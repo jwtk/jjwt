@@ -15,20 +15,24 @@
  */
 package io.jsonwebtoken.security;
 
+import java.security.Provider;
+
 /**
- * Algorithm parameters that include a payload value required during the cryptographic operation.
+ * Interface implemented by objects that allow configuration of a JCA {@link Provider}.
  *
- * @param <T> the type of payload
- * @param <P> the subtype returned for method chaining
+ * @param <T> the type of object returned after setting the {@code Provider}, usually for method chaining.
+ * @see #provider(Provider)
  * @since JJWT_RELEASE_VERSION
  */
-public interface PayloadParams<T, P extends PayloadParams<T, P>> extends Providable<P>, Randomizable<P> {
+@FunctionalInterface
+public interface Providable<T> {
 
     /**
-     * Sets the payload used during the cryptographic operation.
+     * Sets the JCA Security {@link Provider} to use during cryptographic operations.  This is an
+     * optional property - if not specified, a default JCA Provider will be used if necessary.
      *
-     * @param payload the payload used during the cryptographic operation.
-     * @return the instance for method chaining.
+     * @param provider the JCA Security Provider instance to use during cryptographic operations.
+     * @return the associated object for method chaining.
      */
-    P payload(T payload);
+    T provider(Provider provider);
 }
