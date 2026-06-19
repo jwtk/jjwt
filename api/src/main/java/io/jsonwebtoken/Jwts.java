@@ -52,6 +52,7 @@ import java.util.Map;
  * ({@link Jws.alg}, {@link Jwe.alg}, {@link Jwe.enc}, {@link Jwe.zip}) and static factory methods
  * ({@link Jwt#builder()}, {@link Jwt#parser()}, {@link Jwt#header()}, {@link Claims#builder()}).
  */
+@Deprecated
 public final class Jwts {
 
     /**
