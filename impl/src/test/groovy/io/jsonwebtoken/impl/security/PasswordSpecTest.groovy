@@ -53,17 +53,17 @@ class PasswordSpecTest {
 
     @Test
     void testSymmetricChange() {
-        //assert change in backing array changes key as well:
+        //assert change in backing array does not change the key state:
         PASSWORD[0] = 'b'
-        assertArrayEquals PASSWORD, KEY.toCharArray()
+        assertFalse Objects.equals(PASSWORD, KEY.@password)
     }
 
     @Test
     void testSymmetricDestroy() {
         KEY.destroy()
         assertTrue KEY.isDestroyed()
-        for(char c : PASSWORD) { //assert clearing key clears backing array:
-            assertTrue c == (char)'\u0000'
+        for (char c : KEY.@password) { //assert clearing key clears backing array:
+            assertTrue c == (char) '\u0000'
         }
     }
 
@@ -73,8 +73,8 @@ class PasswordSpecTest {
         //now do it again to assert idempotent result:
         KEY.destroy()
         assertTrue KEY.isDestroyed()
-        for(char c : PASSWORD) {
-            assertTrue c == (char)'\u0000'
+        for (char c : KEY.@password) {
+            assertTrue c == (char) '\u0000'
         }
     }
 

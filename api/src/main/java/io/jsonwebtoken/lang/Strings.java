@@ -342,11 +342,11 @@ public final class Strings {
      */
     public static String toHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
-        for (byte temp : bytes) {
+        for (byte b : bytes) {
             if (result.length() > 0) {
-                result.append((char) Character.SPACE_SEPARATOR);
+                result.append(' ');
             }
-            result.append(String.format("%02x", temp));
+            result.append(String.format("%02X", b));
         }
         return result.toString();
     }
