@@ -74,7 +74,7 @@ class RFC7797Test {
         InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
-            def parser = Jwts.parser().verifyWith(key).build()
+            def parser = Jwt.parser().verifyWith(key).build()
             def jws
             if (payload instanceof byte[]) {
                 jws = parser.parseSignedContent(s, (byte[]) payload)
@@ -97,7 +97,7 @@ class RFC7797Test {
 
         def key = TestKeys.HS256
 
-        def claims = Jwts.claims().subject('me').build()
+        def claims = Claims.builder().subject('me').build()
 
         ByteArrayOutputStream out = new ByteArrayOutputStream()
         Services.get(Serializer).serialize(claims, out)
@@ -110,7 +110,7 @@ class RFC7797Test {
         InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
-            def parser = Jwts.parser().verifyWith(key).build()
+            def parser = Jwt.parser().verifyWith(key).build()
             def jws
             if (payload instanceof byte[]) {
                 jws = parser.parseSignedClaims(s, (byte[]) payload)
@@ -136,7 +136,7 @@ class RFC7797Test {
         InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(content))
 
         for (def payload : [content, asByteInputStream, asBufferedInputStream]) {
-            def parser = Jwts.parser().verifyWith(key).build()
+            def parser = Jwt.parser().verifyWith(key).build()
             def jws
             if (payload instanceof byte[]) {
                 jws = parser.parseSignedContent(s, (byte[]) payload)
@@ -175,7 +175,7 @@ class RFC7797Test {
         String compact = Jwts.builder().content(stream).signWith(key).encodePayload(false).compact()
 
         // signature still verified:
-        def jwt = Jwts.parser().verifyWith(key).build().parseSignedContent(compact, data)
+        def jwt = Jwt.parser().verifyWith(key).build().parseSignedContent(compact, data)
         assertEquals 'HS256', jwt.header.getAlgorithm()
         assertEquals s, Strings.utf8(jwt.getPayload())
     }
@@ -189,7 +189,7 @@ class RFC7797Test {
 
         String s = Jwts.builder().signWith(key).content(payload).encodePayload(false).compact()
 
-        def jws = Jwts.parser().verifyWith(key).build().parseSignedClaims(s, payload)
+        def jws = Jwt.parser().verifyWith(key).build().parseSignedClaims(s, payload)
 
         assertEquals 'me', jws.getPayload().getSubject()
     }
@@ -209,7 +209,7 @@ class RFC7797Test {
 
         String s = Jwts.builder().signWith(key).content(payload).encodePayload(false).compact()
 
-        def jws = Jwts.parser().verifyWith(key) // .critical("b64") is not called, should still work:
+        def jws = Jwt.parser().verifyWith(key) // .critical("b64") is not called, should still work:
                 .build().parseSignedClaims(s, payload)
 
         assertEquals 'me', jws.getPayload().getSubject()
@@ -229,7 +229,7 @@ class RFC7797Test {
     @Test
     void testParseContentWithEmptyBytesPayload() {
         try {
-            Jwts.parser().verifyWith(TestKeys.HS256).build().parseSignedContent('whatever', Bytes.EMPTY) // <-- empty
+            Jwt.parser().verifyWith(TestKeys.HS256).build().parseSignedContent('whatever', Bytes.EMPTY) // <-- empty
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = 'unencodedPayload argument cannot be null or empty.'
@@ -240,7 +240,7 @@ class RFC7797Test {
     @Test
     void testParseClaimsWithEmptyBytesPayload() {
         try {
-            Jwts.parser().verifyWith(TestKeys.HS256).build().parseSignedClaims('whatever', Bytes.EMPTY) // <-- empty
+            Jwt.parser().verifyWith(TestKeys.HS256).build().parseSignedClaims('whatever', Bytes.EMPTY) // <-- empty
             fail()
         } catch (IllegalArgumentException expected) {
             String msg = 'unencodedPayload argument cannot be null or empty.'
@@ -261,7 +261,7 @@ class RFC7797Test {
 
         // try to parse it as a 'normal' JWS (without supplying the payload):
         try {
-            Jwts.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
+            Jwt.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
                     .parseSignedContent(s) // <-- no payload supplied
             fail()
         } catch (io.jsonwebtoken.security.SignatureException expected) {
@@ -284,7 +284,7 @@ class RFC7797Test {
 
         // try to parse it as a 'normal' JWS (without supplying the payload):
         try {
-            Jwts.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
+            Jwt.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
                     .parseSignedClaims(s) // <-- no payload supplied
             fail()
         } catch (io.jsonwebtoken.security.SignatureException expected) {
@@ -308,7 +308,7 @@ class RFC7797Test {
         // create a non-detached unencoded JWS:
         String s = Jwts.builder().signWith(key).content(payload).encodePayload(false).compact()
 
-        def jws = Jwts.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
+        def jws = Jwt.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
                 .parseSignedContent(s) // <--- parse normally, without calling parseSignedContent(s, unencodedPayload)
 
         assertArrayEquals Strings.utf8(payload), jws.getPayload()
@@ -322,7 +322,7 @@ class RFC7797Test {
         // create a non-detached unencoded JWS:
         String s = Jwts.builder().signWith(key).subject('me').encodePayload(false).compact()
 
-        def jws = Jwts.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
+        def jws = Jwt.parser().verifyWith(key).critical().add(DefaultJwsHeader.B64.id).and().build()
                 .parseSignedClaims(s) // <--- parse normally, without calling parseSignedClaims(s, unencodedPayload)
 
         assertEquals 'me', jws.getPayload().getSubject()
@@ -351,7 +351,7 @@ class RFC7797Test {
             InputStream asBufferedInputStream = new BufferedInputStream(Streams.of(compressed))
 
             for (def payload : [compressed, asByteInputStream, asBufferedInputStream]) {
-                def parser = Jwts.parser().verifyWith(key).build()
+                def parser = Jwt.parser().verifyWith(key).build()
                 def jws
                 if (payload instanceof byte[]) {
                     jws = parser.parseSignedContent(s, (byte[]) payload)
@@ -391,7 +391,7 @@ class RFC7797Test {
 
         // now try to parse a compressed unencoded using a signing key resolver:
         try {
-            Jwts.parser()
+            Jwt.parser()
                     .setSigningKeyResolver(new SigningKeyResolverAdapter() {
                         @Override
                         Key resolveSigningKey(JwsHeader header, byte[] content) {

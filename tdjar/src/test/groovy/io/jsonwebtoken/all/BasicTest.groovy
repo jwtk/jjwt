@@ -16,7 +16,6 @@
 package io.jsonwebtoken.all
 
 import io.jsonwebtoken.*
-import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import static org.hamcrest.CoreMatchers.equalTo
@@ -30,17 +29,16 @@ class BasicTest {
 
     @Test
     void basicUsageTest() {
-        def key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+        def alg = Jws.alg.HS256
+        def key = alg.key().build()
 
         String token = Jwts.builder()
-            .setSubject("test-user")
-            .claim("test", "basicUsageTest")
-            .signWith(key, SignatureAlgorithm.HS256)
-            .compact()
+                .subject("test-user")
+                .claim("test", "basicUsageTest")
+                .signWith(key, alg)
+                .compact()
 
-        JwtParser parser = Jwts.parser()
-            .setSigningKey(key)
-            .build()
+        JwtParser parser = Jwt.parser().verifyWith(key).build()
 
         Jwt<Header, Claims> result = parser.parseSignedClaims(token)
         assertThat result, notNullValue()

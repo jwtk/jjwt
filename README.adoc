@@ -765,7 +765,7 @@ Now let's verify the JWT (you should always discard JWTs that don't match an exp
 
 [,java]
 ----
-assert Jwts.parser().verifyWith(key).build().parseSignedClaims(jws).getPayload().getSubject().equals("Joe");
+assert Jwt.parser().verifyWith(key).build().parseSignedClaims(jws).getPayload().getSubject().equals("Joe");
 ----
 
 There are two things going on here. The `key` from before is being used to verify the signature of the JWT. If it
@@ -785,7 +785,7 @@ But what if parsing or signature validation failed?  You can catch `JwtException
 ----
 try {
 
-    Jwts.parser().verifyWith(key).build().parseSignedClaims(compactJws);
+    Jwt.parser().verifyWith(key).build().parseSignedClaims(compactJws);
 
     //OK, we can trust this JWT
 
@@ -1133,7 +1133,7 @@ Please see the main <<compression,Compression>> section to see how to compress a
 
 You read (parse) a JWT as follows:
 
-. Use the `Jwts.parser()` method to create a `JwtParserBuilder` instance.
+. Use the `Jwt.parser()` method to create a `JwtParserBuilder` instance.
 . Optionally call `keyLocator`, `verifyWith` or `decryptWith` methods if you expect to parse <<jws,signed>> or <<jwe,encrypted>> JWTs.
 . Call the `build()` method on the `JwtParserBuilder` to create and return a thread-safe `JwtParser`.
 . Call one of the various `parse*` methods with your compact JWT string, depending on the type of JWT you expect.
@@ -1146,7 +1146,7 @@ For example:
 Jwt<?,?> jwt;
 
 try {
-    jwt = Jwts.parser()     // (1)
+    jwt = Jwt.parser()     // (1)
 
     .keyLocator(keyLocator) // (2) dynamically locate signing or encryption keys
     //.verifyWith(key)      //     or a constant key used to verify all signed JWTs
@@ -1189,7 +1189,7 @@ So which key do we use?
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .verifyWith(secretKey) // <----
 
@@ -1202,7 +1202,7 @@ Jwts.parser()
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .verifyWith(publicKey) // <---- publicKey, not privateKey
 
@@ -1215,7 +1215,7 @@ specified on the `JwtParserBuilder`. For example:
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .decryptWith(secretKey) // <---- or a Password from Password.of(charArray)
 
@@ -1228,7 +1228,7 @@ Jwts.parser()
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .decryptWith(privateKey) // <---- privateKey, not publicKey
 
@@ -1271,7 +1271,7 @@ example:
 ----
 Locator<Key> keyLocator = getMyKeyLocator();
 
-Jwts.parser()
+Jwt.parser()
 
     .keyLocator(keyLocator) // <----
 
@@ -1448,7 +1448,7 @@ otherwise you may not trust the token.  You can do that by using one of the vari
 [,java]
 ----
 try {
-    Jwts.parser().requireSubject("jsmith")/* etc... */.build().parse(s);
+    Jwt.parser().requireSubject("jsmith")/* etc... */.build().parse(s);
 } catch (InvalidClaimException ice) {
     // the sub claim was missing or did not have a 'jsmith' value
 }
@@ -1460,7 +1460,7 @@ you can catch either `MissingClaimException` or `IncorrectClaimException`:
 [,java]
 ----
 try {
-    Jwts.parser().requireSubject("jsmith")/* etc... */.build().parse(s);
+    Jwt.parser().requireSubject("jsmith")/* etc... */.build().parse(s);
 } catch(MissingClaimException mce) {
     // the parsed JWT did not have the sub claim
 } catch(IncorrectClaimException ice) {
@@ -1473,7 +1473,7 @@ You can also require custom claims by using the `require(claimName, requiredValu
 [,java]
 ----
 try {
-    Jwts.parser().require("myClaim", "myRequiredValue")/* etc... */.build().parse(s);
+    Jwt.parser().require("myClaim", "myRequiredValue")/* etc... */.build().parse(s);
 } catch(InvalidClaimException ice) {
     // the 'myClaim' claim was missing or did not have a 'myRequiredValue' value
 }
@@ -1501,7 +1501,7 @@ You can account for these differences (usually no more than a few minutes) when 
 ----
 long seconds = 3 * 60; //3 minutes
 
-Jwts.parser()
+Jwt.parser()
 
     .clockSkewSeconds(seconds) // <----
 
@@ -1527,7 +1527,7 @@ during parsing for timestamp comparisons can be obtained via a custom time sourc
 ----
 Clock clock = new MyClock();
 
-Jwts.parser().clock(myClock) //... etc ...
+Jwt.parser().clock(myClock) //... etc ...
 ----
 
 The ``JwtParser``'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
@@ -1912,7 +1912,7 @@ Please see the main <<compression,Compression>> section to see how to compress a
 
 You read (parse) a JWS as follows:
 
-. Use the `Jwts.parser()` method to create a `JwtParserBuilder` instance.
+. Use the `Jwt.parser()` method to create a `JwtParserBuilder` instance.
 . Call either <<key-locator,keyLocator>> or `verifyWith` methods to determine the key used to verify the JWS signature.
 . Call the `build()` method on the `JwtParserBuilder` to return a thread-safe `JwtParser`.
 . Finally, call the `parseSignedClaims(String)` method with your jws `String`, producing the original JWS.
@@ -1926,7 +1926,7 @@ For example:
 Jws<Claims> jws;
 
 try {
-    jws = Jwts.parser()            // (1)
+    jws = Jwt.parser()            // (1)
 
     .keyLocator(keyLocator)        // (2) dynamically lookup verification keys based on each JWS
     //.verifyWith(key)             //     or a static key used to verify all encountered JWSs
@@ -1965,7 +1965,7 @@ For example:
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .verifyWith(secretKey) // <----
 
@@ -1978,7 +1978,7 @@ specified on the `JwtParserBuilder`.  For example:
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .verifyWith(publicKey) // <---- publicKey, not privateKey
 
@@ -2083,7 +2083,7 @@ To parse the resulting `jws` string, we need to do two things when creating the 
 
 [,java]
 ----
-Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
+Jws<byte[]> parsed = Jwt.parser().verifyWith(testKey) // 1
         .build()
         .parseSignedContent(jws, content);             // 2
 
@@ -2135,7 +2135,7 @@ To parse the resulting `jws` string, we need to do two things when creating the 
 
 [,java]
 ----
-Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
+Jws<Claims> parsed = Jwt.parser().verifyWith(testKey) // 1
         .critical().add("b64").and()                   // 2
         .build()
         .parseSignedClaims(jws);
@@ -2157,7 +2157,7 @@ payload String's UTF-8 bytes instead:
 
 [,java]
 ----
-parsed = Jwts.parser().verifyWith(testKey)
+parsed = Jwt.parser().verifyWith(testKey)
         .build()
         .parseSignedClaims(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
 ----
@@ -2621,7 +2621,7 @@ its size.  Please see the main <<compression,Compression>> section to see how to
 
 You read (parse) a JWE as follows:
 
-. Use the `Jwts.parser()` method to create a `JwtParserBuilder` instance.
+. Use the `Jwt.parser()` method to create a `JwtParserBuilder` instance.
 . Call either <<key-locator,keyLocator>> or `decryptWith` methods to determine the key used to decrypt the JWE.
 . Call the ``JwtParserBuilder``'s `build()` method to create a thread-safe `JwtParser`.
 . Parse the jwe string with the ``JwtParser``'s `parseEncryptedClaims` or `parseEncryptedContent` method.
@@ -2634,7 +2634,7 @@ For example:
 Jwe<Claims> jwe;
 
 try {
-    jwe = Jwts.parser()               // (1)
+    jwe = Jwt.parser()               // (1)
 
     .keyLocator(keyLocator)           // (2) dynamically lookup decryption keys based on each JWE
     //.decryptWith(key)               //     or a static key used to decrypt all encountered JWEs
@@ -2672,7 +2672,7 @@ So which key do we use for decryption?
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .decryptWith(secretKey) // <----
 
@@ -2687,7 +2687,7 @@ Jwts.parser()
 ----
 Password password = Password.of(passwordChars);
 
-Jwts.parser()
+Jwt.parser()
 
   .decryptWith(password) // <---- an `io.jsonwebtoken.security.Password` instance
 
@@ -2700,7 +2700,7 @@ the `PublicKey`) must be specified on the `JwtParserBuilder`.  For example:
 +
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
   .decryptWith(privateKey) // <---- a `PrivateKey`, not a `PublicKey`
 
@@ -2753,7 +2753,7 @@ the return value from a custom <<key-locator,Key Locator>> implementation.  For 
 ----
 PrivateKey decryptionKey = Keys.builder(pkcs11PrivateKey).publicKey(pkcs11PublicKey).build();
 
-Jwts.parser()
+Jwt.parser()
     .decryptWith(decryptionKey) // <----
     .build()
     .parseEncryptedClaims(jweString);
@@ -2763,7 +2763,7 @@ Or as the return value from your key locator:
 
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
     .keyLocator(keyLocator) // your keyLocator.locate(header) would return Keys.builder...
     .build()
     .parseEncryptedClaims(jweString);
@@ -3254,7 +3254,7 @@ by modifying the ``JwtParserBuilder``'s `zip()` collection.  For example:
 ----
 CompressionAlgorithm myAlg = new MyCompressionAlgorithm();
 
-Jwts.parser()
+Jwt.parser()
 
     .zip().add(myAlg).and() // <----
 
@@ -3326,7 +3326,7 @@ When reading a JWT:
 ----
 Deserializer<Map<String,?>> deserializer = getMyDeserializer(); //implement me
 
-Jwts.parser()
+Jwt.parser()
 
     .json(deserializer)
 
@@ -3391,7 +3391,7 @@ and the `JacksonDeserializer` using your `ObjectMapper` on the `JwtParserBuilder
 ----
 ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
-Jwts.parser()
+Jwt.parser()
 
     .json(new JacksonDeserializer(objectMapper))
 
@@ -3429,7 +3429,7 @@ The `User` object could be retrieved from the `user` claim with the following co
 
 [,java]
 ----
-Jwts.parser()
+Jwt.parser()
 
     .json(new JacksonDeserializer(Maps.of("user", User.class).build())) // <-----
 
@@ -3528,7 +3528,7 @@ and the `GsonDeserializer` using your `Gson` instance on the `JwtParser`:
 ----
 Gson gson = getGson(); //implement me
 
-Jwts.parser()
+Jwt.parser()
 
     .json(new GsonDeserializer(gson))
 
@@ -3699,7 +3699,7 @@ and the ``JwtParserBuilder``'s `decoder` method to set the decoder:
 ----
 Decoder<String, byte[]> decoder = getMyBase64UrlDecoder(); //implement me
 
-Jwts.parser()
+Jwt.parser()
 
     .b64Url(decoder)
 
@@ -3753,7 +3753,7 @@ byte[] content = message.getBytes(StandardCharsets.UTF_8);
 String jws = Jwts.builder().content(content, "text/plain").signWith(key, alg).compact();
 
 // Parse the compact JWS:
-content = Jwts.parser().verifyWith(key).build().parseSignedContent(jws).getPayload();
+content = Jwt.parser().verifyWith(key).build().parseSignedContent(jws).getPayload();
 
 assert message.equals(new String(content, StandardCharsets.UTF_8));
 ----
@@ -3781,7 +3781,7 @@ String jws = Jwts.builder().subject("Alice")
     .compact();
 
 // Alice receives and verifies the compact JWS came from Bob:
-String subject = Jwts.parser()
+String subject = Jwt.parser()
     .verifyWith(pair.getPublic()) // <-- Bob's RSA public key
     .build().parseSignedClaims(jws).getPayload().getSubject();
 
@@ -3814,7 +3814,7 @@ String jws = Jwts.builder().subject("Alice")
     .compact();
 
 // Alice receives and verifies the compact JWS came from Bob:
-String subject = Jwts.parser()
+String subject = Jwt.parser()
     .verifyWith(pair.getPublic()) // <-- Bob's EC public key
     .build().parseSignedClaims(jws).getPayload().getSubject();
 
@@ -3861,7 +3861,7 @@ String jws = Jwts.builder().subject("Alice")
     .compact();
 
 // Alice receives and verifies the compact JWS came from Bob:
-String subject = Jwts.parser()
+String subject = Jwt.parser()
     .verifyWith(pair.getPublic()) // <-- Bob's Edwards Curve public key
     .build().parseSignedClaims(jws).getPayload().getSubject();
 
@@ -3904,7 +3904,7 @@ byte[] content = message.getBytes(StandardCharsets.UTF_8);
 String jwe = Jwts.builder().content(content, "text/plain").encryptWith(key, enc).compact();
 
 // Parse the compact JWE:
-content = Jwts.parser().decryptWith(key).build().parseEncryptedContent(jwe).getPayload();
+content = Jwt.parser().decryptWith(key).build().parseEncryptedContent(jwe).getPayload();
 
 assert message.equals(new String(content, StandardCharsets.UTF_8));
 ----
@@ -3938,7 +3938,7 @@ String jwe = Jwts.builder().audience().add("Alice").and()
     .compact();
 
 // Alice receives and decrypts the compact JWE:
-Set<String> audience = Jwts.parser()
+Set<String> audience = Jwt.parser()
     .decryptWith(pair.getPrivate()) // <-- Alice's RSA private key
     .build().parseEncryptedClaims(jwe).getPayload().getAudience();
 
@@ -3973,7 +3973,7 @@ AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc..
 String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
 
 // Parse the compact JWE:
-String issuer = Jwts.parser().decryptWith(key).build()
+String issuer = Jwt.parser().decryptWith(key).build()
     .parseEncryptedClaims(jwe).getPayload().getIssuer();
 
 assert "me".equals(issuer);
@@ -4010,7 +4010,7 @@ String jwe = Jwts.builder().audience().add("Alice").and()
     .compact();
 
 // Alice receives and decrypts the compact JWE:
-Set<String> audience = Jwts.parser()
+Set<String> audience = Jwt.parser()
     .decryptWith(pair.getPrivate()) // <-- Alice's EC private key
     .build().parseEncryptedClaims(jwe).getPayload().getAudience();
 
@@ -4059,7 +4059,7 @@ String jwe = Jwts.builder().issuer("me")
     .compact();
 
 // Parse the compact JWE:
-String issuer = Jwts.parser().decryptWith(password)
+String issuer = Jwt.parser().decryptWith(password)
     .build().parseEncryptedClaims(jwe).getPayload().getIssuer();
 
 assert "me".equals(issuer);

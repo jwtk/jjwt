@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.compression
 
 import io.jsonwebtoken.CompressionException
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.io.Decoders
 import org.junit.Test
 
@@ -33,7 +33,7 @@ class DeflateCompressionCodecTest {
     @Test
     void testBackwardsCompatibility_0_10_6() {
         final String jwtFrom0106 = 'eyJhbGciOiJub25lIiwiemlwIjoiREVGIn0.eNqqVsosLlayUspNVdJRKi5NAjJLi1OLgJzMxBIlK0sTMzMLEwsDAx2l1IoCJSsTQwMjExOQQC0AAAD__w.'
-        Jwts.parser().unsecured().unsecuredDecompression().build().parseUnsecuredClaims(jwtFrom0106) // no exception should be thrown
+        Jwt.parser().unsecured().unsecuredDecompression().build().parseUnsecuredClaims(jwtFrom0106) // no exception should be thrown
     }
 
     /**

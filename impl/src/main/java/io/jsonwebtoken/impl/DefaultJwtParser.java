@@ -30,7 +30,6 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtHandler;
 import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.MissingClaimException;
@@ -235,7 +234,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         this.clock = Assert.notNull(clock, "Clock cannot be null.");
         this.critical = Collections.nullSafe(critical);
         this.allowedClockSkewMillis = allowedClockSkewMillis;
-        this.expectedClaims = Jwts.claims().add(expectedClaims);
+        this.expectedClaims = Claims.builder().add(expectedClaims);
         this.decoder = Assert.notNull(base64UrlDecoder, "base64UrlDecoder cannot be null.");
         this.deserializer = Assert.notNull(deserializer, "JSON Deserializer cannot be null.");
         this.sigAlgs = new IdLocator<>(DefaultHeader.ALGORITHM, sigAlgs, "mac or signature", "signature verification", MISSING_JWS_ALG_MSG);

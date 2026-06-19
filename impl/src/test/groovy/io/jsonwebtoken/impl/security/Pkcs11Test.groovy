@@ -15,10 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Identifiable
-import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.*
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.lang.Classes
@@ -242,7 +239,7 @@ class Pkcs11Test {
             // We might need to specify the PKCS11 provider since we can't access the private key material:
             def jws = Jwts.builder().provider(keyProvider).issuer('me').signWith(signKey, alg).compact()
 
-            def builder = Jwts.parser()
+            def builder = Jwt.parser()
             if (verifyKey instanceof SecretKey) {
                 // We only need to specify a provider during parsing for MAC HSM keys: SignatureAlgorithm verification
                 // only needs the PublicKey, and a recipient doesn't need/won't have an HSM for public material anyway.
@@ -291,7 +288,7 @@ class Pkcs11Test {
             // Decryption may need private material inside the HSM:
             priv = Keys.builder(pair.private).publicKey(pub).provider(provider).build()
 
-            String iss = Jwts.parser().decryptWith(priv).build().parseEncryptedClaims(jwe).getPayload().getIssuer()
+            String iss = Jwt.parser().decryptWith(priv).build().parseEncryptedClaims(jwe).getPayload().getIssuer()
             assertEquals 'me', iss
         }
     }

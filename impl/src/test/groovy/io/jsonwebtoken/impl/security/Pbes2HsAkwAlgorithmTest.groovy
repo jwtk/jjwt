@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeaderMutator
@@ -73,7 +74,7 @@ class Pbes2HsAkwAlgorithmTest {
                     '.OSAhMk3FtaCeZ5v1c8bWBgssEVqx2mCPUEnJUsg4hwIQyrUP-LCYkg.' +
                     'K4R_-zb4qaZ3R0W8.sGS4mcT_xBhZC1d7G-g.kWqd_4sEsaKrWE_hMZ5HmQ'
             try {
-                Jwts.parser().decryptWith(password).build().parse(jwe)
+                Jwt.parser().decryptWith(password).build().parse(jwe)
             } catch (UnsupportedJwtException expected) {
                 String msg = "JWE Header 'p2c' (PBES2 Count) value ${iterations} exceeds ${alg.id} maximum allowed " +
                         "value ${alg.MAX_ITERATIONS}. The larger value is rejected to help mitigate potential " +

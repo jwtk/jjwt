@@ -18,6 +18,7 @@ package io.jsonwebtoken.all;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.Curve;
@@ -72,7 +73,7 @@ public class JavaReadmeTest {
                 .encodePayload(false)            // #3
                 .compact();
 
-        Jws<byte[]> parsed = Jwts.parser().verifyWith(testKey) // 1
+        Jws<byte[]> parsed = Jwt.parser().verifyWith(testKey) // 1
                 .build()
                 .parseSignedContent(jws, content);             // 2
 
@@ -94,7 +95,7 @@ public class JavaReadmeTest {
                 .encodePayload(false)            // #3
                 .compact();
 
-        Jws<Claims> parsed = Jwts.parser().verifyWith(testKey) // 1
+        Jws<Claims> parsed = Jwt.parser().verifyWith(testKey) // 1
                 .critical().add("b64").and()                   // 2
                 .build()
                 .parseSignedClaims(jws);                          // 3
@@ -102,7 +103,7 @@ public class JavaReadmeTest {
         assert "joe".equals(parsed.getPayload().getSubject());
         assert "me".equals(parsed.getPayload().getIssuer());
 
-        parsed = Jwts.parser().verifyWith(testKey)
+        parsed = Jwt.parser().verifyWith(testKey)
                 .build()
                 .parseSignedClaims(jws, claimsString.getBytes(StandardCharsets.UTF_8)); // <---
 
@@ -126,7 +127,7 @@ public class JavaReadmeTest {
         String jws = Jwts.builder().content(content, "text/plain").signWith(key, alg).compact();
 
         // Parse the compact JWS:
-        content = Jwts.parser().verifyWith(key).build().parseSignedContent(jws).getPayload();
+        content = Jwt.parser().verifyWith(key).build().parseSignedContent(jws).getPayload();
 
         assert message.equals(new String(content, StandardCharsets.UTF_8));
     }
@@ -146,7 +147,7 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and verifies the compact JWS came from Bob:
-        String subject = Jwts.parser()
+        String subject = Jwt.parser()
                 .verifyWith(pair.getPublic()) // <-- Bob's RSA public key
                 .build().parseSignedClaims(jws).getPayload().getSubject();
 
@@ -168,7 +169,7 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and verifies the compact JWS came from Bob:
-        String subject = Jwts.parser()
+        String subject = Jwt.parser()
                 .verifyWith(pair.getPublic()) // <-- Bob's EC public key
                 .build().parseSignedClaims(jws).getPayload().getSubject();
 
@@ -190,7 +191,7 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and verifies the compact JWS came from Bob:
-        String subject = Jwts.parser()
+        String subject = Jwt.parser()
                 .verifyWith(pair.getPublic()) // <-- Bob's Edwards Curve public key
                 .build().parseSignedClaims(jws).getPayload().getSubject();
 
@@ -214,7 +215,7 @@ public class JavaReadmeTest {
         String jwe = Jwts.builder().content(content, "text/plain").encryptWith(key, enc).compact();
 
         // Parse the compact JWE:
-        content = Jwts.parser().decryptWith(key).build().parseEncryptedContent(jwe).getPayload();
+        content = Jwt.parser().decryptWith(key).build().parseEncryptedContent(jwe).getPayload();
 
         assert message.equals(new String(content, StandardCharsets.UTF_8));
     }
@@ -238,7 +239,7 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and decrypts the compact JWE:
-        Set<String> audience = Jwts.parser()
+        Set<String> audience = Jwt.parser()
                 .decryptWith(pair.getPrivate()) // <-- Alice's RSA private key
                 .build().parseEncryptedClaims(jwe).getPayload().getAudience();
 
@@ -261,7 +262,7 @@ public class JavaReadmeTest {
         String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
 
         // Parse the compact JWE:
-        String issuer = Jwts.parser().decryptWith(key).build()
+        String issuer = Jwt.parser().decryptWith(key).build()
                 .parseEncryptedClaims(jwe).getPayload().getIssuer();
 
         assert "me".equals(issuer);
@@ -286,7 +287,7 @@ public class JavaReadmeTest {
                 .compact();
 
         // Alice receives and decrypts the compact JWE:
-        Set<String> audience = Jwts.parser()
+        Set<String> audience = Jwt.parser()
                 .decryptWith(pair.getPrivate()) // <-- Alice's EC private key
                 .build().parseEncryptedClaims(jwe).getPayload().getAudience();
 
@@ -324,7 +325,7 @@ public class JavaReadmeTest {
                 .compact();
 
         // Parse the compact JWE:
-        String issuer = Jwts.parser().decryptWith(password)
+        String issuer = Jwt.parser().decryptWith(password)
                 .build().parseEncryptedClaims(jwe).getPayload().getIssuer();
 
         assert "me".equals(issuer);

@@ -91,4 +91,14 @@ public interface Jwt<H extends Header, P> {
      * @return the value returned from visitor's {@code visit} method implementation.
      */
     <T> T accept(JwtVisitor<T> visitor);
+
+    /**
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
+     *
+     * @return a new {@link JwtParserBuilder} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwtParserBuilder parser() {
+        return Suppliers.JWT_PARSER_BUILDER_SUPPLIER.get();
+    }
 }

@@ -73,7 +73,7 @@ class Issue365Test {
             def pair = TestKeys.forAlgorithm(alg).pair
             String jws = Jwts.builder().issuer('me').signWith(pair.private).compact()
             try {
-                Jwts.parser().verifyWith(pair.private).build().parseSignedClaims(jws)
+                Jwt.parser().verifyWith(pair.private).build().parseSignedClaims(jws)
                 fail()
             } catch (IllegalArgumentException expected) {
                 assertEquals DefaultJwtParser.PRIV_KEY_VERIFY_MSG, expected.getMessage()
@@ -87,7 +87,7 @@ class Issue365Test {
             def pair = TestKeys.forAlgorithm(alg).pair
             String jws = Jwts.builder().issuer('me').signWith(pair.private).compact()
             try {
-                Jwts.parser().keyLocator(new Locator<Key>() {
+                Jwt.parser().keyLocator(new Locator<Key>() {
                     @Override
                     Key locate(Header header) {
                         return pair.private
@@ -118,7 +118,7 @@ class Issue365Test {
         def pub = TestKeys.RS256.pair.public
         String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwe.alg.RSA1_5, Jwe.enc.A256GCM).compact()
         try {
-            Jwts.parser().decryptWith(new TestPublicKey()).build().parseEncryptedClaims(jwe)
+            Jwt.parser().decryptWith(new TestPublicKey()).build().parseEncryptedClaims(jwe)
             fail()
         } catch (IllegalArgumentException expected) {
             assertEquals DefaultJwtParser.PUB_KEY_DECRYPT_MSG, expected.getMessage()
@@ -130,7 +130,7 @@ class Issue365Test {
         def pub = TestKeys.RS256.pair.public
         String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwe.alg.RSA1_5, Jwe.enc.A256GCM).compact()
         try {
-            Jwts.parser().keyLocator(new Locator<Key>() {
+            Jwt.parser().keyLocator(new Locator<Key>() {
                 @Override
                 Key locate(Header header) {
                     return pub

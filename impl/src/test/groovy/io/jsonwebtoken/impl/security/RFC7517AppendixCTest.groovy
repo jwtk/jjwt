@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Encoders
@@ -330,7 +331,7 @@ class RFC7517AppendixCTest {
         assertEquals RFC_COMPACT_JWE, compact
 
         //ensure we can decrypt now:
-        Jwe<byte[]> jwe = Jwts.parser().decryptWith(key).build().parseEncryptedContent(compact)
+        Jwe<byte[]> jwe = Jwt.parser().decryptWith(key).build().parseEncryptedContent(compact)
 
         assertEquals RFC_JWK_JSON, new String(jwe.getPayload(), StandardCharsets.UTF_8)
     }

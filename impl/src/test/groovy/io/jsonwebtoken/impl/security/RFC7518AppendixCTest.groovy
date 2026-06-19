@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Decoders
@@ -126,7 +127,7 @@ class RFC7518AppendixCTest {
         assertArrayEquals RFC_DERIVED_KEY, derivedKey
 
         // now reverse the process and ensure it all works:
-        Jwe<Claims> claimsJwe = Jwts.parser()
+        Jwe<Claims> claimsJwe = Jwt.parser()
                 .decryptWith(bobJwk.toKey())
                 .build().parseEncryptedClaims(jwe)
 

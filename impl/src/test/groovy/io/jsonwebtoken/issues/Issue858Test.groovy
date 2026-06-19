@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.issues
 
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
 import org.junit.Test
 
@@ -32,7 +33,7 @@ class Issue858Test {
                 .claim('another', null) // null not allowed (same behavior since <= 0.11.5), won't be added
                 .compact()
 
-        def claims = Jwts.parser().unsecured().build().parseUnsecuredClaims(jwt).getPayload()
+        def claims = Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).getPayload()
         assertEquals 4, claims.size()
         assertEquals 'Joe', claims.getSubject()
         assertEquals '', claims.get('foo')

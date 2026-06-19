@@ -16,7 +16,6 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.Builder;
-import io.jsonwebtoken.lang.MapMutator;
 
 /**
  * {@link Builder} used to create an immutable {@link Claims} instance.
@@ -25,5 +24,5 @@ import io.jsonwebtoken.lang.MapMutator;
  * @see Claims
  * @since 0.12.0
  */
-public interface ClaimsBuilder extends MapMutator<String, Object, ClaimsBuilder>, ClaimsMutator<ClaimsBuilder>, Builder<Claims> {
+public interface ClaimsBuilder extends Claims.Params<ClaimsBuilder>, Builder<Claims> {
 }

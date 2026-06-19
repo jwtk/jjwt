@@ -18,16 +18,20 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Suppliers
 import io.jsonwebtoken.impl.lang.Functions
 import io.jsonwebtoken.lang.Classes
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.Jwk
+import io.jsonwebtoken.security.JwkThumbprint
+import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Keys
 import org.junit.Test
 
 import static org.junit.Assert.assertSame
 
 class PrivateConstructorsTest {
 
-    @SuppressWarnings(['GrDeprecatedAPIUsage', 'GroovyResultOfObjectAllocationIgnored'])
+    @SuppressWarnings(['GrDeprecatedAPIUsage', 'GroovyResultOfObjectAllocationIgnored', 'UnnecessaryQualifiedReference'])
     @Test
     void testPrivateCtors() { // for code coverage only
         new Classes()
@@ -35,6 +39,7 @@ class PrivateConstructorsTest {
         new KeysBridge()
         new Functions()
         new Suppliers()
+        new io.jsonwebtoken.security.Suppliers()
         new Jws.alg()
         new Jwe.enc()
         new Jwe.alg()

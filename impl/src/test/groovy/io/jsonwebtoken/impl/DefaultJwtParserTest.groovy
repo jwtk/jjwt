@@ -62,7 +62,7 @@ class DefaultJwtParserTest {
 
     @Before
     void setUp() {
-        parser = Jwts.parser().build() as DefaultJwtParser
+        parser = Jwt.parser().build() as DefaultJwtParser
     }
 
     @Test(expected = MalformedJwtException)
@@ -80,7 +80,7 @@ class DefaultJwtParserTest {
                 return OBJECT_MAPPER.readValue(reader, Map.class)
             }
         }
-        def pb = Jwts.parser().deserializeJsonWith(deserializer)
+        def pb = Jwt.parser().deserializeJsonWith(deserializer)
         assertFalse invoked
 
         def key = Jws.alg.HS256.key().build()
@@ -106,7 +106,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        Jwts.parser().verifyWith(key).build().parseSignedClaims(invalidJws)
+        Jwt.parser().verifyWith(key).build().parseSignedClaims(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -124,7 +124,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        Jwts.parser().verifyWith(key).build().parseEncryptedClaims(invalidJws)
+        Jwt.parser().verifyWith(key).build().parseEncryptedClaims(invalidJws)
     }
 
     @Test(expected = MalformedJwtException)
@@ -142,7 +142,7 @@ class DefaultJwtParserTest {
 
         String invalidJws = compact + encodedSignature
 
-        Jwts.parser().verifyWith(key).build().parseSignedClaims(invalidJws)
+        Jwt.parser().verifyWith(key).build().parseSignedClaims(invalidJws)
     }
 
     /*
@@ -204,7 +204,7 @@ class DefaultJwtParserTest {
         def header = b64Url(serialize(map))
         String compact = header + '.doesntMatter.'
         try {
-            Jwts.parser().unsecured().build().parse(compact)
+            Jwt.parser().unsecured().build().parse(compact)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_UNSECURED_MSG, map)
@@ -218,7 +218,7 @@ class DefaultJwtParserTest {
         def header = b64Url(serialize(map))
         String compact = header + '.a.b'
         try {
-            Jwts.parser().unsecured().build().parse(compact)
+            Jwt.parser().unsecured().build().parse(compact)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_MISSING_MSG, 'whatever', 'whatever', map)
@@ -232,7 +232,7 @@ class DefaultJwtParserTest {
         def header = b64Url(serialize(map))
         String compact = header + '.a.b'
         try {
-            Jwts.parser().unsecured().build().parse(compact)
+            Jwt.parser().unsecured().build().parse(compact)
             fail()
         } catch (UnsupportedJwtException expected) {
             String msg = String.format(DefaultJwtParser.CRIT_UNSUPPORTED_MSG, 'whatever', 'whatever', map)
@@ -249,7 +249,7 @@ class DefaultJwtParserTest {
                 .subject('me')
                 .signWith(key).compact()
 
-        def jwt = Jwts.parser().critical().add(crit).and().verifyWith(key).build().parseSignedClaims(jws)
+        def jwt = Jwt.parser().critical().add(crit).and().verifyWith(key).build().parseSignedClaims(jws)
 
         // no exception thrown, as expected, check the header values:
         def parsedCrit = jwt.getHeader().getCritical()
@@ -267,7 +267,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().expiration(exp).compact()
 
         try {
-            Jwts.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
+            Jwt.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
         } catch (ExpiredJwtException expected) {
             def exp8601 = DateFormats.formatIso8601(exp, true)
             def later8601 = DateFormats.formatIso8601(later, true)
@@ -286,7 +286,7 @@ class DefaultJwtParserTest {
         def s = Jwts.builder().notBefore(nbf).compact()
 
         try {
-            Jwts.parser().unsecured().clock(new FixedClock(earlier)).build().parseUnsecuredClaims(s)
+            Jwt.parser().unsecured().clock(new FixedClock(earlier)).build().parseUnsecuredClaims(s)
         } catch (PrematureJwtException expected) {
             def nbf8601 = DateFormats.formatIso8601(nbf, true)
             def earlier8601 = DateFormats.formatIso8601(earlier, true)
@@ -301,7 +301,7 @@ class DefaultJwtParserTest {
         def jwt = Encoders.BASE64URL.encode(Strings.utf8('{"alg":"none"}'))
         jwt += ".F!3!#." // <-- invalid Base64URL payload
         try {
-            Jwts.parser().unsecured().build().parse(jwt)
+            Jwt.parser().unsecured().build().parse(jwt)
             fail()
         } catch (MalformedJwtException expected) {
             String msg = 'Invalid Base64Url payload: <redacted>'
@@ -316,20 +316,20 @@ class DefaultJwtParserTest {
         // parseContentJwt
         byte[] data = Strings.utf8('hello')
         def jwt = Jwts.builder().content(data).compact()
-        assertArrayEquals data, Jwts.parser().unsecured().build().parseContentJwt(jwt).getPayload()
+        assertArrayEquals data, Jwt.parser().unsecured().build().parseContentJwt(jwt).getPayload()
 
         // parseClaimsJwt
         jwt = Jwts.builder().subject('me').compact()
-        assertEquals 'me', Jwts.parser().unsecured().build().parseClaimsJwt(jwt).getPayload().getSubject()
+        assertEquals 'me', Jwt.parser().unsecured().build().parseClaimsJwt(jwt).getPayload().getSubject()
 
         // parseContentJws
         def key = TestKeys.HS256
         jwt = Jwts.builder().content(data).signWith(key).compact()
-        assertArrayEquals data, Jwts.parser().verifyWith(key).build().parseContentJws(jwt).getPayload()
+        assertArrayEquals data, Jwt.parser().verifyWith(key).build().parseContentJws(jwt).getPayload()
 
         // parseClaimsJws
         jwt = Jwts.builder().subject('me').signWith(key).compact()
-        assertEquals 'me', Jwts.parser().verifyWith(key).build().parseClaimsJws(jwt).getPayload().getSubject()
+        assertEquals 'me', Jwt.parser().verifyWith(key).build().parseClaimsJws(jwt).getPayload().getSubject()
 
         //parse(jwt, handler)
         def value = 'foo'
@@ -339,6 +339,6 @@ class DefaultJwtParserTest {
                 return value
             }
         }
-        assertEquals value, Jwts.parser().verifyWith(key).build().parse(jwt, handler)
+        assertEquals value, Jwt.parser().verifyWith(key).build().parse(jwt, handler)
     }
 }

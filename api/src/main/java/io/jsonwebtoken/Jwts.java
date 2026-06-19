@@ -17,7 +17,6 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -27,14 +26,12 @@ import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * Factory class useful for creating instances of JWT interfaces.  Using this factory class can be a good
@@ -1111,28 +1108,14 @@ public final class Jwts {
         }
     }
 
-    // @since 0.12.7
-    private static final Supplier<JwtBuilder> JWT_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder$Supplier");
 
-    // @since 0.12.7
-    private static final Supplier<JwtParserBuilder> JWT_PARSER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier");
-
-    // @since 0.12.7
-    private static final Supplier<HeaderBuilder> HEADER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier");
-
-    // @since 0.12.7
-    private static final Supplier<ClaimsBuilder> CLAIMS_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier");
 
     /**
      * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
      *
      * @since 0.12.0
      */
-    public interface HeaderBuilder extends JweHeaderMutator<HeaderBuilder>, X509Builder<HeaderBuilder>, Builder<Header> {
+    public interface HeaderBuilder extends JweHeader.BuilderParams<HeaderBuilder>, Builder<Header> {
     }
 
     /**
@@ -1144,7 +1127,7 @@ public final class Jwts {
      * @since 0.12.0
      */
     public static HeaderBuilder header() {
-        return HEADER_BUILDER_SUPPLIER.get();
+        return Suppliers.HEADER_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -1153,26 +1136,28 @@ public final class Jwts {
      *
      * @return a new {@link Claims} builder instance to be used to populate JWT claims, which in aggregate will be
      * the JWT payload.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Claims#builder()}
      */
+    @Deprecated
     public static ClaimsBuilder claims() {
-        return CLAIMS_BUILDER_SUPPLIER.get();
+        return Claims.builder();
     }
 
     /**
      * <p><b>Deprecated since 0.12.0 in favor of
-     * {@code Jwts.}{@link #claims()}{@code .add(map).build()}</b>.
+     * {@link Claims#builder()}{@code .add(map).build()}</b>.
      * This method will be removed before 1.0.</p>
      *
      * <p>Returns a new {@link Claims} instance populated with the specified name/value pairs.</p>
      *
      * @param claims the name/value pairs to populate the new Claims instance.
      * @return a new {@link Claims} instance populated with the specified name/value pairs.
-     * @deprecated since 0.12.0 in favor of {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}.
+     * @deprecated since 0.12.0 in favor of {@link Claims#builder()}{@code .add(map).build()}.
      * This method will be removed before 1.0.
      */
     @Deprecated
     public static Claims claims(Map<String, Object> claims) {
-        return claims().add(claims).build();
+        return Claims.builder().add(claims).build();
     }
 
     /**
@@ -1183,16 +1168,18 @@ public final class Jwts {
      * strings.
      */
     public static JwtBuilder builder() {
-        return JWT_BUILDER_SUPPLIER.get();
+        return Suppliers.JWT_BUILDER_SUPPLIER.get();
     }
 
     /**
      * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
      *
      * @return a new {@link JwtParserBuilder} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt#parser()}.
      */
+    @Deprecated
     public static JwtParserBuilder parser() {
-        return JWT_PARSER_BUILDER_SUPPLIER.get();
+        return Suppliers.JWT_PARSER_BUILDER_SUPPLIER.get();
     }
 
     /**

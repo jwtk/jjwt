@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.MapMutator;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -163,4 +165,35 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * @see <a href="https://github.com/jwtk/jjwt#json-support">JJWT JSON Support</a>
      */
     <T> T get(String claimName, Class<T> requiredType);
+
+    /**
+     * Parameters that may be modified to construct a {@link Claims} instance.
+     *
+     * @param <T> the claims params type, for method chaining
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Params<T extends Params<T>> extends MapMutator<String, Object, T>, ClaimsMutator<T> {
+    }
+
+    /**
+     * Builder used to create an immutable {@link Claims} instance.
+     *
+     * @see Claims
+     * @see Claims#builder()
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder extends Params<Builder>, io.jsonwebtoken.lang.Builder<Claims> {
+    }
+
+    /**
+     * Returns a new {@link Claims} builder instance to be used to populate JWT claims, which in aggregate will be
+     * a JWT payload.
+     *
+     * @return a new {@link Claims} builder instance to be used to populate JWT claims, which in aggregate will be
+     * a JWT payload.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static ClaimsBuilder builder() {
+        return Suppliers.CLAIMS_BUILDER_SUPPLIER.get();
+    }
 }
