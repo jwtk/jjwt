@@ -19,7 +19,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.EcPrivateJwk;
@@ -68,7 +67,7 @@ public class JavaReadmeTest {
         String message = "Hello World. It's a Beautiful Day!";
         byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
-        String jws = Jwts.builder().signWith(testKey) // #1
+        String jws = Jwt.builder().signWith(testKey) // #1
                 .content(content)                     // #2
                 .encodePayload(false)            // #3
                 .compact();
@@ -90,7 +89,7 @@ public class JavaReadmeTest {
 
         String claimsString = "{\"sub\":\"joe\",\"iss\":\"me\"}";
 
-        String jws = Jwts.builder().signWith(testKey) // #1
+        String jws = Jwt.builder().signWith(testKey) // #1
                 .content(claimsString)                // #2
                 .encodePayload(false)            // #3
                 .compact();
@@ -124,7 +123,7 @@ public class JavaReadmeTest {
         byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
         // Create the compact JWS:
-        String jws = Jwts.builder().content(content, "text/plain").signWith(key, alg).compact();
+        String jws = Jwt.builder().content(content, "text/plain").signWith(key, alg).compact();
 
         // Parse the compact JWS:
         content = Jwt.parser().verifyWith(key).build().parseSignedContent(jws).getPayload();
@@ -142,7 +141,7 @@ public class JavaReadmeTest {
         KeyPair pair = alg.keyPair().build();
 
         // Bob creates the compact JWS with his RSA private key:
-        String jws = Jwts.builder().subject("Alice")
+        String jws = Jwt.builder().subject("Alice")
                 .signWith(pair.getPrivate(), alg) // <-- Bob's RSA private key
                 .compact();
 
@@ -164,7 +163,7 @@ public class JavaReadmeTest {
         KeyPair pair = alg.keyPair().build();
 
         // Bob creates the compact JWS with his EC private key:
-        String jws = Jwts.builder().subject("Alice")
+        String jws = Jwt.builder().subject("Alice")
                 .signWith(pair.getPrivate(), alg) // <-- Bob's EC private key
                 .compact();
 
@@ -186,7 +185,7 @@ public class JavaReadmeTest {
         KeyPair pair = curve.keyPair().build();
 
         // Bob creates the compact JWS with his Edwards Curve private key:
-        String jws = Jwts.builder().subject("Alice")
+        String jws = Jwt.builder().subject("Alice")
                 .signWith(pair.getPrivate(), Jws.alg.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
                 .compact();
 
@@ -212,7 +211,7 @@ public class JavaReadmeTest {
         byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
         // Create the compact JWE:
-        String jwe = Jwts.builder().content(content, "text/plain").encryptWith(key, enc).compact();
+        String jwe = Jwt.builder().content(content, "text/plain").encryptWith(key, enc).compact();
 
         // Parse the compact JWE:
         content = Jwt.parser().decryptWith(key).build().parseEncryptedContent(jwe).getPayload();
@@ -234,7 +233,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-        String jwe = Jwts.builder().audience().add("Alice").and()
+        String jwe = Jwt.builder().audience().add("Alice").and()
                 .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
                 .compact();
 
@@ -259,7 +258,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
-        String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
+        String jwe = Jwt.builder().issuer("me").encryptWith(key, alg, enc).compact();
 
         // Parse the compact JWE:
         String issuer = Jwt.parser().decryptWith(key).build()
@@ -282,7 +281,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-        String jwe = Jwts.builder().audience().add("Alice").and()
+        String jwe = Jwt.builder().audience().add("Alice").and()
                 .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
                 .compact();
 
@@ -318,7 +317,7 @@ public class JavaReadmeTest {
         AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
-        String jwe = Jwts.builder().issuer("me")
+        String jwe = Jwt.builder().issuer("me")
                 // Optional work factor is specified in the header:
                 //.header().pbes2Count(pbkdf2Iterations).and()
                 .encryptWith(password, alg, enc)

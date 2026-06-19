@@ -111,7 +111,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testBase64UrlEncodeWithCustomDecoder() {
 
-        String jwt = Jwts.builder().claim('foo', 'bar').compact()
+        String jwt = Jwt.builder().claim('foo', 'bar').compact()
 
         boolean invoked = false
         Decoder<String, byte[]> decoder = new Decoder<String, byte[]>() {
@@ -147,7 +147,7 @@ class DefaultJwtParserBuilderTest {
         def alg = Jws.alg.HS256
         def key = alg.key().build()
 
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
+        String jws = Jwt.builder().claim('foo', 'bar').signWith(key, alg).compact()
 
         assertEquals 'bar', p.verifyWith(key).build().parseSignedClaims(jws).getPayload().get('foo')
     }
@@ -395,7 +395,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testDecompressUnprotectedJwtDefault() {
         def codec = Jwe.zip.GZIP
-        String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
+        String jwt = Jwt.builder().compressWith(codec).setSubject('joe').compact()
         try {
             builder.unsecured().build().parse(jwt)
             fail()
@@ -408,7 +408,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testDecompressUnprotectedJwtEnabled() {
         def codec = Jwe.zip.GZIP
-        String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
+        String jws = Jwt.builder().compressWith(codec).setSubject('joe').compact()
         def jwt = builder.unsecured().unsecuredDecompression().build().parse(jws)
         assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()
     }

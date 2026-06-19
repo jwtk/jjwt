@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.security.Curve
 import io.jsonwebtoken.security.Jwk
@@ -105,7 +104,7 @@ class RFC8037AppendixATest {
     @Test
     void test_Sections_A4_and_A5() {
         def privJwk = a1Jwk()
-        String compact = Jwts.builder()
+        String compact = Jwt.builder()
                 .content(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
                 .signWith(privJwk.toKey() as PrivateKey, Jws.alg.EdDSA)
                 .compact()
@@ -168,7 +167,7 @@ class RFC8037AppendixATest {
         final String issuer = RfcTests.srandom()
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
-        String jwe = Jwts.builder()
+        String jwe = Jwt.builder()
                 .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.enc.A128GCM)
@@ -259,7 +258,7 @@ class RFC8037AppendixATest {
         final String issuer = RfcTests.srandom()
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
-        String jwe = Jwts.builder()
+        String jwe = Jwt.builder()
                 .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .issuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.enc.A256GCM)

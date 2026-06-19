@@ -84,7 +84,7 @@ class DefaultJwtParserTest {
         assertFalse invoked
 
         def key = Jws.alg.HS256.key().build()
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, Jws.alg.HS256).compact()
+        String jws = Jwt.builder().claim('foo', 'bar').signWith(key, Jws.alg.HS256).compact()
         assertFalse invoked
 
         assertEquals 'bar', pb.verifyWith(key).build().parseSignedClaims(jws).getPayload().get('foo')
@@ -244,7 +244,7 @@ class DefaultJwtParserTest {
     void testProtectedCritWithSupportedHeader() {
         def key = TestKeys.HS256
         def crit = Collections.setOf('whatever')
-        String jws = Jwts.builder()
+        String jws = Jwt.builder()
                 .header().critical().add(crit).and().add('whatever', 42).and()
                 .subject('me')
                 .signWith(key).compact()
@@ -264,7 +264,7 @@ class DefaultJwtParserTest {
         long differenceMillis = 843 // arbitrary, anything > 0 is fine
         def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
         def later = new Date(exp.getTime() + differenceMillis)
-        def s = Jwts.builder().expiration(exp).compact()
+        def s = Jwt.builder().expiration(exp).compact()
 
         try {
             Jwt.parser().unsecured().clock(new FixedClock(later)).build().parse(s)
@@ -283,7 +283,7 @@ class DefaultJwtParserTest {
         long differenceMillis = 3842 // arbitrary, anything > 0 is fine
         def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
         def earlier = new Date(nbf.getTime() - differenceMillis)
-        def s = Jwts.builder().notBefore(nbf).compact()
+        def s = Jwt.builder().notBefore(nbf).compact()
 
         try {
             Jwt.parser().unsecured().clock(new FixedClock(earlier)).build().parseUnsecuredClaims(s)
@@ -315,20 +315,20 @@ class DefaultJwtParserTest {
 
         // parseContentJwt
         byte[] data = Strings.utf8('hello')
-        def jwt = Jwts.builder().content(data).compact()
+        def jwt = Jwt.builder().content(data).compact()
         assertArrayEquals data, Jwt.parser().unsecured().build().parseContentJwt(jwt).getPayload()
 
         // parseClaimsJwt
-        jwt = Jwts.builder().subject('me').compact()
+        jwt = Jwt.builder().subject('me').compact()
         assertEquals 'me', Jwt.parser().unsecured().build().parseClaimsJwt(jwt).getPayload().getSubject()
 
         // parseContentJws
         def key = TestKeys.HS256
-        jwt = Jwts.builder().content(data).signWith(key).compact()
+        jwt = Jwt.builder().content(data).signWith(key).compact()
         assertArrayEquals data, Jwt.parser().verifyWith(key).build().parseContentJws(jwt).getPayload()
 
         // parseClaimsJws
-        jwt = Jwts.builder().subject('me').signWith(key).compact()
+        jwt = Jwt.builder().subject('me').signWith(key).compact()
         assertEquals 'me', Jwt.parser().verifyWith(key).build().parseClaimsJws(jwt).getPayload().getSubject()
 
         //parse(jwt, handler)

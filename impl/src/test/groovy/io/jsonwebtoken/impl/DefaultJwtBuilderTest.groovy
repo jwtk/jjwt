@@ -686,19 +686,19 @@ class DefaultJwtBuilderTest {
     @Test
     void testAudience() {
         def aud = 'fubar'
-        def jwt = Jwts.builder().audience().add(aud).and().compact()
+        def jwt = Jwt.builder().audience().add(aud).and().compact()
         assertEquals aud, Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience().iterator().next()
     }
 
     @Test
     void testAudienceNullString() {
-        def jwt = Jwts.builder().subject('me').audience().add(null).and().compact()
+        def jwt = Jwt.builder().subject('me').audience().add(null).and().compact()
         assertNull Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
     }
 
     @Test
     void testAudienceEmptyString() {
-        def jwt = Jwts.builder().subject('me').audience().add('  ').and().compact()
+        def jwt = Jwt.builder().subject('me').audience().add('  ').and().compact()
         assertNull Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
     }
 
@@ -706,7 +706,7 @@ class DefaultJwtBuilderTest {
     void testAudienceMultipleTimes() {
         def one = 'one'
         def two = 'two'
-        def jwt = Jwts.builder().audience().add(one).add(two).and().compact()
+        def jwt = Jwt.builder().audience().add(one).add(two).and().compact()
         def aud = Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
         assertTrue aud.contains(one)
         assertTrue aud.contains(two)
@@ -715,14 +715,14 @@ class DefaultJwtBuilderTest {
     @Test
     void testAudienceNullCollection() {
         Collection c = null
-        def jwt = Jwts.builder().subject('me').audience().add(c).and().compact()
+        def jwt = Jwt.builder().subject('me').audience().add(c).and().compact()
         assertNull Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
     }
 
     @Test
     void testAudienceEmptyCollection() {
         Collection c = new ArrayList()
-        def jwt = Jwts.builder().subject('me').audience().add(c).and().compact()
+        def jwt = Jwt.builder().subject('me').audience().add(c).and().compact()
         assertNull Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
     }
 
@@ -730,7 +730,7 @@ class DefaultJwtBuilderTest {
     void testAudienceCollectionWithNullElement() {
         Collection c = new ArrayList()
         c.add(null)
-        def jwt = Jwts.builder().subject('me').audience().add(c).and().compact()
+        def jwt = Jwt.builder().subject('me').audience().add(c).and().compact()
         assertNull Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
     }
 
@@ -743,7 +743,7 @@ class DefaultJwtBuilderTest {
         def one = 'one'
         def two = 'two'
         //noinspection GrDeprecatedAPIUsage
-        def jwt = Jwts.builder().audience().single(one).audience().add(two).and().compact()
+        def jwt = Jwt.builder().audience().single(one).audience().add(two).and().compact()
         def aud = Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
         assertTrue aud.contains(one)
         assertTrue aud.contains(two)
@@ -759,7 +759,7 @@ class DefaultJwtBuilderTest {
         def one = 'one'
         def two = 'two'
         //noinspection GrDeprecatedAPIUsage
-        def jwt = Jwts.builder().audience().add(one).and().audience().single(two).compact()
+        def jwt = Jwt.builder().audience().add(one).and().audience().single(two).compact()
 
         // can't use the parser here to validate because it coerces the string value into an array automatically,
         // so we need to check the raw payload:
@@ -780,7 +780,7 @@ class DefaultJwtBuilderTest {
         def collection = ['two', 'three'] as Set<String>
         def expected = ['one', 'two', 'three'] as Set<String>
         //noinspection GrDeprecatedAPIUsage
-        def jwt = Jwts.builder().audience().single(single).audience().add(collection).and().compact()
+        def jwt = Jwt.builder().audience().single(single).audience().add(collection).and().compact()
         def aud = Jwt.parser().unsecured().build().parseUnsecuredClaims(jwt).payload.getAudience()
         assertEquals expected.size(), aud.size()
         assertTrue aud.contains(single) && aud.containsAll(collection)
@@ -796,7 +796,7 @@ class DefaultJwtBuilderTest {
         def one = 'one'
         def two = 'two'
         def three = 'three'
-        def jwt = Jwts.builder().audience().add([one, two]).and().audience().single(three).compact()
+        def jwt = Jwt.builder().audience().add([one, two]).and().audience().single(three).compact()
 
         // can't use the parser here to validate because it coerces the string value into an array automatically,
         // so we need to check the raw payload:
@@ -816,7 +816,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testAudienceWithoutConjunction() {
         def aud = 'my-web'
-        def builder = Jwts.builder()
+        def builder = Jwt.builder()
         builder.audience().add(aud) // no .and() call
         def jwt = builder.compact()
 
@@ -834,7 +834,7 @@ class DefaultJwtBuilderTest {
     @Test
     void testCritWithoutConjunction() {
         def crit = 'test'
-        def builder = Jwts.builder().issuer('me')
+        def builder = Jwt.builder().issuer('me')
         def headerBuilder = builder.header()
         headerBuilder.critical().add(crit) // no .and() method
         headerBuilder.add(crit, 'foo') // no .and() method

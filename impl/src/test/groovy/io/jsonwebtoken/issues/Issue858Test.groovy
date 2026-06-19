@@ -16,7 +16,6 @@
 package io.jsonwebtoken.issues
 
 import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -25,7 +24,7 @@ class Issue858Test {
 
     @Test
     void testEmptyAndNullEntries() {
-        def jwt = Jwts.builder()
+        def jwt = Jwt.builder()
                 .subject('Joe')
                 .claim('foo', '')       // empty allowed
                 .claim('list', [])            // empty allowed

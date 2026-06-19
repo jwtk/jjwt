@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
@@ -127,7 +126,7 @@ class RFC7516AppendixA3Test {
             }
         }
 
-        String compact = Jwts.builder()
+        String compact = Jwt.builder()
                 .setPayload(PLAINTEXT)
                 .encryptWith(kek, Jwe.alg.A128KW, enc)
                 .compact()

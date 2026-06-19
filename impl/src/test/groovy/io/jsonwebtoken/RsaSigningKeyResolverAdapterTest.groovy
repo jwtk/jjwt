@@ -30,7 +30,7 @@ class RsaSigningKeyResolverAdapterTest {
 
         def pair = Keys.keyPairFor(alg)
 
-        def compact = Jwts.builder().claim('foo', 'bar').signWith(pair.private, alg).compact()
+        def compact = Jwt.builder().claim('foo', 'bar').signWith(pair.private, alg).compact()
 
         Jws<Claims> jws = Jwt.parser().setSigningKey(pair.public).build().parseSignedClaims(compact)
 

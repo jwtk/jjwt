@@ -237,7 +237,7 @@ class Pkcs11Test {
             alg = alg instanceof Curve ? Jws.alg.EdDSA : alg as SecureDigestAlgorithm
 
             // We might need to specify the PKCS11 provider since we can't access the private key material:
-            def jws = Jwts.builder().provider(keyProvider).issuer('me').signWith(signKey, alg).compact()
+            def jws = Jwt.builder().provider(keyProvider).issuer('me').signWith(signKey, alg).compact()
 
             def builder = Jwt.parser()
             if (verifyKey instanceof SecretKey) {
@@ -279,7 +279,7 @@ class Pkcs11Test {
         }
 
         // Encryption uses the public key, and that key material is available, so no need for the PKCS11 provider:
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, keyalg, Jwe.enc.A256GCM).compact()
+        String jwe = Jwt.builder().issuer('me').encryptWith(pub, keyalg, Jwe.enc.A256GCM).compact()
 
         // The private key can be null if SunPKCS11 doesn't support the key algorithm directly.  In this case
         // encryption only worked because generic X.509 decoding (from the key certificate in the keystore) produced the

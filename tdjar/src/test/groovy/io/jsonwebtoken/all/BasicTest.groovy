@@ -32,7 +32,7 @@ class BasicTest {
         def alg = Jws.alg.HS256
         def key = alg.key().build()
 
-        String token = Jwts.builder()
+        String token = Jwt.builder()
                 .subject("test-user")
                 .claim("test", "basicUsageTest")
                 .signWith(key, alg)

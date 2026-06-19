@@ -1163,9 +1163,11 @@ public final class Jwts {
      *
      * @return a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
      * strings.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt#builder()}
      */
+    @Deprecated
     public static JwtBuilder builder() {
-        return Suppliers.JWT_BUILDER_SUPPLIER.get();
+        return Jwt.builder();
     }
 
     /**

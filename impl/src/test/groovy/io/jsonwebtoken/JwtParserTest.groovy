@@ -182,7 +182,7 @@ class JwtParserTest {
         String payload = 'Hello world!'
 
         //noinspection GrDeprecatedAPIUsage
-        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, base64Encodedkey).compact()
+        String compact = Jwt.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, base64Encodedkey).compact()
 
         assertTrue Jwt.parser().build().isSigned(compact)
 
@@ -197,7 +197,7 @@ class JwtParserTest {
 
         String payload = ''
 
-        String compact = Jwts.builder().setPayload(payload).signWith(key).compact()
+        String compact = Jwt.builder().setPayload(payload).signWith(key).compact()
 
         assertTrue Jwt.parser().build().isSigned(compact)
 
@@ -209,7 +209,7 @@ class JwtParserTest {
     @Test
     void testParseNullPayload() {
         SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
-        String compact = Jwts.builder().signWith(key).compact()
+        String compact = Jwt.builder().signWith(key).compact()
         assertTrue Jwt.parser().build().isSigned(compact)
 
         def jwt = Jwt.parser().setSigningKey(key).build().parse(compact)
@@ -218,7 +218,7 @@ class JwtParserTest {
 
     @Test
     void testParseNullPayloadWithoutKey() {
-        String compact = Jwts.builder().compact()
+        String compact = Jwt.builder().compact()
         def jwt = Jwt.parser().unsecured().build().parse(compact)
         assertEquals 'none', jwt.header.alg
         assertEquals '', new String(jwt.payload as byte[], StandardCharsets.UTF_8)
@@ -233,7 +233,7 @@ class JwtParserTest {
 
         Date exp = new Date(testTime - 1000)
 
-        String compact = Jwts.builder().setSubject('Joe').setExpiration(exp).compact()
+        String compact = Jwt.builder().setSubject('Joe').setExpiration(exp).compact()
 
         try {
             Jwt.parser().unsecured().setClock(fixedClock).build().parse(compact)
@@ -254,7 +254,7 @@ class JwtParserTest {
         def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
         def earlier = new Date(nbf.getTime() - differenceMillis)
 
-        String compact = Jwts.builder().subject('Joe').notBefore(nbf).compact()
+        String compact = Jwt.builder().subject('Joe').notBefore(nbf).compact()
 
         try {
             Jwt.parser().unsecured().clock(new FixedClock(earlier)).build().parse(compact)
@@ -283,10 +283,10 @@ class JwtParserTest {
         millis = seconds * 1000L
         def exp = new Date(millis)
         def later = new Date(exp.getTime() + differenceMillis)
-        def s = Jwts.builder().expiration(exp).compact()
+        def s = Jwt.builder().expiration(exp).compact()
 
         String subject = 'Joe'
-        String compact = Jwts.builder().subject(subject).expiration(exp).compact()
+        String compact = Jwt.builder().subject(subject).expiration(exp).compact()
 
         Jwt<Header, Claims> jwt = Jwt.parser().unsecured().setAllowedClockSkewSeconds(10)
                 .clock(new FixedClock(later)).build().parse(compact)
@@ -301,7 +301,7 @@ class JwtParserTest {
         def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
         def later = new Date(exp.getTime() + differenceMillis)
 
-        def s = Jwts.builder().expiration(exp).compact()
+        def s = Jwt.builder().expiration(exp).compact()
 
         def skewSeconds = 1
 
@@ -323,7 +323,7 @@ class JwtParserTest {
         Date exp = new Date(System.currentTimeMillis() + 3000)
 
         String subject = 'Joe'
-        String compact = Jwts.builder().setSubject(subject).setNotBefore(exp).compact()
+        String compact = Jwt.builder().setSubject(subject).setNotBefore(exp).compact()
 
         Jwt<Header, Claims> jwt = Jwt.parser().unsecured().setAllowedClockSkewSeconds(10).build().parse(compact)
 
@@ -337,7 +337,7 @@ class JwtParserTest {
         def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
         def earlier = new Date(nbf.getTime() - differenceMillis)
 
-        String compact = Jwts.builder().subject('Joe').notBefore(nbf).compact()
+        String compact = Jwt.builder().subject('Joe').notBefore(nbf).compact()
 
         def skewSeconds = 1
 
@@ -364,7 +364,7 @@ class JwtParserTest {
 
         String payload = 'Hello world!'
 
-        String compact = Jwts.builder().setPayload(payload).compact()
+        String compact = Jwt.builder().setPayload(payload).compact()
 
         def jwt = Jwt.parser().unsecured().build().parseUnsecuredContent(compact)
 
@@ -374,7 +374,7 @@ class JwtParserTest {
     @Test
     void testParseUnprotectedContentWithClaimsJwt() {
 
-        String compact = Jwts.builder().setSubject('Joe').compact()
+        String compact = Jwt.builder().setSubject('Joe').compact()
 
         try {
             Jwt.parser().unsecured().build().parseUnsecuredContent(compact)
@@ -389,7 +389,7 @@ class JwtParserTest {
 
         String payload = 'Hello world!'
 
-        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
+        String compact = Jwt.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
             Jwt.parser().build().parseUnsecuredContent(compact)
@@ -403,7 +403,7 @@ class JwtParserTest {
     void testParseUnsecuredContentWithClaimsJws() {
 
         def key = randomKey()
-        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKey(key).build().parseSignedContent(compact)
@@ -422,7 +422,7 @@ class JwtParserTest {
 
         String subject = 'Joe'
 
-        String compact = Jwts.builder().setSubject(subject).compact()
+        String compact = Jwt.builder().setSubject(subject).compact()
 
         Jwt<Header, Claims> jwt = Jwt.parser().unsecured().build().parseUnsecuredClaims(compact)
 
@@ -434,7 +434,7 @@ class JwtParserTest {
 
         String payload = 'Hello world!'
 
-        String compact = Jwts.builder().setPayload(payload).compact()
+        String compact = Jwt.builder().setPayload(payload).compact()
 
         try {
             Jwt.parser().unsecured().build().parseUnsecuredClaims(compact)
@@ -449,7 +449,7 @@ class JwtParserTest {
 
         String payload = 'Hello world!'
 
-        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
+        String compact = Jwt.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, randomKey()).compact()
 
         try {
             Jwt.parser().build().parseUnsecuredClaims(compact)
@@ -463,7 +463,7 @@ class JwtParserTest {
     void testParseUnsecuredClaimsWithClaimsJws() {
 
         def key = randomKey()
-        String compact = Jwts.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject('Joe').signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKey(key).build().parseUnsecuredClaims(compact)
@@ -484,7 +484,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def jwt = Jwt.parser().
                 setSigningKey(key).
@@ -501,7 +501,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setPayload(payload).compact()
+        String compact = Jwt.builder().setPayload(payload).compact()
 
         try {
             Jwt.parser().unsecured().setSigningKey(key).build().parseSignedContent(compact)
@@ -518,7 +518,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).compact()
+        String compact = Jwt.builder().setSubject(subject).compact()
 
         try {
             Jwt.parser().unsecured().setSigningKey(key).build().parseSignedContent(compact)
@@ -535,7 +535,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKey(key).build().parseSignedContent(compact)
@@ -556,7 +556,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(sub).signWith(SignatureAlgorithm.HS256, key).compact()
 
         Jwt<Header, Claims> jwt = Jwt.parser().setSigningKey(key).build().parseSignedClaims(compact)
 
@@ -572,7 +572,7 @@ class JwtParserTest {
 
         String sub = 'Joe'
         byte[] key = randomKey()
-        String compact = Jwts.builder().subject(sub).expiration(exp).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().subject(sub).expiration(exp).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKey(key).clock(new FixedClock(later)).build().parseUnsecuredClaims(compact)
@@ -597,7 +597,7 @@ class JwtParserTest {
 
         String sub = 'Joe'
         byte[] key = randomKey()
-        String compact = Jwts.builder().subject(sub).notBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().subject(sub).notBefore(nbf).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKey(key).clock(new FixedClock(earlier)).build().parseSignedClaims(compact)
@@ -621,7 +621,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setPayload(payload).compact()
+        String compact = Jwt.builder().setPayload(payload).compact()
 
         try {
             Jwt.parser().unsecured().setSigningKey(key).build().parseSignedClaims(compact)
@@ -638,7 +638,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).compact()
+        String compact = Jwt.builder().setSubject(subject).compact()
 
         try {
             Jwt.parser().unsecured().setSigningKey(key).
@@ -657,7 +657,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKey(key).build().parseSignedContent(compact)
@@ -678,7 +678,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
@@ -699,7 +699,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
@@ -723,7 +723,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         try {
             Jwt.parser().setSigningKeyResolver(null).build().parseSignedClaims(compact)
@@ -740,7 +740,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setSubject(subject).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter()
 
@@ -765,7 +765,7 @@ class JwtParserTest {
         def smallLong = (long) 42
         def bigLong = ((long) Integer.MAX_VALUE) + 42
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 claim("byte", b).
                 claim("short", s).
                 claim("int", i).
@@ -795,7 +795,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
@@ -816,7 +816,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setPayload(inputPayload).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter() {
             @Override
@@ -840,7 +840,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
+        String compact = Jwt.builder().setPayload(payload).signWith(SignatureAlgorithm.HS256, key).compact()
 
         def signingKeyResolver = new SigningKeyResolverAdapter()
 
@@ -861,7 +861,7 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         // not setting expected claim name in JWT
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).setIssuer('Dummy').compact()
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).setIssuer('Dummy').compact()
 
         try {
             // expecting null claim name, but with value
@@ -882,7 +882,7 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         // not setting expected claim name in JWT
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuer('Dummy').
                 compact()
 
@@ -908,7 +908,7 @@ class JwtParserTest {
         byte[] key = randomKey()
 
         // not setting expected claim name in JWT
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).setIssuer('Dummy').compact()
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).setIssuer('Dummy').compact()
 
         try {
             // expecting claim name, but with null value
@@ -932,7 +932,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 claim(expectedClaimName, expectedClaimValue).
                 compact()
 
@@ -953,7 +953,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 claim(goodClaimName, badClaimValue).
                 compact()
 
@@ -978,7 +978,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuer('Dummy').
                 compact()
 
@@ -1001,7 +1001,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuedAt(issuedAt).
                 compact()
 
@@ -1020,7 +1020,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuedAt(badIssuedAt).
                 compact()
 
@@ -1036,7 +1036,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setSubject("Dummy").
                 compact()
 
@@ -1052,7 +1052,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuer(issuer).
                 compact()
 
@@ -1071,7 +1071,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuer(badIssuer).
                 compact()
 
@@ -1095,7 +1095,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setId('id').
                 compact()
 
@@ -1117,7 +1117,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setAudience(audience).
                 compact()
 
@@ -1134,7 +1134,7 @@ class JwtParserTest {
         def one = 'one'
         def two = 'two'
         def expected = [one, two]
-        String jwt = Jwts.builder().audience().add(one).add(two).and().compact()
+        String jwt = Jwt.builder().audience().add(one).add(two).and().compact()
         def aud = Jwt.parser().unsecured().requireAudience(one).requireAudience(two).build()
                 .parseUnsecuredClaims(jwt).getPayload().getAudience()
         assertEquals expected.size(), aud.size()
@@ -1145,7 +1145,7 @@ class JwtParserTest {
     void testParseAtLeastOneAudiences() {
         def one = 'one'
 
-        String jwt = Jwts.builder().audience().add(one).add('two').and().compact() // more audiences than required
+        String jwt = Jwt.builder().audience().add(one).add('two').and().compact() // more audiences than required
 
         def aud = Jwt.parser().unsecured().requireAudience(one) // require only one
                 .build().parseUnsecuredClaims(jwt).getPayload().getAudience()
@@ -1158,7 +1158,7 @@ class JwtParserTest {
     void testParseMissingAudiences() {
         def one = 'one'
         def two = 'two'
-        String jwt = Jwts.builder().id('foo').compact()
+        String jwt = Jwt.builder().id('foo').compact()
         try {
             Jwt.parser().unsecured().requireAudience(one).requireAudience(two).build().parseUnsecuredClaims(jwt)
             fail()
@@ -1173,7 +1173,7 @@ class JwtParserTest {
         def one = 'one'
         def two = 'two'
         def expected = [one, two]
-        String jwt = Jwts.builder().claim('custom', one).compact()
+        String jwt = Jwt.builder().claim('custom', one).compact()
         try {
             Jwt.parser().unsecured().require('custom', expected).build().parseUnsecuredClaims(jwt)
         } catch (IncorrectClaimException e) {
@@ -1189,7 +1189,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setAudience(badAudience).
                 compact()
 
@@ -1212,7 +1212,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setId('id').
                 compact()
 
@@ -1234,7 +1234,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setSubject(subject).
                 compact()
 
@@ -1253,7 +1253,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setSubject(badSubject).
                 compact()
 
@@ -1277,7 +1277,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setId('id').
                 compact()
 
@@ -1299,7 +1299,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setId(id).
                 compact()
 
@@ -1318,7 +1318,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setId(badId).
                 compact()
 
@@ -1342,7 +1342,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setIssuer('me').
                 compact()
 
@@ -1365,7 +1365,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setExpiration(expiration).
                 compact()
 
@@ -1384,7 +1384,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setExpiration(badExpiration).
                 compact()
 
@@ -1400,7 +1400,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setSubject("Dummy").
                 compact()
 
@@ -1417,7 +1417,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setNotBefore(notBefore).
                 compact()
 
@@ -1436,7 +1436,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setNotBefore(badNotBefore).
                 compact()
 
@@ -1452,7 +1452,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setSubject("Dummy").
                 compact()
 
@@ -1469,7 +1469,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 claim("aDate", aDate).
                 compact()
 
@@ -1490,7 +1490,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 claim("aDate", badDate).
                 compact()
 
@@ -1515,7 +1515,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 claim("aDate", badDate).
                 compact()
 
@@ -1539,7 +1539,7 @@ class JwtParserTest {
 
         byte[] key = randomKey()
 
-        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).
+        String compact = Jwt.builder().signWith(SignatureAlgorithm.HS256, key).
                 setSubject("Dummy").
                 compact()
 
@@ -1561,7 +1561,7 @@ class JwtParserTest {
         Date expiry = new Date(then)
         Date beforeExpiry = new Date(then - 1000)
 
-        String compact = Jwts.builder().setSubject('Joe').setExpiration(expiry).compact()
+        String compact = Jwt.builder().setSubject('Joe').setExpiration(expiry).compact()
 
         Jwt.parser().unsecured().setClock(new FixedClock(beforeExpiry)).build().parse(compact)
     }
@@ -1659,7 +1659,7 @@ class JwtParserTest {
 
         // create a compressed JWE first:
         def key = TestKeys.A256GCM
-        def jwe = Jwts.builder().claim("hello", "world")
+        def jwe = Jwt.builder().claim("hello", "world")
                 .compressWith(Jwe.zip.DEF)
                 .encryptWith(key, Jwe.enc.A256GCM)
                 .compact()
@@ -1687,7 +1687,7 @@ class JwtParserTest {
 
         // create a compressed JWE first:
         def key = TestKeys.HS256
-        def jws = Jwts.builder().claim("hello", "world")
+        def jws = Jwt.builder().claim("hello", "world")
                 .signWith(key, Jws.alg.HS256)
                 .compact()
 
@@ -1716,7 +1716,7 @@ class JwtParserTest {
 
         // create a compressed JWE first:
         def key = TestKeys.A256GCM
-        def jwe = Jwts.builder().claim("hello", "world")
+        def jwe = Jwt.builder().claim("hello", "world")
                 .encryptWith(key, Jwe.enc.A256GCM)
                 .compact()
 
@@ -1743,7 +1743,7 @@ class JwtParserTest {
 
         // create a compressed JWE first:
         def key = TestKeys.A256GCM
-        def jwe = Jwts.builder().claim("hello", "world")
+        def jwe = Jwt.builder().claim("hello", "world")
                 .encryptWith(key, Jwe.enc.A256GCM)
                 .compact()
 

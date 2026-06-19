@@ -59,7 +59,7 @@ class Issue365Test {
         for (def alg : sigalgs) {
             def pair = TestKeys.forAlgorithm(alg).pair
             try {
-                Jwts.builder().issuer('me').signWith(pair.public, alg).compact()
+                Jwt.builder().issuer('me').signWith(pair.public, alg).compact()
                 fail()
             } catch (IllegalArgumentException expected) {
                 assertEquals DefaultJwtBuilder.PUB_KEY_SIGN_MSG, expected.getMessage()
@@ -71,7 +71,7 @@ class Issue365Test {
     void testVerifyWithPrivateKey() {
         for (def alg : sigalgs) {
             def pair = TestKeys.forAlgorithm(alg).pair
-            String jws = Jwts.builder().issuer('me').signWith(pair.private).compact()
+            String jws = Jwt.builder().issuer('me').signWith(pair.private).compact()
             try {
                 Jwt.parser().verifyWith(pair.private).build().parseSignedClaims(jws)
                 fail()
@@ -85,7 +85,7 @@ class Issue365Test {
     void testVerifyWithKeyLocatorPrivateKey() {
         for (def alg : sigalgs) {
             def pair = TestKeys.forAlgorithm(alg).pair
-            String jws = Jwts.builder().issuer('me').signWith(pair.private).compact()
+            String jws = Jwt.builder().issuer('me').signWith(pair.private).compact()
             try {
                 Jwt.parser().keyLocator(new Locator<Key>() {
                     @Override
@@ -105,7 +105,7 @@ class Issue365Test {
     void testEncryptWithPrivateKey() {
         for (def alg : asymKeyAlgs) {
             try {
-                Jwts.builder().issuer('me').encryptWith(new TestPrivateKey(), alg, Jwe.enc.A256GCM).compact()
+                Jwt.builder().issuer('me').encryptWith(new TestPrivateKey(), alg, Jwe.enc.A256GCM).compact()
                 fail()
             } catch (IllegalArgumentException expected) {
                 assertEquals DefaultJwtBuilder.PRIV_KEY_ENC_MSG, expected.getMessage()
@@ -116,7 +116,7 @@ class Issue365Test {
     @Test
     void testDecryptWithPublicKey() {
         def pub = TestKeys.RS256.pair.public
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwe.alg.RSA1_5, Jwe.enc.A256GCM).compact()
+        String jwe = Jwt.builder().issuer('me').encryptWith(pub, Jwe.alg.RSA1_5, Jwe.enc.A256GCM).compact()
         try {
             Jwt.parser().decryptWith(new TestPublicKey()).build().parseEncryptedClaims(jwe)
             fail()
@@ -128,7 +128,7 @@ class Issue365Test {
     @Test
     void testDecryptWithKeyLocatorPublicKey() {
         def pub = TestKeys.RS256.pair.public
-        String jwe = Jwts.builder().issuer('me').encryptWith(pub, Jwe.alg.RSA1_5, Jwe.enc.A256GCM).compact()
+        String jwe = Jwt.builder().issuer('me').encryptWith(pub, Jwe.alg.RSA1_5, Jwe.enc.A256GCM).compact()
         try {
             Jwt.parser().keyLocator(new Locator<Key>() {
                 @Override

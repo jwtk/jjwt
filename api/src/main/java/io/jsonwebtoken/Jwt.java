@@ -77,6 +77,17 @@ public interface Jwt<H extends Header, P> {
     }
 
     /**
+     * Returns a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
+     * strings.
+     *
+     * @return a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
+     * strings.
+     */
+    static JwtBuilder builder() {
+        return Suppliers.JWT_BUILDER_SUPPLIER.get();
+    }
+
+    /**
      * Returns the JWT {@link Header} or {@code null} if not present.
      *
      * @return the JWT {@link Header} or {@code null} if not present.

@@ -33,7 +33,7 @@ class CustomObjectDeserializationTest {
         customBean.key1 = "value1"
         customBean.key2 = 42
 
-        String jwtString = Jwts.builder().claim("cust", customBean).compact()
+        String jwtString = Jwt.builder().claim("cust", customBean).compact()
 
         // no custom deserialization, object is a map
         Jwt<Header, Claims> jwt = Jwt.parser().unsecured().build().parseUnsecuredClaims(jwtString)

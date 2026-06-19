@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
@@ -217,7 +216,7 @@ class RFC7520Section4Test {
                 return FIGURE_9
             }
         }
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(writer) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -256,7 +255,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(kid).and()
                 .setPayload(FIGURE_7)
@@ -302,7 +301,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -347,7 +346,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(writer) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -385,7 +384,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(writer) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)

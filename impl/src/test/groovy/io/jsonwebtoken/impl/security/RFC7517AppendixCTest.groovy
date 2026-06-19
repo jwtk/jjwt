@@ -18,7 +18,6 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
@@ -321,7 +320,7 @@ class RFC7517AppendixCTest {
 
         Password key = Password.of(RFC_SHARED_PASSPHRASE.toCharArray())
 
-        String compact = Jwts.builder()
+        String compact = Jwt.builder()
                 .setPayload(RFC_JWK_JSON)
                 .header().contentType('jwk+json').pbes2Count(RFC_P2C).and()
                 .encryptWith(key, alg, enc)
