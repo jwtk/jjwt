@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.ParameterMap;
 import io.jsonwebtoken.impl.io.Streams;
+import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
@@ -93,10 +94,15 @@ public class X509BuilderSupport implements X509Builder<X509BuilderSupport> {
     }
 
     private byte[] computeThumbprint(final X509Certificate cert, HashAlgorithm alg) {
-        byte[] encoded = GET_X509_BYTES.apply(cert);
-        InputStream in = Streams.of(encoded);
-        Request<InputStream> request = new DefaultRequest<>(in, null, null);
-        return alg.digest(request);
+        byte[] encoded = Bytes.EMPTY;
+        try {
+            encoded = GET_X509_BYTES.apply(cert);
+            InputStream in = Streams.of(encoded);
+            Request<InputStream> request = new DefaultRequest<>(in, null, null);
+            return alg.digest(request);
+        } finally {
+            Bytes.clear(encoded);
+        }
     }
 
     public void apply() {

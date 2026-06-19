@@ -36,19 +36,23 @@ public class JwtX509StringConverter implements Converter<X509Certificate, CharSe
     @Override
     public String applyTo(X509Certificate cert) {
         Assert.notNull(cert, "X509Certificate cannot be null.");
-        byte[] der;
+        byte[] der = Bytes.EMPTY;
         try {
-            der = cert.getEncoded();
-        } catch (CertificateEncodingException e) {
-            String msg = "Unable to access X509Certificate encoded bytes necessary to perform DER " +
-                    "Base64-encoding. Certificate: {" + cert + "}. Cause: " + e.getMessage();
-            throw new IllegalArgumentException(msg, e);
+            try {
+                der = cert.getEncoded();
+            } catch (CertificateEncodingException e) {
+                String msg = "Unable to access X509Certificate encoded bytes necessary to perform DER " +
+                        "Base64-encoding. Certificate: {" + cert + "}. Cause: " + e.getMessage();
+                throw new IllegalArgumentException(msg, e);
+            }
+            if (Bytes.isEmpty(der)) {
+                String msg = "X509Certificate encoded bytes cannot be null or empty.  Certificate: {" + cert + "}.";
+                throw new IllegalArgumentException(msg);
+            }
+            return Encoders.BASE64.encode(der);
+        } finally {
+            Bytes.clear(der);
         }
-        if (Bytes.isEmpty(der)) {
-            String msg = "X509Certificate encoded bytes cannot be null or empty.  Certificate: {" + cert + "}.";
-            throw new IllegalArgumentException(msg);
-        }
-        return Encoders.BASE64.encode(der);
     }
 
     // visible for testing

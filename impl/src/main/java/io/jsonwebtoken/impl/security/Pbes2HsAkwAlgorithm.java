@@ -124,7 +124,13 @@ public class Pbes2HsAkwAlgorithm extends CryptoAlgorithm implements KeyAlgorithm
         PBEKeySpec spec = new PBEKeySpec(password, rfcSalt, iterations, DERIVED_KEY_BIT_LENGTH);
         try {
             SecretKey derived = factory.generateSecret(spec);
-            return new SecretKeySpec(derived.getEncoded(), AesAlgorithm.KEY_ALG_NAME); // needed to keep the Sun Provider happy
+            byte[] encoded = Bytes.EMPTY;
+            try {
+                encoded = derived.getEncoded();
+                return new SecretKeySpec(encoded, AesAlgorithm.KEY_ALG_NAME); // needed to keep the Sun Provider happy
+            } finally {
+                Bytes.clear(encoded);
+            }
         } finally {
             spec.clearPassword();
         }

@@ -278,22 +278,25 @@ public class JcaTemplate {
         }
         PKCS8EncodedKeySpec pkcs8Spec = (PKCS8EncodedKeySpec) spec;
         byte[] encoded = pkcs8Spec.getEncoded();
-
-        // Address the [JDK 11 SunCE provider bug](https://bugs.openjdk.org/browse/JDK-8213363) for X25519
-        // and X448 encoded keys: Even though the key material might be encoded properly, JDK 11's
-        // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
-        // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
-        // So we get the raw key bytes and use our key factory method:
-        if (isJdk8213363Bug(e)) {
-            InvalidKeyException cause = // asserted in isJdk8213363Bug method
-                    Assert.isInstanceOf(InvalidKeyException.class, e.getCause(), "Unexpected argument.");
-            int size = getJdk8213363BugExpectedSize(cause);
-            if ((size == 32 || size == 56) && Bytes.length(encoded) >= size) {
-                byte[] adjusted = new byte[size];
-                System.arraycopy(encoded, encoded.length - size, adjusted, 0, size);
-                EdwardsCurve curve = size == 32 ? EdwardsCurve.X25519 : EdwardsCurve.X448;
-                return curve.privateKeySpec(adjusted, false);
+        try {
+            // Address the [JDK 11 SunCE provider bug](https://bugs.openjdk.org/browse/JDK-8213363) for X25519
+            // and X448 encoded keys: Even though the key material might be encoded properly, JDK 11's
+            // SunCE provider incorrectly expects an ASN.1 OCTET STRING (without the DER tag/length prefix)
+            // when it should actually be a BER-encoded OCTET STRING (with the tag/length prefix).
+            // So we get the raw key bytes and use our key factory method:
+            if (isJdk8213363Bug(e)) {
+                InvalidKeyException cause = // asserted in isJdk8213363Bug method
+                        Assert.isInstanceOf(InvalidKeyException.class, e.getCause(), "Unexpected argument.");
+                int size = getJdk8213363BugExpectedSize(cause);
+                if ((size == 32 || size == 56) && Bytes.length(encoded) >= size) {
+                    byte[] adjusted = new byte[size];
+                    System.arraycopy(encoded, encoded.length - size, adjusted, 0, size);
+                    EdwardsCurve curve = size == 32 ? EdwardsCurve.X25519 : EdwardsCurve.X448;
+                    return curve.privateKeySpec(adjusted, false);
+                }
             }
+        } finally {
+            Bytes.clear(encoded);
         }
 
         return null;
