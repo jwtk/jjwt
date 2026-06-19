@@ -121,8 +121,9 @@ class EdwardsCurveTest {
     @Test
     void testFindByKeyUsingMalformedEncoding() {
         curves.each {
-            byte[] encoded = EdwardsCurve.ASN1_OID_PREFIX // just the prefix isn't enough
-            def key = new TestKey(algorithm: 'foo', encoded: encoded.clone()) // MUST clone, don't overwrite the src!
+            // just the prefix isn't enough:
+            byte[] encoded = EdwardsCurve.ASN1_OID_PREFIX.clone() // MUST clone, don't overwrite the class array!
+            def key = new TestKey(algorithm: 'foo', encoded: encoded)
             assertNull EdwardsCurve.findByKey(key)
         }
     }
