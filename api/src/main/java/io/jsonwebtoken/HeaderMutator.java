@@ -26,7 +26,7 @@ import io.jsonwebtoken.lang.MapMutator;
 public interface HeaderMutator<T extends HeaderMutator<T>> extends MapMutator<String, Object, T> {
 
     //IMPLEMENTOR NOTE: if this `algorithm` method ever needs to be exposed in the public API, it might be better to
-    //                  have it in the Jwts.HeaderBuilder interface and NOT this one: in the context of
+    //                  have it in the Jwt.HeaderBuilder interface and NOT this one: in the context of
     //                  JwtBuilder.Header, there is never a reason for an application developer to call algorithm(id)
     //                  directly because the KeyAlgorithm or SecureDigestAlgorithm instance must always be provided
     //                  via the signWith or encryptWith methods.  The JwtBuilder will always set the algorithm

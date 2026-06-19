@@ -82,7 +82,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * Web Signature and Encryption Algorithms Registry</a>. Each standard algorithm is available as a
      * ({@code public static final}) constant for direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
@@ -160,7 +160,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * Cryptographic Algorithms for Key Management</a>. Each standard algorithm is available as a
      * ({@code public static final}) constant for direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.enc.A256GCM)
      *    .build();</pre></blockquote>
@@ -788,7 +788,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
      * Registry</a>. Each algorithm is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .compressWith(<b>Jwe.zip.DEF</b>)
      *    .build();</pre></blockquote>

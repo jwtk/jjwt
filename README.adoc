@@ -735,15 +735,15 @@ code quickly.  Here's an example:
 
 [,java]
 ----
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jws;
 import javax.crypto.SecretKey;
 
 // We need a signing key, so we'll create one just for this example. Usually
 // the key would be read from your application configuration instead.
 SecretKey key = Jws.alg.HS256.key().build();
 
-String jws = Jwts.builder().subject("Joe").signWith(key).compact();
+String jws = Jwt.builder().subject("Joe").signWith(key).compact();
 ----
 
 How easy was that!?
@@ -803,7 +803,7 @@ Now that we've had a quickstart 'taste' of how to create and parse JWTs, let's c
 
 You create a JWT as follows:
 
-. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
+. Use the `Jwt.builder()` method to create a `JwtBuilder` instance.
 . Optionally set any <<jwt-header,`header` parameters>> as desired.
 . Call builder methods to set the payload <<jwt-content,content>> or <<jwt-claims,claims>>.
 . Optionally call `signWith` or `encryptWith` methods if you want to digitally sign or encrypt the JWT.
@@ -813,7 +813,7 @@ For example:
 
 [,java]
 ----
-String jwt = Jwts.builder()                     // (1)
+String jwt = Jwt.builder()                     // (1)
 
     .header()                                   // (2) optional
         .keyId("aKeyId")
@@ -859,7 +859,7 @@ to the `JwtBuilder` for further configuration. For example:
 
 [,java]
 ----
-String jwt = Jwts.builder()
+String jwt = Jwt.builder()
 
     .header()                        // <----
         .keyId("aKeyId")
@@ -892,7 +892,7 @@ arbitrary name/value pairs via the `add` method:
 
 [,java]
 ----
-Jwts.builder()
+Jwt.builder()
 
     .header()
         .add("aHeaderName", aValue)
@@ -911,7 +911,7 @@ The `add` method is also overloaded to support multiple parameters in a `Map`:
 
 [,java]
 ----
-Jwts.builder()
+Jwt.builder()
 
     .header()
         .add(multipleHeaderParamsMap)
@@ -921,16 +921,16 @@ Jwts.builder()
 // ... etc ...
 ----
 
-==== Jwts HeaderBuilder
+==== Jwt HeaderBuilder
 
-Using `Jwts.builder().header()` shown above is the preferred way to modify a header when using the `JwtBuilder`.
+Using `Jwt.builder().header()` shown above is the preferred way to modify a header when using the `JwtBuilder`.
 
 However, if you would like to create a 'standalone' `Header` outside of the context of using the `JwtBuilder`, you
-can use `Jwts.header()` instead to return an independent `Header` builder.  For example:
+can use `Jwt.header()` instead to return an independent `Header` builder.  For example:
 
 [,java]
 ----
-Header header = Jwts.header()
+Header header = Jwt.header()
 
         .keyId("aKeyId")
         .x509Url(aUri)
@@ -941,13 +941,13 @@ Header header = Jwts.header()
         .build()  // <---- not 'and()'
 ----
 
-There are only two differences between `Jwts.header()` and `Jwts.builder().header()`:
+There are only two differences between `Jwt.header()` and `Jwt.builder().header()`:
 
-. `Jwts.header()` builds a 'detached' `Header` that is not associated with any particular JWT, whereas
-`Jwts.builder().header()` always modifies the header of the immediate JWT being constructed by its parent
+. `Jwt.header()` builds a 'detached' `Header` that is not associated with any particular JWT, whereas
+`Jwt.builder().header()` always modifies the header of the immediate JWT being constructed by its parent
 `JwtBuilder`.
-. `Jwts.header()` has a `build()` method to produce an explicit `Header` instance and
-`Jwts.builder().header()` does not (it has an `and()` method instead) because its parent `JwtBuilder` will implicitly
+. `Jwt.header()` has a `build()` method to produce an explicit `Header` instance and
+`Jwt.builder().header()` does not (it has an `and()` method instead) because its parent `JwtBuilder` will implicitly
 create the header instance when necessary.
 
 A standalone header might be useful if you want to aggregate common header parameters in a single 'template'
@@ -957,7 +957,7 @@ populate `JwtBuilder` usages by just appending it to the `JwtBuilder` header, fo
 [,java]
 ----
 // perhaps somewhere in application configuration:
-Header commonHeaders = Jwts.header()
+Header commonHeaders = Jwt.header()
     .issuer("My Company")
     // ... etc ...
     .build();
@@ -965,7 +965,7 @@ Header commonHeaders = Jwts.header()
 // --------------------------------
 
 // somewhere else during actual Jwt construction:
-String jwt = Jwts.builder()
+String jwt = Jwt.builder()
 
     .header()
         .add(commonHeaders)                   // <----
@@ -1003,7 +1003,7 @@ For example:
 ----
 byte[] content = "Hello World".getBytes(StandardCharsets.UTF_8);
 
-String jwt = Jwts.builder()
+String jwt = Jwt.builder()
 
     .content(content, "text/plain") // <---
 
@@ -1058,7 +1058,7 @@ For example:
 [,java]
 ----
 
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .issuer("me")
     .subject("Bob")
@@ -1081,7 +1081,7 @@ can simply call the `JwtBuilder` `claim` method one or more times as needed:
 
 [,java]
 ----
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .claim("hello", "world")
 
@@ -1109,7 +1109,7 @@ If you want to add multiple claims at once, you can use `JwtBuilder` `claims(Map
 
 Map<String,?> claims = getMyClaimsMap(); //implement me
 
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .claims(claims)
 
@@ -1314,7 +1314,7 @@ Key key = getSigningKey(); // or getEncryptionKey() for JWE
 
 String keyId = getKeyId(key); //any mechanism you have to associate a key with an ID is fine
 
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .header().keyId(keyId).and()               // <--- add `kid` header
 
@@ -1765,7 +1765,7 @@ natively supported by the JDK.
 
 You create a JWS as follows:
 
-. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
+. Use the `Jwt.builder()` method to create a `JwtBuilder` instance.
 . Call `JwtBuilder` methods to set the `payload` content or claims and any header parameters as desired.
 . Specify the `SecretKey` or asymmetric `PrivateKey` you want to use to sign the JWT.
 . Finally, call the `compact()` method to compact and sign, producing the final jws.
@@ -1774,7 +1774,7 @@ For example:
 
 [,java]
 ----
-String jws = Jwts.builder() // (1)
+String jws = Jwt.builder() // (1)
 
     .subject("Bob")         // (2)
 
@@ -1792,7 +1792,7 @@ determine the most secure algorithm allowed for the specified key.:
 
 [,java]
 ----
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
    // ... etc ...
 
@@ -2070,7 +2070,7 @@ SecretKey testKey = Jws.alg.HS512.key().build();
 String message = "Hello World. It's a Beautiful Day!";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
-String jws = Jwts.builder().signWith(testKey) // #1
+String jws = Jwt.builder().signWith(testKey) // #1
         .content(content)                     // #2
         .encodePayload(false)                 // #3
         .compact();
@@ -2112,7 +2112,7 @@ SecretKey testKey = Jws.alg.HS512.key().build();
 
 String claimsString = "{\"sub\":\"joe\",\"iss\":\"me\"}";
 
-String jws = Jwts.builder().signWith(testKey) // #1
+String jws = Jwt.builder().signWith(testKey) // #1
         .content(claimsString)                // #2
         .encodePayload(false)                 // #3
         .compact();
@@ -2587,7 +2587,7 @@ them to encrypt a JWT?
 
 You create an encrypted JWT (called a 'JWE') as follows:
 
-. Use the `Jwts.builder()` method to create a `JwtBuilder` instance.
+. Use the `Jwt.builder()` method to create a `JwtBuilder` instance.
 . Call `JwtBuilder` methods to set the `payload` content or claims and any <<jws-create-header,header>> parameters as desired.
 . Call the `encryptWith` method, specifying the Key, Key Algorithm, and Encryption Algorithm you want to use.
 . Finally, call the `compact()` method to compact and encrypt, producing the final jwe.
@@ -2596,7 +2596,7 @@ For example:
 
 [,java]
 ----
-String jwe = Jwts.builder()                              // (1)
+String jwe = Jwt.builder()                              // (1)
 
     .subject("Bob")                                      // (2)
 
@@ -3154,7 +3154,7 @@ SecretJwk = JwkSet.builder()        // 1
 ----
 
 As shown, you can optionally configure the `.operationPolicy(KeyOperationPolicy)` method using a
-`Jwts.op.policy()` builder.  A `KeyOperationPolicy` allows you to control what operations are allowed for any JWK
+`Jwk.op.policy()` builder.  A `KeyOperationPolicy` allows you to control what operations are allowed for any JWK
 before being added to the JWK Set; any JWK that does not match the policy will be rejected and not added to the set.
 JJWT internally defaults to a standard RFC-compliant policy, but you can create a
 policy to override the default if desired using the `Jwk.op.policy()` builder method.
@@ -3208,14 +3208,14 @@ example:
 
 [,java]
 ----
-Jwts.builder()
+Jwt.builder()
 
-   .compressWith(Jwts.ZIP.DEF) // DEFLATE compression algorithm
+   .compressWith(Jwe.zip.DEF) // DEFLATE compression algorithm
 
    // .. etc ...
 ----
 
-If you use any of the algorithm constants in the `Jwts.ZIP` class, that's it, you're done.  You don't have to
+If you use any of the algorithm constants in the `Jwe.zip` class, that's it, you're done.  You don't have to
 do anything during parsing or configure the `JwtParserBuilder` for compression - JJWT will automatically decompress
 the payload as expected.
 
@@ -3223,7 +3223,7 @@ the payload as expected.
 
 === Custom Compression Algorithm
 
-If the default `Jwts.ZIP` compression algorithms are not suitable for your needs, you can create your own
+If the default `Jwe.zip` compression algorithms are not suitable for your needs, you can create your own
 `CompressionAlgorithm` implementation(s).
 
 Just as you would with the default algorithms, you may specify that you want a JWT compressed by calling the
@@ -3233,7 +3233,7 @@ Just as you would with the default algorithms, you may specify that you want a J
 ----
 CompressionAlgorithm myAlg = new MyCompressionAlgorithm();
 
-Jwts.builder()
+Jwt.builder()
 
    .compressWith(myAlg) // <----
 
@@ -3262,7 +3262,7 @@ Jwt.parser()
 ----
 
 This adds additional `CompressionAlgorithm` implementations to the parser's overall total set of supported compression
-algorithms (which already includes all of the `Jwts.ZIP` algorithms by default).
+algorithms (which already includes all of the `Jwe.zip` algorithms by default).
 
 The parser will then automatically check to see if the JWT `zip` header has been set to see if a compression
 algorithm has been used to compress the JWT.  If set, the parser will automatically look up your
@@ -3313,7 +3313,7 @@ When creating a JWT:
 ----
 Serializer<Map<String,?>> serializer = getMySerializer(); //implement me
 
-Jwts.builder()
+Jwt.builder()
 
     .json(serializer)
 
@@ -3378,7 +3378,7 @@ And then you can specify the `JacksonSerializer` using your own `ObjectMapper` o
 ----
 ObjectMapper objectMapper = getMyObjectMapper(); //implement me
 
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .json(new JacksonSerializer(objectMapper))
 
@@ -3515,7 +3515,7 @@ Gson gson = new GsonBuilder()
     .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .disableHtmlEscaping().create();
 
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .json(new GsonSerializer(gson))
 
@@ -3686,7 +3686,7 @@ If for some reason you want to specify your own Base64Url encoder and decoder, y
 ----
 Encoder<byte[], String> encoder = getMyBase64UrlEncoder(); //implement me
 
-String jws = Jwts.builder()
+String jws = Jwt.builder()
 
     .b64Url(encoder)
 
@@ -3750,7 +3750,7 @@ String message = "Hello World!";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
 // Create the compact JWS:
-String jws = Jwts.builder().content(content, "text/plain").signWith(key, alg).compact();
+String jws = Jwt.builder().content(content, "text/plain").signWith(key, alg).compact();
 
 // Parse the compact JWS:
 content = Jwt.parser().verifyWith(key).build().parseSignedContent(jws).getPayload();
@@ -3776,7 +3776,7 @@ SignatureAlgorithm alg = Jws.alg.RS512; //or PS512, RS256, etc...
 KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his RSA private key:
-String jws = Jwts.builder().subject("Alice")
+String jws = Jwt.builder().subject("Alice")
     .signWith(pair.getPrivate(), alg) // <-- Bob's RSA private key
     .compact();
 
@@ -3809,7 +3809,7 @@ SignatureAlgorithm alg = Jws.alg.ES512; //or ES256 or ES384
 KeyPair pair = alg.keyPair().build();
 
 // Bob creates the compact JWS with his EC private key:
-String jws = Jwts.builder().subject("Alice")
+String jws = Jwt.builder().subject("Alice")
     .signWith(pair.getPrivate(), alg) // <-- Bob's EC private key
     .compact();
 
@@ -3856,7 +3856,7 @@ Curve curve = Jwk.crv.Ed25519; //or Ed448
 KeyPair pair = curve.keyPair().build();
 
 // Bob creates the compact JWS with his Edwards Curve private key:
-String jws = Jwts.builder().subject("Alice")
+String jws = Jwt.builder().subject("Alice")
     .signWith(pair.getPrivate(), Jws.alg.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
     .compact();
 
@@ -3901,7 +3901,7 @@ String message = "Live long and prosper.";
 byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
 // Create the compact JWE:
-String jwe = Jwts.builder().content(content, "text/plain").encryptWith(key, enc).compact();
+String jwe = Jwt.builder().content(content, "text/plain").encryptWith(key, enc).compact();
 
 // Parse the compact JWE:
 content = Jwt.parser().decryptWith(key).build().parseEncryptedContent(jwe).getPayload();
@@ -3928,12 +3928,12 @@ decrypt the JWT using her RSA private key:
 KeyPair pair = Jws.alg.RS512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
-KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.alg.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
 // Choose the Encryption Algorithm to encrypt the payload:
 AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
-String jwe = Jwts.builder().audience().add("Alice").and()
+String jwe = Jwt.builder().audience().add("Alice").and()
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's RSA public key
     .compact();
 
@@ -3963,14 +3963,14 @@ efficient than the `A*KW` variants.
 [,java]
 ----
 // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-SecretKeyAlgorithm alg = Jwts.KEY.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
+SecretKeyAlgorithm alg = Jwe.alg.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
 SecretKey key = alg.key().build();
 
 // Chooose the Encryption Algorithm used to encrypt the payload:
 AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Create the compact JWE:
-String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
+String jwe = Jwt.builder().issuer("me").encryptWith(key, alg, enc).compact();
 
 // Parse the compact JWE:
 String issuer = Jwt.parser().decryptWith(key).build()
@@ -4000,12 +4000,12 @@ Alice can then decrypt the JWT using her Elliptic Curve private key:
 KeyPair pair = Jws.alg.ES512.keyPair().build();
 
 // Choose the key algorithm used encrypt the payload key:
-KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
+KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.alg.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
 // Choose the Encryption Algorithm to encrypt the payload:
 AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Bob creates the compact JWE with Alice's EC public key so only she may read it:
-String jwe = Jwts.builder().audience().add("Alice").and()
+String jwe = Jwt.builder().audience().add("Alice").and()
     .encryptWith(pair.getPublic(), alg, enc) // <-- Alice's EC public key
     .compact();
 
@@ -4038,7 +4038,7 @@ String pw = "correct horse battery staple";
 Password password = Password.of(pw.toCharArray());
 
 // Choose the desired PBES2 key derivation algorithm:
-KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
+KeyAlgorithm<Password, Password> alg = Jwe.alg.PBES2_HS512_A256KW; //or PBES2_HS384_A192KW or PBES2_HS256_A128KW
 
 // Optionally choose the number of PBES2 computational iterations to use to derive the key.
 // This is optional - if you do not specify a value, JJWT will automatically choose a value
@@ -4052,7 +4052,7 @@ KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_H
 AeadAlgorithm enc = Jwe.alg.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
 // Create the compact JWE:
-String jwe = Jwts.builder().issuer("me")
+String jwe = Jwt.builder().issuer("me")
     // Optional work factor is specified in the header:
     //.header().pbes2Count(pbkdf2Iterations)).and()
     .encryptWith(password, alg, enc)

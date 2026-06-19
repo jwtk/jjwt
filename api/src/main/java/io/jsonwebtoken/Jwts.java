@@ -42,12 +42,15 @@ import java.util.Map;
  * algorithm type. Each organized collection of algorithms is available via a constant to allow
  * for easy code-completion in IDEs, showing available algorithm instances.  For example, when typing:</p>
  * <blockquote><pre>
- * Jwts.// press code-completion hotkeys to suggest available algorithm registry fields
  * {@link Jws.alg Jws.alg}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
  * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods
- * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods</pre></blockquote>
+ * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods
+ * {@link Jwe.zip Jwe.zip}.// press hotkeys to suggest individual compression algorithms or utility methods</pre></blockquote>
  *
  * @since 0.1
+ * @deprecated since JJWT_RELEASE_VERSION in favor of respective interface static registries
+ * ({@link Jws.alg}, {@link Jwe.alg}, {@link Jwe.enc}, {@link Jwe.zip}) and static factory methods
+ * ({@link Jwt#builder()}, {@link Jwt#parser()}, {@link Jwt#header()}, {@link Claims#builder()}).
  */
 public final class Jwts {
 
@@ -58,7 +61,7 @@ public final class Jwts {
      * Web Signature and Encryption Algorithms Registry</a>. Each standard algorithm is available as a
      * ({@code public static final}) constant for direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
@@ -158,7 +161,7 @@ public final class Jwts {
      * Registry</a>. Each standard algorithm is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .signWith(aKey, <b>Jws.alg.HS512</b>) // or RS512, PS256, EdDSA, etc...
      *    .build();</pre></blockquote>
@@ -363,7 +366,7 @@ public final class Jwts {
      * Cryptographic Algorithms for Key Management</a>. Each standard algorithm is available as a
      * ({@code public static final}) constant for direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.enc.A256GCM)
      *    .build();</pre></blockquote>
@@ -1043,7 +1046,7 @@ public final class Jwts {
      * Registry</a>. Each algorithm is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .compressWith(<b>Jwe.zip.DEF</b>)
      *    .build();</pre></blockquote>

@@ -56,7 +56,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *
      *     <b>.header()
      *         .keyId("keyId")
@@ -82,7 +82,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * Modifies the JWT's header name/value pairs as desired, allowing for in-line configuration. For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *     .header(<b>header -> header
      *         .keyId("keyId")
      *         .add("aName", aValue)
@@ -411,7 +411,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *
      *     <b>.claims()
      *         .issuer("me")
@@ -439,7 +439,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * Modifies the JWT {@code Claims} payload, allowing for in-line configuration. For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *
      *     <b>.claims(claims -> claims
      *         .issuer("me")

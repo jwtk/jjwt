@@ -79,7 +79,7 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
      * Registry</a>. Each standard algorithm is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .signWith(aKey, <b>Jws.alg.HS512</b>) // or RS512, PS256, EdDSA, etc...
      *    .build();</pre></blockquote>

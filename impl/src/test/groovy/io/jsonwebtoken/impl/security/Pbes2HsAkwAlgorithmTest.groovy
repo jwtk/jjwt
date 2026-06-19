@@ -59,7 +59,7 @@ class Pbes2HsAkwAlgorithmTest {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             def password = Password.of('correct horse battery staple'.toCharArray())
             def iterations = alg.MAX_ITERATIONS + 1
-            // we make the JWE string directly from JSON here (instead of using Jwts.builder()) to avoid
+            // we make the JWE string directly from JSON here (instead of using Jwt.builder()) to avoid
             // the computational time it would take to create such JWEs with excessive iterations as well as
             // avoid the builder throwing any exceptions (and this is what a potential attacker would do anyway):
             def headerJson = """
