@@ -57,6 +57,7 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
 
     /**
      * Ensures {@code keyBitLength is a valid AES key length}
+     *
      * @param keyBitLength the key length (in bits) to check
      * @since 0.12.4
      */
@@ -100,7 +101,8 @@ abstract class AesAlgorithm extends CryptoAlgorithm implements KeyBuilderSupplie
     }
 
     private void validateLengthIfPossible(SecretKey key) {
-        validateLength(key, this.keyBitLength, false);
+        byte[] encoded = validateLength(key, this.keyBitLength, false);
+        Bytes.clear(Bytes.nullSafe(encoded));
     }
 
     protected static String lengthMsg(String id, String type, int requiredLengthInBits, long actualLengthInBits) {

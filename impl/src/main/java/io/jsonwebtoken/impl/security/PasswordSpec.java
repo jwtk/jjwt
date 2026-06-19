@@ -38,7 +38,8 @@ public class PasswordSpec implements Password, KeySpec {
     private final char[] password;
 
     public PasswordSpec(char[] password) {
-        this.password = Assert.notEmpty(password, "Password character array cannot be null or empty.");
+        Assert.notEmpty(password, "Password character array cannot be null or empty.");
+        this.password = password.clone(); // ensures changes to the source array do not change this instance
     }
 
     private void assertActive() {
