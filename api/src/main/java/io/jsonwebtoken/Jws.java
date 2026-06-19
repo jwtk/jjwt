@@ -115,49 +115,49 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
          * is used only when creating unsecured (not integrity protected) JWSs and is not usable in any other scenario.
          * Any attempt to call its methods will result in an exception being thrown.
          */
-        public static final SecureDigestAlgorithm<Key, Key> NONE = Jwts.get(REGISTRY, "none");
+        public static final SecureDigestAlgorithm<Key, Key> NONE = Suppliers.get(REGISTRY, "none");
 
         /**
          * {@code HMAC using SHA-256} message authentication algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
          * requires a 256-bit (32 byte) key.
          */
-        public static final MacAlgorithm HS256 = Jwts.get(REGISTRY, "HS256");
+        public static final MacAlgorithm HS256 = Suppliers.get(REGISTRY, "HS256");
 
         /**
          * {@code HMAC using SHA-384} message authentication algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
          * requires a 384-bit (48 byte) key.
          */
-        public static final MacAlgorithm HS384 = Jwts.get(REGISTRY, "HS384");
+        public static final MacAlgorithm HS384 = Suppliers.get(REGISTRY, "HS384");
 
         /**
          * {@code HMAC using SHA-512} message authentication algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.2">RFC 7518, Section 3.2</a>.  This algorithm
          * requires a 512-bit (64 byte) key.
          */
-        public static final MacAlgorithm HS512 = Jwts.get(REGISTRY, "HS512");
+        public static final MacAlgorithm HS512 = Suppliers.get(REGISTRY, "HS512");
 
         /**
          * {@code RSASSA-PKCS1-v1_5 using SHA-256} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
          * requires a 2048-bit key.
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm RS256 = Jwts.get(REGISTRY, "RS256");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm RS256 = Suppliers.get(REGISTRY, "RS256");
 
         /**
          * {@code RSASSA-PKCS1-v1_5 using SHA-384} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
          * requires a 2048-bit key, but the JJWT team recommends a 3072-bit key.
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm RS384 = Jwts.get(REGISTRY, "RS384");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm RS384 = Suppliers.get(REGISTRY, "RS384");
 
         /**
          * {@code RSASSA-PKCS1-v1_5 using SHA-512} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.3">RFC 7518, Section 3.3</a>.  This algorithm
          * requires a 2048-bit key, but the JJWT team recommends a 4096-bit key.
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm RS512 = Jwts.get(REGISTRY, "RS512");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm RS512 = Suppliers.get(REGISTRY, "RS512");
 
         /**
          * {@code RSASSA-PSS using SHA-256 and MGF1 with SHA-256} signature algorithm as defined by
@@ -168,7 +168,7 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
          * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
          * classpath.</p>
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm PS256 = Jwts.get(REGISTRY, "PS256");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm PS256 = Suppliers.get(REGISTRY, "PS256");
 
         /**
          * {@code RSASSA-PSS using SHA-384 and MGF1 with SHA-384} signature algorithm as defined by
@@ -179,7 +179,7 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
          * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
          * classpath.</p>
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm PS384 = Jwts.get(REGISTRY, "PS384");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm PS384 = Suppliers.get(REGISTRY, "PS384");
 
         /**
          * {@code RSASSA-PSS using SHA-512 and MGF1 with SHA-512} signature algorithm as defined by
@@ -190,28 +190,28 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
          * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
          * classpath.</p>
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm PS512 = Jwts.get(REGISTRY, "PS512");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm PS512 = Suppliers.get(REGISTRY, "PS512");
 
         /**
          * {@code ECDSA using P-256 and SHA-256} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 256-bit key.
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm ES256 = Jwts.get(REGISTRY, "ES256");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm ES256 = Suppliers.get(REGISTRY, "ES256");
 
         /**
          * {@code ECDSA using P-384 and SHA-384} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 384-bit key.
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm ES384 = Jwts.get(REGISTRY, "ES384");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm ES384 = Suppliers.get(REGISTRY, "ES384");
 
         /**
          * {@code ECDSA using P-521 and SHA-512} signature algorithm as defined by
          * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-3.4">RFC 7518, Section 3.4</a>.  This algorithm
          * requires a 521-bit key.
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm ES512 = Jwts.get(REGISTRY, "ES512");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm ES512 = Suppliers.get(REGISTRY, "ES512");
 
         /**
          * {@code EdDSA} signature algorithm defined by
@@ -232,6 +232,6 @@ public interface Jws<P> extends ProtectedJwt<JwsHeader, P> {
          * <p><b><sup>1</sup>This algorithm requires at least JDK 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
          * classpath.</b></p>
          */
-        public static final io.jsonwebtoken.security.SignatureAlgorithm EdDSA = Jwts.get(REGISTRY, "EdDSA");
+        public static final io.jsonwebtoken.security.SignatureAlgorithm EdDSA = Suppliers.get(REGISTRY, "EdDSA");
     }
 }

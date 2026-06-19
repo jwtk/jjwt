@@ -176,7 +176,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
 
         /**
          * Returns all standard JWA standard <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4">Cryptographic
-         * Algorithms for Key Management</a>..
+         * Algorithms for Key Management</a>.
          *
          * @return all standard JWA Key Management algorithms.
          */
@@ -189,7 +189,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          * by <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-4.5">RFC 7518 (JWA), Section 4.5</a>.  This
          * algorithm does not produce encrypted key ciphertext.
          */
-        public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Jwts.get(REGISTRY, "dir");
+        public static final KeyAlgorithm<SecretKey, SecretKey> DIRECT = Suppliers.get(REGISTRY, "dir");
 
         /**
          * AES Key Wrap algorithm with default initial value using a 128-bit key, as defined by
@@ -213,7 +213,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final SecretKeyAlgorithm A128KW = Jwts.get(REGISTRY, "A128KW");
+        public static final SecretKeyAlgorithm A128KW = Suppliers.get(REGISTRY, "A128KW");
 
         /**
          * AES Key Wrap algorithm with default initial value using a 192-bit key, as defined by
@@ -237,7 +237,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final SecretKeyAlgorithm A192KW = Jwts.get(REGISTRY, "A192KW");
+        public static final SecretKeyAlgorithm A192KW = Suppliers.get(REGISTRY, "A192KW");
 
         /**
          * AES Key Wrap algorithm with default initial value using a 256-bit key, as defined by
@@ -261,7 +261,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final SecretKeyAlgorithm A256KW = Jwts.get(REGISTRY, "A256KW");
+        public static final SecretKeyAlgorithm A256KW = Suppliers.get(REGISTRY, "A256KW");
 
         /**
          * Key wrap algorithm with AES GCM using a 128-bit key, as defined by
@@ -300,7 +300,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final SecretKeyAlgorithm A128GCMKW = Jwts.get(REGISTRY, "A128GCMKW");
+        public static final SecretKeyAlgorithm A128GCMKW = Suppliers.get(REGISTRY, "A128GCMKW");
 
         /**
          * Key wrap algorithm with AES GCM using a 192-bit key, as defined by
@@ -339,7 +339,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final SecretKeyAlgorithm A192GCMKW = Jwts.get(REGISTRY, "A192GCMKW");
+        public static final SecretKeyAlgorithm A192GCMKW = Suppliers.get(REGISTRY, "A192GCMKW");
 
         /**
          * Key wrap algorithm with AES GCM using a 256-bit key, as defined by
@@ -378,7 +378,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final SecretKeyAlgorithm A256GCMKW = Jwts.get(REGISTRY, "A256GCMKW");
+        public static final SecretKeyAlgorithm A256GCMKW = Suppliers.get(REGISTRY, "A256GCMKW");
 
         /**
          * Key encryption algorithm using <code>PBES2 with HMAC SHA-256 and &quot;A128KW&quot; wrapping</code>
@@ -423,7 +423,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = Jwts.get(REGISTRY, "PBES2-HS256+A128KW");
+        public static final KeyAlgorithm<Password, Password> PBES2_HS256_A128KW = Suppliers.get(REGISTRY, "PBES2-HS256+A128KW");
 
         /**
          * Key encryption algorithm using <code>PBES2 with HMAC SHA-384 and &quot;A192KW&quot; wrapping</code>
@@ -468,7 +468,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = Jwts.get(REGISTRY, "PBES2-HS384+A192KW");
+        public static final KeyAlgorithm<Password, Password> PBES2_HS384_A192KW = Suppliers.get(REGISTRY, "PBES2-HS384+A192KW");
 
         /**
          * Key encryption algorithm using <code>PBES2 with HMAC SHA-512 and &quot;A256KW&quot; wrapping</code>
@@ -513,7 +513,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = Jwts.get(REGISTRY, "PBES2-HS512+A256KW");
+        public static final KeyAlgorithm<Password, Password> PBES2_HS512_A256KW = Suppliers.get(REGISTRY, "PBES2-HS512+A256KW");
 
         /**
          * Key Encryption with {@code RSAES-PKCS1-v1_5}, as defined by
@@ -538,7 +538,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = Jwts.get(REGISTRY, "RSA1_5");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA1_5 = Suppliers.get(REGISTRY, "RSA1_5");
 
         /**
          * Key Encryption with {@code RSAES OAEP using default parameters}, as defined by
@@ -563,7 +563,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = Jwts.get(REGISTRY, "RSA-OAEP");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP = Suppliers.get(REGISTRY, "RSA-OAEP");
 
         /**
          * Key Encryption with {@code RSAES OAEP using SHA-256 and MGF1 with SHA-256}, as defined by
@@ -588,7 +588,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *     JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}. </li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = Jwts.get(REGISTRY, "RSA-OAEP-256");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> RSA_OAEP_256 = Suppliers.get(REGISTRY, "RSA-OAEP-256");
 
         /**
          * Key Agreement with {@code ECDH-ES using Concat KDF} as defined by
@@ -629,7 +629,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = Jwts.get(REGISTRY, "ECDH-ES");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES = Suppliers.get(REGISTRY, "ECDH-ES");
 
         /**
          * Key Agreement with Key Wrapping via
@@ -677,7 +677,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = Jwts.get(REGISTRY, "ECDH-ES+A128KW");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A128KW = Suppliers.get(REGISTRY, "ECDH-ES+A128KW");
 
         /**
          * Key Agreement with Key Wrapping via
@@ -726,7 +726,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = Jwts.get(REGISTRY, "ECDH-ES+A192KW");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A192KW = Suppliers.get(REGISTRY, "ECDH-ES+A192KW");
 
         /**
          * Key Agreement with Key Wrapping via
@@ -775,7 +775,7 @@ public interface Jwe<B> extends ProtectedJwt<JweHeader, B> {
          *      JWE using the JWE's identified &quot;enc&quot; {@link AeadAlgorithm}.</li>
          * </ol>
          */
-        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Jwts.get(REGISTRY, "ECDH-ES+A256KW");
+        public static final KeyAlgorithm<PublicKey, PrivateKey> ECDH_ES_A256KW = Suppliers.get(REGISTRY, "ECDH-ES+A256KW");
 
         //prevent instantiation
         private alg() {

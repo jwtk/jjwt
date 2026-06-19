@@ -51,12 +51,6 @@ import java.util.Map;
  */
 public final class Jwts {
 
-    // do not change this visibility.  Raw type method signature must not be publicly exposed:
-    @SuppressWarnings("unchecked")
-    static <T> T get(Registry<String, ?> registry, String id) {
-        return (T) registry.forKey(id);
-    }
-
     /**
      * Constants for all standard JWA
      * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-5">Cryptographic Algorithms for Content

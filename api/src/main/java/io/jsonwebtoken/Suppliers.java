@@ -16,6 +16,7 @@
 package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.Classes;
+import io.jsonwebtoken.lang.Registry;
 
 import java.util.function.Supplier;
 
@@ -42,5 +43,11 @@ final class Suppliers {
             Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier");
 
     private Suppliers() { // for coverage
+    }
+
+    // do not change this visibility.  Raw type method signature must not be publicly exposed:
+    @SuppressWarnings("unchecked")
+    static <T> T get(Registry<String, ?> registry, String id) {
+        return (T) registry.forKey(id);
     }
 }
