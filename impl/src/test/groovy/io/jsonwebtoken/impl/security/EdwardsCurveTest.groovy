@@ -103,9 +103,8 @@ class EdwardsCurveTest {
     void testFindByKeyUsingEncoding() {
         curves.each {
             def pair = TestKeys.forAlgorithm(it).pair
-            def found = EdwardsCurve.findByKey(pair.public)
-            assertEquals(it, found)
-            found = EdwardsCurve.findByKey(pair.private)
+            def key = new TestKey(algorithm: 'foo', encoded: pair.public.getEncoded())
+            def found = EdwardsCurve.findByKey(key)
             assertEquals(it, found)
         }
     }
@@ -123,7 +122,7 @@ class EdwardsCurveTest {
     void testFindByKeyUsingMalformedEncoding() {
         curves.each {
             byte[] encoded = EdwardsCurve.ASN1_OID_PREFIX // just the prefix isn't enough
-            def key = new TestKey(algorithm: 'foo', encoded: encoded)
+            def key = new TestKey(algorithm: 'foo', encoded: encoded.clone()) // MUST clone, don't overwrite the src!
             assertNull EdwardsCurve.findByKey(key)
         }
     }
@@ -199,7 +198,7 @@ class EdwardsCurveTest {
             def keySpec = it.privateKeySpec(d, false) // standard = false for JDK 11 bug
             assertTrue keySpec instanceof PKCS8EncodedKeySpec
             def expectedEncoded = Bytes.concat(it.PRIVATE_KEY_JDK11_PREFIX, d)
-            assertArrayEquals expectedEncoded, ((PKCS8EncodedKeySpec)keySpec).getEncoded()
+            assertArrayEquals expectedEncoded, ((PKCS8EncodedKeySpec) keySpec).getEncoded()
         }
     }
 
