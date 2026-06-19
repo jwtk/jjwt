@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.*
 import io.jsonwebtoken.impl.compression.GzipCompressionAlgorithm
 import io.jsonwebtoken.impl.io.Streams
