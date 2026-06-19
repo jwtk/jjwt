@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Identifiable
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.lang.IdRegistry
@@ -46,13 +46,13 @@ class IdLocatorTest {
     @Test
     void unrequiredHeaderValueTest() {
         locator = new IdLocator(TEST_PARAM, registry, 'foo', 'bar', null)
-        def header = Jwts.header().add('a', 'b').build()
+        def header = Jwt.header().add('a', 'b').build()
         assertNull locator.apply(header)
     }
 
     @Test
     void missingRequiredHeaderValueTest() {
-        def header = Jwts.header().build()
+        def header = Jwt.header().build()
         try {
             locator.apply(header)
             fail()
@@ -63,7 +63,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJwtHeaderInstanceTest() {
-        def header = Jwts.header().add('foo', 'foo').build()
+        def header = Jwt.header().add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
@@ -74,7 +74,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJwsHeaderInstanceTest() {
-        def header = Jwts.header().add('alg', 'HS256').add('foo', 'foo').build()
+        def header = Jwt.header().add('alg', 'HS256').add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {
@@ -85,7 +85,7 @@ class IdLocatorTest {
 
     @Test
     void unlocatableJweHeaderInstanceTest() {
-        def header = Jwts.header().add('alg', 'foo').add('enc', 'A256GCM').add('foo', 'foo').build()
+        def header = Jwt.header().add('alg', 'foo').add('enc', 'A256GCM').add('foo', 'foo').build()
         try {
             locator.apply(header)
         } catch (UnsupportedJwtException expected) {

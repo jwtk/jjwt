@@ -146,14 +146,14 @@ class DefaultJwtBuilderTest {
 
     @Test
     void testSetHeader() {
-        def h = Jwts.header().add('foo', 'bar').build()
+        def h = Jwt.header().add('foo', 'bar').build()
         builder.setHeader(h)
         assertEquals h, builder.headerBuilder.build()
     }
 
     @Test
     void testHeaderConsumer() {
-        def h = Jwts.header().add('foo', 'bar').build()
+        def h = Jwt.header().add('foo', 'bar').build()
         builder.header(header -> header.add('foo', 'bar'))
         assertEquals h, builder.headerBuilder.build()
     }

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.security.Randoms
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
@@ -57,7 +57,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testJku() {
         URI uri = URI.create('https://github.com')
-        def header = Jwts.header().add('alg', 'foo').jwkSetUrl(uri).build() as DefaultProtectedHeader
+        def header = Jwt.header().add('alg', 'foo').jwkSetUrl(uri).build() as DefaultProtectedHeader
         assertEquals uri.toString(), header.get('jku')
         assertEquals uri, header.getJwkSetUrl()
     }
@@ -213,7 +213,7 @@ class AbstractProtectedHeaderTest {
     @Test
     void testCritical() {
         Set<String> crits = Collections.setOf('foo', 'bar')
-        def header = Jwts.header().add('alg', 'HS256').add('foo', 'value1').add('bar', 'value2')
+        def header = Jwt.header().add('alg', 'HS256').add('foo', 'value1').add('bar', 'value2')
                 .critical().add(crits).and().build() as DefaultProtectedHeader
         assertEquals crits, header.getCritical()
     }

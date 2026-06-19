@@ -1103,10 +1103,13 @@ public final class Jwts {
     }
 
     /**
-     * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
+     * A builder that dynamically determines the type of {@link Header} to create based on builder state.
      *
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt.HeaderBuilder}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public interface HeaderBuilder extends JweHeader.BuilderParams<HeaderBuilder>, Builder<Header> {
     }
 
@@ -1117,9 +1120,11 @@ public final class Jwts {
      * @return a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
      * which builder properties are set.
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt#header()}.
      */
+    @Deprecated
     public static HeaderBuilder header() {
-        return Suppliers.HEADER_BUILDER_SUPPLIER.get();
+        return Suppliers.JWTS_HEADER_BUILDER_SUPPLIER.get();
     }
 
     /**

@@ -74,7 +74,7 @@ class DefaultJwtHeaderBuilderTest {
 
     @Test
     void testStaticFactoryMethod() {
-        assertTrue Jwts.header() instanceof DefaultJwtHeaderBuilder
+        assertTrue Jwt.header() instanceof DefaultJwtHeaderBuilder
     }
 
     @Test

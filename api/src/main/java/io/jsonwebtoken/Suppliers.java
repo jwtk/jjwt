@@ -36,8 +36,12 @@ final class Suppliers {
     static final Supplier<JwtParserBuilder> JWT_PARSER_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier");
 
-    static final Supplier<Jwts.HeaderBuilder> HEADER_BUILDER_SUPPLIER =
+    static final Supplier<Jwt.HeaderBuilder> HEADER_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier");
+
+    @SuppressWarnings("deprecation")
+    static final Supplier<Jwts.HeaderBuilder> JWTS_HEADER_BUILDER_SUPPLIER =
+            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtsHeaderBuilder$Supplier");
 
     static final Supplier<ClaimsBuilder> CLAIMS_BUILDER_SUPPLIER =
             Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier");

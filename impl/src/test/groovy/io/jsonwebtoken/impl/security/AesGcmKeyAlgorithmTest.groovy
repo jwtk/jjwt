@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
 import io.jsonwebtoken.impl.io.Streams
@@ -89,7 +89,7 @@ class AesGcmKeyAlgorithmTest {
 
         def template = new JcaTemplate('AES')
 
-        def header = Jwts.header().add('alg', alg.id).add('enc', 'foo')
+        def header = Jwt.header().add('alg', alg.id).add('enc', 'foo')
         SecretKey kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {
@@ -126,7 +126,7 @@ class AesGcmKeyAlgorithmTest {
         int keyLength = 128
         def alg = new AesGcmKeyAlgorithm(keyLength)
         def template = new JcaTemplate('AES')
-        def headerBuilder = Jwts.header().add('alg', alg.id).add('enc', 'foo')
+        def headerBuilder = Jwt.header().add('alg', alg.id).add('enc', 'foo')
         def kek = template.generateSecretKey(keyLength)
         def cek = template.generateSecretKey(keyLength)
         def enc = new GcmAesAeadAlgorithm(keyLength) {

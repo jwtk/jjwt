@@ -27,7 +27,7 @@ class LocatorAdapterTest {
 
     @Test
     void testJwtHeader() {
-        Header input = Jwts.header().build()
+        Header input = Jwt.header().build()
         def locator = new LocatorAdapter() {
             @Override
             protected Object doLocate(Header header) {
@@ -39,7 +39,7 @@ class LocatorAdapterTest {
 
     @Test
     void testJwtHeaderWithoutOverride() {
-        Header input = Jwts.header().build()
+        Header input = Jwt.header().build()
         Locator locator = new LocatorAdapter() {}
         assertNull locator.locate(input as Header /* force Groovy to avoid signature erasure */)
     }

@@ -84,14 +84,20 @@ class JwtsTest {
     }
 
     @Test
+    void testHeader() {
+        assertTrue Jwt.header() instanceof DefaultJwtHeaderBuilder
+        assertTrue Jwts.header() instanceof DefaultJwtsHeaderBuilder
+    }
+
+    @Test
     void testHeaderWithNoArgs() {
-        def header = Jwts.header().build()
+        def header = Jwt.header().build()
         assertTrue header instanceof DefaultHeader
     }
 
     @Test
     void testHeaderWithMapArg() {
-        def header = Jwts.header().add([alg: "HS256"]).build()
+        def header = Jwt.header().add([alg: "HS256"]).build()
         assertTrue header instanceof DefaultJwsHeader
         assertEquals 'HS256', header.getAlgorithm()
         assertEquals 'HS256', header.alg
