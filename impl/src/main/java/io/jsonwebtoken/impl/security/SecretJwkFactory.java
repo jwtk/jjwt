@@ -24,7 +24,14 @@ import io.jsonwebtoken.impl.lang.RequiredParameterReader;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.MacAlgorithm;
+import io.jsonwebtoken.security.MalformedKeyException;
+import io.jsonwebtoken.security.SecretJwk;
+import io.jsonwebtoken.security.SecretKeyAlgorithm;
+import io.jsonwebtoken.security.WeakKeyException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;

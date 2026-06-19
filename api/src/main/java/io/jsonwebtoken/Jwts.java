@@ -19,8 +19,15 @@ import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
 import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.KeyPairBuilderSupplier;
+import io.jsonwebtoken.security.MacAlgorithm;
+import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.SecretKeyAlgorithm;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;

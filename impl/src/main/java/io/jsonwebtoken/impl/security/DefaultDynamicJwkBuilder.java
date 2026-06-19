@@ -17,7 +17,18 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.DynamicJwkBuilder;
+import io.jsonwebtoken.security.EcPrivateJwkBuilder;
+import io.jsonwebtoken.security.EcPublicJwkBuilder;
+import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.OctetPrivateJwkBuilder;
+import io.jsonwebtoken.security.OctetPublicJwkBuilder;
+import io.jsonwebtoken.security.PrivateJwkBuilder;
+import io.jsonwebtoken.security.PublicJwkBuilder;
+import io.jsonwebtoken.security.RsaPrivateJwkBuilder;
+import io.jsonwebtoken.security.RsaPublicJwkBuilder;
+import io.jsonwebtoken.security.SecretJwkBuilder;
+import io.jsonwebtoken.security.UnsupportedKeyException;
 
 import javax.crypto.SecretKey;
 import java.security.Key;

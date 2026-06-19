@@ -15,10 +15,21 @@
  */
 package io.jsonwebtoken;
 
-import io.jsonwebtoken.io.*;
+import io.jsonwebtoken.io.CompressionAlgorithm;
+import io.jsonwebtoken.io.Decoder;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoder;
+import io.jsonwebtoken.io.Serializer;
 import io.jsonwebtoken.lang.Conjunctor;
 import io.jsonwebtoken.lang.MapMutator;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.AeadAlgorithm;
+import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.KeyAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.Password;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import io.jsonwebtoken.security.WeakKeyException;
+import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;

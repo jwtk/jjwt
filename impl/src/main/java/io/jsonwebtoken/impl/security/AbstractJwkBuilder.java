@@ -15,11 +15,23 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.*;
+import io.jsonwebtoken.impl.lang.DefaultNestedCollection;
+import io.jsonwebtoken.impl.lang.DelegatingMapMutator;
+import io.jsonwebtoken.impl.lang.IdRegistry;
+import io.jsonwebtoken.impl.lang.Parameter;
+import io.jsonwebtoken.impl.lang.Parameters;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.NestedCollection;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.HashAlgorithm;
+import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.JwkBuilder;
+import io.jsonwebtoken.security.JwkThumbprint;
+import io.jsonwebtoken.security.KeyOperation;
+import io.jsonwebtoken.security.KeyOperationPolicy;
+import io.jsonwebtoken.security.MalformedKeyException;
+import io.jsonwebtoken.security.SecretJwk;
+import io.jsonwebtoken.security.SecretJwkBuilder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
