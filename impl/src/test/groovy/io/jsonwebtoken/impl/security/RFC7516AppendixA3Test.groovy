@@ -122,7 +122,7 @@ class RFC7516AppendixA3Test {
 
             @Override
             SecretKeyBuilder key() {
-                return Keys.builder(CEK)
+                return SecretKeyBuilder.with(CEK)
             }
         }
 

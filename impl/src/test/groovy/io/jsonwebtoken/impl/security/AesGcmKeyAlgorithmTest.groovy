@@ -95,7 +95,7 @@ class AesGcmKeyAlgorithmTest {
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
             SecretKeyBuilder key() {
-                return Keys.builder(cek)
+                return SecretKeyBuilder.with(cek)
             }
         }
 
@@ -132,7 +132,7 @@ class AesGcmKeyAlgorithmTest {
         def enc = new GcmAesAeadAlgorithm(keyLength) {
             @Override
             SecretKeyBuilder key() {
-                return Keys.builder(cek)
+                return SecretKeyBuilder.with(cek)
             }
         }
         def delegate = new DefaultMutableJweHeader(headerBuilder)

@@ -17,21 +17,31 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.Password
+import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import static org.junit.Assert.assertSame
 
 class ProvidedSecretKeyBuilderTest {
 
+    @SuppressWarnings('GrDeprecatedAPIUsage')
+    @Test
+    void testBuildSecretKeyWithoutProvider() {
+        // does not wrap in ProviderKey:
+        assertSame TestKeys.HS256, SecretKeyBuilder.with(TestKeys.HS256).build()
+        assertSame TestKeys.HS256, Keys.builder(TestKeys.HS256).build() // for coverage, will be removed before 1.0
+    }
+
     @Test
     void testBuildPasswordWithoutProvider() {
         def password = Password.of('foo'.toCharArray())
-        assertSame password, Keys.builder(password).build() // does not wrap in ProviderKey
+        assertSame password, SecretKeyBuilder.with(password).build() // does not wrap in ProviderKey
     }
 
     @Test
     void testBuildPasswordWithProvider() {
         def password = Password.of('foo'.toCharArray())
-        assertSame password, Keys.builder(password).provider(new TestProvider()).build() // does not wrap in ProviderKey
+        // does not wrap in ProviderKey:
+        assertSame password, SecretKeyBuilder.with(password).provider(new TestProvider()).build()
     }
 }

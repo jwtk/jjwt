@@ -15,7 +15,11 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.*
+
+import io.jsonwebtoken.Identifiable
+import io.jsonwebtoken.Jwe
+import io.jsonwebtoken.Jws
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.lang.Assert
 import io.jsonwebtoken.lang.Classes
@@ -243,7 +247,7 @@ class Pkcs11Test {
             if (verifyKey instanceof SecretKey) {
                 // We only need to specify a provider during parsing for MAC HSM keys: SignatureAlgorithm verification
                 // only needs the PublicKey, and a recipient doesn't need/won't have an HSM for public material anyway.
-                verifyKey = Keys.builder(verifyKey).provider(keyProvider).build()
+                verifyKey = SecretKeyBuilder.with(verifyKey).provider(keyProvider).build()
                 builder.verifyWith(verifyKey as SecretKey)
             } else {
                 builder.verifyWith(verifyKey as PublicKey)

@@ -20,7 +20,10 @@ import io.jsonwebtoken.JweHeader
 import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.KeyRequest
+import io.jsonwebtoken.security.Password
+import io.jsonwebtoken.security.Request
+import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -284,7 +287,7 @@ class RFC7517AppendixCTest {
         def enc = new HmacAesAeadAlgorithm(128) {
             @Override
             SecretKeyBuilder key() {
-                return Keys.builder(RFC_CEK)
+                return SecretKeyBuilder.with(RFC_CEK)
             }
 
             @Override

@@ -286,7 +286,7 @@ class KeysTest {
     void testAssociateWithECKey() {
         def priv = new TestPrivateKey(algorithm: 'EC')
         def pub = TestKeys.ES256.pair.public as ECPublicKey
-        def result = Keys.builder(priv).publicKey(pub).build()
+        def result = PrivateKeyBuilder.with(priv).publicKey(pub).build()
         assertTrue result instanceof PrivateECKey
         def key = result as PrivateECKey
         assertSame priv, key.getKey()
@@ -304,6 +304,7 @@ class KeysTest {
     @Test
     void testAssociateWithKeyThatDoesntNeedToBeWrapped() {
         def pair = TestKeys.RS256.pair
+        assertSame pair.private, PrivateKeyBuilder.with(pair.private).publicKey(pair.public).build()
         assertSame pair.private, Keys.builder(pair.private).publicKey(pair.public).build()
     }
 }
