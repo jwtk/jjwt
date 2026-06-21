@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.lang
 
 import io.jsonwebtoken.Header
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Locator
 import org.junit.Test
 
@@ -29,7 +29,7 @@ class LocatorFunctionTest {
         final int value = 42
         def locator = new StaticLocator(value)
         def fn = new LocatorFunction(locator)
-        assertEquals value, fn.apply(Jwts.header().build())
+        assertEquals value, fn.apply(Jwt.header().build())
     }
 
     static class StaticLocator<T> implements Locator<T> {

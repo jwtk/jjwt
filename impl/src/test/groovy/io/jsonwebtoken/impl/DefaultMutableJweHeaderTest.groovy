@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.impl.security.DefaultHashAlgorithm
@@ -38,7 +38,7 @@ class DefaultMutableJweHeaderTest {
 
     @Before
     void setUp() {
-        header = new DefaultMutableJweHeader(Jwts.header() as DefaultJweHeaderMutator)
+        header = new DefaultMutableJweHeader(Jwt.header() as DefaultJweHeaderMutator)
     }
 
     @SuppressWarnings('GroovyAssignabilityCheck')

@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
@@ -41,15 +41,15 @@ import static org.junit.Assert.*
  */
 class EcdhKeyAlgorithmTest {
 
-    private static Jwts.HeaderBuilder jwe() {
-        return Jwts.header().add('alg', 'foo').add('enc', 'bar')
+    private static Jwt.HeaderBuilder jwe() {
+        return Jwt.header().add('alg', 'foo').add('enc', 'bar')
     }
 
     @Test
     void testEdwardsEncryptionWithRequestProvider() {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.X25519.pair.public as PublicKey
-        def header = new DefaultMutableJweHeader(Jwts.header())
+        def header = new DefaultMutableJweHeader(Jwt.header())
         def provider = TestKeys.BC
         def req = KeyRequest.builder().payload(encKey).provider(provider).header(header)
                 .encryptionAlgorithm(Jwe.enc.A128GCM).build()
@@ -126,7 +126,7 @@ class EcdhKeyAlgorithmTest {
     void testEncryptionWithInvalidPublicKey() {
         def alg = new EcdhKeyAlgorithm()
         PublicKey encKey = TestKeys.RS256.pair.public as PublicKey // not an elliptic curve key, must fail
-        def header = new DefaultMutableJweHeader(Jwts.header())
+        def header = new DefaultMutableJweHeader(Jwt.header())
         try {
             alg.getEncryptionKey(encKey, header, Jwe.enc.A128GCM)
             fail()

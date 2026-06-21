@@ -27,7 +27,7 @@ import java.security.Key;
  * example:</p>
  *
  * <pre>
- * Jws&lt;Claims&gt; jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
+ * Jws&lt;Claims&gt; jws = Jwt.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
  *         &#64;Override
  *         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
  *             //inspect the header or claims, lookup and return the signing key

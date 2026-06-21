@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.*
@@ -106,7 +106,7 @@ class RFC7516AppendixA3Test {
         SecretKey kek = jwk.toKey()
 
         // test decryption per the RFC
-        Jwe<byte[]> jwe = Jwts.parser().decryptWith(kek).build().parseEncryptedContent(COMPLETE_JWE)
+        Jwe<byte[]> jwe = Jwt.parser().decryptWith(kek).build().parseEncryptedContent(COMPLETE_JWE)
         assertEquals PLAINTEXT, new String(jwe.getPayload(), StandardCharsets.UTF_8)
 
         // now ensure that when JJWT does the encryption (i.e. a compact value is produced from JJWT, not from the RFC text),
@@ -122,11 +122,11 @@ class RFC7516AppendixA3Test {
 
             @Override
             SecretKeyBuilder key() {
-                return Keys.builder(CEK)
+                return SecretKeyBuilder.with(CEK)
             }
         }
 
-        String compact = Jwts.builder()
+        String compact = Jwt.builder()
                 .setPayload(PLAINTEXT)
                 .encryptWith(kek, Jwe.alg.A128KW, enc)
                 .compact()

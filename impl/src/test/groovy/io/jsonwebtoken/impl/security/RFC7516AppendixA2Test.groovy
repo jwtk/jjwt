@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Jwk
@@ -168,7 +168,7 @@ class RFC7516AppendixA2Test {
         RsaPrivateJwk jwk = Jwk.builder().add(KEK_VALUES).build() as RsaPrivateJwk
         RSAPrivateKey privKey = jwk.toKey()
 
-        Jwe<byte[]> jwe = Jwts.parser().decryptWith(privKey).build().parseEncryptedContent(COMPLETE_JWE)
+        Jwe<byte[]> jwe = Jwt.parser().decryptWith(privKey).build().parseEncryptedContent(COMPLETE_JWE)
         assertEquals PLAINTEXT, new String(jwe.getPayload(), StandardCharsets.UTF_8)
     }
 }

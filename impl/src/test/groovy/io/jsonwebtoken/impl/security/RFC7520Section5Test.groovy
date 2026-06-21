@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.impl.lang.CheckedFunction
 import io.jsonwebtoken.io.Decoders
@@ -469,7 +469,7 @@ class RFC7520Section5Test {
                 return FIGURE_77
             }
         }
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
@@ -479,7 +479,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_81, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().decryptWith(jwk.toKey()).build().parseEncryptedContent(result)
+        def parsed = Jwt.parser().decryptWith(jwk.toKey()).build().parseEncryptedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
@@ -532,7 +532,7 @@ class RFC7520Section5Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
@@ -542,7 +542,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_92, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().decryptWith(jwk.toKey()).build().parseEncryptedContent(result)
+        def parsed = Jwt.parser().decryptWith(jwk.toKey()).build().parseEncryptedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
@@ -592,7 +592,7 @@ class RFC7520Section5Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().contentType(cty).pbes2Count(p2c).and()
                 .setPayload(FIGURE_95)
@@ -602,7 +602,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_105, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().decryptWith(key).build().parseEncryptedContent(result)
+        def parsed = Jwt.parser().decryptWith(key).build().parseEncryptedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals FIGURE_99, b64Url(parsed.header.getPbes2Salt())
         assertEquals p2c, parsed.header.getPbes2Count()
@@ -656,7 +656,7 @@ class RFC7520Section5Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_72)
@@ -666,7 +666,7 @@ class RFC7520Section5Test {
         assertEquals FIGURE_117, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().decryptWith(jwk.toKey()).build().parseEncryptedContent(result)
+        def parsed = Jwt.parser().decryptWith(jwk.toKey()).build().parseEncryptedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals enc.getId(), parsed.header.getEncryptionAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()

@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * A builder to construct a {@link JwtParser}. Example usage:
  * <pre>{@code
- *     Jwts.parser()
+ *     Jwt.parser()
  *         .requireIssuer("https://issuer.example.com")
  *         .verifyWith(...)
  *         .build()
@@ -117,7 +117,7 @@ public interface JwtParserBuilder extends Providable<JwtParserBuilder>, Builder<
      * <p>When finished, use the collection's
      * {@link Conjunctor#and() and()} method to continue parser configuration, for example:
      * <blockquote><pre>
-     * Jwts.parser()
+     * Jwt.parser()
      *     .critical().add("headerName").<b>{@link Conjunctor#and() and()} // return parent</b>
      * // resume parser configuration...</pre></blockquote>
      *
@@ -460,7 +460,7 @@ public interface JwtParserBuilder extends Providable<JwtParserBuilder>, Builder<
      * verify the JWS signature or decrypt the JWE payload with the returned key.  For example:</p>
      *
      * <pre>
-     * Jws&lt;Claims&gt; jws = Jwts.parser().keyLocator(new Locator&lt;Key&gt;() {
+     * Jws&lt;Claims&gt; jws = Jwt.parser().keyLocator(new Locator&lt;Key&gt;() {
      *         &#64;Override
      *         public Key locate(Header&lt;?&gt; header) {
      *             if (header instanceof JwsHeader) {
@@ -532,7 +532,7 @@ public interface JwtParserBuilder extends Providable<JwtParserBuilder>, Builder<
      * returned key.  For example:</p>
      *
      * <pre>
-     * Jws&lt;Claims&gt; jws = Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
+     * Jws&lt;Claims&gt; jws = Jwt.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
      *         &#64;Override
      *         public byte[] resolveSigningKeyBytes(JwsHeader header, Claims claims) {
      *             //inspect the header or claims, lookup and return the signing key

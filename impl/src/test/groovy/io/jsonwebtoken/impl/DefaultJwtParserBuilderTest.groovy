@@ -111,7 +111,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testBase64UrlEncodeWithCustomDecoder() {
 
-        String jwt = Jwts.builder().claim('foo', 'bar').compact()
+        String jwt = Jwt.builder().claim('foo', 'bar').compact()
 
         boolean invoked = false
         Decoder<String, byte[]> decoder = new Decoder<String, byte[]>() {
@@ -147,7 +147,7 @@ class DefaultJwtParserBuilderTest {
         def alg = Jws.alg.HS256
         def key = alg.key().build()
 
-        String jws = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
+        String jws = Jwt.builder().claim('foo', 'bar').signWith(key, alg).compact()
 
         assertEquals 'bar', p.verifyWith(key).build().parseSignedClaims(jws).getPayload().get('foo')
     }
@@ -185,7 +185,7 @@ class DefaultJwtParserBuilderTest {
     void testAddCompressionAlgorithms() {
         def codec = new TestCompressionCodec(id: 'test')
         def parser = builder.zip().add(codec).and().build()
-        def header = Jwts.header().add('zip', codec.getId()).build()
+        def header = Jwt.header().add('zip', codec.getId()).build()
         assertSame codec, parser.zipAlgs.locate(header)
     }
 
@@ -200,13 +200,13 @@ class DefaultJwtParserBuilderTest {
         def codec = new TestCompressionCodec(id: 'test')
         builder.zip().add(codec) // no .and() call
         def parser = builder.build()
-        def header = Jwts.header().add('zip', codec.getId()).build()
+        def header = Jwt.header().add('zip', codec.getId()).build()
         assertSame codec, parser.zipAlgs.locate(header)
     }
 
     @Test
     void testAddCompressionAlgorithmsOverrideDefaults() {
-        def header = Jwts.header().add('zip', 'DEF').build()
+        def header = Jwt.header().add('zip', 'DEF').build()
         def parser = builder.build()
         assertSame Jwe.zip.DEF, parser.zipAlgs.apply(header) // standard implementation default
 
@@ -217,8 +217,8 @@ class DefaultJwtParserBuilderTest {
 
     @Test
     void testCaseSensitiveCompressionAlgorithm() {
-        def standard = Jwts.header().add('zip', 'DEF').build()
-        def nonStandard = Jwts.header().add('zip', 'def').build()
+        def standard = Jwt.header().add('zip', 'DEF').build()
+        def nonStandard = Jwt.header().add('zip', 'def').build()
         def parser = builder.build()
         assertSame Jwe.zip.DEF, parser.zipAlgs.apply(standard) // standard implementation default
         try {
@@ -233,7 +233,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testAddEncryptionAlgorithmsOverrideDefaults() {
         final String standardId = Jwe.enc.A256GCM.getId()
-        def header = Jwts.header().add('enc', standardId).build()
+        def header = Jwt.header().add('enc', standardId).build()
         def parser = builder.build()
         assertSame Jwe.enc.A256GCM, parser.encAlgs.apply(header) // standard implementation default
 
@@ -253,15 +253,15 @@ class DefaultJwtParserBuilderTest {
         def alg = new TestAeadAlgorithm(id: 'test')
         builder.enc().add(alg) // no .and() call
         def parser = builder.build() as DefaultJwtParser
-        def header = Jwts.header().add('alg', 'foo').add('enc', alg.getId()).build() as JweHeader
+        def header = Jwt.header().add('alg', 'foo').add('enc', alg.getId()).build() as JweHeader
         assertSame alg, parser.encAlgs.apply(header)
     }
 
     @Test
     void testCaseSensitiveEncryptionAlgorithm() {
         def alg = Jwe.enc.A256GCM
-        def standard = Jwts.header().add('alg', 'foo').add('enc', alg.id).build()
-        def nonStandard = Jwts.header().add('alg', 'foo').add('enc', alg.id.toLowerCase()).build()
+        def standard = Jwt.header().add('alg', 'foo').add('enc', alg.id).build()
+        def nonStandard = Jwt.header().add('alg', 'foo').add('enc', alg.id.toLowerCase()).build()
         def parser = builder.build()
         assertSame alg, parser.encAlgs.apply(standard) // standard id
         try {
@@ -276,7 +276,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testAddKeyAlgorithmsOverrideDefaults() {
         final String standardId = Jwe.alg.A256GCMKW.id
-        def header = Jwts.header().add('enc', Jwe.enc.A256GCM.id).add('alg', standardId).build()
+        def header = Jwt.header().add('enc', Jwe.enc.A256GCM.id).add('alg', standardId).build()
         def parser = builder.build()
         assertSame Jwe.alg.A256GCMKW, parser.keyAlgs.apply(header) // standard implementation default
 
@@ -296,7 +296,7 @@ class DefaultJwtParserBuilderTest {
         def alg = new TestKeyAlgorithm(id: 'test')
         builder.key().add(alg) // no .and() call
         def parser = builder.build() as DefaultJwtParser
-        def header = Jwts.header()
+        def header = Jwt.header()
                 .add('enc', 'foo')
                 .add('alg', alg.getId()).build() as JweHeader
         assertSame alg, parser.keyAlgs.apply(header)
@@ -305,7 +305,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testCaseSensitiveKeyAlgorithm() {
         def alg = Jwe.alg.A256GCMKW
-        def hb = Jwts.header().add('enc', Jwe.enc.A256GCM.id)
+        def hb = Jwt.header().add('enc', Jwe.enc.A256GCM.id)
         def standard = hb.add('alg', alg.id).build()
         def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()
         def parser = builder.build()
@@ -322,7 +322,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testAddSignatureAlgorithmsOverrideDefaults() {
         final String standardId = Jws.alg.HS256.id
-        def header = Jwts.header().add('alg', standardId).build()
+        def header = Jwt.header().add('alg', standardId).build()
         def parser = builder.build()
         assertSame Jws.alg.HS256, parser.sigAlgs.apply(header) // standard implementation default
 
@@ -342,14 +342,14 @@ class DefaultJwtParserBuilderTest {
         def alg = new TestMacAlgorithm(id: 'test')
         builder.sig().add(alg) // no .and() call
         def parser = builder.build() as DefaultJwtParser
-        def header = Jwts.header().add('alg', alg.getId()).build() as JwsHeader
+        def header = Jwt.header().add('alg', alg.getId()).build() as JwsHeader
         assertSame alg, parser.sigAlgs.apply(header)
     }
 
     @Test
     void testCaseSensitiveSignatureAlgorithm() {
         def alg = Jws.alg.HS256
-        def hb = Jwts.header().add('alg', alg.id)
+        def hb = Jwt.header().add('alg', alg.id)
         def standard = hb.build()
         def nonStandard = hb.add('alg', alg.id.toLowerCase()).build()
         def parser = builder.build()
@@ -395,7 +395,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testDecompressUnprotectedJwtDefault() {
         def codec = Jwe.zip.GZIP
-        String jwt = Jwts.builder().compressWith(codec).setSubject('joe').compact()
+        String jwt = Jwt.builder().compressWith(codec).setSubject('joe').compact()
         try {
             builder.unsecured().build().parse(jwt)
             fail()
@@ -408,7 +408,7 @@ class DefaultJwtParserBuilderTest {
     @Test
     void testDecompressUnprotectedJwtEnabled() {
         def codec = Jwe.zip.GZIP
-        String jws = Jwts.builder().compressWith(codec).setSubject('joe').compact()
+        String jws = Jwt.builder().compressWith(codec).setSubject('joe').compact()
         def jwt = builder.unsecured().unsecuredDecompression().build().parse(jws)
         assertEquals 'joe', ((Claims) jwt.getPayload()).getSubject()
     }

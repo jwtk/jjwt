@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -44,13 +45,13 @@ class ProvidedKeyBuilderTest {
     void testBuildWithSpecifiedProviderKey() {
         Provider provider = new TestProvider()
         SecretKey key = new SecretKeySpec(Bytes.random(256), 'AES')
-        def providerKey = Keys.builder(key).provider(provider).build() as ProviderSecretKey
+        def providerKey = SecretKeyBuilder.with(key).provider(provider).build() as ProviderSecretKey
 
         assertSame provider, providerKey.getProvider()
         assertSame key, providerKey.getKey()
 
         // now for the test: ensure that our provider key isn't wrapped again
-        SecretKey returned = Keys.builder(providerKey).provider(new TestProvider('different')).build()
+        SecretKey returned = SecretKeyBuilder.with(providerKey).provider(new TestProvider('different')).build()
 
         assertSame providerKey, returned // not wrapped again
     }

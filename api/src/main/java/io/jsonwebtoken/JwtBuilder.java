@@ -31,7 +31,6 @@ import io.jsonwebtoken.security.Providable;
 import io.jsonwebtoken.security.Randomizable;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.WeakKeyException;
-import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.io.InputStream;
@@ -57,7 +56,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *
      *     <b>.header()
      *         .keyId("keyId")
@@ -70,7 +69,11 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
+     * <p>If you wish to use Java8+ lambda-style inline configuration instead of using the
+     * {@link BuilderHeader#and() and()} method, consider using the {@link #header(Consumer)} method.</p>
+     *
      * @return the {@link BuilderHeader} to use for header construction.
+     * @see #header(Consumer)
      * @since 0.12.0
      */
     BuilderHeader header();
@@ -79,7 +82,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * Modifies the JWT's header name/value pairs as desired, allowing for in-line configuration. For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *     .header(<b>header -> header
      *         .keyId("keyId")
      *         .add("aName", aValue)
@@ -89,11 +92,16 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
-     * @param header the consumer used to configure the JWT header
+     * <p>Note that, although the consumer argument accepts a {@link JweHeader.BuilderParams} instance, a
+     * {@code JweHeader} will not necessarily be created; the params instance only reflects all possible header
+     * parameters that <em>may</em> be configured, but the builder will dynamically create a JWT, JWS, or JWE header
+     * based on which parameters have actually been set.</p>
+     *
+     * @param header the consumer used to configure the JWT header.
      * @return the {@code JwtBuilder} for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    default JwtBuilder header(Consumer<BuilderHeader> header) {
+    default JwtBuilder header(Consumer<JweHeader.BuilderParams<?>> header) {
         BuilderHeader h = header();
         header.accept(h);
         return h.and();
@@ -403,7 +411,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *
      *     <b>.claims()
      *         .issuer("me")
@@ -418,7 +426,11 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      *     // ... etc ...
      *     .compact();</pre></blockquote>
      *
+     * <p>If you wish to use Java8+ lambda-style inline configuration instead of using the
+     * {@link BuilderClaims#and() and()} method, consider using the {@link #claims(Consumer)} method.</p>
+     *
      * @return the {@link BuilderClaims} to use for Claims construction.
+     * @see #claims(Consumer)
      * @since 0.12.0
      */
     BuilderClaims claims();
@@ -427,7 +439,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * Modifies the JWT {@code Claims} payload, allowing for in-line configuration. For example:
      *
      * <blockquote><pre>
-     * String jwt = Jwts.builder()
+     * String jwt = Jwt.builder()
      *
      *     <b>.claims(claims -> claims
      *         .issuer("me")
@@ -444,7 +456,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      * @return the {@code JwtBuilder} for method chaining.
      * @since JJWT_RELEASE_VERSION
      */
-    default JwtBuilder claims(Consumer<BuilderClaims> claims) {
+    default JwtBuilder claims(Consumer<Claims.Params<?>> claims) {
         BuilderClaims c = claims();
         claims.accept(c);
         return c.and();
@@ -1069,8 +1081,7 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      *
      * @since 0.12.0
      */
-    interface BuilderClaims extends MapMutator<String, Object, BuilderClaims>, ClaimsMutator<BuilderClaims>,
-            Conjunctor<JwtBuilder> {
+    interface BuilderClaims extends Claims.Params<BuilderClaims>, Conjunctor<JwtBuilder> {
     }
 
     /**
@@ -1080,7 +1091,6 @@ public interface JwtBuilder extends Providable<JwtBuilder>, Randomizable<JwtBuil
      *
      * @since 0.12.0
      */
-    interface BuilderHeader extends JweHeaderMutator<BuilderHeader>, X509Builder<BuilderHeader>,
-            Conjunctor<JwtBuilder> {
+    interface BuilderHeader extends JweHeader.BuilderParams<BuilderHeader>, Conjunctor<JwtBuilder> {
     }
 }

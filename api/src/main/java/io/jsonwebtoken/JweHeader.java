@@ -18,6 +18,7 @@ package io.jsonwebtoken;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
 import io.jsonwebtoken.security.PublicJwk;
+import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -167,4 +168,13 @@ public interface JweHeader extends ProtectedHeader {
      * @see Jwe.alg#PBES2_HS512_A256KW
      */
     byte[] getPbes2Salt();
+
+    /**
+     * Parameters that may be used to build a JWE Header.
+     *
+     * @param <T> the params subtype for method chaining.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface BuilderParams<T extends BuilderParams<T>> extends JweHeaderMutator<T>, X509Builder<T> {
+    }
 }

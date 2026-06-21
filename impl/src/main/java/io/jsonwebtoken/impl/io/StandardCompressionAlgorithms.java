@@ -21,7 +21,7 @@ import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Collections;
 
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.ZIP
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Suppliers
 public final class StandardCompressionAlgorithms extends IdRegistry<CompressionAlgorithm> {
 
     public static final String NAME = "Compression Algorithm";

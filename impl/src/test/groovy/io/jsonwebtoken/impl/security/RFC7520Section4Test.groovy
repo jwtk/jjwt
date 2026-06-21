@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
@@ -216,7 +216,7 @@ class RFC7520Section4Test {
                 return FIGURE_9
             }
         }
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(writer) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -226,7 +226,7 @@ class RFC7520Section4Test {
         assertEquals FIGURE_13, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().verifyWith(jwk.toPublicJwk().toKey()).build().parseSignedContent(result)
+        def parsed = Jwt.parser().verifyWith(jwk.toPublicJwk().toKey()).build().parseSignedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals FIGURE_7, utf8(parsed.payload)
@@ -255,7 +255,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(kid).and()
                 .setPayload(FIGURE_7)
@@ -270,7 +270,7 @@ class RFC7520Section4Test {
 
         // even though we can't know what the signature output is ahead of time due to random data, we can assert
         // the signature to guarantee a round trip works as expected:
-        def parsed = Jwts.parser()
+        def parsed = Jwt.parser()
                 .verifyWith(jwk.toPublicJwk().toKey())
                 .build().parseSignedContent(result)
 
@@ -301,7 +301,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(ser) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -315,7 +315,7 @@ class RFC7520Section4Test {
 
         // even though we can't know what the signature output is ahead of time due to random data, we can assert
         // the signature to guarantee a round trip works as expected:
-        def parsed = Jwts.parser()
+        def parsed = Jwt.parser()
                 .verifyWith(jwk.toPublicJwk().toKey())
                 .build().parseSignedContent(result)
 
@@ -346,7 +346,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(writer) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -356,7 +356,7 @@ class RFC7520Section4Test {
         assertEquals FIGURE_34, result
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().verifyWith(key).build().parseSignedContent(result)
+        def parsed = Jwt.parser().verifyWith(key).build().parseSignedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals FIGURE_7, utf8(parsed.payload)
@@ -384,7 +384,7 @@ class RFC7520Section4Test {
             }
         }
 
-        String result = Jwts.builder()
+        String result = Jwt.builder()
                 .json(writer) // assert input, return RFC ordered string
                 .header().keyId(jwk.getId()).and()
                 .setPayload(FIGURE_7)
@@ -397,7 +397,7 @@ class RFC7520Section4Test {
         assertEquals FIGURE_41, detached
 
         // Assert round trip works as expected:
-        def parsed = Jwts.parser().verifyWith(key).build().parseSignedContent(result)
+        def parsed = Jwt.parser().verifyWith(key).build().parseSignedContent(result)
         assertEquals alg.getId(), parsed.header.getAlgorithm()
         assertEquals jwk.getId(), parsed.header.getKeyId()
         assertEquals FIGURE_7, utf8(parsed.payload)

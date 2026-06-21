@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 jsonwebtoken.io
+ * Copyright © 2026 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,22 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 
-/**
- * @since 0.12.0
- */
-public class DefaultJwtHeaderBuilder extends AbstractJwtHeaderBuilder<Jwt.HeaderBuilder>
-        implements Jwt.HeaderBuilder {
+@SuppressWarnings({"unused", "deprecation"})
+public class DefaultJwtsHeaderBuilder extends AbstractJwtHeaderBuilder<Jwts.HeaderBuilder>
+        implements Jwts.HeaderBuilder {
 
-    public DefaultJwtHeaderBuilder() {
+    public DefaultJwtsHeaderBuilder() {
         super();
     }
 
-    public DefaultJwtHeaderBuilder(DefaultJweHeaderMutator<?> src) {
-        super(src);
-    }
-
     // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    @SuppressWarnings("unused") // used via reflection in the api module's Jwts class.
-    public static final class Supplier implements java.util.function.Supplier<Jwt.HeaderBuilder> {
+    @SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Suppliers.
+    public static final class Supplier implements java.util.function.Supplier<Jwts.HeaderBuilder> {
         @Override
-        public Jwt.HeaderBuilder get() {
-            return new DefaultJwtHeaderBuilder();
+        public Jwts.HeaderBuilder get() {
+            return new DefaultJwtsHeaderBuilder();
         }
     }
 }

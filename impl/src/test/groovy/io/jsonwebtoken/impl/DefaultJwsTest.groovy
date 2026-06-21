@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl
 
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.JwsHeader
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Encoders
 import org.junit.Test
@@ -45,10 +45,10 @@ class DefaultJwsTest {
         //create random signing key for testing:
         def alg = Jws.alg.HS256
         def key = alg.key().build()
-        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
+        String compact = Jwt.builder().claim('foo', 'bar').signWith(key, alg).compact()
         int i = compact.lastIndexOf('.')
         String signature = compact.substring(i + 1)
-        def jws = Jwts.parser().verifyWith(key).build().parseSignedClaims(compact)
+        def jws = Jwt.parser().verifyWith(key).build().parseSignedClaims(compact)
         assertEquals 'header={alg=HS256},payload={foo=bar},signature=' + signature, jws.toString()
     }
 
@@ -56,8 +56,8 @@ class DefaultJwsTest {
     void testEqualsAndHashCode() {
         def alg = Jws.alg.HS256
         def key = alg.key().build()
-        String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
-        def parser = Jwts.parser().verifyWith(key).build()
+        String compact = Jwt.builder().claim('foo', 'bar').signWith(key, alg).compact()
+        def parser = Jwt.parser().verifyWith(key).build()
         def jws1 = parser.parseSignedClaims(compact)
         def jws2 = parser.parseSignedClaims(compact)
         assertNotEquals jws1, 'hello' as String

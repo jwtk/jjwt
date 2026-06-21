@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.RfcTests
 import io.jsonwebtoken.security.Curve
 import io.jsonwebtoken.security.Jwk
@@ -104,14 +104,14 @@ class RFC8037AppendixATest {
     @Test
     void test_Sections_A4_and_A5() {
         def privJwk = a1Jwk()
-        String compact = Jwts.builder()
+        String compact = Jwt.builder()
                 .content(A4_JWS_PAYLOAD.getBytes(StandardCharsets.UTF_8))
                 .signWith(privJwk.toKey() as PrivateKey, Jws.alg.EdDSA)
                 .compact()
         assertEquals A4_JWS_COMPACT, compact
 
         def pubJwk = a2Jwk()
-        def payloadBytes = Jwts.parser().verifyWith(pubJwk.toKey()).build().parse(compact).getPayload() as byte[]
+        def payloadBytes = Jwt.parser().verifyWith(pubJwk.toKey()).build().parse(compact).getPayload() as byte[]
         def payload = new String(payloadBytes, StandardCharsets.UTF_8)
         assertEquals A4_JWS_PAYLOAD, payload
     }
@@ -167,7 +167,7 @@ class RFC8037AppendixATest {
         final String issuer = RfcTests.srandom()
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
-        String jwe = Jwts.builder()
+        String jwe = Jwt.builder()
                 .header().keyId(bobPrivJwk.getId()).and()
                 .setIssuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.enc.A128GCM)
@@ -196,7 +196,7 @@ class RFC8037AppendixATest {
         assertEquals(rfcExpectedHeaderMap.get('epk'), jweHeaderMap.get('epk'))
 
         //ensure that bob can decrypt:
-        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseEncryptedClaims(jwe)
+        def jwt = Jwt.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseEncryptedClaims(jwe)
 
         assertEquals(issuer, jwt.getPayload().getIssuer())
     }
@@ -258,7 +258,7 @@ class RFC8037AppendixATest {
         final String issuer = RfcTests.srandom()
 
         // Create the test case JWE with the 'kid' header to ensure the output matches the RFC expected value:
-        String jwe = Jwts.builder()
+        String jwe = Jwt.builder()
                 .header().keyId(bobPrivJwk.getId()).and() //value will be "Dave" as noted above
                 .issuer(issuer)
                 .encryptWith(bobPrivJwk.toPublicJwk().toKey() as PublicKey, alg, Jwe.enc.A256GCM)
@@ -287,7 +287,7 @@ class RFC8037AppendixATest {
         assertEquals(rfcExpectedHeaderMap.get('epk'), jweHeaderMap.get('epk'))
 
         //ensure that Bob ("Dave") can decrypt:
-        def jwt = Jwts.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseEncryptedClaims(jwe)
+        def jwt = Jwt.parser().decryptWith(bobPrivJwk.toKey() as PrivateKey).build().parseEncryptedClaims(jwe)
 
         //assert that we've decrypted and the value in the body/content is as expected:
         assertEquals(issuer, jwt.getPayload().getIssuer())

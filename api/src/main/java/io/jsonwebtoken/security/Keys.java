@@ -288,9 +288,11 @@ public final class Keys {
      * @return a new {@code SecretKeyBuilder} that produces the specified key, potentially associated with any
      * specified provider.
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link SecretKeyBuilder#with(SecretKey)}
      */
+    @Deprecated
     public static SecretKeyBuilder builder(SecretKey key) {
-        return Suppliers.SECRET_KEY_BUILDER_FACTORY.apply(key);
+        return SecretKeyBuilder.with(key);
     }
 
     /**
@@ -314,7 +316,9 @@ public final class Keys {
      * @return a new {@code PrivateKeyBuilder} that produces the specified private key, potentially associated with any
      * specified provider or {@code PublicKey}
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link PrivateKeyBuilder#with(PrivateKey)}
      */
+    @Deprecated
     public static PrivateKeyBuilder builder(PrivateKey key) {
         return Suppliers.PRIVATE_KEY_BUILDER_FACTORY.apply(key);
     }

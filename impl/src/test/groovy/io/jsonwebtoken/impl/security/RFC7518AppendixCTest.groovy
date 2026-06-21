@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Deserializer
@@ -111,7 +111,7 @@ class RFC7518AppendixCTest {
             }
         }
 
-        String jwe = Jwts.builder()
+        String jwe = Jwt.builder()
                 .header().agreementPartyUInfo("Alice").agreementPartyVInfo("Bob").and()
                 .claim("Hello", "World")
                 .encryptWith(bobJwk.toPublicJwk().toKey(), alg, Jwe.enc.A128GCM)
@@ -126,7 +126,7 @@ class RFC7518AppendixCTest {
         assertArrayEquals RFC_DERIVED_KEY, derivedKey
 
         // now reverse the process and ensure it all works:
-        Jwe<Claims> claimsJwe = Jwts.parser()
+        Jwe<Claims> claimsJwe = Jwt.parser()
                 .decryptWith(bobJwk.toKey())
                 .build().parseEncryptedClaims(jwe)
 

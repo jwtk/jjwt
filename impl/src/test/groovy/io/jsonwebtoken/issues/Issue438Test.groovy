@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.issues
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.security.TestKeys
 import org.junit.Test
@@ -27,7 +27,7 @@ class Issue438Test {
 
     @Test(expected = UnsupportedJwtException /* not IllegalArgumentException */)
     void testIssue438() {
-        String jws = Jwts.builder().issuer('test').signWith(TestKeys.RS256.pair.private).compact()
-        Jwts.parser().verifyWith(TestKeys.HS256).build().parseSignedClaims(jws)
+        String jws = Jwt.builder().issuer('test').signWith(TestKeys.RS256.pair.private).compact()
+        Jwt.parser().verifyWith(TestKeys.HS256).build().parseSignedClaims(jws)
     }
 }

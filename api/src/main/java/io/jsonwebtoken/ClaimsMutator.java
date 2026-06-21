@@ -99,7 +99,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * <p>When finished, the {@code audience} collection's {@link AudienceCollection#and() and()} method may be used
      * to continue configuration. For example:</p>
      * <blockquote><pre>
-     *  Jwts.builder() // or Jwts.claims()
+     *  Jwt.builder() // or Jwt.claims()
      *
      *     .audience().add("anAudience")<b>.and() // return parent</b>
      *
@@ -235,7 +235,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * <p>Because this interface extends {@link NestedCollection}, the {@link #and()} method may be used to continue
      * parent configuration. For example:</p>
      * <blockquote><pre>
-     *  Jwts.builder() // or Jwts.claims()
+     *  Jwt.builder() // or Jwt.claims()
      *
      *     .audience().add("anAudience")<b>.and() // return parent</b>
      *

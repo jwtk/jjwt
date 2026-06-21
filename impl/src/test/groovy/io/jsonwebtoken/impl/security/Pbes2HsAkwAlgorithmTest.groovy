@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.impl.DefaultJweHeaderMutator
 import io.jsonwebtoken.impl.DefaultMutableJweHeader
@@ -40,7 +40,7 @@ class Pbes2HsAkwAlgorithmTest {
     void testInsufficientIterations() {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             int iterations = 50 // must be 1000 or more
-            def header = Jwts.header().pbes2Count(iterations) as DefaultJweHeaderMutator
+            def header = Jwt.header().pbes2Count(iterations) as DefaultJweHeaderMutator
             def mutable = new DefaultMutableJweHeader(header)
             try {
                 alg.getEncryptionKey(KEY, mutable, Jwe.enc.A256GCM)
@@ -59,7 +59,7 @@ class Pbes2HsAkwAlgorithmTest {
         for (Pbes2HsAkwAlgorithm alg : ALGS) {
             def password = Password.of('correct horse battery staple'.toCharArray())
             def iterations = alg.MAX_ITERATIONS + 1
-            // we make the JWE string directly from JSON here (instead of using Jwts.builder()) to avoid
+            // we make the JWE string directly from JSON here (instead of using Jwt.builder()) to avoid
             // the computational time it would take to create such JWEs with excessive iterations as well as
             // avoid the builder throwing any exceptions (and this is what a potential attacker would do anyway):
             def headerJson = """
@@ -73,7 +73,7 @@ class Pbes2HsAkwAlgorithmTest {
                     '.OSAhMk3FtaCeZ5v1c8bWBgssEVqx2mCPUEnJUsg4hwIQyrUP-LCYkg.' +
                     'K4R_-zb4qaZ3R0W8.sGS4mcT_xBhZC1d7G-g.kWqd_4sEsaKrWE_hMZ5HmQ'
             try {
-                Jwts.parser().decryptWith(password).build().parse(jwe)
+                Jwt.parser().decryptWith(password).build().parse(jwe)
             } catch (UnsupportedJwtException expected) {
                 String msg = "JWE Header 'p2c' (PBES2 Count) value ${iterations} exceeds ${alg.id} maximum allowed " +
                         "value ${alg.MAX_ITERATIONS}. The larger value is rejected to help mitigate potential " +

@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.SecureDigestRequest
 import io.jsonwebtoken.security.SignatureException
@@ -126,8 +126,8 @@ class EdSignatureAlgorithmTest {
     }
 
     static void testSig(PrivateKey signing, PublicKey verification) {
-        String jwt = Jwts.builder().issuer('me').audience().add('you').and().signWith(signing, alg).compact()
-        def token = Jwts.parser().verifyWith(verification).build().parseSignedClaims(jwt)
+        String jwt = Jwt.builder().issuer('me').audience().add('you').and().signWith(signing, alg).compact()
+        def token = Jwt.parser().verifyWith(verification).build().parseSignedClaims(jwt)
         assertEquals([alg: alg.getId()], token.header)
         assertEquals 'me', token.getPayload().getIssuer()
         assertEquals 'you', token.getPayload().getAudience().iterator().next()

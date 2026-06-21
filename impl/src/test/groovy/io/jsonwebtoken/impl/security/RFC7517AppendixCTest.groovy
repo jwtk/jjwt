@@ -17,10 +17,13 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.JweHeader
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.impl.io.TestSerializer
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.*
+import io.jsonwebtoken.security.KeyRequest
+import io.jsonwebtoken.security.Password
+import io.jsonwebtoken.security.Request
+import io.jsonwebtoken.security.SecretKeyBuilder
 import org.junit.Test
 
 import javax.crypto.SecretKey
@@ -284,7 +287,7 @@ class RFC7517AppendixCTest {
         def enc = new HmacAesAeadAlgorithm(128) {
             @Override
             SecretKeyBuilder key() {
-                return Keys.builder(RFC_CEK)
+                return SecretKeyBuilder.with(RFC_CEK)
             }
 
             @Override
@@ -320,7 +323,7 @@ class RFC7517AppendixCTest {
 
         Password key = Password.of(RFC_SHARED_PASSPHRASE.toCharArray())
 
-        String compact = Jwts.builder()
+        String compact = Jwt.builder()
                 .setPayload(RFC_JWK_JSON)
                 .header().contentType('jwk+json').pbes2Count(RFC_P2C).and()
                 .encryptWith(key, alg, enc)
@@ -330,7 +333,7 @@ class RFC7517AppendixCTest {
         assertEquals RFC_COMPACT_JWE, compact
 
         //ensure we can decrypt now:
-        Jwe<byte[]> jwe = Jwts.parser().decryptWith(key).build().parseEncryptedContent(compact)
+        Jwe<byte[]> jwe = Jwt.parser().decryptWith(key).build().parseEncryptedContent(compact)
 
         assertEquals RFC_JWK_JSON, new String(jwe.getPayload(), StandardCharsets.UTF_8)
     }

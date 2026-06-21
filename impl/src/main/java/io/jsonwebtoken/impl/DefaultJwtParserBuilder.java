@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.CompressionCodecResolver;
@@ -22,7 +23,6 @@ import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Locator;
 import io.jsonwebtoken.SigningKeyResolver;
 import io.jsonwebtoken.impl.io.DelegateStringDecoder;
@@ -103,7 +103,7 @@ public class DefaultJwtParserBuilder implements JwtParserBuilder {
 
     private Deserializer<Map<String, ?>> deserializer;
 
-    private final ClaimsBuilder expectedClaims = Jwts.claims();
+    private final ClaimsBuilder expectedClaims = Claims.builder();
 
     private Clock clock = DefaultClock.INSTANCE;
 

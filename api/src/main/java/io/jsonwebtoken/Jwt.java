@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken;
 
+import io.jsonwebtoken.lang.Builder;
+
 /**
  * An expanded (not compact/serialized) JSON Web Token.
  *
@@ -51,6 +53,39 @@ public interface Jwt<H extends Header, P> {
             return jwt;
         }
     };
+
+    /**
+     * Returns a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
+     * which builder properties are set.
+     *
+     * @return a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
+     * which builder properties are set.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static HeaderBuilder header() {
+        return Suppliers.HEADER_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
+     *
+     * @return a new {@link JwtParserBuilder} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwtParserBuilder parser() {
+        return Suppliers.JWT_PARSER_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Returns a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
+     * strings.
+     *
+     * @return a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
+     * strings.
+     */
+    static JwtBuilder builder() {
+        return Suppliers.JWT_BUILDER_SUPPLIER.get();
+    }
 
     /**
      * Returns the JWT {@link Header} or {@code null} if not present.
@@ -91,4 +126,12 @@ public interface Jwt<H extends Header, P> {
      * @return the value returned from visitor's {@code visit} method implementation.
      */
     <T> T accept(JwtVisitor<T> visitor);
+
+    /**
+     * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface HeaderBuilder extends JweHeader.BuilderParams<HeaderBuilder>, Builder<Header> {
+    }
 }

@@ -17,7 +17,6 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.io.CompressionAlgorithm;
 import io.jsonwebtoken.lang.Builder;
-import io.jsonwebtoken.lang.Classes;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.AeadAlgorithm;
 import io.jsonwebtoken.security.KeyAlgorithm;
@@ -27,14 +26,12 @@ import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import io.jsonwebtoken.security.SignatureAlgorithm;
-import io.jsonwebtoken.security.X509Builder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * Factory class useful for creating instances of JWT interfaces.  Using this factory class can be a good
@@ -45,20 +42,18 @@ import java.util.function.Supplier;
  * algorithm type. Each organized collection of algorithms is available via a constant to allow
  * for easy code-completion in IDEs, showing available algorithm instances.  For example, when typing:</p>
  * <blockquote><pre>
- * Jwts.// press code-completion hotkeys to suggest available algorithm registry fields
  * {@link Jws.alg Jws.alg}.// press hotkeys to suggest individual Digital Signature or MAC algorithms or utility methods
  * {@link Jwe.alg Jwe.alg}.// press hotkeys to suggest individual key management algorithms or utility methods
- * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods</pre></blockquote>
+ * {@link Jwe.enc Jwe.enc}.// press hotkeys to suggest individual encryption algorithms or utility methods
+ * {@link Jwe.zip Jwe.zip}.// press hotkeys to suggest individual compression algorithms or utility methods</pre></blockquote>
  *
  * @since 0.1
+ * @deprecated since JJWT_RELEASE_VERSION in favor of respective interface static registries
+ * ({@link Jws.alg}, {@link Jwe.alg}, {@link Jwe.enc}, {@link Jwe.zip}) and static factory methods
+ * ({@link Jwt#builder()}, {@link Jwt#parser()}, {@link Jwt#header()}, {@link Claims#builder()}).
  */
+@Deprecated
 public final class Jwts {
-
-    // do not change this visibility.  Raw type method signature must not be publicly exposed:
-    @SuppressWarnings("unchecked")
-    static <T> T get(Registry<String, ?> registry, String id) {
-        return (T) registry.forKey(id);
-    }
 
     /**
      * Constants for all standard JWA
@@ -67,7 +62,7 @@ public final class Jwts {
      * Web Signature and Encryption Algorithms Registry</a>. Each standard algorithm is available as a
      * ({@code public static final}) constant for direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .encryptWith(aKey, <b>Jwe.enc.A256GCM</b>) // or A128GCM, A192GCM, etc...
      *    .build();</pre></blockquote>
@@ -167,7 +162,7 @@ public final class Jwts {
      * Registry</a>. Each standard algorithm is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .signWith(aKey, <b>Jws.alg.HS512</b>) // or RS512, PS256, EdDSA, etc...
      *    .build();</pre></blockquote>
@@ -372,7 +367,7 @@ public final class Jwts {
      * Cryptographic Algorithms for Key Management</a>. Each standard algorithm is available as a
      * ({@code public static final}) constant for direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .encryptWith(aKey, <b>Jwe.alg.ECDH_ES_A256KW</b>, Jwe.enc.A256GCM)
      *    .build();</pre></blockquote>
@@ -1052,7 +1047,7 @@ public final class Jwts {
      * Registry</a>. Each algorithm is available as a ({@code public static final}) constant for
      * direct type-safe reference in application code. For example:
      * <blockquote><pre>
-     * Jwts.builder()
+     * Jwt.builder()
      *    // ... etc ...
      *    .compressWith(<b>Jwe.zip.DEF</b>)
      *    .build();</pre></blockquote>
@@ -1111,28 +1106,15 @@ public final class Jwts {
         }
     }
 
-    // @since 0.12.7
-    private static final Supplier<JwtBuilder> JWT_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtBuilder$Supplier");
-
-    // @since 0.12.7
-    private static final Supplier<JwtParserBuilder> JWT_PARSER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier");
-
-    // @since 0.12.7
-    private static final Supplier<HeaderBuilder> HEADER_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier");
-
-    // @since 0.12.7
-    private static final Supplier<ClaimsBuilder> CLAIMS_BUILDER_SUPPLIER =
-            Classes.newInstance("io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier");
-
     /**
-     * A {@link Builder} that dynamically determines the type of {@link Header} to create based on builder state.
+     * A builder that dynamically determines the type of {@link Header} to create based on builder state.
      *
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt.HeaderBuilder}
      */
-    public interface HeaderBuilder extends JweHeaderMutator<HeaderBuilder>, X509Builder<HeaderBuilder>, Builder<Header> {
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
+    public interface HeaderBuilder extends JweHeader.BuilderParams<HeaderBuilder>, Builder<Header> {
     }
 
     /**
@@ -1142,9 +1124,11 @@ public final class Jwts {
      * @return a new {@link HeaderBuilder} that can build any type of {@link Header} instance depending on
      * which builder properties are set.
      * @since 0.12.0
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt#header()}.
      */
+    @Deprecated
     public static HeaderBuilder header() {
-        return HEADER_BUILDER_SUPPLIER.get();
+        return Suppliers.JWTS_HEADER_BUILDER_SUPPLIER.get();
     }
 
     /**
@@ -1153,26 +1137,28 @@ public final class Jwts {
      *
      * @return a new {@link Claims} builder instance to be used to populate JWT claims, which in aggregate will be
      * the JWT payload.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Claims#builder()}
      */
+    @Deprecated
     public static ClaimsBuilder claims() {
-        return CLAIMS_BUILDER_SUPPLIER.get();
+        return Claims.builder();
     }
 
     /**
      * <p><b>Deprecated since 0.12.0 in favor of
-     * {@code Jwts.}{@link #claims()}{@code .add(map).build()}</b>.
+     * {@link Claims#builder()}{@code .add(map).build()}</b>.
      * This method will be removed before 1.0.</p>
      *
      * <p>Returns a new {@link Claims} instance populated with the specified name/value pairs.</p>
      *
      * @param claims the name/value pairs to populate the new Claims instance.
      * @return a new {@link Claims} instance populated with the specified name/value pairs.
-     * @deprecated since 0.12.0 in favor of {@code Jwts.}{@link #claims()}{@code .putAll(map).build()}.
+     * @deprecated since 0.12.0 in favor of {@link Claims#builder()}{@code .add(map).build()}.
      * This method will be removed before 1.0.
      */
     @Deprecated
     public static Claims claims(Map<String, Object> claims) {
-        return claims().add(claims).build();
+        return Claims.builder().add(claims).build();
     }
 
     /**
@@ -1181,18 +1167,22 @@ public final class Jwts {
      *
      * @return a new {@link JwtBuilder} instance that can be configured and then used to create JWT compact serialized
      * strings.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt#builder()}
      */
+    @Deprecated
     public static JwtBuilder builder() {
-        return JWT_BUILDER_SUPPLIER.get();
+        return Jwt.builder();
     }
 
     /**
      * Returns a new {@link JwtParserBuilder} instance that can be configured to create an immutable/thread-safe {@link JwtParser}.
      *
      * @return a new {@link JwtParserBuilder} instance that can be configured create an immutable/thread-safe {@link JwtParser}.
+     * @deprecated since JJWT_RELEASE_VERSION in favor of {@link Jwt#parser()}.
      */
+    @Deprecated
     public static JwtParserBuilder parser() {
-        return JWT_PARSER_BUILDER_SUPPLIER.get();
+        return Jwt.parser();
     }
 
     /**
