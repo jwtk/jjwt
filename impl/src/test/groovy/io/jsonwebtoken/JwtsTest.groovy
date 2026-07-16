@@ -1455,6 +1455,28 @@ class JwtsTest {
         }
     }
 
+    /**
+     * @see <a href="https://github.com/jwtk/jjwt/issues/1035">JJWT Issue 1035</a>
+     */
+    @Test
+    void testParseEncryptedContentWithEmptyJsonObjectBytes() {
+
+        Password key = Keys.password('password'.toCharArray())
+        byte[] payload = [0x7B, 0x7D] as byte[] // '{}'
+
+        String jwe = Jwts.builder()
+                .content(payload)
+                .encryptWith(key, Jwts.KEY.PBES2_HS512_A256KW, Jwts.ENC.A256GCM)
+                .compact()
+
+        def jwt = Jwts.parser()
+                .decryptWith(key)
+                .build()
+                .parseEncryptedContent(jwe)
+
+        assertArrayEquals payload, jwt.getPayload()
+    }
+
     @Test
     void testJweCompressionWithArbitraryContentInputStream() {
         def codecs = [Jwts.ZIP.DEF, Jwts.ZIP.GZIP]

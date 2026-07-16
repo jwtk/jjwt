@@ -366,6 +366,10 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
     }
 
     private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload) {
+        return parse(compact, unencodedPayload, unencodedPayload.isClaimsExpected());
+    }
+
+    private Jwt<?, ?> parse(Reader compact, Payload unencodedPayload, boolean claimsExpected) {
 
         Assert.notNull(compact, "Compact reader cannot be null.");
         Assert.stateNotNull(unencodedPayload, "internal error: unencodedPayload is null.");
@@ -624,7 +628,9 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
                     }
                     if (claimsMap != null) {
                         try {
-                            claims = new DefaultClaims(claimsMap);
+                            if (claimsExpected || !Collections.isEmpty(claimsMap)) {
+                                claims = new DefaultClaims(claimsMap);
+                            }
                         } catch (Throwable t) {
                             String msg = "Invalid claims: " + t.getMessage();
                             throw new MalformedJwtException(msg);
@@ -784,6 +790,11 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
         return parse(new CharSequenceReader(compact), unencodedPayload);
     }
 
+    private Jwt<?, ?> parse(CharSequence compact, boolean claimsExpected) {
+        Assert.hasText(compact, "JWT String argument cannot be null or empty.");
+        return parse(new CharSequenceReader(compact), Payload.EMPTY, claimsExpected);
+    }
+
     @Override
     public Jwt<Header, byte[]> parseContentJwt(CharSequence jwt) {
         return parse(jwt).accept(Jwt.UNSECURED_CONTENT);
@@ -791,7 +802,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     @Override
     public Jwt<Header, Claims> parseClaimsJwt(CharSequence jwt) {
-        return parse(jwt).accept(Jwt.UNSECURED_CLAIMS);
+        return parse(jwt, true).accept(Jwt.UNSECURED_CLAIMS);
     }
 
     @Override
@@ -811,7 +822,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     @Override
     public Jwt<Header, Claims> parseUnsecuredClaims(CharSequence jwt) throws JwtException, IllegalArgumentException {
-        return parse(jwt).accept(Jwt.UNSECURED_CLAIMS);
+        return parse(jwt, true).accept(Jwt.UNSECURED_CLAIMS);
     }
 
     @Override
@@ -825,7 +836,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     @Override
     public Jws<Claims> parseSignedClaims(CharSequence compact) {
-        return parse(compact).accept(Jws.CLAIMS);
+        return parse(compact, true).accept(Jws.CLAIMS);
     }
 
     private Jws<Claims> parseSignedClaims(CharSequence jws, Payload unencodedPayload) {
@@ -875,7 +886,7 @@ public class DefaultJwtParser extends AbstractParser<Jwt<?, ?>> implements JwtPa
 
     @Override
     public Jwe<Claims> parseEncryptedClaims(CharSequence compact) throws JwtException {
-        return parse(compact).accept(Jwe.CLAIMS);
+        return parse(compact, true).accept(Jwe.CLAIMS);
     }
 
     protected byte[] decode(CharSequence base64UrlEncoded, String name) {

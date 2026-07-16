@@ -102,6 +102,10 @@ class Payload {
         this.claimsExpected = claimsExpected;
     }
 
+    boolean isClaimsExpected() {
+        return this.claimsExpected;
+    }
+
     /**
      * Returns {@code true} if the payload may be fully consumed and retained in memory, {@code false} if empty,
      * already extracted, or a potentially too-large InputStream.
