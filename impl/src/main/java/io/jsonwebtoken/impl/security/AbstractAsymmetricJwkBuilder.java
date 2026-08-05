@@ -17,6 +17,10 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.impl.ParameterMap;
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.AkpPrivateJwk;
+import io.jsonwebtoken.security.AkpPrivateJwkBuilder;
+import io.jsonwebtoken.security.AkpPublicJwk;
+import io.jsonwebtoken.security.AkpPublicJwkBuilder;
 import io.jsonwebtoken.security.AsymmetricJwk;
 import io.jsonwebtoken.security.AsymmetricJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwk;
@@ -218,6 +222,21 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
         }
     }
 
+    static class DefaultAkpPublicJwkBuilder<A extends PublicKey, B extends PrivateKey>
+            extends DefaultPublicJwkBuilder<A, B, AkpPublicJwk<A>, AkpPrivateJwk<B, A>,
+            AkpPrivateJwkBuilder<B, A>, AkpPublicJwkBuilder<A, B>>
+            implements AkpPublicJwkBuilder<A, B> {
+        DefaultAkpPublicJwkBuilder(JwkContext<A> ctx) {
+            super(ctx);
+            MlDsaAlgorithm.assertMlDsa(ctx.getKey());
+        }
+
+        @Override
+        protected AkpPrivateJwkBuilder<B, A> newPrivateBuilder(JwkContext<B> ctx) {
+            return new DefaultAkpPrivateJwkBuilder<>(this, ctx);
+        }
+    }
+
     static class DefaultRsaPrivateJwkBuilder
             extends DefaultPrivateJwkBuilder<RSAPrivateKey, RSAPublicKey, RsaPublicJwk, RsaPrivateJwk, RsaPrivateJwkBuilder>
             implements RsaPrivateJwkBuilder {
@@ -254,6 +273,21 @@ abstract class AbstractAsymmetricJwkBuilder<K extends Key, J extends AsymmetricJ
             super(b, ctx);
             EdwardsCurve.assertEdwards(ctx.getKey());
             EdwardsCurve.assertEdwards(ctx.getPublicKey());
+        }
+    }
+
+    static class DefaultAkpPrivateJwkBuilder<A extends PrivateKey, B extends PublicKey>
+            extends DefaultPrivateJwkBuilder<A, B, AkpPublicJwk<B>, AkpPrivateJwk<A, B>,
+            AkpPrivateJwkBuilder<A, B>> implements AkpPrivateJwkBuilder<A, B> {
+        DefaultAkpPrivateJwkBuilder(JwkContext<A> src) {
+            super(src);
+            MlDsaAlgorithm.assertMlDsa(src.getKey());
+        }
+
+        DefaultAkpPrivateJwkBuilder(DefaultAkpPublicJwkBuilder<B, A> b, JwkContext<A> ctx) {
+            super(b, ctx);
+            MlDsaAlgorithm.assertMlDsa(ctx.getKey());
+            MlDsaAlgorithm.assertMlDsa(ctx.getPublicKey());
         }
     }
 }

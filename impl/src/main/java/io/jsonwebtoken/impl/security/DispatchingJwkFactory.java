@@ -30,11 +30,12 @@ class DispatchingJwkFactory implements JwkFactory<Key, Jwk<Key>> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Collection<FamilyJwkFactory<Key, ?>> createDefaultFactories() {
-        List families = new ArrayList<>(3);
+        List families = new ArrayList<>(5);
         families.add(new SecretJwkFactory());
         families.add(new AsymmetricJwkFactory(EcPublicJwkFactory.INSTANCE, new EcPrivateJwkFactory()));
         families.add(new AsymmetricJwkFactory(RsaPublicJwkFactory.INSTANCE, new RsaPrivateJwkFactory()));
         families.add(new AsymmetricJwkFactory(OctetPublicJwkFactory.INSTANCE, new OctetPrivateJwkFactory()));
+        families.add(new AsymmetricJwkFactory(AkpPublicJwkFactory.INSTANCE, new AkpPrivateJwkFactory()));
         return families;
     }
 

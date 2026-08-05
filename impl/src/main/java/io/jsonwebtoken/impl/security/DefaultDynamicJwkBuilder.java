@@ -17,6 +17,8 @@ package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.AkpPrivateJwkBuilder;
+import io.jsonwebtoken.security.AkpPublicJwkBuilder;
 import io.jsonwebtoken.security.DynamicJwkBuilder;
 import io.jsonwebtoken.security.EcPrivateJwkBuilder;
 import io.jsonwebtoken.security.EcPublicJwkBuilder;
@@ -91,6 +93,12 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
             return (PublicJwkBuilder<A, B, ?, ?, ?, ?>) key((RSAPublicKey) key);
         } else if (key instanceof ECPublicKey) {
             return (PublicJwkBuilder<A, B, ?, ?, ?, ?>) key((ECPublicKey) key);
+        } else if (MlDsaAlgorithm.isMlDsa(key)) {
+            try {
+                return akpKey(key);
+            } catch (Exception e) {
+                throw unsupportedKey(key, e);
+            }
         } else {
             try {
                 return octetKey(key);
@@ -108,6 +116,12 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
             return (PrivateJwkBuilder<B, A, ?, ?, ?>) key((RSAPrivateKey) key);
         } else if (key instanceof ECPrivateKey) {
             return (PrivateJwkBuilder<B, A, ?, ?, ?>) key((ECPrivateKey) key);
+        } else if (MlDsaAlgorithm.isMlDsa(key)) {
+            try {
+                return akpKey(key);
+            } catch (Exception e) {
+                throw unsupportedKey(key, e);
+            }
         } else {
             try {
                 return octetKey(key);
@@ -125,6 +139,26 @@ public class DefaultDynamicJwkBuilder<K extends Key, J extends Jwk<K>>
     @Override
     public <A extends PrivateKey, B extends PublicKey> OctetPrivateJwkBuilder<A, B> octetKey(A key) {
         return new AbstractAsymmetricJwkBuilder.DefaultOctetPrivateJwkBuilder<>(newContext(key));
+    }
+
+    @Override
+    public <A extends PublicKey, B extends PrivateKey> AkpPublicJwkBuilder<A, B> akpKey(A key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultAkpPublicJwkBuilder<>(newContext(key));
+    }
+
+    @Override
+    public <A extends PrivateKey, B extends PublicKey> AkpPrivateJwkBuilder<A, B> akpKey(A key) {
+        return new AbstractAsymmetricJwkBuilder.DefaultAkpPrivateJwkBuilder<>(newContext(key));
+    }
+
+    @SuppressWarnings("unchecked") // ok because of the MlDsaAlgorithm.assertMlDsa calls
+    @Override
+    public <A extends PrivateKey, B extends PublicKey> AkpPrivateJwkBuilder<A, B> akpKeyPair(KeyPair pair) {
+        PublicKey pub = KeyPairs.getKey(pair, PublicKey.class);
+        PrivateKey priv = KeyPairs.getKey(pair, PrivateKey.class);
+        MlDsaAlgorithm.assertMlDsa(pub);
+        MlDsaAlgorithm.assertMlDsa(priv);
+        return (AkpPrivateJwkBuilder<A, B>) akpKey(priv).publicKey(pub);
     }
 
     @SuppressWarnings("unchecked")
