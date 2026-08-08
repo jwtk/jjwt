@@ -16,8 +16,12 @@
 package io.jsonwebtoken.gson.io;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.MalformedJsonException;
 import io.jsonwebtoken.io.AbstractDeserializer;
 import io.jsonwebtoken.lang.Assert;
 
@@ -66,7 +70,30 @@ public class GsonDeserializer<T> extends AbstractDeserializer<T> {
         if (!this.rejectDuplicateNames) {
             return gson.fromJson(reader, returnType);
         }
-        return gson.fromJson(new DuplicateNameRejectingJsonReader(reader), returnType);
+        JsonReader jsonReader = new DuplicateNameRejectingJsonReader(reader);
+        T value = gson.fromJson(jsonReader, returnType);
+        assertFullConsumption(value, jsonReader);
+        return value;
+    }
+
+    /**
+     * Ensures nothing follows the parsed value, mirroring the check {@code Gson} performs when it creates the
+     * {@link JsonReader} itself.  {@code Gson#fromJson(JsonReader, Type)} does not perform it, so supplying our own
+     * reader would otherwise accept trailing content.
+     *
+     * @param value      the deserialized value
+     * @param jsonReader the reader used to produce {@code value}
+     */
+    private static void assertFullConsumption(Object value, JsonReader jsonReader) {
+        try {
+            if (value != null && jsonReader.peek() != JsonToken.END_DOCUMENT) {
+                throw new JsonSyntaxException("JSON document was not fully consumed.");
+            }
+        } catch (MalformedJsonException e) {
+            throw new JsonSyntaxException(e);
+        } catch (IOException e) {
+            throw new JsonIOException(e);
+        }
     }
 
     /**

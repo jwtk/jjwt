@@ -150,6 +150,27 @@ class GsonDeserializerTest {
         assertEquals expected, deser('{"l":[{"k":1},{"k":2}]}')
     }
 
+    private void assertTrailingContentRejected(String json) {
+        // Gson asserts full consumption only when it creates the JsonReader itself, so supplying our own reader
+        // must keep that check:
+        try {
+            deser(json)
+            fail()
+        } catch (DeserializationException expected) {
+            assertTrue expected.message.startsWith('Unable to deserialize: ')
+        }
+    }
+
+    @Test
+    void testTrailingContentRejected() {
+        assertTrailingContentRejected('{"sub":"alice"}trailing')
+    }
+
+    @Test
+    void testTrailingDocumentRejected() {
+        assertTrailingContentRejected('{"a":1} {"b":2}')
+    }
+
     @Test
     void testDuplicateMemberNameWithCustomGson() {
         // a caller-supplied Gson instance retains Gson's default behavior of using the last value:
