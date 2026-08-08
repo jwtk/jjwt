@@ -111,4 +111,50 @@ class GsonDeserializerTest {
         assertTrue val instanceof Double
         assertEquals(dval, ((Double) val).doubleValue(), 0)
     }
+
+    private void assertDuplicateRejected(String json, String name) {
+        try {
+            deser(json)
+            fail()
+        } catch (DeserializationException expected) {
+            assertTrue expected.message.startsWith('Unable to deserialize: ')
+            assertTrue expected.message.contains("Duplicate JSON member name '" + name + "'")
+        }
+    }
+
+    @Test
+    void testDuplicateMemberName() {
+        assertDuplicateRejected('{"sub":"alice","sub":"attacker"}', 'sub')
+    }
+
+    @Test
+    void testDuplicateMemberNameInNestedObject() {
+        assertDuplicateRejected('{"user":{"id":1,"id":2}}', 'id')
+    }
+
+    @Test
+    void testDuplicateMemberNameInArrayElement() {
+        assertDuplicateRejected('{"list":[{"k":"a","k":"b"}]}', 'k')
+    }
+
+    @Test
+    void testSameMemberNameInSiblingObjects() {
+        // not duplicates - each name is unique within its own object:
+        def expected = [x: [k: 1L], y: [k: 2L]]
+        assertEquals expected, deser('{"x":{"k":1},"y":{"k":2}}')
+    }
+
+    @Test
+    void testSameMemberNameInSiblingArrayElements() {
+        def expected = [l: [[k: 1L], [k: 2L]]]
+        assertEquals expected, deser('{"l":[{"k":1},{"k":2}]}')
+    }
+
+    @Test
+    void testDuplicateMemberNameWithCustomGson() {
+        // a caller-supplied Gson instance retains Gson's default behavior of using the last value:
+        deserializer = new GsonDeserializer(new Gson())
+        def m = deser('{"sub":"alice","sub":"attacker"}') as Map
+        assertEquals 'attacker', m.sub
+    }
 }
