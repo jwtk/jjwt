@@ -20,7 +20,6 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.MalformedJsonException;
 import io.jsonwebtoken.io.AbstractDeserializer;
 import io.jsonwebtoken.lang.Assert;
@@ -72,7 +71,7 @@ public class GsonDeserializer<T> extends AbstractDeserializer<T> {
         }
         JsonReader jsonReader = new DuplicateNameRejectingJsonReader(reader);
         T value = gson.fromJson(jsonReader, returnType);
-        assertFullConsumption(value, jsonReader);
+        assertFullConsumption(jsonReader);
         return value;
     }
 
@@ -81,14 +80,14 @@ public class GsonDeserializer<T> extends AbstractDeserializer<T> {
      * {@link JsonReader} itself.  {@code Gson#fromJson(JsonReader, Type)} does not perform it, so supplying our own
      * reader would otherwise accept trailing content.
      *
-     * @param value      the deserialized value
-     * @param jsonReader the reader used to produce {@code value}
+     * <p>The reader is always strict, and a strict reader reports anything other than the end of the document by
+     * throwing {@link MalformedJsonException}, so peeking is all that is required.</p>
+     *
+     * @param jsonReader the reader used to produce the deserialized value
      */
-    private static void assertFullConsumption(Object value, JsonReader jsonReader) {
+    private static void assertFullConsumption(JsonReader jsonReader) {
         try {
-            if (value != null && jsonReader.peek() != JsonToken.END_DOCUMENT) {
-                throw new JsonSyntaxException("JSON document was not fully consumed.");
-            }
+            jsonReader.peek();
         } catch (MalformedJsonException e) {
             throw new JsonSyntaxException(e);
         } catch (IOException e) {

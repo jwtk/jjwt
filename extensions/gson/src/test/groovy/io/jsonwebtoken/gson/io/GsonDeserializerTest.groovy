@@ -17,6 +17,7 @@
 package io.jsonwebtoken.gson.io
 
 import com.google.gson.Gson
+import com.google.gson.JsonIOException
 import io.jsonwebtoken.io.DeserializationException
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.lang.Strings
@@ -177,5 +178,26 @@ class GsonDeserializerTest {
         deserializer = new GsonDeserializer(new Gson())
         def m = deser('{"sub":"alice","sub":"attacker"}') as Map
         assertEquals 'attacker', m.sub
+    }
+
+    @Test
+    void testIOExceptionWhenCheckingForTrailingContent() {
+        // the value itself parses, and the stream fails only when the trailing content check reads past it:
+        def reader = new FilterReader(new StringReader('{"sub":"alice"}')) {
+            @Override
+            int read(char[] cbuf, int off, int len) throws IOException {
+                int count = super.read(cbuf, off, len)
+                if (count == -1) throw new IOException('read failure')
+                return count
+            }
+        }
+        try {
+            deserializer.deserialize(reader)
+            fail()
+        } catch (DeserializationException expected) {
+            assertTrue expected.message.startsWith('Unable to deserialize: ')
+            assertTrue expected.cause instanceof JsonIOException
+            assertEquals 'read failure', expected.cause.cause.message
+        }
     }
 }
