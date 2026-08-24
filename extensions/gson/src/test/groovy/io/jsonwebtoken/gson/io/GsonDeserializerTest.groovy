@@ -181,6 +181,13 @@ class GsonDeserializerTest {
     }
 
     @Test
+    void testNullLiteral() {
+        // a top-level null deserializes to null, and the trailing content check is skipped for it, matching what
+        // Gson does when it creates the JsonReader itself:
+        assertNull deser('null')
+    }
+
+    @Test
     void testIOExceptionWhenCheckingForTrailingContent() {
         // the value itself parses, and the stream fails only when the trailing content check reads past it:
         def reader = new FilterReader(new StringReader('{"sub":"alice"}')) {

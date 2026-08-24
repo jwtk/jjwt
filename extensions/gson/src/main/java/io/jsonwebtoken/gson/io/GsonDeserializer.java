@@ -71,7 +71,7 @@ public class GsonDeserializer<T> extends AbstractDeserializer<T> {
         }
         JsonReader jsonReader = new DuplicateNameRejectingJsonReader(reader);
         T value = gson.fromJson(jsonReader, returnType);
-        assertFullConsumption(jsonReader);
+        assertFullConsumption(value, jsonReader);
         return value;
     }
 
@@ -80,14 +80,17 @@ public class GsonDeserializer<T> extends AbstractDeserializer<T> {
      * {@link JsonReader} itself.  {@code Gson#fromJson(JsonReader, Type)} does not perform it, so supplying our own
      * reader would otherwise accept trailing content.
      *
-     * <p>The reader is always strict, and a strict reader reports anything other than the end of the document by
-     * throwing {@link MalformedJsonException}, so peeking is all that is required.</p>
+     * <p>The reader is always strict, and a strict reader reports anything after the value by throwing
+     * {@link MalformedJsonException}, so the peek itself is the check.</p>
      *
-     * @param jsonReader the reader used to produce the deserialized value
+     * @param value      the deserialized value
+     * @param jsonReader the reader used to produce {@code value}
      */
-    private static void assertFullConsumption(JsonReader jsonReader) {
+    private static void assertFullConsumption(Object value, JsonReader jsonReader) {
         try {
-            jsonReader.peek();
+            if (value != null) {
+                jsonReader.peek();
+            }
         } catch (MalformedJsonException e) {
             throw new JsonSyntaxException(e);
         } catch (IOException e) {
