@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -105,8 +106,28 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * <p>A JWT obtained after this timestamp should not be used.</p>
      *
      * @return the JWT {@code exp} value or {@code null} if not present.
+     * @deprecated since 0.14.0 in favor of {@link #expiration()}. This method will be removed before the
+     * JJWT 1.0 release.
      */
+    @Deprecated
     Date getExpiration();
+
+    /**
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) timestamp or {@code null} if not present.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>The default implementation returns {@code getExpiration().toInstant()} for compatibility with existing
+     * {@code Claims} implementations. Implementations are encouraged to override this method directly.</p>
+     *
+     * @return the JWT {@code exp} value or {@code null} if not present.
+     * @since 0.14.0
+     */
+    default Instant expiration() {
+        Date date = getExpiration();
+        return date != null ? date.toInstant() : null;
+    }
 
     /**
      * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -115,8 +136,28 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * <p>A JWT obtained before this timestamp should not be used.</p>
      *
      * @return the JWT {@code nbf} value or {@code null} if not present.
+     * @deprecated since 0.14.0 in favor of {@link #notBefore()}. This method will be removed before the
+     * JJWT 1.0 release.
      */
+    @Deprecated
     Date getNotBefore();
+
+    /**
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
+     * <code>nbf</code></a> (not before) timestamp or {@code null} if not present.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>The default implementation returns {@code getNotBefore().toInstant()} for compatibility with existing
+     * {@code Claims} implementations. Implementations are encouraged to override this method directly.</p>
+     *
+     * @return the JWT {@code nbf} value or {@code null} if not present.
+     * @since 0.14.0
+     */
+    default Instant notBefore() {
+        Date date = getNotBefore();
+        return date != null ? date.toInstant() : null;
+    }
 
     /**
      * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -125,8 +166,28 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * <p>If present, this value is the timestamp when the JWT was created.</p>
      *
      * @return the JWT {@code iat} value or {@code null} if not present.
+     * @deprecated since 0.14.0 in favor of {@link #issuedAt()}. This method will be removed before the
+     * JJWT 1.0 release.
      */
+    @Deprecated
     Date getIssuedAt();
+
+    /**
+     * Returns the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
+     * <code>iat</code></a> (issued at) timestamp or {@code null} if not present.
+     *
+     * <p>If present, this value is the timestamp when the JWT was created.</p>
+     *
+     * <p>The default implementation returns {@code getIssuedAt().toInstant()} for compatibility with existing
+     * {@code Claims} implementations. Implementations are encouraged to override this method directly.</p>
+     *
+     * @return the JWT {@code iat} value or {@code null} if not present.
+     * @since 0.14.0
+     */
+    default Instant issuedAt() {
+        Date date = getIssuedAt();
+        return date != null ? date.toInstant() : null;
+    }
 
     /**
      * Returns the JWTs <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
@@ -147,7 +208,7 @@ public interface Claims extends Map<String, Object>, Identifiable {
      * Returns the JWTs claim ({@code claimName}) value as a {@code requiredType} instance, or {@code null} if not
      * present.
      *
-     * <p>JJWT only converts simple String, Date, Long, Integer, Short and Byte types automatically. Anything more
+     * <p>JJWT only converts simple String, Date, Instant, Long, Integer, Short and Byte types automatically. Anything more
      * complex is expected to be already converted to your desired type by the JSON parser. You may specify a custom
      * JSON processor using the {@code JwtParserBuilder}'s
      * {@link JwtParserBuilder#json(io.jsonwebtoken.io.Deserializer) json(Deserializer)} method. See the JJWT

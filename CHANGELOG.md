@@ -4,6 +4,71 @@
 
 The first JJWT release that uses Java 8+ features.  This release is not strictly backwards compatible and will also not work with Java 7.
 
+#### `java.time.Instant` Support
+
+JJWT now uses `java.time.Instant` internally for all date/time values, and the following `Instant` methods have been added:
+
+- `Claims`: `expiration()`, `notBefore()` and `issuedAt()`.
+- `ClaimsMutator` (and therefore `JwtBuilder` and `ClaimsBuilder`): `expiration(Instant)`, `notBefore(Instant)` and `issuedAt(Instant)`.
+- `JwtParserBuilder`: `requireExpiration(Instant)`, `requireNotBefore(Instant)` and `requireIssuedAt(Instant)`.
+- `Clock`: `instant()`. JJWT's `JwtParser` now only calls `Clock.instant()` to obtain the current time.
+- `DateFormats`: `formatIso8601(Instant)`, `formatIso8601(Instant, boolean)` and `parseIso8601Instant(String)`.
+- `FixedClock` (`jjwt-impl`): `FixedClock(Instant)`.
+- `Claims.get(claimName, Instant.class)` and `JwtParserBuilder.require(claimName, anInstant)` now convert claim values
+  to `Instant` using the same heuristics as `Date` (`Number` values are interpreted as milliseconds, and ISO-8601
+  strings are supported).
+
+`Instant` values in custom claims are serialized as ISO-8601 strings with millisecond precision (e.g.
+`"2026-10-03T10:00:00.123Z"`), consistent with how `Date` values are represented, and can be read back via
+`Claims.get(claimName, Instant.class)`:
+
+- `jjwt-jackson`: JJWT's default `ObjectMapper` (de)serializes `Instant` values without requiring the
+  `jackson-datatype-jsr310` module, so a `JacksonDeserializer` claim type map can also specify `Instant.class`. An
+  application-provided `ObjectMapper` is not modified, so any `java.time` configuration it already has (e.g.
+  `JavaTimeModule`) is retained.
+- `jjwt-gson`: JJWT's default `Gson` instance registers the new `GsonInstantTypeAdapter`. If you provide your own
+  `Gson` instance, register it via `gsonBuilder.registerTypeAdapter(Instant.class, GsonInstantTypeAdapter.INSTANCE)`.
+- `jjwt-orgjson`: `Instant` values are supported automatically.
+
+All new methods are additive, and those that are `interface` methods have `default` implementations, so existing
+`Claims`, `ClaimsMutator`, `JwtParserBuilder` and `Clock` implementations continue to work without changes.
+
+The equivalent `java.util.Date` methods (`getExpiration()`, `expiration(Date)`, `requireExpiration(Date)`,
+`Clock.now()`, `DateFormats.formatIso8601(Date)`, `FixedClock(Date)`, etc) are now deprecated and will be removed
+before the JJWT 1.0 release.
+
+`Clock.now()` remains the only abstract `Clock` method until it is removed, so existing `Clock` implementations and
+lambdas (e.g. `() -> new Date()`) remain compatible. New implementations should override `instant()` and implement
+`now()` as `return Date.from(instant());`.
+
+#### Behavior Changes
+
+- Passing a `null` literal to a method that now has both `Date` and `Instant` overloads no longer compiles because
+  the call is ambiguous, for example `builder.expiration(null)` or `new FixedClock(null)`. Use an explicit cast
+  instead, e.g. `builder.expiration((Instant) null)`. This ambiguity will disappear when the `Date` methods are removed.
+- Out-of-range `exp`, `nbf` and `iat` values now result in an exception during parsing instead of silently
+  overflowing to an incorrect date.
+- A very large allowed clock skew (via `JwtParserBuilder.clockSkewSeconds`) no longer overflows during `nbf` validation,
+  which previously caused tokens within the allowed skew to be rejected as premature.
+- `IncorrectClaimException.getClaimValue()` now returns an `Instant` (instead of a `Date`) when a `requireExpiration`,
+  `requireNotBefore` or `requireIssuedAt` assertion fails, and the exception message renders that value in
+  ISO-8601 format (e.g. `2026-10-03T10:00:00Z`) instead of `Date.toString()` format.
+- Some exception messages produced when `exp`, `nbf` or `iat` values cannot be converted have changed. For example
+  `Cannot create Date from object of type ...` is now `Cannot create Instant from object of type ...`, and the cause
+  of an invalid ISO-8601 string is now reported by `java.time.format.DateTimeFormatter` (e.g.
+  `Text '-42-' could not be parsed at index 1`) instead of `java.text.SimpleDateFormat`
+  (e.g. `Unparseable date: "-42-"`).
+- `Claims.getExpiration()`, `getNotBefore()` and `getIssuedAt()` and `FixedClock.now()` now return a new `Date`
+  instance on each invocation, so the returned instance can no longer be used to mutate internal state.
+- `DateFormats.formatIso8601(Date)` and `formatIso8601(Date, boolean)` now delegate to their `Instant` equivalents.
+  Output is unchanged for any date between the Gregorian calendar cutover (`1582-10-15`) and the year `9999`.
+  Earlier dates are now formatted using the proleptic Gregorian calendar as required by ISO-8601 (instead of the
+  Julian calendar), and years after `9999` are prefixed with a `+` sign (e.g. `+10000-01-01T00:00:00.000Z`).
+  This also affects custom `Date` claims serialized by the `jjwt-orgjson` extension.
+- `DateFormats.parseIso8601Instant` is strict: out-of-range field values (e.g. month `13`), trailing characters, and
+  millisecond notation other than exactly three digits are rejected. The deprecated `parseIso8601Date` method retains
+  its existing lenient behavior.
+
 #### Backwards Compatibility Breaking Changes
 
 - The `io.jsonwebtoken.lang.Supplier` interface has been renamed and moved to `io.jsonwebtoken.security.ConfidentialValue` to avoid any potential risk of conflict or accidental use

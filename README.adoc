@@ -628,6 +628,14 @@ dependencies {
 Android projects will want to define the following dependencies and Proguard exclusions, and optional
 BouncyCastle `Provider`:
 
+[NOTE]
+====
+JJWT uses `java.time.Instant` for date/time values, which is natively available on Android API level 26 (Android 8.0)
+and later.  If your application supports earlier API levels, enable
+https://developer.android.com/studio/write/java8-support#library-desugaring[Java 8+ API desugaring support] in your
+Android build.
+====
+
 +++<a name="install-android-dependencies">++++++</a>+++
 
 ==== Dependencies
@@ -1063,13 +1071,23 @@ String jws = Jwts.builder()
     .issuer("me")
     .subject("Bob")
     .audience().add("you").and()
-    .expiration(expiration) //a java.util.Date
-    .notBefore(notBefore) //a java.util.Date
-    .issuedAt(new Date()) // for example, now
+    .expiration(expiration) //a java.time.Instant
+    .notBefore(notBefore) //a java.time.Instant
+    .issuedAt(Instant.now()) // for example, now
     .id(UUID.randomUUID().toString()) //just an example id
 
     /// ... etc ...
 ----
+
+[NOTE]
+====
+As of JJWT 0.14.0, the `expiration`, `notBefore` and `issuedAt` methods accept `java.time.Instant` values, and the
+equivalent `Claims` accessors are `expiration()`, `notBefore()` and `issuedAt()`. The previous `java.util.Date`
+variants (e.g. `expiration(Date)` and `getExpiration()`) are deprecated and will be removed before the 1.0 release.
+
+Because both variants exist until then, passing a `null` literal is ambiguous and will not compile. Use an explicit
+cast instead, for example `expiration((Instant) null)`.
+====
 
 +++<a name="jwt-claims-custom">++++++</a>++++++<a name="jws-create-claims-custom">++++++</a>+++
 // legacy anchors for old links
@@ -1527,12 +1545,35 @@ during parsing for timestamp comparisons can be obtained via a custom time sourc
 ----
 Clock clock = new MyClock();
 
-Jwts.parser().clock(myClock) //... etc ...
+Jwts.parser().clock(clock) //... etc ...
 ----
 
-The ``JwtParser``'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
-as most would expect.  However, supplying your own clock could be useful, especially when writing test cases to
+The ``JwtParser``'s default `Clock` implementation simply returns `Instant.now()` to reflect the time when parsing
+occurs, as most would expect.  However, supplying your own clock could be useful, especially when writing test cases to
 guarantee deterministic behavior.
+
+The `JwtParser` obtains the current time by calling `Clock.instant()`, so custom implementations should override that
+method. Until the deprecated `Clock.now()` method is removed before the 1.0 release, it is still the interface's only
+abstract method, so implement it by delegating to `instant()`:
+
+[,java]
+----
+public class MyClock implements Clock {
+
+    @Override
+    public Instant instant() {
+        return getMyTime(); //implement me
+    }
+
+    @Override
+    public Date now() { // deprecated, will be removed before 1.0
+        return Date.from(instant());
+    }
+}
+----
+
+Existing `Clock` implementations (and lambdas) that only implement `now()` continue to work unchanged, since the
+default `instant()` implementation returns `now().toInstant()`.
 
 +++<a name="jwt-read-decompression">++++++</a>+++
 
@@ -3398,12 +3439,20 @@ Jwts.parser()
     // ... etc ...
 ----
 
+[NOTE]
+====
+JJWT's default `ObjectMapper` (de)serializes `java.time.Instant` values in custom claims as ISO-8601 strings
+(e.g. `"2026-10-03T10:00:00.123Z"`) without requiring the `jackson-datatype-jsr310` module. If you provide your own
+`ObjectMapper`, JJWT does not change its `java.time` handling, so if you use `Instant` values in custom claims, ensure
+your `ObjectMapper` supports them (e.g. by registering Jackson's `JavaTimeModule`).
+====
+
 +++<a name="json-jackson-custom-types">++++++</a>+++
 
 ==== Parsing of Custom Claim Types
 
-By default, JJWT will only convert simple claim types: String, Date, Long, Integer, Short and Byte.  If you need to
-deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in
+By default, JJWT will only convert simple claim types: String, Date, Instant, Long, Integer, Short and Byte.  If you
+need to deserialize other types you can configure the `JacksonDeserializer` by passing a `Map` of claim names to types in
 through a constructor. For example:
 
 [,java]
@@ -3468,13 +3517,16 @@ If you're curious, JJWT will automatically create an internal default Gson insta
 ----
 new GsonBuilder()
     .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
+    .registerTypeAdapter(java.time.Instant.class, GsonInstantTypeAdapter.INSTANCE)
     .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .disableHtmlEscaping()
     .create();
 ----
 
-The `registerTypeHierarchyAdapter` builder call is required to serialize JWKs with secret or private values.
+The `registerTypeHierarchyAdapter` builder call is required to serialize JWKs with secret or private values.  The
+`registerTypeAdapter` call ensures `java.time.Instant` values in custom claims are serialized as ISO-8601 strings
+(e.g. `"2026-10-03T10:00:00.123Z"`).
 
 However, if you prefer to use a different Gson instance instead of JJWT's default, you can configure JJWT to use your
 own - just *don't forget to register the necessary JJWT type hierarchy adapter*.
@@ -3511,6 +3563,8 @@ And then you can specify the `GsonSerializer` using your own `Gson` instance on 
 Gson gson = new GsonBuilder()
     // don't forget this line!:
     .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
+    // and this one if you use java.time.Instant values in custom claims:
+    .registerTypeAdapter(java.time.Instant.class, GsonInstantTypeAdapter.INSTANCE)
     .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
     .disableHtmlEscaping().create();
@@ -3542,7 +3596,12 @@ Again, as shown above, it is critical to create your `Gson` instance using the `
 .registerTypeHierarchyAdapter(io.jsonwebtoken.security.ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
 ----
 
-to ensure JWK serialization works as expected.
+to ensure JWK serialization works as expected.  If you use `java.time.Instant` values in custom claims, also include:
+
+[,java]
+----
+.registerTypeAdapter(java.time.Instant.class, GsonInstantTypeAdapter.INSTANCE)
+----
 
 +++<a name="base64">++++++</a>+++
 

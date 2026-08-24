@@ -27,6 +27,8 @@ import org.json.JSONString
 import org.junit.Before
 import org.junit.Test
 
+import java.time.Instant
+
 import static org.junit.Assert.*
 
 class OrgJsonSerializerTest {
@@ -195,6 +197,12 @@ class OrgJsonSerializerTest {
         Date now = new Date()
         String formatted = DateFormats.formatIso8601(now)
         assertEquals "\"$formatted\"" as String, ser(now)
+    }
+
+    @Test
+    void testInstant() {
+        def instant = Instant.parse('2026-10-03T10:00:00.123Z')
+        assertEquals '"2026-10-03T10:00:00.123Z"', ser(instant)
     }
 
     @Test

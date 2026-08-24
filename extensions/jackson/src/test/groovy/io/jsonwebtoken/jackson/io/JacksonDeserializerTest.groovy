@@ -26,6 +26,8 @@ import io.jsonwebtoken.lang.Maps
 import org.junit.Before
 import org.junit.Test
 
+import java.time.Instant
+
 import static org.junit.Assert.*
 
 class JacksonDeserializerTest {
@@ -258,5 +260,47 @@ class JacksonDeserializerTest {
 
     private static String base64(String input) {
         return Encoders.BASE64.encode(input.getBytes('UTF-8'))
+    }
+
+    @Test
+    void testDeserializeInstantClaimTypeFromIso8601String() {
+        def result = new JacksonDeserializer(Maps.of("custom", Instant).build())
+                .deserialize(new StringReader('{"custom":"2026-10-03T10:00:00.123Z"}'))
+        assertEquals Instant.parse('2026-10-03T10:00:00.123Z'), result.custom
+    }
+
+    @Test
+    void testDeserializeInstantClaimTypeFromMillis() {
+        def result = new JacksonDeserializer(Maps.of("custom", Instant).build())
+                .deserialize(new StringReader('{"custom":1791021600123}'))
+        assertEquals Instant.ofEpochMilli(1791021600123L), result.custom
+    }
+
+    @Test
+    void testDeserializeInstantClaimTypeFromNull() {
+        def result = new JacksonDeserializer(Maps.of("custom", Instant).build())
+                .deserialize(new StringReader('{"custom":null}'))
+        assertNull result.custom
+    }
+
+    @Test
+    void testDeserializeInstantClaimTypeFromInvalidString() {
+        try {
+            new JacksonDeserializer(Maps.of("custom", Instant).build())
+                    .deserialize(new StringReader('{"custom":"hello"}'))
+            fail()
+        } catch (DeserializationException expected) {
+            assertTrue expected.getMessage().contains('not an ISO-8601-formatted string')
+        }
+    }
+
+    @Test
+    void testDeserializeInstantClaimTypeFromUnexpectedToken() {
+        try {
+            new JacksonDeserializer(Maps.of("custom", Instant).build())
+                    .deserialize(new StringReader('{"custom":true}'))
+            fail()
+        } catch (DeserializationException expected) {
+        }
     }
 }

@@ -94,7 +94,10 @@
         <arguments/>
 
         <jjwt.root>${basedir}</jjwt.root>
-        <jjwt.previousVersion>0.11.2</jjwt.previousVersion>
+        <!-- Baseline used by japicmp to report API changes. Set to the latest released version (0.13.0, the last
+             Java 7 compatible release) so the report only shows changes introduced in this release, instead of
+             also listing all of the changes made since 0.11.2: -->
+        <jjwt.previousVersion>0.13.0</jjwt.previousVersion>
 
         <maven.jar.version>3.4.2</maven.jar.version>
         <maven.compiler.version>3.14.0</maven.compiler.version>
@@ -442,6 +445,14 @@
                             <!-- <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications> -->
                             <!-- TODO: enable after 1.0 -->
                             <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
+
+                            <!-- io.jsonwebtoken.lang.Supplier was renamed to io.jsonwebtoken.security.ConfidentialValue
+                                 in 0.14.0 (see CHANGELOG). Previous version classes that reference it (e.g.
+                                 jjwt-gson 0.13.0's GsonSupplierSerializer) can't otherwise be loaded for comparison.
+                                 This can be removed once jjwt.previousVersion is 0.14.0 or later: -->
+                            <ignoreMissingClassesByRegularExpressions>
+                                <ignoreMissingClassesByRegularExpression>io\.jsonwebtoken\.lang\.Supplier</ignoreMissingClassesByRegularExpression>
+                            </ignoreMissingClassesByRegularExpressions>
 
                             <!-- All of the following can be removed after 0.11.1 is released: -->
                             <!-- <excludes>

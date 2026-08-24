@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -94,12 +95,15 @@ public class OrgJsonSerializer<T> extends AbstractSerializer<T> {
         }
 
         if (object instanceof Calendar) {
-            object = ((Calendar) object).getTime(); //sets object to date, will be converted in next if-statement:
+            object = ((Calendar) object).toInstant(); //sets object to instant, will be converted in next if-statement:
         }
 
         if (object instanceof Date) {
-            Date date = (Date) object;
-            return DateFormats.formatIso8601(date);
+            object = ((Date) object).toInstant(); //sets object to instant, will be converted in next if-statement:
+        }
+
+        if (object instanceof Instant) {
+            return DateFormats.formatIso8601((Instant) object);
         }
 
         if (object instanceof byte[]) {

@@ -21,51 +21,18 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
-public class JwtDateConverter implements Converter<Date, Object> {
+/**
+ * Converts object values to {@link Date} instances using heuristics. Retained only to support the deprecated
+ * {@code Claims.get(claimName, Date.class)} conversion, which (unlike {@link JwtInstantConverter}) parses ISO-8601
+ * strings leniently. RFC NumericDate claims ({@code exp}, {@code nbf} and {@code iat}) are converted by
+ * {@link JwtInstantConverter}.
+ *
+ * <p>This class will be removed along with the deprecated {@code Date}-based APIs before the JJWT 1.0 release.</p>
+ */
+public final class JwtDateConverter {
 
-    public static final JwtDateConverter INSTANCE = new JwtDateConverter();
-
-    @Override
-    public Object applyTo(Date date) {
-        if (date == null) {
-            return null;
-        }
-        // https://www.rfc-editor.org/rfc/rfc7519.html#section-2, 'Numeric Date' definition:
-        return date.getTime() / 1000L;
-    }
-
-    @Override
-    public Date applyFrom(Object o) {
-        return toSpecDate(o);
-    }
-
-    /**
-     * Returns an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
-     *
-     * @param value object to convert to a {@code Date} using heuristics.
-     * @return an RFC-compatible {@link Date} equivalent of the specified object value using heuristics.
-     * @since 0.10.0
-     */
-    public static Date toSpecDate(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof String) {
-            try {
-                value = Long.parseLong((String) value);
-            } catch (NumberFormatException ignored) { // will try in the fallback toDate method call below
-            }
-        }
-        if (value instanceof Number) {
-            // https://github.com/jwtk/jjwt/issues/122:
-            // The JWT RFC *mandates* NumericDate values are represented as seconds.
-            // Because java.util.Date requires milliseconds, we need to multiply by 1000:
-            long seconds = ((Number) value).longValue();
-            value = seconds * 1000;
-        }
-        //v would have been normalized to milliseconds if it was a number value, so perform normal date conversion:
-        return toDate(value);
-    }
+    private JwtDateConverter() {
+    } // prevent instantiation
 
     /**
      * Returns a {@link Date} equivalent of the specified object value using heuristics.

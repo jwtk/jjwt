@@ -31,6 +31,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
@@ -194,8 +195,30 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
+     * @deprecated since 0.14.0 in favor of {@link #requireIssuedAt(Instant)}. This method will be removed
+     * before the JJWT 1.0 release.
      */
+    @Deprecated
     JwtParserBuilder requireIssuedAt(Date issuedAt);
+
+    /**
+     * Ensures that the specified {@code iat} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
+     *
+     * <p>The default implementation delegates to {@link #requireIssuedAt(Date)} for compatibility with existing
+     * {@code JwtParserBuilder} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param issuedAt the required value of the {@code iat} header parameter.
+     * @return the parser builder for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
+     * @since 0.14.0
+     */
+    default JwtParserBuilder requireIssuedAt(Instant issuedAt) {
+        return requireIssuedAt(issuedAt != null ? Date.from(issuedAt) : null);
+    }
 
     /**
      * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
@@ -206,20 +229,64 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
      * @return the parser builder for method chaining.
      * @see MissingClaimException
      * @see IncorrectClaimException
+     * @deprecated since 0.14.0 in favor of {@link #requireExpiration(Instant)}. This method will be removed
+     * before the JJWT 1.0 release.
      */
+    @Deprecated
     JwtParserBuilder requireExpiration(Date expiration);
+
+    /**
+     * Ensures that the specified {@code exp} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
+     *
+     * <p>The default implementation delegates to {@link #requireExpiration(Date)} for compatibility with existing
+     * {@code JwtParserBuilder} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param expiration the required value of the {@code exp} header parameter.
+     * @return the parser builder for method chaining.
+     * @see MissingClaimException
+     * @see IncorrectClaimException
+     * @since 0.14.0
+     */
+    default JwtParserBuilder requireExpiration(Instant expiration) {
+        return requireExpiration(expiration != null ? Date.from(expiration) : null);
+    }
 
     /**
      * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
      * value does not equal the specified value, an exception will be thrown indicating that the
      * JWT is invalid and may not be used.
      *
-     * @param notBefore the required value of the {@code npf} header parameter.
+     * @param notBefore the required value of the {@code nbf} header parameter.
      * @return the parser builder for method chaining
      * @see MissingClaimException
      * @see IncorrectClaimException
+     * @deprecated since 0.14.0 in favor of {@link #requireNotBefore(Instant)}. This method will be removed
+     * before the JJWT 1.0 release.
      */
+    @Deprecated
     JwtParserBuilder requireNotBefore(Date notBefore);
+
+    /**
+     * Ensures that the specified {@code nbf} exists in the parsed JWT.  If missing or if the parsed
+     * value does not equal the specified value, an exception will be thrown indicating that the
+     * JWT is invalid and may not be used.
+     *
+     * <p>The default implementation delegates to {@link #requireNotBefore(Date)} for compatibility with existing
+     * {@code JwtParserBuilder} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param notBefore the required value of the {@code nbf} header parameter.
+     * @return the parser builder for method chaining
+     * @see MissingClaimException
+     * @see IncorrectClaimException
+     * @since 0.14.0
+     */
+    default JwtParserBuilder requireNotBefore(Instant notBefore) {
+        return requireNotBefore(notBefore != null ? Date.from(notBefore) : null);
+    }
 
     /**
      * Ensures that the specified {@code claimName} exists in the parsed JWT.  If missing or if the parsed
@@ -236,7 +303,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
-     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+     * The parser uses a default Clock implementation that simply returns {@code Instant.now()} when called.
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the parser builder for method chaining.
@@ -248,7 +315,7 @@ public interface JwtParserBuilder extends Builder<JwtParser> {
 
     /**
      * Sets the {@link Clock} that determines the timestamp to use when validating the parsed JWT.
-     * The parser uses a default Clock implementation that simply returns {@code new Date()} when called.
+     * The parser uses a default Clock implementation that simply returns {@code Instant.now()} when called.
      *
      * @param clock a {@code Clock} object to return the timestamp to use when validating the parsed JWT.
      * @return the parser builder for method chaining.

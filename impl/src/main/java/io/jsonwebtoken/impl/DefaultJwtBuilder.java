@@ -72,6 +72,7 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -427,33 +428,60 @@ public class DefaultJwtBuilder implements JwtBuilder {
         return new DelegateAudienceCollection<>(this, claims().audience());
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public JwtBuilder setExpiration(Date exp) {
         return expiration(exp);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public JwtBuilder expiration(Date exp) {
+        return expiration(exp != null ? exp.toInstant() : null);
+    }
+
+    @Override
+    public JwtBuilder expiration(Instant exp) {
         return claims().expiration(exp).and();
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public JwtBuilder setNotBefore(Date nbf) {
         return notBefore(nbf);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public JwtBuilder notBefore(Date nbf) {
+        return notBefore(nbf != null ? nbf.toInstant() : null);
+    }
+
+    @Override
+    public JwtBuilder notBefore(Instant nbf) {
         return claims().notBefore(nbf).and();
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public JwtBuilder setIssuedAt(Date iat) {
         return issuedAt(iat);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public JwtBuilder issuedAt(Date iat) {
+        return issuedAt(iat != null ? iat.toInstant() : null);
+    }
+
+    @Override
+    public JwtBuilder issuedAt(Instant iat) {
         return claims().issuedAt(iat).and();
     }
 
