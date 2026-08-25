@@ -15,11 +15,16 @@
  */
 package io.jsonwebtoken
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.jackson.io.JacksonDeserializer
+import io.jsonwebtoken.jackson.io.JacksonSerializer
+import io.jsonwebtoken.io.Decoders
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertTrue
 
 class CustomObjectDeserializationTest {
 
@@ -35,6 +40,9 @@ class CustomObjectDeserializationTest {
 
         String jwtString = Jwts.builder().claim("cust", customBean).compact()
 
+        String payload = new String(Decoders.BASE64URL.decode(jwtString.split('\\.')[1]), 'UTF-8')
+        assertEquals '{"cust":{"key1":"value1","key2":42}}', payload
+
         // no custom deserialization, object is a map
         Jwt<Header, Claims> jwt = Jwts.parser().unsecured().build().parseUnsecuredClaims(jwtString)
         assertNotNull jwt
@@ -46,6 +54,67 @@ class CustomObjectDeserializationTest {
         assertNotNull jwt
         CustomBean result = jwt.getPayload().get("cust", CustomBean)
         assertEquals customBean, result
+    }
+
+    /**
+     * Asserts https://github.com/jwtk/jjwt/issues/1065
+     */
+    @Test
+    void testCustomObjectDeserializationWithJsonTypeInfo() {
+
+        ObjectMapper objectMapper = new ObjectMapper()
+                .addMixIn(Authority, AuthorityMixin)
+        SimpleAuthority authority = new SimpleAuthority('ROLE_ADMIN')
+
+        String jwtString = Jwts.builder()
+                .json(new JacksonSerializer(objectMapper))
+                .claim('authority', authority)
+                .compact()
+
+        String payload = new String(Decoders.BASE64URL.decode(jwtString.split('\\.')[1]), 'UTF-8')
+        assertTrue payload.contains('"@class":"io.jsonwebtoken.CustomObjectDeserializationTest$SimpleAuthority"')
+
+        Jwt<Header, Claims> jwt = Jwts.parser()
+                .unsecured()
+                .json(new JacksonDeserializer(objectMapper, [authority: Authority]))
+                .build()
+                .parseUnsecuredClaims(jwtString)
+        assertEquals authority, jwt.payload.get('authority')
+    }
+
+    interface Authority {
+        String getAuthority()
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    static abstract class AuthorityMixin {
+    }
+
+    static class SimpleAuthority implements Authority {
+        private String authority
+
+        SimpleAuthority() {
+        }
+
+        SimpleAuthority(String authority) {
+            this.authority = authority
+        }
+
+        String getAuthority() {
+            return authority
+        }
+
+        void setAuthority(String authority) {
+            this.authority = authority
+        }
+
+        boolean equals(o) {
+            return o instanceof SimpleAuthority && authority == o.authority
+        }
+
+        int hashCode() {
+            return authority?.hashCode() ?: 0
+        }
     }
 
     static class CustomBean {
