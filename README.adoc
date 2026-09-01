@@ -221,7 +221,7 @@ and conditional branch variant in the entire codebase is tested and required to 
 | `RSAPrivateKey`
 | `RsaPrivateJwk`
 
-| XDH Private Key
+| XDH Public Key
 | `XECPublicKey`^*1*^
 | `OctetPublicJwk`
 
@@ -234,7 +234,7 @@ and conditional branch variant in the entire codebase is tested and required to 
 | `OctetPublicJwk`
 
 | EdDSA Private Key
-| `EdECPublicKey`^*2*^
+| `EdECPrivateKey`^*2*^
 | `OctetPrivateJwk`
 |===
 +
