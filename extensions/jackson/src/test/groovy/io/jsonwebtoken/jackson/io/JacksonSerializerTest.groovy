@@ -118,4 +118,10 @@ class JacksonSerializerTest {
         byte[] result = serialize([hello: '世界'])
         assertArrayEquals expected, result
     }
+
+    @Test
+    void testMapValues() {
+        byte[] result = serialize([bytes: Strings.utf8('hi'), chars: 'hi'.toCharArray()])
+        assertEquals '{"bytes":"aGk=","chars":"hi"}', Strings.utf8(result)
+    }
 }
