@@ -24,10 +24,11 @@ import java.security.PublicKey;
  *
  * <p>Per <a href="https://www.rfc-editor.org/rfc/rfc9964.html#name-ml-dsa-private-keys">RFC 9964, Section 6</a>, the
  * {@code priv} parameter of an ML-DSA AKP JWK is the 32-byte private key <em>seed</em>, not an expanded private
- * key.  Not every JCA provider retains the seed in a private key's PKCS#8 encoding: JDK versions 24 through 26
- * encode ML-DSA private keys as an expanded key only, from which the seed cannot be recovered.  Creating an
- * {@code AkpPrivateJwk} from such a key will throw an {@link InvalidKeyException}; keys parsed from an existing
- * RFC 9964 JWK, keys produced by BouncyCastle, and keys produced by JDK 27 or later all retain the seed.</p>
+ * key.  Not every JCA provider retains the seed in a private key's PKCS#8 encoding: the JDK SUN provider on
+ * versions 24 through 26 and IBM's OpenJCEPlus provider (on Eclipse OpenJ9) encode ML-DSA private keys as an
+ * expanded key only, from which the seed cannot be recovered.  Creating an {@code AkpPrivateJwk} from such a
+ * key will throw an {@link InvalidKeyException}; keys parsed from an existing RFC 9964 JWK, keys produced by
+ * BouncyCastle, and keys produced by the JDK SUN provider on version 27 or later all retain the seed.</p>
  *
  * <p><b>AKP-specific Properties</b></p>
  *

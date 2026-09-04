@@ -59,6 +59,18 @@ class AkpJwksTest {
         return alg.keyPair().provider(Providers.findBouncyCastle()).build()
     }
 
+    /**
+     * Builds an ML-DSA private key that retains the RFC 9964 32-byte seed, independent of the runtime's
+     * default provider. The JDK SUN provider (24 through 26) and IBM's OpenJCEPlus provider (OpenJ9)
+     * both encode ML-DSA private keys without a recoverable seed, so a key built through them cannot
+     * round-trip the seed; BouncyCastle retains it. Returns null when BouncyCastle is unavailable, so
+     * callers can skip.
+     */
+    private static PrivateKey seedRetainingPrivateKey(MlDsaAlgorithm alg, byte[] seed) {
+        def bc = Providers.findBouncyCastle()
+        return bc == null ? null : alg.toPrivateKey(seed, bc)
+    }
+
     @Test
     void testPublicJwkRoundtripAllParameterSets() {
         if (!available()) return
@@ -83,10 +95,12 @@ class AkpJwksTest {
     void testPrivateJwkRoundtrip() {
         if (!available()) return
         for (MlDsaAlgorithm alg : MlDsaAlgorithm.VALUES) {
-            // Build a private key from a known seed so the test does not depend on whether the runtime's default
-            // provider retains the seed in generated keys (JDK 24 through 26 do not):
+            // Build a private key from a known seed through a seed-retaining provider, so the test does not
+            // depend on whether the runtime's default provider preserves the seed (JDK 24 through 26 and
+            // IBM's OpenJCEPlus on OpenJ9 do not):
             byte[] seed = Bytes.random(MlDsaAlgorithm.SEED_LENGTH)
-            PrivateKey priv = alg.toPrivateKey(seed, null)
+            PrivateKey priv = seedRetainingPrivateKey(alg, seed)
+            if (priv == null) return // no seed-retaining provider available on this runtime
             PublicKey pub = keyPair(alg).getPublic() // any matching-parameter-set public key for structure checks
 
             def jwk = Jwks.builder().key(priv).publicKey(pub).build() as AkpPrivateJwk
@@ -111,7 +125,8 @@ class AkpJwksTest {
         if (!available()) return
         def alg = MlDsaAlgorithm.ML_DSA_65
         byte[] seed = Bytes.random(MlDsaAlgorithm.SEED_LENGTH)
-        PrivateKey priv = alg.toPrivateKey(seed, null)
+        PrivateKey priv = seedRetainingPrivateKey(alg, seed)
+        if (priv == null) return // no seed-retaining provider available on this runtime
         def pub = keyPair(alg).getPublic()
         def jwk = Jwks.builder().key(priv).publicKey(pub).build()
         def parsed = Jwks.parser().build().parse(Jwks.UNSAFE_JSON(jwk)) as AkpPrivateJwk
@@ -335,7 +350,8 @@ class AkpJwksTest {
         assertNotEquals jwk44a, ecJwk
 
         byte[] seed = Bytes.random(MlDsaAlgorithm.SEED_LENGTH)
-        def priv44 = MlDsaAlgorithm.ML_DSA_44.toPrivateKey(seed, null)
+        def priv44 = seedRetainingPrivateKey(MlDsaAlgorithm.ML_DSA_44, seed)
+        if (priv44 == null) return // no seed-retaining provider available on this runtime
         def privJwk1 = Jwks.builder().akpKey(priv44).publicKey(pub44).build()
         def privJwk2 = Jwks.builder().akpKey(priv44).publicKey(pub44).build()
         assertEquals privJwk1, privJwk2
