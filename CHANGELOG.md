@@ -4,6 +4,14 @@
 
 The first JJWT release that uses Java 8+ features.  This release is not strictly backwards compatible and will also not work with Java 7.
 
+#### RFC 9964 AKP JWK Support
+
+JWKs using the `AKP` (Algorithm Key Pair) key type defined by [RFC 9964](https://www.rfc-editor.org/rfc/rfc9964.html)
+can now be built, parsed and serialized for the ML-DSA (FIPS 204) post-quantum signature algorithms `ML-DSA-44`,
+`ML-DSA-65` and `ML-DSA-87`.  ML-DSA keys are supported natively on JDK 24 or later, and via BouncyCastle on earlier
+JDK versions.  Per RFC 9964, an AKP private JWK's `priv` value is the 32-byte ML-DSA private key seed.  See
+[Issue 1042](https://github.com/jwtk/jjwt/issues/1042).
+
 #### Backwards Compatibility Breaking Changes
 
 - The `io.jsonwebtoken.lang.Supplier` interface has been renamed and moved to `io.jsonwebtoken.security.ConfidentialValue` to avoid any potential risk of conflict or accidental use
