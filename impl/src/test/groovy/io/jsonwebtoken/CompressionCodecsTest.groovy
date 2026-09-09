@@ -49,8 +49,8 @@ class CompressionCodecsTest {
 
     @Test
     void testStatics() {
-        assertTrue Jwts.ZIP.DEF instanceof DeflateCompressionAlgorithm
-        assertTrue Jwts.ZIP.GZIP instanceof GzipCompressionAlgorithm
+        assertTrue Jwe.zip.DEF instanceof DeflateCompressionAlgorithm
+        assertTrue Jwe.zip.GZIP instanceof GzipCompressionAlgorithm
     }
 
     @Test

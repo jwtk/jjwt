@@ -98,13 +98,16 @@
 
         <maven.jar.version>3.4.2</maven.jar.version>
         <maven.compiler.version>3.14.0</maven.compiler.version>
-        <maven.javadoc.version>3.11.3</maven.javadoc.version>
+        <maven.javadoc.version>3.12.0</maven.javadoc.version>
         <maven.source.version>3.3.1</maven.source.version>
         <maven.resources.version>3.3.1</maven.resources.version>
         <maven.gpg.version>3.2.8</maven.gpg.version>
         <maven.japicmp.version>0.23.1</maven.japicmp.version>
         <maven.toolchains.version>3.2.0</maven.toolchains.version>
-        <gmavenplus.version>4.2.1</gmavenplus.version>
+        <gmavenplus.version>4.3.1</gmavenplus.version>
+        <!-- The following line silences compileSourceRoots / testCompileSourceRoots mutation warnings on Maven >= 3.9.11 when using gmavenplus-plugin <= 5.0.0:
+             TODO: remove when fixed. See https://github.com/groovy/GMavenPlus/issues/341 -->
+        <maven.project.sourceRoots.warningsDisabled>true</maven.project.sourceRoots.warningsDisabled>
         <maven.license.version>4.6</maven.license.version>
         <maven.license.skipExistingHeaders>true</maven.license.skipExistingHeaders>
 
@@ -641,6 +644,11 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <supportedProjectTypes>
+                        <supportedProjectType>jar</supportedProjectType>
+                        <supportedProjectType>bundle</supportedProjectType>
+                        <supportedProjectType>pom</supportedProjectType> <!-- build warning without this line -->
+                    </supportedProjectTypes>
                     <instructions>
                         <_include>-bnd.bnd</_include>
                     </instructions>

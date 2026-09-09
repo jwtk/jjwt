@@ -36,6 +36,30 @@ import javax.security.auth.Destroyable;
 public interface Password extends SecretKey, Destroyable {
 
     /**
+     * Returns a new {@link Password} instance suitable for use with password-based key derivation algorithms.
+     *
+     * <p><b>Usage Note</b>: Using {@code Password}s outside of key derivation contexts will likely
+     * fail. See the {@link Password} JavaDoc for more, and also note the <b>Password Safety</b> section below.</p>
+     *
+     * <p><b>Password Safety</b></p>
+     *
+     * <p>Instances returned by this method use a <em>clone</em> of the specified {@code password} character array
+     * argument - changes to the argument array will NOT be reflected in the returned key, and vice versa.  If you wish
+     * to clear a {@code Password} instance to ensure it is no longer usable, call its {@link Password#destroy()}
+     * method will clear/overwrite its internal cloned char array. Also note that each subsequent call to
+     * {@link Password#toCharArray()} will also return a new clone of the underlying password character array per
+     * standard JCE key behavior.</p>
+     *
+     * @param password the raw password character array to clone for use with password-based key derivation algorithms.
+     * @return a new {@link Password} instance that wraps a new clone of the specified {@code password} character array.
+     * @see Password#toCharArray()
+     * @since JJWT_RELEASE_VERSION
+     */
+    static Password of(char[] password) {
+        return Suppliers.PASSWORD_FACTORY.apply(password);
+    }
+
+    /**
      * Returns a new clone of the underlying password character array for use during derivation algorithms.  Like all
      * {@code SecretKey} implementations, if you wish to clear the backing password character array for
      * safety/security reasons, call the {@link #destroy()} method, ensuring that both the character array is cleared

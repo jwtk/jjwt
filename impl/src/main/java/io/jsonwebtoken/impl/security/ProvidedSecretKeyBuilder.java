@@ -15,11 +15,14 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecretKeyBuilder;
 
 import javax.crypto.SecretKey;
+import java.util.function.Function;
 
+@SuppressWarnings("unused") // used via reflection as io.jsonwebtoken.security.Suppliers.SECRET_KEY_BUILDER_FACTORY
 class ProvidedSecretKeyBuilder extends ProvidedKeyBuilder<SecretKey, SecretKeyBuilder> implements SecretKeyBuilder {
 
     ProvidedSecretKeyBuilder(SecretKey key) {
@@ -32,5 +35,14 @@ class ProvidedSecretKeyBuilder extends ProvidedKeyBuilder<SecretKey, SecretKeyBu
             return this.key; // provider never needed for Password instances.
         }
         return provider != null ? new ProviderSecretKey(this.provider, this.key) : this.key;
+    }
+
+    @SuppressWarnings("unused") // used via reflection as io.jsonwebtoken.security.Suppliers.SECRET_KEY_BUILDER_FACTORY
+    public static class Factory implements Function<SecretKey, SecretKeyBuilder> {
+        @Override
+        public SecretKeyBuilder apply(SecretKey secretKey) {
+            Assert.notNull(secretKey, "SecretKey cannot be null.");
+            return new ProvidedSecretKeyBuilder(secretKey);
+        }
     }
 }

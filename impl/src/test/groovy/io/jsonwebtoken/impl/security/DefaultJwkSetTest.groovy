@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.RedactedConfidentialValue
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -49,7 +49,7 @@ class DefaultJwkSetTest {
 
     @Test(expected = UnsupportedOperationException)
     void testGetKeysImmutable() {
-        def jwk = Jwks.builder().key(TestKeys.HS256).build()
+        def jwk = Jwk.builder().key(TestKeys.HS256).build()
         def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
         def result = set.getKeys()
         result.remove(jwk) // shouldn't be able
@@ -58,7 +58,7 @@ class DefaultJwkSetTest {
 
     @Test(expected = UnsupportedOperationException)
     void testIteratorImmutable() {
-        def jwk = Jwks.builder().key(TestKeys.HS256).build()
+        def jwk = Jwk.builder().key(TestKeys.HS256).build()
         def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
         def i = set.iterator()
         assertEquals jwk, i.next()
@@ -72,7 +72,7 @@ class DefaultJwkSetTest {
      */
     @Test
     void testGetKeysNotRedactedSupplier() {
-        def jwk = Jwks.builder().key(TestKeys.HS256).build()
+        def jwk = Jwk.builder().key(TestKeys.HS256).build()
         def set = new DefaultJwkSet(DefaultJwkSet.KEYS, [keys: [jwk]])
         def keys = set.get('keys')
         assertFalse keys instanceof RedactedConfidentialValue

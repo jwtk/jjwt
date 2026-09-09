@@ -19,7 +19,7 @@ import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.RsaPrivateJwk
 import org.junit.Test
 
@@ -171,7 +171,7 @@ class RFC7516AppendixA1Test {
         assertArrayEquals TAG, decode(encodedTag)
 
         //read the RFC Test JWK to get the private key for decrypting
-        RsaPrivateJwk jwk = Jwks.builder().add(KEK_VALUES).build() as RsaPrivateJwk
+        RsaPrivateJwk jwk = Jwk.builder().add(KEK_VALUES).build() as RsaPrivateJwk
         RSAPrivateKey privKey = jwk.toKey()
 
         Jwe<byte[]> jwe = Jwts.parser().decryptWith(privKey).build().parseEncryptedContent(COMPLETE_JWE)

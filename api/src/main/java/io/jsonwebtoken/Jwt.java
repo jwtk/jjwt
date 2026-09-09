@@ -31,8 +31,7 @@ public interface Jwt<H extends Header, P> {
      * @see SupportedJwtVisitor#onUnsecuredContent(Jwt)
      * @since 0.12.0
      */
-    @SuppressWarnings("UnnecessaryModifier")
-    public static final JwtVisitor<Jwt<Header, byte[]>> UNSECURED_CONTENT = new SupportedJwtVisitor<Jwt<Header, byte[]>>() {
+    JwtVisitor<Jwt<Header, byte[]>> UNSECURED_CONTENT = new SupportedJwtVisitor<Jwt<Header, byte[]>>() {
         @Override
         public Jwt<Header, byte[]> onUnsecuredContent(Jwt<Header, byte[]> jwt) {
             return jwt;
@@ -46,8 +45,7 @@ public interface Jwt<H extends Header, P> {
      * @see SupportedJwtVisitor#onUnsecuredClaims(Jwt)
      * @since 0.12.0
      */
-    @SuppressWarnings("UnnecessaryModifier")
-    public static final JwtVisitor<Jwt<Header, Claims>> UNSECURED_CLAIMS = new SupportedJwtVisitor<Jwt<Header, Claims>>() {
+    JwtVisitor<Jwt<Header, Claims>> UNSECURED_CLAIMS = new SupportedJwtVisitor<Jwt<Header, Claims>>() {
         @Override
         public Jwt<Header, Claims> onUnsecuredClaims(Jwt<Header, Claims> jwt) {
             return jwt;

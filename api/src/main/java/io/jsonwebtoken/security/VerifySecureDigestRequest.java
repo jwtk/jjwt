@@ -15,20 +15,42 @@
  */
 package io.jsonwebtoken.security;
 
-import java.io.InputStream;
 import java.security.Key;
 
 /**
- * A request to a {@link SecureDigestAlgorithm} to verify a previously-computed
+ * A request to a {@link SecureDigestAlgorithm} to verify a previously computed
  * <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signature</a> or
  * <a href="https://en.wikipedia.org/wiki/Message_authentication_code">message
  * authentication code</a>.
  *
- * <p>The content to verify will be available via {@link #getPayload()}, the previously-computed signature or MAC will
+ * <p>The content to verify will be available via {@link #getPayload()}, the previously computed signature or MAC will
  * be available via {@link #getDigest()}, and the verification key will be available via {@link #getKey()}.</p>
  *
  * @param <K> the type of {@link Key} used to verify a digital signature or message authentication code
  * @since 0.12.0
  */
-public interface VerifySecureDigestRequest<K extends Key> extends SecureRequest<InputStream, K>, VerifyDigestRequest {
+public interface VerifySecureDigestRequest<K extends Key> extends SecureDigestRequest<K>, VerifyDigestRequest {
+
+    /**
+     * A builder for creating {@link VerifySecureDigestRequest}s used to verify a MAC or signature via
+     * {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
+     *
+     * @param <K> type of key used to verify the digest.
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder<K extends Key> extends SecureDigestAlgorithm.VerifyParams<K, Builder<K>>, io.jsonwebtoken.lang.Builder<VerifySecureDigestRequest<K>> {
+    }
+
+    /**
+     * Returns a new {@link VerifySecureDigestRequest.Builder} for creating {@link VerifySecureDigestRequest}s used
+     * to verify a mac or signature via {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
+     *
+     * @param <K> type of key used to verify the digest.
+     * @return a new {@link VerifySecureDigestRequest.Builder} for creating {@link VerifySecureDigestRequest}s used
+     * to verify a MAC or signature via {@link SecureDigestAlgorithm#verify(VerifyDigestRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static <K extends Key> VerifySecureDigestRequest.Builder<K> builder() {
+        return Suppliers.verifySecureDigestRequestBuilder();
+    }
 }

@@ -17,10 +17,11 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.JweHeader;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.io.Base64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.ByteBase64UrlStreamEncoder;
 import io.jsonwebtoken.impl.io.CountingInputStream;
@@ -32,10 +33,6 @@ import io.jsonwebtoken.impl.lang.Bytes;
 import io.jsonwebtoken.impl.lang.Functions;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Services;
-import io.jsonwebtoken.impl.security.DefaultAeadRequest;
-import io.jsonwebtoken.impl.security.DefaultAeadResult;
-import io.jsonwebtoken.impl.security.DefaultKeyRequest;
-import io.jsonwebtoken.impl.security.DefaultSecureRequest;
 import io.jsonwebtoken.impl.security.Pbes2HsAkwAlgorithm;
 import io.jsonwebtoken.impl.security.ProviderKey;
 import io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms;
@@ -56,7 +53,7 @@ import io.jsonwebtoken.security.KeyRequest;
 import io.jsonwebtoken.security.KeyResult;
 import io.jsonwebtoken.security.Password;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
-import io.jsonwebtoken.security.SecureRequest;
+import io.jsonwebtoken.security.SecureDigestRequest;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
 import io.jsonwebtoken.security.UnsupportedKeyException;
@@ -94,8 +91,8 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
     private Payload payload = Payload.EMPTY;
 
-    private SecureDigestAlgorithm<Key, ?> sigAlg = Jwts.SIG.NONE;
-    private Function<SecureRequest<InputStream, Key>, byte[]> signFunction;
+    private SecureDigestAlgorithm<Key, ?> sigAlg = Jws.alg.NONE;
+    private Function<SecureDigestRequest<Key>, byte[]> signFunction;
 
     private AeadAlgorithm enc; // MUST be Symmetric AEAD per https://tools.ietf.org/html/rfc7516#section-4.1.2
 
@@ -232,7 +229,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         String id = Assert.hasText(alg.getId(), "SignatureAlgorithm id cannot be null or empty.");
-        if (Jwts.SIG.NONE.getId().equalsIgnoreCase(id)) {
+        if (Jws.alg.NONE.getId().equalsIgnoreCase(id)) {
             String msg = "The 'none' JWS algorithm cannot be used to sign JWTs.";
             throw new IllegalArgumentException(msg);
         }
@@ -248,7 +245,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
     public JwtBuilder signWith(Key key, io.jsonwebtoken.SignatureAlgorithm alg) throws InvalidKeyException {
         Assert.notNull(alg, "SignatureAlgorithm cannot be null.");
         alg.assertValidSigningKey(key); //since 0.10.0 for https://github.com/jwtk/jjwt/issues/334
-        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jwts.SIG.get().forKey(alg.getValue()));
+        return signWith(key, (SecureDigestAlgorithm<? super Key, ?>) Jws.alg.registry().forKey(alg.getValue()));
     }
 
     @SuppressWarnings("deprecation") // TODO: remove method for 1.0
@@ -283,7 +280,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         if (key instanceof Password) {
             return encryptWith((Password) key, new Pbes2HsAkwAlgorithm(enc.getKeyBitLength()), enc);
         }
-        return encryptWith(key, Jwts.KEY.DIRECT, enc);
+        return encryptWith(key, Jwe.alg.DIRECT, enc);
     }
 
     @Override
@@ -601,7 +598,9 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         byte[] signature;
         try {
-            SecureRequest<InputStream, Key> request = new DefaultSecureRequest<>(signingInput, provider, secureRandom, key);
+            SecureDigestRequest<Key> request = SecureDigestRequest.builder()
+                    .payload(signingInput).key(key).provider(provider).random(secureRandom)
+                    .build();
             signature = signFunction.apply(request);
 
             // now that we've calculated the signature, if using the b64 extension, and the payload is
@@ -637,7 +636,7 @@ public class DefaultJwtBuilder implements JwtBuilder {
         Assert.stateNotNull(content, "Content argument cannot be null.");
         assertPayloadEncoding("unprotected JWT");
 
-        this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), Jwts.SIG.NONE.getId());
+        this.headerBuilder.add(DefaultHeader.ALGORITHM.getId(), Jws.alg.NONE.getId());
 
         final ByteArrayOutputStream jwt = new ByteArrayOutputStream(512);
 
@@ -679,7 +678,10 @@ public class DefaultJwtBuilder implements JwtBuilder {
         //only expose (mutable) JweHeader functionality to KeyAlgorithm instances, not the full headerBuilder
         // (which exposes this JwtBuilder and shouldn't be referenced by KeyAlgorithms):
         JweHeader delegate = new DefaultMutableJweHeader(this.headerBuilder);
-        KeyRequest<Key> keyRequest = new DefaultKeyRequest<>(key, keyProvider, this.secureRandom, delegate, enc);
+        KeyRequest<Key> keyRequest = KeyRequest.builder()
+                .provider(keyProvider).random(this.secureRandom)
+                .payload(key).header(delegate).encryptionAlgorithm(enc)
+                .build();
         KeyResult keyResult = keyAlgFunction.apply(keyRequest);
         Assert.stateNotNull(keyResult, "KeyAlgorithm must return a KeyResult.");
 
@@ -705,11 +707,12 @@ public class DefaultJwtBuilder implements JwtBuilder {
 
         // During encryption, the configured Provider applies to the KeyAlgorithm, not the AeadAlgorithm, mostly
         // because all JVMs support the standard AeadAlgorithms (especially with BouncyCastle in the classpath).
-        // As such, the provider here is intentionally omitted (null):
+        // As such, the provider here is intentionally omitted when building the AeadRequest:
         // TODO: add encProvider(Provider) builder method that applies to this request only?
         ByteArrayOutputStream ciphertextOut = new ByteArrayOutputStream(8192);
-        AeadRequest req = new DefaultAeadRequest(plaintext, null, secureRandom, cek, aad);
-        DefaultAeadResult res = new DefaultAeadResult(ciphertextOut);
+        AeadRequest req = AeadRequest.builder().random(secureRandom) // no .provider call, see message above
+                .payload(plaintext).key(cek).aad(aad).build();
+        AeadResult res = AeadResult.with(ciphertextOut);
         encrypt(req, res);
 
         byte[] iv = Assert.notEmpty(res.getIv(), "Encryption result must have a non-empty initialization vector.");

@@ -16,6 +16,8 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.lang.Assert;
+import io.jsonwebtoken.security.Keyable;
+import io.jsonwebtoken.security.PayloadParams;
 import io.jsonwebtoken.security.SecureRequest;
 
 import java.security.Key;
@@ -34,5 +36,17 @@ public class DefaultSecureRequest<T, K extends Key> extends DefaultRequest<T> im
     @Override
     public K getKey() {
         return this.KEY;
+    }
+
+    static abstract class AbstractKeyedPayloadParams<T, K extends Key, M extends Keyable<K, M> & PayloadParams<T, M>>
+            extends AbstractPayloadParams<T, M> implements Keyable<K, M> {
+
+        protected K key;
+
+        @Override
+        public M key(K key) {
+            this.key = key;
+            return self();
+        }
     }
 }

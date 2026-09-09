@@ -46,9 +46,9 @@ import java.security.PublicKey;
  * <p><b>JWA Standard Implementations</b></p>
  *
  * <p>Constant definitions and utility methods for all JWA (RFC 7518) standard signature algorithms are
- * available via {@link io.jsonwebtoken.Jwts.SIG Jwts.SIG}.</p>
+ * available via {@link io.jsonwebtoken.Jws.alg Jws.alg}.</p>
  *
- * @see io.jsonwebtoken.Jwts.SIG Jwts.SIG
+ * @see io.jsonwebtoken.Jws.alg Jws.alg
  * @since 0.12.0
  */
 public interface SignatureAlgorithm extends SecureDigestAlgorithm<PrivateKey, PublicKey>, KeyPairBuilderSupplier {

@@ -19,7 +19,7 @@ import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.AeadAlgorithm;
 
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwts.ENC
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.Jwe.alg
 public final class StandardEncryptionAlgorithms extends IdRegistry<AeadAlgorithm> {
 
     public static final String NAME = "JWE Encryption Algorithm";

@@ -15,6 +15,8 @@
  */
 package io.jsonwebtoken.security;
 
+import io.jsonwebtoken.io.Parser;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -38,10 +40,46 @@ import java.util.Set;
 public interface JwkSet extends Map<String, Object>, Iterable<Jwk<?>> {
 
     /**
+     * Return a new builder used to create {@link JwkSet}s.  For example:
+     * <blockquote><pre>
+     * JwkSet set = JwkSet.builder()
+     *     //.provider(aJcaProvider)     // optional
+     *     //.operationPolicy(policy)    // optional
+     *     .add(aSingleJwk)              // appends a jwk
+     *     .add(aJwkCollection)          // appends multiple jwks
+     *     //.keys(allJwks)              // sets/replaces all jwks
+     *     .build()
+     * </pre></blockquote>
+     *
+     * @return a new builder used to create {@link JwkSet}s
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwkSetBuilder builder() {
+        return Suppliers.JWK_SET_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Creates a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances. For example:
+     * <blockquote><pre>
+     * JwkSet set = JwkSet.parser()
+     *     //.provider(aJcaProvider)      // optional
+     *     //.deserializer(deserializer)  // optional
+     *     //.operationPolicy(policy)     // optional
+     *     //.ignoreUnsupported(aBoolean) // optional
+     *     .build()
+     *     .parse(jwkSetString);</pre></blockquote>
+     *
+     * @return a new builder used to create {@link Parser}s that parse JSON into {@link JwkSet} instances.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwkSetParserBuilder parser() {
+        return Suppliers.JWK_SET_PARSER_BUILDER_SUPPLIER.get();
+    }
+
+    /**
      * Returns the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
      *
      * @return the non-null, non-empty set of JWKs contained within the {@code JwkSet}.
      */
     Set<Jwk<?>> getKeys();
-
 }

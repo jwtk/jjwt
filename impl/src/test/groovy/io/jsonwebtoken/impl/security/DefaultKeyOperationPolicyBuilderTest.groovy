@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.KeyOperation
 import org.junit.Before
 import org.junit.Test
@@ -34,11 +34,11 @@ class DefaultKeyOperationPolicyBuilderTest {
     @Test
     void testDefault() {
         def policy = builder.build()
-        assertTrue policy.operations.containsAll(Jwks.OP.get().values())
+        assertTrue policy.operations.containsAll(Jwk.op.registry().values())
         // unrelated operations not allowed:
-        def op = Jwks.OP.builder().id('foo').build()
+        def op = Jwk.op.builder().id('foo').build()
         try {
-            policy.validate([op, Jwks.OP.SIGN])
+            policy.validate([op, Jwk.op.SIGN])
             fail("Unrelated operations are not allowed by default.")
         } catch (IllegalArgumentException expected) {
             String msg = 'Unrelated key operations are not allowed. KeyOperation ' +
@@ -49,8 +49,15 @@ class DefaultKeyOperationPolicyBuilderTest {
 
     @Test
     void testAdd() {
-        def op = Jwks.OP.builder().id('foo').build()
+        def op = Jwk.op.builder().id('foo').build()
         def policy = builder.add(op).build()
+        assertTrue policy.operations.contains(op)
+    }
+
+    @Test
+    void testAddConsumer() {
+        def op = Jwk.op.builder().id('foo').build()
+        def policy = builder.add(b -> b.id('foo')).build()
         assertTrue policy.operations.contains(op)
     }
 
@@ -63,8 +70,8 @@ class DefaultKeyOperationPolicyBuilderTest {
 
     @Test
     void testAddCollection() {
-        def foo = Jwks.OP.builder().id('foo').build()
-        def bar = Jwks.OP.builder().id('bar').build()
+        def foo = Jwk.op.builder().id('foo').build()
+        def bar = Jwk.op.builder().id('bar').build()
         def policy = builder.add([foo, bar]).build()
         assertTrue policy.operations.contains(foo)
         assertTrue policy.operations.contains(bar)
@@ -79,14 +86,14 @@ class DefaultKeyOperationPolicyBuilderTest {
 
     @Test
     void testAllowUnrelatedTrue() { // testDefault has it false as expected
-        def foo = Jwks.OP.builder().id('foo').build()
+        def foo = Jwk.op.builder().id('foo').build()
         def policy = builder.unrelated().build()
-        policy.validate([foo, Jwks.OP.SIGN]) // no exception thrown since unrelated == true
+        policy.validate([foo, Jwk.op.SIGN]) // no exception thrown since unrelated == true
     }
 
     @Test
     void testHashCode() {
-        def a = builder.add(Jwks.OP.builder().id('foo').build()).build()
+        def a = builder.add(Jwk.op.builder().id('foo').build()).build()
         def b = builder.build()
         assertFalse a.is(b) // identity equals is different
         def ahc = a.hashCode()
@@ -96,7 +103,7 @@ class DefaultKeyOperationPolicyBuilderTest {
 
     @Test
     void testEquals() {
-        def a = builder.add(Jwks.OP.builder().id('foo').build()).build()
+        def a = builder.add(Jwk.op.builder().id('foo').build()).build()
         def b = builder.build()
         assertFalse a.is(b) // identity equals is different
         assertEquals a, b // but still equals

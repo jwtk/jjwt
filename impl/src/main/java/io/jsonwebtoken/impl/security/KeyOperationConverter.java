@@ -18,12 +18,12 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.Converter;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Registry;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyOperation;
 
 final class KeyOperationConverter implements Converter<KeyOperation, Object> {
 
-    static final Converter<KeyOperation, Object> DEFAULT = new KeyOperationConverter(Jwks.OP.get());
+    static final Converter<KeyOperation, Object> DEFAULT = new KeyOperationConverter(Jwk.op.registry());
 
     private final Registry<String, KeyOperation> registry;
 
@@ -45,6 +45,6 @@ final class KeyOperationConverter implements Converter<KeyOperation, Object> {
         String id = Assert.isInstanceOf(String.class, o, "Argument must be a KeyOperation or String.");
         Assert.hasText(id, "KeyOperation string value cannot be null or empty.");
         KeyOperation keyOp = this.registry.get(id);
-        return keyOp != null ? keyOp : Jwks.OP.builder().id(id).build(); // custom operations are allowed
+        return keyOp != null ? keyOp : Jwk.op.builder().id(id).build(); // custom operations are allowed
     }
 }

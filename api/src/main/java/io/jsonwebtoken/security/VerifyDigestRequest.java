@@ -15,8 +15,6 @@
  */
 package io.jsonwebtoken.security;
 
-import java.io.InputStream;
-
 /**
  * A request to verify a previously-computed cryptographic digest (available via {@link #getDigest()}) against the
  * digest to be computed for the specified {@link #getPayload() payload}.
@@ -29,5 +27,25 @@ import java.io.InputStream;
  * @see VerifySecureDigestRequest
  * @since 0.12.0
  */
-public interface VerifyDigestRequest extends Request<InputStream>, DigestSupplier {
+public interface VerifyDigestRequest extends DigestRequest, DigestSupplier {
+
+    /**
+     * A builder for creating new immutable {@link VerifyDigestRequest} instances.
+     *
+     * @since JJWT_RELEASE_VERSION
+     */
+    interface Builder extends DigestAlgorithm.VerifyParams<Builder>, io.jsonwebtoken.lang.Builder<VerifyDigestRequest> {
+    }
+
+    /**
+     * Returns a new {@link VerifyDigestRequest.Builder} for creating {@link VerifyDigestRequest}s to verify a
+     * digest via {@link HashAlgorithm#verify(VerifyDigestRequest)}.
+     *
+     * @return a new {@link VerifyDigestRequest.Builder} for creating {@link VerifyDigestRequest}s to verify a
+     * digest via {@link HashAlgorithm#verify(VerifyDigestRequest)}.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static VerifyDigestRequest.Builder builder() {
+        return Suppliers.VERIFY_DIGEST_REQUEST_BUILDER.get();
+    }
 }

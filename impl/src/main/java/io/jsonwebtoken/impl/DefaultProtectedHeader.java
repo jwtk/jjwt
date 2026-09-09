@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.impl;
 
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.ProtectedHeader;
 import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.Parameters;
@@ -62,8 +62,8 @@ public class DefaultProtectedHeader extends DefaultHeader implements ProtectedHe
 
     static boolean isCandidate(ParameterMap map) {
         String id = map.get(DefaultHeader.ALGORITHM);
-        return Strings.hasText(id) && !id.equalsIgnoreCase(Jwts.SIG.NONE.getId()); // alg cannot be empty or 'none'
-//        return (Strings.hasText(id) && !Jwts.SIG.NONE.equals(Jwts.SIG.get().get(id))) ||
+        return Strings.hasText(id) && !id.equalsIgnoreCase(Jws.alg.NONE.getId()); // alg cannot be empty or 'none'
+//        return (Strings.hasText(id) && !Jws.alg.NONE.equals(Jws.alg.registry().get(id))) ||
 //                map.get(JKU) != null ||
 //                map.get(JWK) != null ||
 //                !Collections.isEmpty(map.get(CRIT)) ||

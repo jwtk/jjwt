@@ -15,7 +15,6 @@
  */
 package io.jsonwebtoken.impl.security;
 
-import io.jsonwebtoken.impl.lang.CheckedFunction;
 import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.security.DecryptionKeyRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -88,16 +87,13 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
         validate(kek, true);
         final SecretKey cek = generateCek(request);
 
-        byte[] ciphertext = jca(request).withCipher(new CheckedFunction<Cipher, byte[]>() {
-            @Override
-            public byte[] apply(Cipher cipher) throws Exception {
-                if (SPEC == null) {
-                    cipher.init(Cipher.WRAP_MODE, kek, ensureSecureRandom(request));
-                } else {
-                    cipher.init(Cipher.WRAP_MODE, kek, SPEC, ensureSecureRandom(request));
-                }
-                return cipher.wrap(cek);
+        byte[] ciphertext = jca(request).withCipher(cipher -> {
+            if (SPEC == null) {
+                cipher.init(Cipher.WRAP_MODE, kek, ensureSecureRandom(request));
+            } else {
+                cipher.init(Cipher.WRAP_MODE, kek, SPEC, ensureSecureRandom(request));
             }
+            return cipher.wrap(cek);
         });
 
         return new DefaultKeyResult(cek, ciphertext);
@@ -110,17 +106,14 @@ public class DefaultRsaKeyAlgorithm extends CryptoAlgorithm implements KeyAlgori
         validate(kek, false);
         final byte[] cekBytes = Assert.notEmpty(request.getPayload(), "Request content (encrypted key) cannot be null or empty.");
 
-        return jca(request).withCipher(new CheckedFunction<Cipher, SecretKey>() {
-            @Override
-            public SecretKey apply(Cipher cipher) throws Exception {
-                if (SPEC == null) {
-                    cipher.init(Cipher.UNWRAP_MODE, kek);
-                } else {
-                    cipher.init(Cipher.UNWRAP_MODE, kek, SPEC);
-                }
-                Key key = cipher.unwrap(cekBytes, AesAlgorithm.KEY_ALG_NAME, Cipher.SECRET_KEY);
-                return Assert.isInstanceOf(SecretKey.class, key, "Cipher unwrap must return a SecretKey instance.");
+        return jca(request).withCipher(cipher -> {
+            if (SPEC == null) {
+                cipher.init(Cipher.UNWRAP_MODE, kek);
+            } else {
+                cipher.init(Cipher.UNWRAP_MODE, kek, SPEC);
             }
+            Key key = cipher.unwrap(cekBytes, AesAlgorithm.KEY_ALG_NAME, Cipher.SECRET_KEY);
+            return Assert.isInstanceOf(SecretKey.class, key, "Cipher unwrap must return a SecretKey instance.");
         });
     }
 }

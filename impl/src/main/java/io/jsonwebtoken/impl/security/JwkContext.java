@@ -22,6 +22,8 @@ import io.jsonwebtoken.impl.lang.Parameter;
 import io.jsonwebtoken.impl.lang.ParameterReadable;
 import io.jsonwebtoken.security.HashAlgorithm;
 import io.jsonwebtoken.security.KeyOperation;
+import io.jsonwebtoken.security.Providable;
+import io.jsonwebtoken.security.Randomizable;
 
 import java.security.Key;
 import java.security.Provider;
@@ -32,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface JwkContext<K extends Key> extends Identifiable, Map<String, Object>, ParameterReadable, Nameable,
-        X509Context<JwkContext<K>> {
+        X509Context<JwkContext<K>>, Providable<JwkContext<K>>, Randomizable<JwkContext<K>> {
 
     JwkContext<K> parameter(Parameter<?> param);
 
@@ -82,9 +84,5 @@ public interface JwkContext<K extends Key> extends Identifiable, Map<String, Obj
 
     Provider getProvider();
 
-    JwkContext<K> setProvider(Provider provider);
-
     SecureRandom getRandom();
-
-    JwkContext<K> setRandom(SecureRandom random);
 }

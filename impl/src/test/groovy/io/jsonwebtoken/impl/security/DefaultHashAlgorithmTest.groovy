@@ -18,24 +18,33 @@ package io.jsonwebtoken.impl.security
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.HashAlgorithm
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.JwkThumbprint
 import org.junit.Test
 
 import static org.junit.Assert.assertTrue
 
 class DefaultHashAlgorithmTest {
 
-    static final def algs = [DefaultHashAlgorithm.SHA1, Jwks.HASH.SHA256]
+    static final def algs = [DefaultHashAlgorithm.SHA1, JwkThumbprint.alg.SHA256]
 
     @Test
-    void testDigestAndVerify() {
+    void testDigestInputStreamAndVerify() {
         byte[] data = Strings.utf8('Hello World')
         InputStream payload = Streams.of(data)
         for (HashAlgorithm alg : algs) {
-            byte[] hash = alg.digest(new DefaultRequest<>(payload, null, null))
+            byte[] hash = alg.digest(payload)
             payload.reset()
-            assertTrue alg.verify(new DefaultVerifyDigestRequest(payload, null, null, hash))
+            assertTrue alg.verify(payload, hash)
             payload.reset()
+        }
+    }
+
+    @Test
+    void testDigestByteArrayAndVerify() {
+        byte[] data = Strings.utf8('Hello World')
+        for (HashAlgorithm alg : algs) {
+            byte[] hash = alg.digest(data)
+            assertTrue alg.verify(data, hash)
         }
     }
 }

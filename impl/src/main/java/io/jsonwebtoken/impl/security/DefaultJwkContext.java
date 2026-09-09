@@ -22,7 +22,7 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.Registry;
 import io.jsonwebtoken.security.HashAlgorithm;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyOperation;
 
 import java.security.Key;
@@ -233,7 +233,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
         if (Collections.isEmpty(ops)) {
             return false;
         }
-        return ops.contains(Jwks.OP.SIGN) || ops.contains(Jwks.OP.VERIFY);
+        return ops.contains(Jwk.op.SIGN) || ops.contains(Jwk.op.VERIFY);
     }
 
     @Override
@@ -264,7 +264,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
-    public JwkContext<K> setProvider(Provider provider) {
+    public JwkContext<K> provider(Provider provider) {
         this.provider = provider;
         return this;
     }
@@ -275,7 +275,7 @@ public class DefaultJwkContext<K extends Key> extends AbstractX509Context<JwkCon
     }
 
     @Override
-    public JwkContext<K> setRandom(SecureRandom random) {
+    public JwkContext<K> random(SecureRandom random) {
         this.random = random;
         return this;
     }

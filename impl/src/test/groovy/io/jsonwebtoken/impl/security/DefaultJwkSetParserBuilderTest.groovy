@@ -59,6 +59,7 @@ class DefaultJwkSetParserBuilderTest {
     @Test
     void testStaticFactoryMethod() {
         assertTrue Jwks.setParser() instanceof DefaultJwkSetParserBuilder
+        assertTrue JwkSet.parser() instanceof DefaultJwkSetParserBuilder
     }
 
     /**

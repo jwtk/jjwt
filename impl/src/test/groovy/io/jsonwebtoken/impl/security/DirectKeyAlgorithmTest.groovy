@@ -15,10 +15,11 @@
  */
 package io.jsonwebtoken.impl.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import io.jsonwebtoken.impl.DefaultJweHeader
 import io.jsonwebtoken.lang.Arrays
 import io.jsonwebtoken.security.DecryptionKeyRequest
+import io.jsonwebtoken.security.KeyRequest
 import org.junit.Test
 
 import javax.crypto.spec.SecretKeySpec
@@ -39,21 +40,21 @@ class DirectKeyAlgorithmTest {
     void testGetEncryptionKey() {
         def alg = new DirectKeyAlgorithm()
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader([:]), Jwts.ENC.A128GCM)
-        def result = alg.getEncryptionKey(request)
+        def header = new DefaultJweHeader([:])
+        def result = alg.getEncryptionKey(key, header, Jwe.enc.A128GCM)
         assertSame key, result.getKey()
         assertEquals 0, Arrays.length(result.getPayload()) //must not have an encrypted key
     }
 
     @Test(expected = IllegalArgumentException)
     void testGetEncryptionKeyWithNullRequest() {
-        new DirectKeyAlgorithm().getEncryptionKey(null)
+        new DirectKeyAlgorithm().getEncryptionKey(null as KeyRequest)
     }
 
     @Test(expected = IllegalArgumentException)
     void testGetEncryptionKeyWithNullRequestKey() {
         def key = new SecretKeySpec(new byte[1], "AES")
-        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader([:]), Jwts.ENC.A128GCM) {
+        def request = new DefaultKeyRequest(key, null, null, new DefaultJweHeader([:]), Jwe.enc.A128GCM) {
             @Override
             Key getPayload() {
                 return null
@@ -66,7 +67,7 @@ class DirectKeyAlgorithmTest {
     void testGetDecryptionKey() {
         def alg = new DirectKeyAlgorithm()
         DecryptionKeyRequest req = createMock(DecryptionKeyRequest)
-        def key = Jwts.ENC.A128GCM.key().build()
+        def key = Jwe.enc.A128GCM.key().build()
         expect(req.getKey()).andReturn(key)
         replay(req)
         def result = alg.getDecryptionKey(req)
@@ -76,7 +77,7 @@ class DirectKeyAlgorithmTest {
 
     @Test(expected = IllegalArgumentException)
     void testGetDecryptionKeyWithNullRequest() {
-        new DirectKeyAlgorithm().getDecryptionKey(null)
+        new DirectKeyAlgorithm().getDecryptionKey(null as DecryptionKeyRequest)
     }
 
     @Test(expected = IllegalArgumentException)

@@ -16,6 +16,7 @@
 package io.jsonwebtoken.all;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwe;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.AeadAlgorithm;
@@ -23,9 +24,7 @@ import io.jsonwebtoken.security.Curve;
 import io.jsonwebtoken.security.EcPrivateJwk;
 import io.jsonwebtoken.security.EcPublicJwk;
 import io.jsonwebtoken.security.Jwk;
-import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.KeyAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.OctetPrivateJwk;
 import io.jsonwebtoken.security.OctetPublicJwk;
@@ -48,7 +47,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
 
-import static io.jsonwebtoken.security.Jwks.builder;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
@@ -64,7 +62,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleDetachedUnencodedPayload() {
         // create a test key for this example:
-        SecretKey testKey = Jwts.SIG.HS512.key().build();
+        SecretKey testKey = Jws.alg.HS512.key().build();
 
         String message = "Hello World. It's a Beautiful Day!";
         byte[] content = message.getBytes(StandardCharsets.UTF_8);
@@ -87,7 +85,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleNonDetachedUnencodedPayload() {
         // create a test key for this example:
-        SecretKey testKey = Jwts.SIG.HS512.key().build();
+        SecretKey testKey = Jws.alg.HS512.key().build();
 
         String claimsString = "{\"sub\":\"joe\",\"iss\":\"me\"}";
 
@@ -118,7 +116,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsHS() {
         // Create a test key suitable for the desired HMAC-SHA algorithm:
-        MacAlgorithm alg = Jwts.SIG.HS512; //or HS384 or HS256
+        MacAlgorithm alg = Jws.alg.HS512; //or HS384 or HS256
         SecretKey key = alg.key().build();
 
         String message = "Hello World!";
@@ -139,7 +137,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsRSA() {
         // Create a test key suitable for the desired RSA signature algorithm:
-        SignatureAlgorithm alg = Jwts.SIG.RS512; //or PS512, RS256, etc...
+        SignatureAlgorithm alg = Jws.alg.RS512; //or PS512, RS256, etc...
         KeyPair pair = alg.keyPair().build();
 
         // Bob creates the compact JWS with his RSA private key:
@@ -161,7 +159,7 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsECDSA() {
         // Create a test key suitable for the desired ECDSA signature algorithm:
-        SignatureAlgorithm alg = Jwts.SIG.ES512; //or ES256 or ES384
+        SignatureAlgorithm alg = Jws.alg.ES512; //or ES256 or ES384
         KeyPair pair = alg.keyPair().build();
 
         // Bob creates the compact JWS with his EC private key:
@@ -183,12 +181,12 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJwsEdDSA() {
         // Create a test key suitable for the EdDSA signature algorithm using Ed25519 or Ed448 keys:
-        Curve curve = Jwks.CRV.Ed25519; //or Ed448
+        Curve curve = Jwk.crv.Ed25519; //or Ed448
         KeyPair pair = curve.keyPair().build();
 
         // Bob creates the compact JWS with his Edwards Curve private key:
         String jws = Jwts.builder().subject("Alice")
-                .signWith(pair.getPrivate(), Jwts.SIG.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
+                .signWith(pair.getPrivate(), Jws.alg.EdDSA) // <-- Bob's Edwards Curve private key w/ EdDSA
                 .compact();
 
         // Alice receives and verifies the compact JWS came from Bob:
@@ -206,7 +204,7 @@ public class JavaReadmeTest {
     public void testExampleJweDir() {
         // Create a test key suitable for the desired payload encryption algorithm:
         // (A*GCM algorithms are recommended, but require JDK 8 or later)
-        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A128GCM, A192GCM, A256CBC-HS512, etc...
         SecretKey key = enc.key().build();
 
         String message = "Live long and prosper.";
@@ -227,12 +225,12 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweRSA() {
         // Create a test KeyPair suitable for the desired RSA key algorithm:
-        KeyPair pair = Jwts.SIG.RS512.keyPair().build();
+        KeyPair pair = Jws.alg.RS512.keyPair().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.alg.RSA_OAEP_256; //or RSA_OAEP or RSA1_5
         // Choose the Encryption Algorithm to encrypt the payload:
-        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's RSA public key so only she may read it:
         String jwe = Jwts.builder().audience().add("Alice").and()
@@ -253,11 +251,11 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweAESKW() {
         // Create a test SecretKey suitable for the desired AES Key Wrap algorithm:
-        SecretKeyAlgorithm alg = Jwts.KEY.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
+        SecretKeyAlgorithm alg = Jwe.alg.A256GCMKW; //or A192GCMKW, A128GCMKW, A256KW, etc...
         SecretKey key = alg.key().build();
 
-        // Chooose the Encryption Algorithm used to encrypt the payload:
-        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        // Choose the Encryption Algorithm used to encrypt the payload:
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
         String jwe = Jwts.builder().issuer("me").encryptWith(key, alg, enc).compact();
@@ -275,12 +273,12 @@ public class JavaReadmeTest {
     @Test
     public void testExampleJweECDHES() {
         // Create a test KeyPair suitable for the desired EC key algorithm:
-        KeyPair pair = Jwts.SIG.ES512.keyPair().build();
+        KeyPair pair = Jws.alg.ES512.keyPair().build();
 
         // Choose the key algorithm used encrypt the payload key:
-        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwts.KEY.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
+        KeyAlgorithm<PublicKey, PrivateKey> alg = Jwe.alg.ECDH_ES_A256KW; //ECDH_ES_A192KW, etc...
         // Choose the Encryption Algorithm to encrypt the payload:
-        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Bob creates the compact JWE with Alice's EC public key so only she may read it:
         String jwe = Jwts.builder().audience().add("Alice").and()
@@ -302,10 +300,10 @@ public class JavaReadmeTest {
     public void testExampleJwePassword() {
         //DO NOT use this example password in a real app, it is well-known to password crackers
         String pw = "correct horse battery staple";
-        Password password = Keys.password(pw.toCharArray());
+        Password password = Password.of(pw.toCharArray());
 
         // Choose the desired PBES2 key derivation algorithm:
-        KeyAlgorithm<Password, Password> alg = Jwts.KEY.PBES2_HS512_A256KW; //or PBES2_HS384...
+        KeyAlgorithm<Password, Password> alg = Jwe.alg.PBES2_HS512_A256KW; //or PBES2_HS384...
 
         // Optionally choose the number of PBES2 computational iterations to use to derive the key.
         // This is optional - if you do not specify a value, JJWT will automatically choose a value
@@ -316,12 +314,12 @@ public class JavaReadmeTest {
         //int pbkdf2Iterations = 120000; //for HS512. Needs to be much higher for smaller hash algs.
 
         // Choose the Encryption Algorithm used to encrypt the payload:
-        AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
+        AeadAlgorithm enc = Jwe.enc.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc...
 
         // Create the compact JWE:
         String jwe = Jwts.builder().issuer("me")
                 // Optional work factor is specified in the header:
-                //.header().pbes2Count(pbkdf2Iterations)).and()
+                //.header().pbes2Count(pbkdf2Iterations).and()
                 .encryptWith(password, alg, enc)
                 .compact();
 
@@ -334,14 +332,14 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleSecretJwk() {
-        SecretKey key = Jwts.SIG.HS512.key().build(); // or HS384 or HS256
-        SecretJwk jwk = builder().key(key).idFromThumbprint().build();
+        SecretKey key = Jws.alg.HS512.key().build(); // or HS384 or HS256
+        SecretJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(jwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(jwk); // returns raw key material
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof SecretJwk;
         assert jwk.equals(parsed);
@@ -349,14 +347,14 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleRsaPublicJwk() {
-        RSAPublicKey key = (RSAPublicKey) Jwts.SIG.RS512.keyPair().build().getPublic();
-        RsaPublicJwk jwk = builder().key(key).idFromThumbprint().build();
+        RSAPublicKey key = (RSAPublicKey) Jws.alg.RS512.keyPair().build().getPublic();
+        RsaPublicJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String jwkJson = Jwks.json(jwk);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String jwkJson = Jwk.json(jwk);
+        Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof RsaPublicJwk;
         assert jwk.equals(parsed);
@@ -364,11 +362,11 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleRsaPrivateJwk() {
-        KeyPair pair = Jwts.SIG.RS512.keyPair().build();
+        KeyPair pair = Jws.alg.RS512.keyPair().build();
         RSAPublicKey pubKey = (RSAPublicKey) pair.getPublic();
         RSAPrivateKey privKey = (RSAPrivateKey) pair.getPrivate();
 
-        RsaPrivateJwk privJwk = builder().key(privKey).idFromThumbprint().build();
+        RsaPrivateJwk privJwk = Jwk.builder().key(privKey).idFromThumbprint().build();
         RsaPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -376,8 +374,8 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(privJwk); // returns raw key material
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof RsaPrivateJwk;
         assert privJwk.equals(parsed);
@@ -385,14 +383,14 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleEcPublicJwk() {
-        ECPublicKey key = (ECPublicKey) Jwts.SIG.ES512.keyPair().build().getPublic();
-        EcPublicJwk jwk = builder().key(key).idFromThumbprint().build();
+        ECPublicKey key = (ECPublicKey) Jws.alg.ES512.keyPair().build().getPublic();
+        EcPublicJwk jwk = Jwk.builder().key(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String jwkJson = Jwks.json(jwk);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String jwkJson = Jwk.json(jwk);
+        Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof EcPublicJwk;
         assert jwk.equals(parsed);
@@ -400,11 +398,11 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleEcPrivateJwk() {
-        KeyPair pair = Jwts.SIG.ES512.keyPair().build();
+        KeyPair pair = Jws.alg.ES512.keyPair().build();
         ECPublicKey pubKey = (ECPublicKey) pair.getPublic();
         ECPrivateKey privKey = (ECPrivateKey) pair.getPrivate();
 
-        EcPrivateJwk privJwk = builder().key(privKey).idFromThumbprint().build();
+        EcPrivateJwk privJwk = Jwk.builder().key(privKey).idFromThumbprint().build();
         EcPublicJwk pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -412,8 +410,8 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(privJwk); // returns raw key material
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof EcPrivateJwk;
         assert privJwk.equals(parsed);
@@ -421,14 +419,14 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleEdEcPublicJwk() {
-        PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
-        OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
+        PublicKey key = Jwk.crv.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
+        OctetPublicJwk<PublicKey> jwk = Jwk.builder().octetKey(key).idFromThumbprint().build();
 
         assert jwk.getId().equals(jwk.thumbprint().toString());
         assert key.equals(jwk.toKey());
 
-        String jwkJson = Jwks.json(jwk);
-        Jwk<?> parsed = Jwks.parser().build().parse(jwkJson);
+        String jwkJson = Jwk.json(jwk);
+        Jwk<?> parsed = Jwk.parser().build().parse(jwkJson);
 
         assert parsed instanceof OctetPublicJwk;
         assert jwk.equals(parsed);
@@ -436,11 +434,11 @@ public class JavaReadmeTest {
 
     @Test
     public void testExampleEdEcPrivateJwk() {
-        KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
+        KeyPair pair = Jwk.crv.Ed448.keyPair().build(); // or Ed25519, X25519, X448
         PublicKey pubKey = pair.getPublic();
         PrivateKey privKey = pair.getPrivate();
 
-        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().octetKey(privKey).idFromThumbprint().build();
+        OctetPrivateJwk<PrivateKey, PublicKey> privJwk = Jwk.builder().octetKey(privKey).idFromThumbprint().build();
         OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
         assert privJwk.getId().equals(privJwk.thumbprint().toString());
@@ -448,8 +446,8 @@ public class JavaReadmeTest {
         assert privKey.equals(privJwk.toKey());
         assert pubKey.equals(pubJwk.toKey());
 
-        String unsafeJwkJson = Jwks.UNSAFE_JSON(privJwk); // returns raw key material
-        Jwk<?> parsed = Jwks.parser().build().parse(unsafeJwkJson);
+        String unsafeJwkJson = Jwk.UNSAFE_JSON(privJwk); // returns raw key material
+        Jwk<?> parsed = Jwk.parser().build().parse(unsafeJwkJson);
 
         assert parsed instanceof OctetPrivateJwk;
         assert privJwk.equals(parsed);
@@ -461,7 +459,7 @@ public class JavaReadmeTest {
                 "\"k\":\"AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow\"," +
                 "\"kid\":\"HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.\"}";
 
-        Jwk<?> jwk = Jwks.parser().build().parse(json);
+        Jwk<?> jwk = Jwk.parser().build().parse(json);
 
         String expected = "{kty=oct, k=<redacted>, kid=HMAC key used in https://www.rfc-editor.org/rfc/rfc7515#appendix-A.1.1 example.}";
         assert expected.equals(jwk.toString());

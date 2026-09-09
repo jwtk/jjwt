@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl
 
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.lang.Bytes
@@ -42,7 +43,7 @@ class DefaultJwsTest {
     @Test
     void testToString() {
         //create random signing key for testing:
-        def alg = Jwts.SIG.HS256
+        def alg = Jws.alg.HS256
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         int i = compact.lastIndexOf('.')
@@ -53,7 +54,7 @@ class DefaultJwsTest {
 
     @Test
     void testEqualsAndHashCode() {
-        def alg = Jwts.SIG.HS256
+        def alg = Jws.alg.HS256
         def key = alg.key().build()
         String compact = Jwts.builder().claim('foo', 'bar').signWith(key, alg).compact()
         def parser = Jwts.parser().verifyWith(key).build()

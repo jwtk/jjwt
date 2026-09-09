@@ -15,6 +15,7 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.security.PayloadParams;
 import io.jsonwebtoken.security.Request;
 
 import java.security.Provider;
@@ -25,7 +26,7 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
     private final Provider provider;
     private final SecureRandom secureRandom;
 
-    public DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
+    DefaultRequest(T payload, Provider provider, SecureRandom secureRandom) {
         super(payload);
         this.provider = provider;
         this.secureRandom = secureRandom;
@@ -39,5 +40,36 @@ public class DefaultRequest<T> extends DefaultMessage<T> implements Request<T> {
     @Override
     public SecureRandom getSecureRandom() {
         return this.secureRandom;
+    }
+
+    static abstract class AbstractPayloadParams<T, M extends PayloadParams<T, M>>
+            implements PayloadParams<T, M> {
+
+        protected Provider provider;
+        protected SecureRandom random;
+        protected T payload;
+
+        @SuppressWarnings("unchecked")
+        protected final M self() {
+            return (M) this;
+        }
+
+        @Override
+        public M payload(T payload) {
+            this.payload = payload;
+            return self();
+        }
+
+        @Override
+        public M provider(Provider provider) {
+            this.provider = provider;
+            return self();
+        }
+
+        @Override
+        public M random(SecureRandom random) {
+            this.random = random;
+            return self();
+        }
     }
 }

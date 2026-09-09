@@ -16,6 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.Password
 import org.junit.Test
 
 import static org.junit.Assert.assertSame
@@ -24,13 +25,13 @@ class ProvidedSecretKeyBuilderTest {
 
     @Test
     void testBuildPasswordWithoutProvider() {
-        def password = Keys.password('foo'.toCharArray())
+        def password = Password.of('foo'.toCharArray())
         assertSame password, Keys.builder(password).build() // does not wrap in ProviderKey
     }
 
     @Test
     void testBuildPasswordWithProvider() {
-        def password = Keys.password('foo'.toCharArray())
+        def password = Password.of('foo'.toCharArray())
         assertSame password, Keys.builder(password).provider(new TestProvider()).build() // does not wrap in ProviderKey
     }
 }

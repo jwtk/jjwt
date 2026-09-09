@@ -15,38 +15,75 @@
  */
 package io.jsonwebtoken.security;
 
+import java.util.function.Consumer;
+
 /**
  * A marker interface that indicates the implementing instance supports the ability to configure a
  * {@link KeyOperationPolicy} used to validate JWK instances.
  *
  * @param <T> the implementing instance for method chaining
  */
+@SuppressWarnings("SpellCheckingInspection")
 @FunctionalInterface
 public interface KeyOperationPolicied<T extends KeyOperationPolicied<T>> {
 
     /**
-     * Sets the key operation policy that determines which {@link KeyOperation}s may be assigned to a
-     * JWK. Unless overridden by this method, the default RFC-recommended policy is used where:
+     * Sets the key operation policy that determines which {@link KeyOperation}s may be assigned to a JWK.
+     *
+     * <p>Unless overridden by this method, the default RFC-recommended policy is used where:</p>
      * <ul>
-     *     <li>All {@link Jwks.OP RFC-standard key operations} are supported.</li>
+     *     <li>All {@link Jwk.op RFC-standard key operations} are supported.</li>
      *     <li>Multiple unrelated operations may <b>not</b> be assigned to the JWK per the
      *     <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
      * <blockquote><pre>
      * Multiple unrelated key operations SHOULD NOT be specified for a key
      * because of the potential vulnerabilities associated with using the
-     * same key with multiple algorithms.  Thus, the combinations "{@link Jwks.OP#SIGN sign}"
-     * with "{@link Jwks.OP#VERIFY verify}", "{@link Jwks.OP#ENCRYPT encrypt}" with "{@link Jwks.OP#DECRYPT decrypt}", and "{@link Jwks.OP#WRAP_KEY wrapKey}" with
-     * "{@link Jwks.OP#UNWRAP_KEY unwrapKey}" are permitted, but other combinations SHOULD NOT be used.</pre></blockquote>
+     * same key with multiple algorithms.  Thus, the combinations "{@link Jwk.op#SIGN sign}"
+     * with "{@link Jwk.op#VERIFY verify}", "{@link Jwk.op#ENCRYPT encrypt}" with "{@link Jwk.op#DECRYPT decrypt}", and "{@link Jwk.op#WRAP_KEY wrapKey}" with
+     * "{@link Jwk.op#UNWRAP_KEY unwrapKey}" are permitted, but other combinations SHOULD NOT be used.</pre></blockquote>
      * </li>
      * </ul>
      *
      * <p>If you wish to enable a different policy, perhaps to support additional custom {@code KeyOperation} values,
-     * one can be created by using the {@link Jwks.OP#policy()} builder, or by implementing the
-     * {@link KeyOperationPolicy} interface directly.</p>
+     * one may be created and configured using the {@link #operationPolicy(Consumer)} method, or by using a
+     * {@link Jwk.op#policy()} builder, or by implementing the {@link KeyOperationPolicy} interface directly.</p>
      *
      * @param policy the policy that determines which {@link KeyOperation}s may be assigned to a JWK.
      * @return the builder for method chaining.
      * @throws IllegalArgumentException if {@code policy} is null
+     * @see #operationPolicy(Consumer)
      */
     T operationPolicy(KeyOperationPolicy policy) throws IllegalArgumentException;
+
+    /**
+     * Configures a new {@link KeyOperationPolicy} that determines which {@link KeyOperation}s may be assigned to a
+     * JWK. Unless overridden by this or the {@link #operationPolicy(KeyOperationPolicy)} methods, the default
+     * RFC-recommended policy is used where:
+     * <ul>
+     *     <li>All {@link Jwk.op RFC-standard key operations} are supported.</li>
+     *     <li>Multiple unrelated operations may <b>not</b> be assigned to the JWK per the
+     *     <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">RFC 7517, Section 4.3</a> recommendation:
+     * <blockquote><pre>
+     * Multiple unrelated key operations SHOULD NOT be specified for a key
+     * because of the potential vulnerabilities associated with using the
+     * same key with multiple algorithms.  Thus, the combinations "{@link Jwk.op#SIGN sign}"
+     * with "{@link Jwk.op#VERIFY verify}", "{@link Jwk.op#ENCRYPT encrypt}" with "{@link Jwk.op#DECRYPT decrypt}", and "{@link Jwk.op#WRAP_KEY wrapKey}" with
+     * "{@link Jwk.op#UNWRAP_KEY unwrapKey}" are permitted, but other combinations SHOULD NOT be used.</pre></blockquote>
+     * </li>
+     * </ul>
+     *
+     * @param p the consumer that may configure the policy that determines which {@link KeyOperation}s may be assigned
+     *          to a JWK.
+     * @return the builder for method chaining.
+     * @throws IllegalArgumentException if {@code policy} is null
+     * @see #operationPolicy(KeyOperationPolicy)
+     * @since JJWT_RELEASE_VERSION
+     */
+    default T operationPolicy(Consumer<KeyOperationPolicyBuilder> p) throws IllegalArgumentException {
+        KeyOperationPolicyBuilder b = Jwk.op.policy();
+        p.accept(b);
+        KeyOperationPolicy policy = b.build();
+        return operationPolicy(policy);
+    }
+
 }

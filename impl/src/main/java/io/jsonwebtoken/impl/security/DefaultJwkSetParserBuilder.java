@@ -40,7 +40,7 @@ public class DefaultJwkSetParserBuilder extends AbstractJwkParserBuilder<JwkSet,
     }
 
     // @since 0.12.7 per https://github.com/jwtk/jjwt/issues/988
-    @SuppressWarnings("unused") // used via reflection in the api module's Jwks class.
+    @SuppressWarnings("unused") // used via reflection by io.jsonwebtoken.security.Suppliers
     public static final class Supplier implements java.util.function.Supplier<JwkSetParserBuilder> {
         @Override
         public JwkSetParserBuilder get() {

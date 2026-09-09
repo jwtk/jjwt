@@ -16,13 +16,14 @@
 //file:noinspection SpellCheckingInspection
 package io.jsonwebtoken.impl.security
 
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.io.Streams
 import io.jsonwebtoken.impl.lang.Bytes
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.security.InvalidKeyException
+import io.jsonwebtoken.security.SecureDigestRequest
 import io.jsonwebtoken.security.SignatureException
 import org.junit.Test
 
@@ -44,7 +45,7 @@ import static org.junit.Assert.*
 class EcSignatureAlgorithmTest {
 
     static Collection<EcSignatureAlgorithm> algs() {
-        return Jwts.SIG.get().values().findAll({ it instanceof EcSignatureAlgorithm }) as Collection<EcSignatureAlgorithm>
+        return Jws.alg.registry().values().findAll({ it instanceof EcSignatureAlgorithm }) as Collection<EcSignatureAlgorithm>
     }
 
     @Test
@@ -120,9 +121,10 @@ class EcSignatureAlgorithmTest {
     @Test
     void testSignWithPublicKey() {
         ECPublicKey key = TestKeys.ES256.pair.public as ECPublicKey
-        def request = new DefaultSecureRequest(Streams.of(new byte[1]), null, null, key)
-        def alg = Jwts.SIG.ES256
+        def request = SecureDigestRequest.builder().payload(Streams.of(new byte[1])).key(key).build()
+        def alg = Jws.alg.ES256
         try {
+            //noinspection GroovyAssignabilityCheck
             alg.digest(request)
         } catch (InvalidKeyException e) {
             String msg = "${alg.getId()} signing keys must be PrivateKeys (implement ${PrivateKey.class.getName()}). " +
@@ -137,9 +139,8 @@ class EcSignatureAlgorithmTest {
             BigInteger order = BigInteger.ONE
             ECParameterSpec spec = new ECParameterSpec(new EllipticCurve(new TestECField(), BigInteger.ONE, BigInteger.ONE), new ECPoint(BigInteger.ONE, BigInteger.ONE), order, 1)
             ECPrivateKey priv = new TestECPrivateKey(algorithm: 'EC', params: spec)
-            def request = new DefaultSecureRequest(Streams.of(new byte[1]), null, null, priv)
             try {
-                it.digest(request)
+                it.digest(priv, Streams.of(new byte[1]))
             } catch (InvalidKeyException expected) {
                 String msg = "The provided Elliptic Curve signing key size (aka order bit length) is " +
                         "${Bytes.bitsMsg(order.bitLength())}, but the '${it.getId()}' algorithm requires EC Keys with " +
@@ -152,11 +153,10 @@ class EcSignatureAlgorithmTest {
 
     @Test
     void testSignWithInvalidKeyFieldLength() {
-        def keypair = Jwts.SIG.ES256.keyPair().build()
+        def keypair = Jws.alg.ES256.keyPair().build()
         def data = "foo".getBytes(StandardCharsets.UTF_8)
-        def req = new DefaultSecureRequest(Streams.of(data), null, null, keypair.private)
         try {
-            Jwts.SIG.ES384.digest(req)
+            Jws.alg.ES384.digest(keypair.private, Streams.of(data))
         } catch (InvalidKeyException expected) {
             String msg = "The provided Elliptic Curve signing key size (aka order bit length) is " +
                     "256 bits (32 bytes), but the 'ES384' algorithm requires EC Keys with " +
@@ -174,8 +174,7 @@ class EcSignatureAlgorithmTest {
             payload.reset()
             def pair = it.keyPair().build()
             def key = pair.getPrivate()
-            def signRequest = new DefaultSecureRequest(payload, null, null, key)
-            byte[] signature = it.digest(signRequest)
+            byte[] signature = it.digest(key, payload)
             payload.reset()
             def verifyRequest = new DefaultVerifySecureDigestRequest(payload, null, null, key, signature)
             try {
@@ -266,6 +265,7 @@ class EcSignatureAlgorithmTest {
 
     @Test
     void edgeCaseSignatureToConcatLengthTest() {
+        //noinspection GroovyUnusedCatchParameter
         try {
             def signature = Decoders.BASE64.decode("MIEAAGg3OVb/ZeX12cYrhK3c07TsMKo7Kc6SiqW++4CAZWCX72DkZPGTdCv2duqlupsnZL53hiG3rfdOLj8drndCU+KHGrn5EotCATdMSLCXJSMMJoHMM/ZPG+QOHHPlOWnAvpC1v4lJb32WxMFNz1VAIWrl9Aa6RPG1GcjCTScKjvEE")
             EcSignatureAlgorithm.transcodeDERToConcat(signature, 132)
@@ -305,11 +305,11 @@ class EcSignatureAlgorithmTest {
         def fact = KeyFactory.getInstance("EC")
         def publicKey = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="
         def pub = fact.generatePublic(new X509EncodedKeySpec(Decoders.BASE64.decode(publicKey)))
-        def alg = Jwts.SIG.ES512
+        def alg = Jws.alg.ES512
         def verifier = { String token ->
             def signatureStart = token.lastIndexOf('.')
             def withoutSignature = token.substring(0, signatureStart)
-            def data = Strings.ascii(withoutSignature);
+            def data = Strings.ascii(withoutSignature)
             def payload = Streams.of(data)
             def signature = Decoders.BASE64URL.decode(token.substring(signatureStart + 1))
             assertTrue "Signature do not match that of other implementations", alg.verify(new DefaultVerifySecureDigestRequest(payload, null, null, pub, signature))
@@ -330,7 +330,7 @@ class EcSignatureAlgorithmTest {
             assertTrue keypair.getPrivate() instanceof ECPrivateKey
             def data = Strings.ascii(withoutSignature)
             def payload = Streams.of(data)
-            def signature = alg.digest(new DefaultSecureRequest<>(payload, null, null, keypair.private))
+            def signature = alg.digest(keypair.private, payload)
             payload.reset()
             assertTrue alg.verify(new DefaultVerifySecureDigestRequest(payload, null, null, keypair.public, signature))
         }
@@ -466,7 +466,7 @@ class EcSignatureAlgorithmTest {
         def fact = KeyFactory.getInstance("EC")
         def publicKey = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQASisgweVL1tAtIvfmpoqvdXF8sPKTV9YTKNxBwkdkm+/auh4pR8TbaIfsEzcsGUVv61DFNFXb0ozJfurQ59G2XcgAn3vROlSSnpbIvuhKrzL5jwWDTaYa5tVF1Zjwia/5HUhKBkcPuWGXg05nMjWhZfCuEetzMLoGcHmtvabugFrqsAg="
         def pub = fact.generatePublic(new X509EncodedKeySpec(Decoders.BASE64.decode(publicKey)))
-        def alg = Jwts.SIG.ES512
+        def alg = Jws.alg.ES512
         def verifier = { String token ->
             def signatureStart = token.lastIndexOf('.')
             def withoutSignature = token.substring(0, signatureStart)
@@ -488,7 +488,7 @@ class EcSignatureAlgorithmTest {
     // asserts guard for JVM security bug CVE-2022-21449:
     void legacySignatureCompatDefaultTest() {
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = Jwts.SIG.ES512
+        def alg = Jws.alg.ES512
         def keypair = alg.keyPair().build()
         def signature = Signature.getInstance(alg.jcaName as String)
         def data = Strings.ascii(withoutSignature)
@@ -515,7 +515,7 @@ class EcSignatureAlgorithmTest {
             System.setProperty(EcSignatureAlgorithm.DER_ENCODING_SYS_PROPERTY_NAME, 'true')
 
             def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-            def alg = Jwts.SIG.ES512
+            def alg = Jws.alg.ES512
             def keypair = alg.keyPair().build()
             def signature = Signature.getInstance(alg.jcaName as String)
             def data = Strings.ascii(withoutSignature)
@@ -535,7 +535,7 @@ class EcSignatureAlgorithmTest {
     void testVerifySignatureAllZeros() {
         byte[] forgedSig = new byte[64]
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = Jwts.SIG.ES256
+        def alg = Jws.alg.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
         def payload = Streams.of(data)
@@ -553,7 +553,7 @@ class EcSignatureAlgorithmTest {
         System.arraycopy(s, 0, sig, r.length, s.length)
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = Jwts.SIG.ES256
+        def alg = Jws.alg.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
         def payload = Streams.of(data)
@@ -571,7 +571,7 @@ class EcSignatureAlgorithmTest {
         System.arraycopy(s, 0, sig, r.length, s.length)
 
         def withoutSignature = "eyJhbGciOiJFUzUxMiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
-        def alg = Jwts.SIG.ES256
+        def alg = Jws.alg.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
         def payload = Streams.of(data)
@@ -584,7 +584,7 @@ class EcSignatureAlgorithmTest {
     void ecdsaInvalidSignatureValuesTest() {
         def withoutSignature = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsImlhdCI6MTQ2NzA2NTgyN30"
         def invalidEncodedSignature = "_____wAAAAD__________7zm-q2nF56E87nKwvxjJVH_____AAAAAP__________vOb6racXnoTzucrC_GMlUQ"
-        def alg = Jwts.SIG.ES256
+        def alg = Jws.alg.ES256
         def keypair = alg.keyPair().build()
         def data = Strings.ascii(withoutSignature)
         def payload = Streams.of(data)

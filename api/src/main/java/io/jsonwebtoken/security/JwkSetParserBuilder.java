@@ -22,7 +22,7 @@ import io.jsonwebtoken.io.ParserBuilder;
  * A builder to construct a {@link Parser} that can parse {@link JwkSet}s.
  * Example usage:
  * <blockquote><pre>
- * JwkSet jwkSet = Jwks.setParser()
+ * JwkSet jwkSet = JwkSet.parser()
  *         .provider(aJcaProvider)      // optional
  *         .json(deserializer)          // optional
  *         .operationPolicy(policy)     // optional

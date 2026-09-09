@@ -15,14 +15,17 @@
  */
 package io.jsonwebtoken.impl.security;
 
+import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.PrivateKeyBuilder;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
+import java.util.function.Function;
 
-public class ProvidedPrivateKeyBuilder extends ProvidedKeyBuilder<PrivateKey, PrivateKeyBuilder>
+@SuppressWarnings("unused") // used via reflection as io.jsonwebtoken.security.Suppliers.PRIVATE_KEY_BUILDER_FACTORY
+class ProvidedPrivateKeyBuilder extends ProvidedKeyBuilder<PrivateKey, PrivateKeyBuilder>
         implements PrivateKeyBuilder {
 
     private PublicKey publicKey;
@@ -53,5 +56,14 @@ public class ProvidedPrivateKeyBuilder extends ProvidedKeyBuilder<PrivateKey, Pr
         }
 
         return this.provider != null ? new ProviderPrivateKey(this.provider, key) : key;
+    }
+
+    @SuppressWarnings("unused") // used via reflection as io.jsonwebtoken.security.Suppliers.PRIVATE_KEY_BUILDER_FACTORY
+    public static class Factory implements Function<PrivateKey, PrivateKeyBuilder> {
+        @Override
+        public PrivateKeyBuilder apply(PrivateKey key) {
+            Assert.notNull(key, "PrivateKey cannot be null.");
+            return new ProvidedPrivateKeyBuilder(key);
+        }
     }
 }

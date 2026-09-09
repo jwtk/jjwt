@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Converters
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.RsaPublicJwk
 import org.junit.Test
 
@@ -66,7 +66,7 @@ class RFC7517AppendixBTest {
     @Test
     void test() {
         def m = jwkPairs
-        RsaPublicJwk jwk = Jwks.builder().add(m).build() as RsaPublicJwk
+        RsaPublicJwk jwk = Jwk.builder().add(m).build() as RsaPublicJwk
         RSAPublicKey key = jwk.toKey()
         assertNotNull key
         assertEquals m.size(), jwk.size()

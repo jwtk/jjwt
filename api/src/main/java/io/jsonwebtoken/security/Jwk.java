@@ -16,6 +16,9 @@
 package io.jsonwebtoken.security;
 
 import io.jsonwebtoken.Identifiable;
+import io.jsonwebtoken.io.Parser;
+import io.jsonwebtoken.lang.Classes;
+import io.jsonwebtoken.lang.Registry;
 
 import java.security.Key;
 import java.util.Map;
@@ -25,15 +28,15 @@ import java.util.Set;
  * A JWK is an immutable set of name/value pairs that represent a cryptographic key as defined by
  * <a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517: JSON Web Key (JWK)</a>.  The {@code Jwk}
  * interface represents properties common to all JWKs.  Subtypes will have additional properties specific to
- * different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc).
+ * different types of cryptographic keys (e.g. Secret, Asymmetric, RSA, Elliptic Curve, etc.).
  *
  * <p><b>Immutability</b></p>
  *
  * <p>JWKs are immutable and cannot be changed after they are created.  {@code Jwk} extends the
- * {@link Map} interface purely out of convenience: to allow easy marshalling to JSON as well as name/value
+ * {@link Map} interface purely out of convenience: to allow easy marshaling to JSON as well as name/value
  * pair access and key/value iteration, and other conveniences provided by the Map interface.  Attempting to call any of
  * the {@link Map} interface's mutation methods however (such as {@link Map#put(Object, Object) put},
- * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc) will throw an
+ * {@link Map#remove(Object) remove}, {@link Map#clear() clear}, etc.) will throw an
  * {@link UnsupportedOperationException}.</p>
  *
  * <p><b>Identification</b></p>
@@ -85,6 +88,58 @@ import java.util.Set;
 public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
 
     /**
+     * Return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     *
+     * @return a new JWK builder instance, allowing for type-safe JWK builder coercion based on a specified key or key pair.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static DynamicJwkBuilder<?, ?> builder() {
+        return Suppliers.JWK_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Returns a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances. For example:
+     * <blockquote><pre>
+     * Jwk&lt;?&gt; jwk = Jwk.parser()
+     *         //.provider(aJcaProvider)     // optional
+     *         //.deserializer(deserializer) // optional
+     *         //.operationPolicy(policy)    // optional
+     *         .build()
+     *         .parse(jwkString);</pre></blockquote>
+     *
+     * @return a new builder used to create {@link Parser}s that parse JSON into {@link Jwk} instances.
+     * @since JJWT_RELEASE_VERSION
+     */
+    static JwkParserBuilder parser() {
+        return Suppliers.JWK_PARSER_BUILDER_SUPPLIER.get();
+    }
+
+    /**
+     * Converts the specified {@link PublicJwk} into JSON. Because {@link PublicJwk}s do not contain secret or private
+     * key material, they are safe to be printed to application logs or {@code System.out}.
+     *
+     * @param publicJwk the {@code PublicJwk} to convert to JSON
+     * @return the JWK's canonical JSON value
+     * @since JJWT_RELEASE_VERSION
+     */
+    static String json(PublicJwk<?> publicJwk) {
+        return UNSAFE_JSON(publicJwk); // safe by nature of it being a Public JWK
+    }
+
+    /**
+     * <b>WARNING - UNSAFE OPERATION - RETURN VALUES CONTAIN RAW KEY MATERIAL, DO NOT LOG OR PRINT TO SYSTEM.OUT.</b>
+     * Converts the specified JWK into JSON, including raw key material.  If the specified JWK
+     * is a {@link SecretJwk} or a {@link PrivateJwk}, be very careful with the return value, ensuring it is not
+     * printed to application logs or system.out.
+     *
+     * @param jwk the JWK to convert to JSON
+     * @return the JWK's canonical JSON value
+     */
+    static String UNSAFE_JSON(Jwk<?> jwk) {
+        return Suppliers.UNSAFE_JSON_FUNCTION.apply(jwk);
+    }
+
+    /**
      * Returns the JWK
      * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.4">{@code alg} (Algorithm)</a> value
      * or {@code null} if not present.
@@ -96,7 +151,7 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
     /**
      * Returns the JWK <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">{@code key_ops}
      * (Key Operations) parameter</a> values or {@code null} if not present.  All JWK standard Key Operations are
-     * available via the {@link Jwks.OP} registry, but other (custom) values <em>MAY</em> be present in the returned
+     * available via the {@link op} registry, but other (custom) values <em>MAY</em> be present in the returned
      * set.
      *
      * @return the JWK {@code key_ops} value or {@code null} if not present.
@@ -153,16 +208,19 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
      * JWK using the {@code SHA-256} hash algorithm.
      * @see #thumbprint(HashAlgorithm)
+     * @see JwkThumbprint.alg
      */
     JwkThumbprint thumbprint();
 
     /**
      * Computes and returns the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
-     * JWK using the specified hash algorithm.
+     * JWK using the specified hash algorithm. JWK Thumbprint standard hash algorithms are available in the
+     * {@link JwkThumbprint.alg} registry, but custom algorithms may be used as well.
      *
      * @param alg the hash algorithm to use to compute the digest of the canonical JWK Thumbprint JSON form of this JWK.
      * @return the canonical <a href="https://www.rfc-editor.org/rfc/rfc7638">JWK Thumbprint</a> of this
      * JWK using the specified hash algorithm.
+     * @see JwkThumbprint.alg
      */
     JwkThumbprint thumbprint(HashAlgorithm alg);
 
@@ -173,4 +231,245 @@ public interface Jwk<K extends Key> extends Identifiable, Map<String, Object> {
      * @return the JWK's corresponding Java {@link Key} instance for use with Java cryptographic APIs.
      */
     K toKey();
+
+    /**
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7518.html#section-6.2.1.1">crv (Curve)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">JSON Web Key Elliptic
+     * Curve Registry</a> (including its
+     * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">Edwards Elliptic Curve additions</a>).
+     * Each standard algorithm is available as a ({@code public static final}) constant for direct type-safe
+     * reference in application code. For example:
+     * <blockquote><pre>
+     * Jwk.crv.P256.keyPair().build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
+     *
+     * @see #registry()
+     * @since JJWT_RELEASE_VERSION
+     */
+    final class crv {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardCurves";
+        private static final Registry<String, Curve> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        /**
+         * Returns a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-7.6">RFC 7518, Section 7.6</a>
+         * (for Weierstrass Elliptic Curves) and
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-5">RFC 8037, Section 5</a> (for Edwards Elliptic Curves).
+         *
+         * @return a registry of all standard Elliptic Curves in the {@code JSON Web Key Elliptic Curve Registry}.
+         */
+        public static Registry<String, Curve> registry() {
+            return REGISTRY;
+        }
+
+        /**
+         * {@code P-256} Elliptic Curve defined by
+         * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1">RFC 7518, Section 6.2.1.1</a>
+         * using the native Java JCA {@code secp256r1} algorithm.
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve P256 = registry().forKey("P-256");
+
+        /**
+         * {@code P-384} Elliptic Curve defined by
+         * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1">RFC 7518, Section 6.2.1.1</a>
+         * using the native Java JCA {@code secp384r1} algorithm.
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve P384 = registry().forKey("P-384");
+
+        /**
+         * {@code P-521} Elliptic Curve defined by
+         * <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1">RFC 7518, Section 6.2.1.1</a>
+         * using the native Java JCA {@code secp521r1} algorithm.
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve P521 = registry().forKey("P-521");
+
+        /**
+         * {@code Ed25519} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>
+         * using the native Java JCA {@code Ed25519}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 14 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve Ed25519 = registry().forKey("Ed25519");
+
+        /**
+         * {@code Ed448} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.1">RFC 8037, Section 3.1</a>
+         * using the native Java JCA {@code Ed448}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 15 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 14 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve Ed448 = registry().forKey("Ed448");
+
+        /**
+         * {@code X25519} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.2">RFC 8037, Section 3.2</a>
+         * using the native Java JCA {@code X25519}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve X25519 = registry().forKey("X25519");
+
+        /**
+         * {@code X448} Elliptic Curve defined by
+         * <a href="https://www.rfc-editor.org/rfc/rfc8037#section-3.2">RFC 8037, Section 3.2</a>
+         * using the native Java JCA {@code X448}<b><sup>1</sup></b> algorithm.
+         *
+         * <p><b><sup>1</sup></b> Requires Java 11 or a compatible JCA Provider (like BouncyCastle) in the runtime
+         * classpath. If on Java 10 or earlier, BouncyCastle will be used automatically if found in the runtime
+         * classpath.</p>
+         *
+         * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names</a>
+         */
+        public static final Curve X448 = registry().forKey("X448");
+
+        //prevent instantiation
+        private crv() {
+        }
+    }
+
+    /**
+     * Constants for all standard JWK
+     * <a href="https://www.rfc-editor.org/rfc/rfc7517.html#section-4.3">key_ops (Key Operations)</a> parameter values
+     * defined in the <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">JSON Web Key Operations
+     * Registry</a>. Each standard key operation is available as a ({@code public static final}) constant for
+     * direct type-safe reference in application code. For example:
+     * <blockquote><pre>
+     * Jwk.builder()
+     *     .operations(Jwk.op.SIGN)
+     *     // ... etc ...
+     *     .build();</pre></blockquote>
+     * <p>They are also available together as a {@link Registry} instance via the {@link #registry()} method.</p>
+     *
+     * @see #registry()
+     * @since JJWT_RELEASE_VERSION
+     */
+    final class op {
+
+        private static final String IMPL_CLASSNAME = "io.jsonwebtoken.impl.security.StandardKeyOperations";
+        private static final Registry<String, KeyOperation> REGISTRY = Classes.newInstance(IMPL_CLASSNAME);
+
+        /**
+         * Creates a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         *
+         * @return a new {@link KeyOperationBuilder} for creating custom {@link KeyOperation} instances.
+         */
+        public static KeyOperationBuilder builder() {
+            return Suppliers.KEY_OPERATION_BUILDER_SUPPLIER.get();
+        }
+
+        /**
+         * Creates a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         *
+         * @return a new {@link KeyOperationPolicyBuilder} for creating custom {@link KeyOperationPolicy} instances.
+         */
+        public static KeyOperationPolicyBuilder policy() {
+            return Suppliers.KEY_OPERATION_POLICY_BUILDER_SUPPLIER.get();
+        }
+
+        /**
+         * Returns a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}
+         * defined by <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3">RFC 7517, Section 8.3</a>.
+         *
+         * @return a registry of all standard Key Operations in the {@code JSON Web Key Operations Registry}.
+         */
+        public static Registry<String, KeyOperation> registry() {
+            return REGISTRY;
+        }
+
+        /**
+         * {@code sign} operation indicating a key is intended to be used to compute digital signatures or
+         * MACs. It's related operation is {@link #VERIFY}.
+         *
+         * @see #VERIFY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation SIGN = registry().forKey("sign");
+
+        /**
+         * {@code verify} operation indicating a key is intended to be used to verify digital signatures or
+         * MACs. It's related operation is {@link #SIGN}.
+         *
+         * @see #SIGN
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation VERIFY = registry().forKey("verify");
+
+        /**
+         * {@code encrypt} operation indicating a key is intended to be used to encrypt content. It's
+         * related operation is {@link #DECRYPT}.
+         *
+         * @see #DECRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation ENCRYPT = registry().forKey("encrypt");
+
+        /**
+         * {@code decrypt} operation indicating a key is intended to be used to decrypt content. It's
+         * related operation is {@link #ENCRYPT}.
+         *
+         * @see #ENCRYPT
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DECRYPT = registry().forKey("decrypt");
+
+        /**
+         * {@code wrapKey} operation indicating a key is intended to be used to encrypt another key. It's
+         * related operation is {@link #UNWRAP_KEY}.
+         *
+         * @see #UNWRAP_KEY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation WRAP_KEY = registry().forKey("wrapKey");
+
+        /**
+         * {@code unwrapKey} operation indicating a key is intended to be used to decrypt another key and validate
+         * decryption, if applicable. It's related operation is
+         * {@link #WRAP_KEY}.
+         *
+         * @see #WRAP_KEY
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation UNWRAP_KEY = registry().forKey("unwrapKey");
+
+        /**
+         * {@code deriveKey} operation indicating a key is intended to be used to derive another key. It does not have
+         * a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DERIVE_KEY = registry().forKey("deriveKey");
+
+        /**
+         * {@code deriveBits} operation indicating a key is intended to be used to derive bits that are not to be
+         * used as key. It does not have a related operation.
+         *
+         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517#section-8.3.2">Key Operation Registry Contents</a>
+         */
+        public static final KeyOperation DERIVE_BITS = registry().forKey("deriveBits");
+
+        //prevent instantiation
+        private op() {
+        }
+    }
 }

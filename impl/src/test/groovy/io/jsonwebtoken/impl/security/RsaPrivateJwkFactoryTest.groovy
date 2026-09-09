@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.security.InvalidKeyException
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.RsaPrivateJwk
 import io.jsonwebtoken.security.UnsupportedKeyException
 import org.junit.Test
@@ -45,7 +45,7 @@ class RsaPrivateJwkFactoryTest {
         }
 
         try {
-            Jwks.builder().key(key).build()
+            Jwk.builder().key(key).build()
             fail()
         } catch (UnsupportedKeyException expected) {
             String msg = String.format(RsaPrivateJwkFactory.PUB_EXPONENT_EX_MSG, KeysBridge.toString(key))
@@ -113,7 +113,7 @@ class RsaPrivateJwkFactoryTest {
         } as RSAPrivateKey
 
         try {
-            Jwks.builder().key(key).build()
+            Jwk.builder().key(key).build()
             fail()
         } catch (InvalidKeyException expected) {
             String prefix = 'Unable to derive RSAPublicKey from RSAPrivateKey {kty=RSA}. Cause: '
@@ -133,7 +133,7 @@ class RsaPrivateJwkFactoryTest {
         //build up test key:
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, infos)
 
-        RsaPrivateJwk jwk = Jwks.builder().key(key).build()
+        RsaPrivateJwk jwk = Jwk.builder().key(key).build()
 
         List<RSAOtherPrimeInfo> oth = jwk.get('oth') as List<RSAOtherPrimeInfo>
         assertTrue oth instanceof List
@@ -156,11 +156,11 @@ class RsaPrivateJwkFactoryTest {
         RSAPrivateCrtKey priv = pair.private as RSAPrivateCrtKey
         RSAPublicKey pub = pair.public as RSAPublicKey
 
-        RsaPrivateJwk jwk = Jwks.builder().key(priv).publicKey(pub).build()
+        RsaPrivateJwk jwk = Jwk.builder().key(priv).publicKey(pub).build()
         // an RSAMultiPrimePrivateCrtKey without OtherInfo elements is treated the same as a normal RSAPrivateCrtKey,
         // so ensure they are equal:
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, null)
-        RsaPrivateJwk jwk2 = Jwks.builder().key(key).publicKey(pub).build()
+        RsaPrivateJwk jwk2 = Jwk.builder().key(key).publicKey(pub).build()
         assertEquals jwk, jwk2
         assertNull jwk.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())
         assertNull jwk2.get(DefaultRsaPrivateJwk.OTHER_PRIMES_INFO.getId())
@@ -175,7 +175,7 @@ class RsaPrivateJwkFactoryTest {
 
         def priv = new TestRSAPrivateKey(privCrtKey)
 
-        RsaPrivateJwk jwk = Jwks.builder().key(priv).publicKey(pub).build()
+        RsaPrivateJwk jwk = Jwk.builder().key(priv).publicKey(pub).build()
         assertEquals 4, jwk.size() // kty, public exponent, modulus, private exponent
         assertEquals 'RSA', jwk.getType()
         assertEquals Converters.BIGINT.applyTo(pub.getModulus()), jwk.get(DefaultRsaPublicJwk.MODULUS.getId())
@@ -188,13 +188,13 @@ class RsaPrivateJwkFactoryTest {
         def pair = TestKeys.RS256.pair
         RSAPublicKey pub = pair.public as RSAPublicKey
         RSAPrivateKey priv = new TestRSAPrivateKey(pair.private as RSAPrivateKey)
-        def jwk = Jwks.builder().key(priv).publicKey(pub).build()
+        def jwk = Jwk.builder().key(priv).publicKey(pub).build()
         //minimal values: kty, modulus, public exponent, private exponent = 4 params:
         assertEquals 4, jwk.size()
         def map = new LinkedHashMap(jwk)
         assertEquals 4, map.size()
 
-        def jwkFromValues = Jwks.builder().add(map).build()
+        def jwkFromValues = Jwk.builder().add(map).build()
 
         //ensure they're equal:
         assertEquals jwk, jwkFromValues
@@ -211,7 +211,7 @@ class RsaPrivateJwkFactoryTest {
         def infos = [info1, info2]
         RSAMultiPrimePrivateCrtKey key = new TestRSAMultiPrimePrivateCrtKey(priv, infos)
 
-        final RsaPrivateJwk jwk = Jwks.builder().key(key).publicKey(pub).build()
+        final RsaPrivateJwk jwk = Jwk.builder().key(key).publicKey(pub).build()
 
         //we have to test the class directly and override, since the dummy MultiPrime values won't be accepted by the
         //JVM:

@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken.security
 
-import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.Jwe
 import org.junit.Test
 
 import java.security.Key
@@ -23,62 +23,62 @@ import java.security.Key
 import static org.junit.Assert.*
 
 /**
- * Tests {@link Jwts.KEY} values.
+ * Tests {@link io.jsonwebtoken.Jwe.alg} values.
  *
  * @since 0.12.0
  */
 class KeyAlgorithmsTest {
 
     static boolean contains(KeyAlgorithm<? extends Key, ? extends Key> alg) {
-        return Jwts.KEY.get().values().contains(alg)
+        return Jwe.alg.registry().values().contains(alg)
     }
 
     @Test
     void testValues() {
-        assertEquals 17, Jwts.KEY.get().values().size()
-        assertTrue(contains(Jwts.KEY.DIRECT) &&
-                contains(Jwts.KEY.A128KW) &&
-                contains(Jwts.KEY.A192KW) &&
-                contains(Jwts.KEY.A256KW) &&
-                contains(Jwts.KEY.A128GCMKW) &&
-                contains(Jwts.KEY.A192GCMKW) &&
-                contains(Jwts.KEY.A256GCMKW) &&
-                contains(Jwts.KEY.PBES2_HS256_A128KW) &&
-                contains(Jwts.KEY.PBES2_HS384_A192KW) &&
-                contains(Jwts.KEY.PBES2_HS512_A256KW) &&
-                contains(Jwts.KEY.RSA1_5) &&
-                contains(Jwts.KEY.RSA_OAEP) &&
-                contains(Jwts.KEY.RSA_OAEP_256) &&
-                contains(Jwts.KEY.ECDH_ES) &&
-                contains(Jwts.KEY.ECDH_ES_A128KW) &&
-                contains(Jwts.KEY.ECDH_ES_A192KW) &&
-                contains(Jwts.KEY.ECDH_ES_A256KW)
+        assertEquals 17, Jwe.alg.registry().values().size()
+        assertTrue(contains(Jwe.alg.DIRECT) &&
+                contains(Jwe.alg.A128KW) &&
+                contains(Jwe.alg.A192KW) &&
+                contains(Jwe.alg.A256KW) &&
+                contains(Jwe.alg.A128GCMKW) &&
+                contains(Jwe.alg.A192GCMKW) &&
+                contains(Jwe.alg.A256GCMKW) &&
+                contains(Jwe.alg.PBES2_HS256_A128KW) &&
+                contains(Jwe.alg.PBES2_HS384_A192KW) &&
+                contains(Jwe.alg.PBES2_HS512_A256KW) &&
+                contains(Jwe.alg.RSA1_5) &&
+                contains(Jwe.alg.RSA_OAEP) &&
+                contains(Jwe.alg.RSA_OAEP_256) &&
+                contains(Jwe.alg.ECDH_ES) &&
+                contains(Jwe.alg.ECDH_ES_A128KW) &&
+                contains(Jwe.alg.ECDH_ES_A192KW) &&
+                contains(Jwe.alg.ECDH_ES_A256KW)
         )
     }
 
     @Test
     void testForKey() {
-        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
-            assertSame alg, Jwts.KEY.get().forKey(alg.getId())
+        for (KeyAlgorithm alg : Jwe.alg.registry().values()) {
+            assertSame alg, Jwe.alg.registry().forKey(alg.getId())
         }
     }
 
     @Test(expected = IllegalArgumentException)
     void testForKeyWithInvalidId() {
         //unlike the 'get' paradigm, 'key' requires the value to exist
-        Jwts.KEY.get().forKey('invalid')
+        Jwe.alg.registry().forKey('invalid')
     }
 
     @Test
     void testGet() {
-        for (KeyAlgorithm alg : Jwts.KEY.get().values()) {
-            assertSame alg, Jwts.KEY.get().get(alg.getId())
+        for (KeyAlgorithm alg : Jwe.alg.registry().values()) {
+            assertSame alg, Jwe.alg.registry().get(alg.getId())
         }
     }
 
     @Test
     void testGetWithInvalidId() {
         // 'get' paradigm can return null if not found
-        assertNull Jwts.KEY.get().get('invalid')
+        assertNull Jwe.alg.registry().get('invalid')
     }
 }

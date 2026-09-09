@@ -18,13 +18,14 @@ package io.jsonwebtoken.impl.security;
 import io.jsonwebtoken.impl.lang.IdRegistry;
 import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.security.HashAlgorithm;
+import io.jsonwebtoken.security.JwkThumbprint;
 
 /**
- * Backing implementation for the {@link io.jsonwebtoken.security.Jwks.HASH} implementation.
+ * Backing implementation for the {@link JwkThumbprint.alg} implementation.
  *
  * @since 0.12.0
  */
-@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.Jwks.HASH
+@SuppressWarnings("unused") // used via reflection in io.jsonwebtoken.security.JwkThumbprint.alg
 public final class StandardHashAlgorithms extends IdRegistry<HashAlgorithm> {
 
     public StandardHashAlgorithms() {

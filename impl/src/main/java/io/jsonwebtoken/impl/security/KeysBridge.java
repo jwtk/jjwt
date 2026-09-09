@@ -20,38 +20,21 @@ import io.jsonwebtoken.lang.Assert;
 import io.jsonwebtoken.lang.Strings;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.KeySupplier;
-import io.jsonwebtoken.security.Password;
-import io.jsonwebtoken.security.PrivateKeyBuilder;
-import io.jsonwebtoken.security.SecretKeyBuilder;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 
-@SuppressWarnings({"unused"}) // reflection bridge class for the io.jsonwebtoken.security.Keys implementation
 public final class KeysBridge {
 
-     // Some HSMs use generic secrets. This prefix matches the generic secret algorithm name
-     // used by SUN PKCS#11 provider, AWS CloudHSM JCE provider and possibly other HSMs
+    // Some HSMs use generic secrets. This prefix matches the generic secret algorithm name
+    // used by SUN PKCS#11 provider, AWS CloudHSM JCE provider and possibly other HSMs
     private static final String GENERIC_SECRET_ALG_PREFIX = "Generic";
 
     // prevent instantiation
     private KeysBridge() {
-    }
-
-    public static Password password(char[] password) {
-        return new PasswordSpec(password);
-    }
-
-    public static SecretKeyBuilder builder(SecretKey key) {
-        return new ProvidedSecretKeyBuilder(key);
-    }
-
-    public static PrivateKeyBuilder builder(PrivateKey key) {
-        return new ProvidedPrivateKeyBuilder(key);
     }
 
     /**

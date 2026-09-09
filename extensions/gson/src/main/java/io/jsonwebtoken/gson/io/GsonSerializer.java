@@ -29,20 +29,46 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Serializer using a {@link Gson} instance.
+ *
+ * @param <T> the type of objects that will be serialized
+ * @since 0.11.0
+ */
 public class GsonSerializer<T> extends AbstractSerializer<T> {
 
+    /**
+     * The default {@code Gson} instance used to serialize and deserialize objects, equivalent to the following:
+     * <blockquote><pre>
+     * static final Gson DEFAULT_GSON = new GsonBuilder()
+     *     .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+     *     .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+     *     .registerTypeHierarchyAdapter(ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
+     *     .disableHtmlEscaping().create();</pre></blockquote>
+     */
     static final Gson DEFAULT_GSON = new GsonBuilder()
             .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .registerTypeHierarchyAdapter(ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
             .disableHtmlEscaping().create();
 
+    /**
+     * The {@code Gson} instance used to serialize objects.
+     */
     protected final Gson gson;
 
+    /**
+     * Creates a new {@code GsonSerilizer} with a {@link GsonSerializer#DEFAULT_GSON} instance.
+     */
     public GsonSerializer() {
         this(DEFAULT_GSON);
     }
 
+    /**
+     * Creates a new {@code GsonSerializer} using the specified {@code gson} instance.
+     *
+     * @param gson the {@code Gson} instance to use to serialize objects.
+     */
     public GsonSerializer(Gson gson) {
         Assert.notNull(gson, "gson cannot be null.");
         this.gson = gson;
@@ -75,6 +101,12 @@ public class GsonSerializer<T> extends AbstractSerializer<T> {
         }
     }
 
+    /**
+     * Converts {@code o} to a JSON value, writing it to the specified {@code writer}.
+     *
+     * @param o      the object to convert to a JSON value
+     * @param writer the writer to accept the JSON value
+     */
     protected void writeValue(Object o, java.io.Writer writer) {
         this.gson.toJson(o, writer);
     }

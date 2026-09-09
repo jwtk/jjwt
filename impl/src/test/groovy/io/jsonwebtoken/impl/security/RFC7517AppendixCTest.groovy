@@ -318,7 +318,7 @@ class RFC7517AppendixCTest {
             }
         }
 
-        Password key = Keys.password(RFC_SHARED_PASSPHRASE.toCharArray())
+        Password key = Password.of(RFC_SHARED_PASSPHRASE.toCharArray())
 
         String compact = Jwts.builder()
                 .setPayload(RFC_JWK_JSON)

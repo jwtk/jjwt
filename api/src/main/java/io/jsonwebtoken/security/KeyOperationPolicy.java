@@ -33,7 +33,7 @@ public interface KeyOperationPolicy {
     Collection<KeyOperation> getOperations();
 
     /**
-     * Returns quietly if all of the specified key operations are allowed to be assigned to a JWK,
+     * Returns quietly if all the specified key operations are allowed to be assigned to a JWK,
      * or throws an {@link IllegalArgumentException} otherwise.
      *
      * @param ops the operations to validate

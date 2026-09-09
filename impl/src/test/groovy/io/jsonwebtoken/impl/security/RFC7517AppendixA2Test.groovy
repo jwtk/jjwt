@@ -17,7 +17,7 @@ package io.jsonwebtoken.impl.security
 
 import io.jsonwebtoken.impl.lang.Converters
 import io.jsonwebtoken.security.EcPrivateJwk
-import io.jsonwebtoken.security.Jwks
+import io.jsonwebtoken.security.Jwk
 import io.jsonwebtoken.security.RsaPrivateJwk
 import org.junit.Test
 
@@ -89,7 +89,7 @@ class RFC7517AppendixA2Test {
     void test() { // asserts we can parse and verify RFC values
 
         def m = keys[0]
-        def jwk = Jwks.builder().add(m).build() as EcPrivateJwk
+        def jwk = Jwk.builder().add(m).build() as EcPrivateJwk
         def key = jwk.toKey()
         def curve = key.params.curve
         assertTrue key instanceof ECPrivateKey
@@ -106,7 +106,7 @@ class RFC7517AppendixA2Test {
         assertEquals m.kid, jwk.getId()
 
         m = keys[1]
-        jwk = Jwks.builder().add(m).build() as RsaPrivateJwk
+        jwk = Jwk.builder().add(m).build() as RsaPrivateJwk
         key = jwk.toKey() as RSAPrivateCrtKey
         assertNotNull key
         assertEquals m.size(), jwk.size()

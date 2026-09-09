@@ -59,7 +59,7 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         return "A" + keyLength + "CBC-HS" + digestLength(keyLength);
     }
 
-    public HmacAesAeadAlgorithm(String id, DefaultMacAlgorithm sigAlg) {
+    private HmacAesAeadAlgorithm(String id, DefaultMacAlgorithm sigAlg) {
         super(id, TRANSFORMATION_STRING, sigAlg.getKeyBitLength());
         this.SIGALG = sigAlg;
     }
@@ -150,11 +150,8 @@ public class HmacAesAeadAlgorithm extends AesAlgorithm implements AeadAlgorithm 
         streams.add(ciphertext);
         streams.add(Streams.of(AL));
         InputStream in = new SequenceInputStream(Collections.enumeration(streams));
-
         SecretKey key = new SecretKeySpec(macKeyBytes, SIGALG.getJcaName());
-        SecureRequest<InputStream, SecretKey> request =
-                new DefaultSecureRequest<>(in, null, null, key);
-        byte[] digest = SIGALG.digest(request);
+        byte[] digest = SIGALG.digest(key, in);
 
         // https://tools.ietf.org/html/rfc7518#section-5.2.2.1 #5 requires truncating the signature
         // to be the same length as the macKey/encKey:

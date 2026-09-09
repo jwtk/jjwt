@@ -16,7 +16,7 @@
 package io.jsonwebtoken.impl.security;
 
 import io.jsonwebtoken.security.DynamicJwkBuilder;
-import io.jsonwebtoken.security.Jwks;
+import io.jsonwebtoken.security.Jwk;
 import io.jsonwebtoken.security.KeyOperationPolicy;
 
 import java.security.Provider;
@@ -36,7 +36,7 @@ public class JwkBuilderSupplier implements Supplier<DynamicJwkBuilder<?, ?>> {
 
     @Override
     public DynamicJwkBuilder<?, ?> get() {
-        DynamicJwkBuilder<?, ?> builder = Jwks.builder().provider(this.provider);
+        DynamicJwkBuilder<?, ?> builder = Jwk.builder().provider(this.provider);
         if (this.operationPolicy != null) {
             builder.operationPolicy(operationPolicy);
         }

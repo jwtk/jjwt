@@ -1,5 +1,5 @@
 /*
- * Copyright © 2023 jsonwebtoken.io
+ * Copyright © 2026 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,18 @@ import io.jsonwebtoken.security.Jwk;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+import java.util.function.Function;
 
-public final class JwksBridge {
+/**
+ * @since JJWT_RELEASE_VERSION, moved from former JwksBridge class.
+ */
+@SuppressWarnings("unused") // used via reflection by io.jsonwebtoken.security.Suppliers
+public final class UnsafeJsonFunction implements Function<Jwk<?>, String> {
 
-    private JwksBridge() {
-    }
-
-    @SuppressWarnings({"unchecked", "unused"}) // used via reflection by io.jsonwebtoken.security.Jwks
-    public static String UNSAFE_JSON(Jwk<?> jwk) {
+    @SuppressWarnings("unchecked")
+    @Override
+    public String apply(Jwk<?> jwk) {
+        Assert.notNull(jwk, "JWK argument cannot be null.");
         Serializer<Map<String, ?>> serializer = Services.get(Serializer.class);
         Assert.stateNotNull(serializer, "Serializer lookup failed. Ensure JSON impl .jar is in the runtime classpath.");
         NamedSerializer ser = new NamedSerializer("JWK", serializer);
@@ -39,4 +43,5 @@ public final class JwksBridge {
         ser.serialize(jwk, out);
         return Strings.utf8(out.toByteArray());
     }
+
 }

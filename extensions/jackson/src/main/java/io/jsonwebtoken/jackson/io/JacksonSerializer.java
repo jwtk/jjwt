@@ -64,6 +64,9 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // https://github.com/jwtk/jjwt/issues/893
     }
 
+    /**
+     * The Jackson ObjectMapper instance to use during serialization.
+     */
     protected final ObjectMapper objectMapper;
 
     /**

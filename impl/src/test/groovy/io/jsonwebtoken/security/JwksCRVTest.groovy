@@ -27,17 +27,17 @@ class JwksCRVTest {
 
     @Test
     void testRegistry() {
-        assertTrue Jwks.CRV.get() instanceof StandardCurves
+        assertTrue Jwk.crv.registry() instanceof StandardCurves
     }
 
     @Test
     void testInstances() {
-        assertSame ECCurve.P256, Jwks.CRV.P256
-        assertSame ECCurve.P384, Jwks.CRV.P384
-        assertSame ECCurve.P521, Jwks.CRV.P521
-        assertSame EdwardsCurve.X25519, Jwks.CRV.X25519
-        assertSame EdwardsCurve.X448, Jwks.CRV.X448
-        assertSame EdwardsCurve.Ed25519, Jwks.CRV.Ed25519
-        assertSame EdwardsCurve.Ed448, Jwks.CRV.Ed448
+        assertSame ECCurve.P256, Jwk.crv.P256
+        assertSame ECCurve.P384, Jwk.crv.P384
+        assertSame ECCurve.P521, Jwk.crv.P521
+        assertSame EdwardsCurve.X25519, Jwk.crv.X25519
+        assertSame EdwardsCurve.X448, Jwk.crv.X448
+        assertSame EdwardsCurve.Ed25519, Jwk.crv.Ed25519
+        assertSame EdwardsCurve.Ed448, Jwk.crv.Ed448
     }
 }

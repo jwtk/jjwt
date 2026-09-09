@@ -15,16 +15,15 @@
  */
 package io.jsonwebtoken.impl.security
 
+
+import io.jsonwebtoken.security.Password
 import org.junit.Test
 
 import javax.crypto.SecretKey
 import java.security.Key
 import java.security.PrivateKey
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertSame
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.*
 
 class KeysBridgeTest {
 
@@ -41,9 +40,13 @@ class KeysBridgeTest {
     void testFindBitLengthSecretKeyNonRawFormat() {
         // when a SecretKey's format is not "RAW", findBitLength should return -1
         def nonRawSecretKey = new SecretKey() {
-            @Override String getAlgorithm() { return 'AES' }
-            @Override String getFormat() { return 'PKCS8' } // not RAW
-            @Override byte[] getEncoded() { return new byte[16] }
+            @Override
+            String getAlgorithm() { return 'AES' }
+
+            @Override
+            String getFormat() { return 'PKCS8' } // not RAW
+            @Override
+            byte[] getEncoded() { return new byte[16] }
         }
         assertEquals(-1, KeysBridge.findBitLength(nonRawSecretKey))
     }
@@ -79,7 +82,7 @@ class KeysBridgeTest {
 
     @Test
     void testToStringPassword() {
-        testFormattedOutput(new PasswordSpec("foo".toCharArray()))
+        testFormattedOutput(Password.of("foo".toCharArray()))
     }
 
     @Test
