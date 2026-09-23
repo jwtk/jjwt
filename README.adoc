@@ -1009,7 +1009,7 @@ String jwt = Jwts.builder()
 
     // ... etc ...
 
-    .build();
+    .compact();
 ----
 
 Notice this particular example of `content` uses the two-argument convenience variant:
@@ -1158,7 +1158,7 @@ try {
 
     // we can safely trust the JWT
 
-catch (JwtException ex) {   // (5)
+} catch (JwtException ex) { // (5)
 
     // we *cannot* use the JWT as intended by its creator
 }
@@ -1527,7 +1527,7 @@ during parsing for timestamp comparisons can be obtained via a custom time sourc
 ----
 Clock clock = new MyClock();
 
-Jwts.parser().clock(myClock) //... etc ...
+Jwts.parser().clock(clock) //... etc ...
 ----
 
 The ``JwtParser``'s default `Clock` implementation simply returns `new Date()` to reflect the time when parsing occurs,
@@ -1936,7 +1936,7 @@ try {
 
     // we can safely trust the JWT
 
-catch (JwtException ex) {          // (5)
+} catch (JwtException ex) {        // (5)
 
     // we *cannot* use the JWT as intended by its creator
 }
@@ -2644,7 +2644,7 @@ try {
 
     // we can safely trust the JWT
 
-catch (JwtException ex) {             // (5)
+} catch (JwtException ex) {           // (5)
 
     // we *cannot* use the JWT as intended by its creator
 }
@@ -2705,7 +2705,7 @@ Jwts.parser()
   .decryptWith(privateKey) // <---- a `PrivateKey`, not a `PublicKey`
 
   .build()
-  .parseSignedClaims(jweString);
+  .parseEncryptedClaims(jweString);
 ----
 
 +++<a name="jwe-key-locator">++++++</a>+++
@@ -2819,7 +2819,7 @@ For example:
 [,java]
 ----
 SecretKey key = getSecretKey();     // or RSA or EC PublicKey or PrivateKey
-SecretJwk = Jwks.builder().key(key) // (1) and (2)
+SecretJwk jwk = Jwks.builder().key(key) // (1) and (2)
 
     .id("mySecretKeyId")            // (3)
     // ... etc ...
@@ -3077,7 +3077,7 @@ instead print the string literal `<redacted>` for any secret or private key data
 String json = getExampleSecretKeyJson();
 Jwk<?> jwk = Jwks.parser().build().parse(json);
 
-System.out.printn(jwk);
+System.out.println(jwk);
 ----
 
 This code would print the following string literal to the System console:
@@ -3140,7 +3140,7 @@ For example:
 [,java]
 ----
 Jwk<?> jwk = Jwks.builder()/* ... */.build();
-SecretJwk = Jwks.set()              // 1
+JwkSet jwkSet = Jwks.set()          // 1
     .add(jwk)                       // 2, appends a key
     //.add(aCollection)             //    append multiple keys
     //.keys(allJwks)                //    sets/replaces all keys
@@ -3154,7 +3154,7 @@ SecretJwk = Jwks.set()              // 1
 ----
 
 As shown, you can optionally configure the `.operationPolicy(KeyOperationPolicy)` method using a
-`Jwts.OP.policy()` builder.  A `KeyOperationPolicy` allows you control what operations are allowed for any JWK
+`Jwks.OP.policy()` builder.  A `KeyOperationPolicy` allows you control what operations are allowed for any JWK
 before being added to the JWK Set; any JWK that does not match the policy will be rejected and not added to the set.
 JJWT internally defaults to a standard RFC-compliant policy, but you can create a
 policy to override the default if desired using the `Jwks.OP.policy()` builder method.
@@ -4054,7 +4054,7 @@ AeadAlgorithm enc = Jwts.ENC.A256GCM; //or A192GCM, A128GCM, A256CBC-HS512, etc.
 // Create the compact JWE:
 String jwe = Jwts.builder().issuer("me")
     // Optional work factor is specified in the header:
-    //.header().pbes2Count(pbkdf2Iterations)).and()
+    //.header().pbes2Count(pbkdf2Iterations).and()
     .encryptWith(password, alg, enc)
     .compact();
 
@@ -4198,7 +4198,7 @@ Example creating and parsing an Edwards Elliptic Curve (Ed25519, Ed448, X25519, 
 [,java]
 ----
 PublicKey key = Jwks.CRV.Ed25519.keyPair().build().getPublic(); // or Ed448, X25519, X448
-OctetPublicJwk<PublicKey> jwk = builder().octetKey(key).idFromThumbprint().build();
+OctetPublicJwk<PublicKey> jwk = Jwks.builder().octetKey(key).idFromThumbprint().build();
 
 assert jwk.getId().equals(jwk.thumbprint().toString());
 assert key.equals(jwk.toKey());
@@ -4225,7 +4225,7 @@ KeyPair pair = Jwks.CRV.Ed448.keyPair().build(); // or Ed25519, X25519, X448
 PublicKey pubKey = pair.getPublic();
 PrivateKey privKey = pair.getPrivate();
 
-OctetPrivateJwk<PrivateKey, PublicKey> privJwk = builder().octetKey(privKey).idFromThumbprint().build();
+OctetPrivateJwk<PrivateKey, PublicKey> privJwk = Jwks.builder().octetKey(privKey).idFromThumbprint().build();
 OctetPublicJwk<PublicKey> pubJwk = privJwk.toPublicJwk();
 
 assert privJwk.getId().equals(privJwk.thumbprint().toString());
