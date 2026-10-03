@@ -17,6 +17,7 @@ package io.jsonwebtoken.impl;
 
 import io.jsonwebtoken.Clock;
 
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -32,12 +33,27 @@ public class DefaultClock implements Clock {
     public static final Clock INSTANCE = new DefaultClock();
 
     /**
-     * Simply returns <code>new {@link Date}()</code>.
+     * Simply returns {@link Instant#now()}.
      *
-     * @return a new {@link Date} instance.
+     * @return the current instant.
+     * @since 0.14.0
      */
     @Override
+    public Instant instant() {
+        return Instant.now();
+    }
+
+    /**
+     * Returns the current {@link #instant()} as a new {@link Date} instance.
+     *
+     * @return a new {@link Date} instance.
+     * @deprecated since 0.14.0 in favor of {@link #instant()}. This method will be removed before the
+     * JJWT 1.0 release.
+     */
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    @Override
     public Date now() {
-        return new Date();
+        return Date.from(instant());
     }
 }

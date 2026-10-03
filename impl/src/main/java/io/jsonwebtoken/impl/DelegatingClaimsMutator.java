@@ -23,6 +23,7 @@ import io.jsonwebtoken.lang.Collections;
 import io.jsonwebtoken.lang.MapMutator;
 import io.jsonwebtoken.lang.Strings;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -140,34 +141,65 @@ public class DelegatingClaimsMutator<T extends MapMutator<String, Object, T> & C
         };
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T setExpiration(Date exp) {
         return expiration(exp);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T expiration(Date exp) {
+        return expiration(toInstant(exp));
+    }
+
+    @Override
+    public T expiration(Instant exp) {
         return put(DefaultClaims.EXPIRATION, exp);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T setNotBefore(Date nbf) {
         return notBefore(nbf);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T notBefore(Date nbf) {
+        return notBefore(toInstant(nbf));
+    }
+
+    @Override
+    public T notBefore(Instant nbf) {
         return put(DefaultClaims.NOT_BEFORE, nbf);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T setIssuedAt(Date iat) {
         return issuedAt(iat);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public T issuedAt(Date iat) {
+        return issuedAt(toInstant(iat));
+    }
+
+    @Override
+    public T issuedAt(Instant iat) {
         return put(DefaultClaims.ISSUED_AT, iat);
+    }
+
+    private static Instant toInstant(Date date) {
+        return date != null ? date.toInstant() : null;
     }
 
     @Override

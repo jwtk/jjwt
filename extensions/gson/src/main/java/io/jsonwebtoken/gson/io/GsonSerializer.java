@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 
 public class GsonSerializer<T> extends AbstractSerializer<T> {
 
@@ -35,6 +36,7 @@ public class GsonSerializer<T> extends AbstractSerializer<T> {
             .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .registerTypeHierarchyAdapter(ConfidentialValue.class, GsonConfidentialValueSerializer.INSTANCE)
+            .registerTypeAdapter(Instant.class, GsonInstantTypeAdapter.INSTANCE)
             .disableHtmlEscaping().create();
 
     protected final Gson gson;

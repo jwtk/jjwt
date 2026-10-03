@@ -151,7 +151,7 @@ class JwtsTest {
         } catch (MalformedJwtException e) {
             String expected = 'Invalid claims: Invalid JWT Claims \'exp\' (Expiration Time) value: -42-. ' +
                     'String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics exhausted. ' +
-                    'Cause: Unparseable date: "-42-"'
+                    'Cause: Text \'-42-\' could not be parsed at index 1'
             assertEquals expected, e.getMessage()
         }
     }

@@ -26,6 +26,7 @@ import io.jsonwebtoken.io.AbstractSerializer;
 import io.jsonwebtoken.lang.Assert;
 
 import java.io.OutputStream;
+import java.time.Instant;
 
 /**
  * Serializer using a Jackson {@link ObjectMapper}.
@@ -43,14 +44,28 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
         MODULE = module;
     }
 
+    // Registered only on JJWT's default ObjectMapper, and intentionally not part of MODULE, so that it never
+    // overrides java.time handling (e.g. jackson-datatype-jsr310) configured on an application-provided ObjectMapper:
+    static final String DEFAULTS_MODULE_ID = "jjwt-jackson-defaults";
+    static final Module DEFAULTS_MODULE;
+
+    static {
+        SimpleModule module = new SimpleModule(DEFAULTS_MODULE_ID);
+        module.addSerializer(JacksonInstantSerializer.INSTANCE);
+        module.addDeserializer(Instant.class, JacksonInstantDeserializer.INSTANCE);
+        DEFAULTS_MODULE = module;
+    }
+
     static final ObjectMapper DEFAULT_OBJECT_MAPPER = newObjectMapper();
 
     /**
-     * Creates and returns a new ObjectMapper with the {@code jjwt-jackson} module registered and
+     * Creates and returns a new ObjectMapper with the {@code jjwt-jackson} module registered, {@code java.time.Instant}
+     * values (de)serialized as ISO-8601 strings, and
      * {@code JsonParser.Feature.STRICT_DUPLICATE_DETECTION} enabled (set to true) and
      * {@code DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} disabled (set to false).
      *
-     * @return a new ObjectMapper with the {@code jjwt-jackson} module registered and
+     * @return a new ObjectMapper with the {@code jjwt-jackson} module registered, {@code java.time.Instant}
+     * values (de)serialized as ISO-8601 strings, and
      * {@code JsonParser.Feature.STRICT_DUPLICATE_DETECTION} enabled (set to true) and
      * {@code DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} disabled (set to false).
      *
@@ -60,6 +75,7 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
     static ObjectMapper newObjectMapper() {
         return new ObjectMapper()
                 .registerModule(MODULE)
+                .registerModule(DEFAULTS_MODULE)
                 .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true) // https://github.com/jwtk/jjwt/issues/877
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // https://github.com/jwtk/jjwt/issues/893
     }

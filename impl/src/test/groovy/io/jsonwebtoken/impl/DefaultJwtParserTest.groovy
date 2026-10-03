@@ -17,7 +17,6 @@ package io.jsonwebtoken.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.*
-import io.jsonwebtoken.impl.lang.JwtDateConverter
 import io.jsonwebtoken.impl.lang.Services
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.AbstractDeserializer
@@ -32,6 +31,8 @@ import org.junit.Test
 
 import javax.crypto.Mac
 import javax.crypto.SecretKey
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import static org.junit.Assert.*
 
@@ -262,8 +263,8 @@ class DefaultJwtParserTest {
     void testExpiredExceptionMessage() {
 
         long differenceMillis = 843 // arbitrary, anything > 0 is fine
-        def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def later = new Date(exp.getTime() + differenceMillis)
+        def exp = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def later = exp.plusMillis(differenceMillis)
         def s = Jwts.builder().expiration(exp).compact()
 
         try {
@@ -281,8 +282,8 @@ class DefaultJwtParserTest {
     void testNotBeforeExceptionMessage() {
 
         long differenceMillis = 3842 // arbitrary, anything > 0 is fine
-        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def earlier = new Date(nbf.getTime() - differenceMillis)
+        def nbf = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def earlier = nbf.minusMillis(differenceMillis)
         def s = Jwts.builder().notBefore(nbf).compact()
 
         try {

@@ -25,6 +25,8 @@ import io.jsonwebtoken.security.ConfidentialValue
 import org.junit.Before
 import org.junit.Test
 
+import java.time.Instant
+
 import static org.junit.Assert.*
 
 class GsonSerializerTest {
@@ -168,5 +170,12 @@ class GsonSerializerTest {
             assertEquals causeMsg, expected.cause.message
             assertEquals msg, expected.message
         }
+    }
+
+    @Test
+    void testInstant() {
+        def instant = Instant.parse('2026-10-03T10:00:00.123Z')
+        assertEquals '"2026-10-03T10:00:00.123Z"', ser(instant)
+        assertEquals '{"custom":"2026-10-03T10:00:00.123Z"}', ser([custom: instant])
     }
 }

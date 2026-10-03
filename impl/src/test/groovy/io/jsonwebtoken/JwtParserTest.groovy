@@ -18,7 +18,6 @@ package io.jsonwebtoken
 import io.jsonwebtoken.impl.DefaultJwtParser
 import io.jsonwebtoken.impl.FixedClock
 import io.jsonwebtoken.impl.JwtTokenizer
-import io.jsonwebtoken.impl.lang.JwtDateConverter
 import io.jsonwebtoken.impl.security.TestKeys
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.lang.DateFormats
@@ -30,6 +29,8 @@ import org.junit.Test
 import javax.crypto.SecretKey
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 import static io.jsonwebtoken.DateTestUtils.truncateMillis
 import static io.jsonwebtoken.impl.DefaultJwtParser.INCORRECT_EXPECTED_CLAIM_MESSAGE_TEMPLATE
@@ -251,8 +252,8 @@ class JwtParserTest {
     void testParseWithPrematureJwt() {
 
         long differenceMillis = 100000 // arbitrary, anything > 0 is fine
-        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def earlier = new Date(nbf.getTime() - differenceMillis)
+        def nbf = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def earlier = nbf.minusMillis(differenceMillis)
 
         String compact = Jwts.builder().subject('Joe').notBefore(nbf).compact()
 
@@ -276,13 +277,10 @@ class JwtParserTest {
     void testParseWithExpiredJwtWithinAllowedClockSkew() {
 
         long differenceMillis = 3000 // arbitrary, anything > 0 is fine
-        long millis = System.currentTimeMillis()
         // RFC requires time in seconds, so we need to base our assertions based on second-normalized dates,
         // otherwise we'll get nondeterministic tests:
-        long seconds = (millis / 1000L).longValue()
-        millis = seconds * 1000L
-        def exp = new Date(millis)
-        def later = new Date(exp.getTime() + differenceMillis)
+        def exp = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def later = exp.plusMillis(differenceMillis)
         def s = Jwts.builder().expiration(exp).compact()
 
         String subject = 'Joe'
@@ -298,8 +296,8 @@ class JwtParserTest {
     void testParseWithExpiredJwtNotWithinAllowedClockSkew() {
 
         long differenceMillis = 3000 // arbitrary, anything > 0 is fine
-        def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def later = new Date(exp.getTime() + differenceMillis)
+        def exp = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def later = exp.plusMillis(differenceMillis)
 
         def s = Jwts.builder().expiration(exp).compact()
 
@@ -334,8 +332,8 @@ class JwtParserTest {
     void testParseWithPrematureJwtNotWithinAllowedClockSkew() {
 
         long differenceMillis = 3000 // arbitrary, anything > 0 is fine
-        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def earlier = new Date(nbf.getTime() - differenceMillis)
+        def nbf = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def earlier = nbf.minusMillis(differenceMillis)
 
         String compact = Jwts.builder().subject('Joe').notBefore(nbf).compact()
 
@@ -567,8 +565,8 @@ class JwtParserTest {
     void testParseSignedClaimsWithExpiredJws() {
 
         long differenceMillis = 843 // arbitrary, anything > 0 is fine
-        def exp = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def later = new Date(exp.getTime() + differenceMillis)
+        def exp = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def later = exp.plusMillis(differenceMillis)
 
         String sub = 'Joe'
         byte[] key = randomKey()
@@ -592,8 +590,8 @@ class JwtParserTest {
     void testParseSignedClaimsWithPrematureJws() {
 
         long differenceMillis = 3842 // arbitrary, anything > 0 is fine
-        def nbf = JwtDateConverter.INSTANCE.applyFrom(System.currentTimeMillis() / 1000L)
-        def earlier = new Date(nbf.getTime() - differenceMillis)
+        def nbf = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        def earlier = nbf.minusMillis(differenceMillis)
 
         String sub = 'Joe'
         byte[] key = randomKey()
@@ -1460,6 +1458,184 @@ class JwtParserTest {
                 requireNotBefore(notBefore).
                 build().
                 parseSignedClaims(compact)
+    }
+
+    @Test
+    void testParseRequireIssuedAtInstant_Success() {
+        def issuedAt = Instant.now()
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).issuedAt(issuedAt).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).requireIssuedAt(issuedAt).build()
+                .parseSignedClaims(compact)
+
+        assertEquals issuedAt.truncatedTo(ChronoUnit.SECONDS), jwt.getPayload().issuedAt()
+    }
+
+    @Test(expected = IncorrectClaimException)
+    void testParseRequireIssuedAtInstant_Incorrect_Fail() {
+        def now = Instant.now()
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).issuedAt(now.minusSeconds(10))
+                .compact()
+
+        Jwts.parser().setSigningKey(key).requireIssuedAt(now).build().parseSignedClaims(compact)
+    }
+
+    @Test(expected = MissingClaimException)
+    void testParseRequireIssuedAtInstant_Missing_Fail() {
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).subject("Dummy").compact()
+
+        Jwts.parser().setSigningKey(key).requireIssuedAt(Instant.now()).build().parseSignedClaims(compact)
+    }
+
+    @Test
+    void testParseRequireExpirationInstant_Success() {
+        def expiration = Instant.now().plusSeconds(10)
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).expiration(expiration).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).requireExpiration(expiration).build()
+                .parseSignedClaims(compact)
+
+        assertEquals expiration.truncatedTo(ChronoUnit.SECONDS), jwt.getPayload().expiration()
+    }
+
+    @Test(expected = IncorrectClaimException)
+    void testParseRequireExpirationInstant_Incorrect_Fail() {
+        def now = Instant.now()
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).expiration(now.plusSeconds(10))
+                .compact()
+
+        Jwts.parser().setSigningKey(key).requireExpiration(now.plusSeconds(20)).build().parseSignedClaims(compact)
+    }
+
+    @Test(expected = MissingClaimException)
+    void testParseRequireExpirationInstant_Missing_Fail() {
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).subject("Dummy").compact()
+
+        Jwts.parser().setSigningKey(key).requireExpiration(Instant.now().plusSeconds(10)).build()
+                .parseSignedClaims(compact)
+    }
+
+    @Test
+    void testParseRequireNotBeforeInstant_Success() {
+        def notBefore = Instant.now().minusSeconds(10)
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).notBefore(notBefore).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).requireNotBefore(notBefore).build()
+                .parseSignedClaims(compact)
+
+        assertEquals notBefore.truncatedTo(ChronoUnit.SECONDS), jwt.getPayload().notBefore()
+    }
+
+    @Test(expected = IncorrectClaimException)
+    void testParseRequireNotBeforeInstant_Incorrect_Fail() {
+        def now = Instant.now()
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).notBefore(now.minusSeconds(10))
+                .compact()
+
+        Jwts.parser().setSigningKey(key).requireNotBefore(now.minusSeconds(20)).build().parseSignedClaims(compact)
+    }
+
+    @Test(expected = MissingClaimException)
+    void testParseRequireNotBeforeInstant_Missing_Fail() {
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).subject("Dummy").compact()
+
+        Jwts.parser().setSigningKey(key).requireNotBefore(Instant.now().minusSeconds(10)).build()
+                .parseSignedClaims(compact)
+    }
+
+    @Test
+    void testParseRequireExpirationDateMatchesInstant() {
+        // token built with the Instant API must satisfy a requirement expressed with the deprecated Date API:
+        def expiration = Instant.now().plusSeconds(10)
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).expiration(expiration).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).requireExpiration(Date.from(expiration)).build()
+                .parseSignedClaims(compact)
+
+        assertEquals Date.from(expiration.truncatedTo(ChronoUnit.SECONDS)), jwt.getPayload().getExpiration()
+    }
+
+    @Test
+    void testParseRequireCustomInstant_Success() {
+        def anInstant = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        byte[] key = randomKey()
+        // custom claim value as an ISO-8601 string, as serialized for a Date:
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key)
+                .claim("anInstant", DateFormats.formatIso8601(anInstant)).compact()
+
+        Jwt<Header, Claims> jwt = Jwts.parser().setSigningKey(key).require("anInstant", anInstant).build()
+                .parseSignedClaims(compact)
+
+        assertEquals anInstant, jwt.getPayload().get("anInstant", Instant.class)
+    }
+
+    @Test
+    void testParseRequireCustomInstantFromMillis_Success() {
+        def anInstant = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key)
+                .claim("anInstant", anInstant.toEpochMilli()).compact()
+
+        Jwts.parser().setSigningKey(key).require("anInstant", anInstant).build().parseSignedClaims(compact)
+    }
+
+    @Test
+    void testParseRequireCustomInstantWhenClaimIsNotAnInstant() {
+        byte[] key = randomKey()
+        String compact = Jwts.builder().signWith(SignatureAlgorithm.HS256, key).claim("anInstant", 'hello').compact()
+
+        try {
+            Jwts.parser().setSigningKey(key).require("anInstant", Instant.now()).build().parseSignedClaims(compact)
+            fail()
+        } catch (IncorrectClaimException e) {
+            String expected = 'JWT Claim \'anInstant\' was expected to be an Instant, but its value cannot be ' +
+                    'converted to an Instant using current heuristics.  Value: hello'
+            assertEquals expected, e.getMessage()
+        }
+    }
+
+    @Test
+    void testParseExpiredWithInstantOnlyClock() {
+        // the parser must only use Clock.instant(), never the deprecated Clock.now():
+        def fixed = Instant.parse('2026-10-03T10:00:00Z')
+        Clock clock = new Clock() {
+            @Override
+            Date now() {
+                throw new UnsupportedOperationException('now() should not be called')
+            }
+
+            @Override
+            Instant instant() {
+                return fixed
+            }
+        }
+        String compact = Jwts.builder().expiration(fixed.minusSeconds(1)).compact()
+
+        try {
+            Jwts.parser().unsecured().clock(clock).build().parse(compact)
+            fail()
+        } catch (ExpiredJwtException e) {
+            assertEquals 'JWT expired 1000 milliseconds ago at 2026-10-03T09:59:59.000Z. Current time: ' +
+                    '2026-10-03T10:00:00.000Z. Allowed clock skew: 0 milliseconds.', e.getMessage()
+        }
+    }
+
+    @Test
+    void testParsePrematureWithMaxClockSkewDoesNotOverflow() {
+        // now + skew previously overflowed when computed with long millis, rejecting a token within the skew:
+        String compact = Jwts.builder().notBefore(Instant.now().plusSeconds(1000)).compact()
+
+        Jwts.parser().unsecured().setAllowedClockSkewSeconds(Long.MAX_VALUE.intdiv(1000L) as long).build().parse(compact)
     }
 
     @Test

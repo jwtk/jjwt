@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.Provider
 import java.security.SecureRandom
+import java.time.Instant
 
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
@@ -446,6 +447,35 @@ class DefaultJwtBuilderTest {
     @Test
     void testSetNullIssuedAtWithNullClaims() {
         builder.setIssuedAt(null)
+        assertTrue builder.claimsBuilder.isEmpty()
+    }
+
+    @Test
+    void testInstantClaims() {
+        def iat = Instant.parse('2026-10-03T10:00:00.123Z')
+        builder.issuedAt(iat).notBefore(iat.plusSeconds(1)).expiration(iat.plusSeconds(2))
+        Claims claims = builder.claimsBuilder.build()
+        assertEquals Instant.parse('2026-10-03T10:00:00Z'), claims.issuedAt()
+        assertEquals Instant.parse('2026-10-03T10:00:01Z'), claims.notBefore()
+        assertEquals Instant.parse('2026-10-03T10:00:02Z'), claims.expiration()
+    }
+
+    @Test
+    void testDateClaimsDelegateToInstant() {
+        def date = new Date(1700000000123L)
+        builder.issuedAt(date).notBefore(date).expiration(date)
+        Claims claims = builder.claimsBuilder.build()
+        def expected = Instant.ofEpochSecond(1700000000L)
+        assertEquals expected, claims.issuedAt()
+        assertEquals expected, claims.notBefore()
+        assertEquals expected, claims.expiration()
+    }
+
+    @Test
+    void testNullInstantClaimsRemoveValues() {
+        def now = Instant.now()
+        builder.issuedAt(now).notBefore(now).expiration(now)
+        builder.issuedAt((Instant) null).notBefore((Instant) null).expiration((Instant) null)
         assertTrue builder.claimsBuilder.isEmpty()
     }
 

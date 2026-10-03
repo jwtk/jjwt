@@ -21,6 +21,16 @@ import io.jsonwebtoken.lang.Strings
 import org.junit.Before
 import org.junit.Test
 
+import com.fasterxml.jackson.core.JsonGenerator
+
+import com.fasterxml.jackson.databind.SerializerProvider
+
+import com.fasterxml.jackson.databind.module.SimpleModule
+
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+
+import java.time.Instant
+
 import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
@@ -117,5 +127,26 @@ class JacksonSerializerTest {
         byte[] expected = Strings.utf8('{"hello":"世界"}' as String)
         byte[] result = serialize([hello: '世界'])
         assertArrayEquals expected, result
+    }
+
+    @Test
+    void testInstantWithDefaultObjectMapper() {
+        def instant = Instant.parse('2026-10-03T10:00:00.123Z')
+        assertEquals '{"custom":"2026-10-03T10:00:00.123Z"}', Strings.utf8(serialize([custom: instant]))
+    }
+
+    @Test
+    void testInstantDoesNotOverrideApplicationObjectMapperConfig() {
+        // An application-provided ObjectMapper's java.time handling (e.g. jackson-datatype-jsr310) must be retained:
+        def module = new SimpleModule()
+        module.addSerializer(Instant, new StdSerializer<Instant>(Instant) {
+            @Override
+            void serialize(Instant value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+                gen.writeNumber(value.getEpochSecond())
+            }
+        })
+        ser = new JacksonSerializer(new ObjectMapper().registerModule(module))
+        def instant = Instant.parse('2026-10-03T10:00:00.123Z')
+        assertEquals '{"custom":1791021600}', Strings.utf8(serialize([custom: instant]))
     }
 }

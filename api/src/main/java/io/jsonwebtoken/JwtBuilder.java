@@ -40,6 +40,7 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
@@ -498,7 +499,6 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      */
     @Override
-    // for better/targeted JavaDoc
     JwtBuilder issuer(String iss);
 
     /**
@@ -512,7 +512,6 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      */
     @Override
-    // for better/targeted JavaDoc
     JwtBuilder subject(String sub);
 
     /**
@@ -527,10 +526,35 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
+     * @deprecated since 0.14.0 in favor of {@link #expiration(Instant)}. This method will be removed before the
+     * JJWT 1.0 release.
+     */
+    @Override 
+    @Deprecated
+    JwtBuilder expiration(Date exp);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#expiration(Instant) expiration(exp)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * <p>The default implementation delegates to {@link #expiration(Date)} for compatibility with existing
+     * {@code JwtBuilder} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.14.0
      */
     @Override
-    // for better/targeted JavaDoc
-    JwtBuilder expiration(Date exp);
+    default JwtBuilder expiration(Instant exp) {
+        return expiration(exp != null ? Date.from(exp) : null);
+    }
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -544,10 +568,35 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
+     * @deprecated since 0.14.0 in favor of {@link #notBefore(Instant)}. This method will be removed before the
+     * JJWT 1.0 release.
      */
     @Override
-    // for better/targeted JavaDoc
+    @Deprecated
     JwtBuilder notBefore(Date nbf);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
+     * <code>nbf</code></a> (not before) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#notBefore(Instant) notBefore(nbf)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * <p>The default implementation delegates to {@link #notBefore(Date)} for compatibility with existing
+     * {@code JwtBuilder} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.14.0
+     */
+    @Override
+    default JwtBuilder notBefore(Instant nbf) {
+        return notBefore(nbf != null ? Date.from(nbf) : null);
+    }
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -561,10 +610,35 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      *
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
      * @return the builder instance for method chaining.
+     * @deprecated since 0.14.0 in favor of {@link #issuedAt(Instant)}. This method will be removed before the
+     * JJWT 1.0 release.
      */
     @Override
-    // for better/targeted JavaDoc
+    @Deprecated
     JwtBuilder issuedAt(Date iat);
+
+    /**
+     * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
+     * <code>iat</code></a> (issued at) claim. A {@code null} value will remove the property from the Claims.
+     *
+     * <p>The value is the timestamp when the JWT was created.</p>
+     *
+     * <p>This is a convenience wrapper for:</p>
+     * <blockquote><pre>
+     * {@link #claims()}.{@link ClaimsMutator#issuedAt(Instant) issuedAt(iat)}.{@link BuilderClaims#and() and()}</pre></blockquote>
+     *
+     * <p>The default implementation delegates to {@link #issuedAt(Date)} for compatibility with existing
+     * {@code JwtBuilder} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the Claims map.
+     * @return the builder instance for method chaining.
+     * @since 0.14.0
+     */
+    @Override
+    default JwtBuilder issuedAt(Instant iat) {
+        return issuedAt(iat != null ? Date.from(iat) : null);
+    }
 
     /**
      * Sets the JWT Claims <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">
@@ -582,7 +656,6 @@ public interface JwtBuilder extends ClaimsMutator<JwtBuilder> {
      * @return the builder instance for method chaining.
      */
     @Override
-    // for better/targeted JavaDoc
     JwtBuilder id(String jti);
 
     /**

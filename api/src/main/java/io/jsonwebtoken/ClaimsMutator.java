@@ -17,6 +17,7 @@ package io.jsonwebtoken;
 
 import io.jsonwebtoken.lang.NestedCollection;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 
@@ -124,7 +125,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
-     * {@link #expiration(Date)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #expiration(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     T setExpiration(Date exp);
@@ -139,8 +140,30 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @since 0.12.0
+     * @deprecated since 0.14.0 in favor of {@link #expiration(Instant)}. This method will be removed before the
+     * JJWT 1.0 release.
      */
+    @Deprecated
     T expiration(Date exp);
+
+    /**
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.4">
+     * <code>exp</code></a> (expiration) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
+     *
+     * <p>A JWT obtained after this timestamp should not be used.</p>
+     *
+     * <p>The default implementation delegates to {@link #expiration(Date)} for compatibility with existing
+     * {@code ClaimsMutator} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param exp the JWT {@code exp} value or {@code null} to remove the property from the JSON map.
+     * @return the {@code Claims} instance for method chaining.
+     * @since 0.14.0
+     */
+    default T expiration(Instant exp) {
+        return expiration(exp != null ? Date.from(exp) : null);
+    }
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
@@ -152,7 +175,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
-     * {@link #notBefore(Date)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #notBefore(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     T setNotBefore(Date nbf);
@@ -167,8 +190,30 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @since 0.12.0
+     * @deprecated since 0.14.0 in favor of {@link #notBefore(Instant)}. This method will be removed before the
+     * JJWT 1.0 release.
      */
+    @Deprecated
     T notBefore(Date nbf);
+
+    /**
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.5">
+     * <code>nbf</code></a> (not before) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
+     *
+     * <p>A JWT obtained before this timestamp should not be used.</p>
+     *
+     * <p>The default implementation delegates to {@link #notBefore(Date)} for compatibility with existing
+     * {@code ClaimsMutator} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param nbf the JWT {@code nbf} value or {@code null} to remove the property from the JSON map.
+     * @return the {@code Claims} instance for method chaining.
+     * @since 0.14.0
+     */
+    default T notBefore(Instant nbf) {
+        return notBefore(nbf != null ? Date.from(nbf) : null);
+    }
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
@@ -180,7 +225,7 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @deprecated since 0.12.0 in favor of the shorter and more modern builder-style named
-     * {@link #issuedAt(Date)}. This method will be removed before the JJWT 1.0 release.
+     * {@link #issuedAt(Instant)}. This method will be removed before the JJWT 1.0 release.
      */
     @Deprecated
     T setIssuedAt(Date iat);
@@ -195,8 +240,30 @@ public interface ClaimsMutator<T extends ClaimsMutator<T>> {
      * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
      * @return the {@code Claims} instance for method chaining.
      * @since 0.12.0
+     * @deprecated since 0.14.0 in favor of {@link #issuedAt(Instant)}. This method will be removed before the
+     * JJWT 1.0 release.
      */
+    @Deprecated
     T issuedAt(Date iat);
+
+    /**
+     * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.6">
+     * <code>iat</code></a> (issued at) timestamp claim.  A {@code null} value will remove the property from the
+     * JSON Claims map.
+     *
+     * <p>The value is the timestamp when the JWT was created.</p>
+     *
+     * <p>The default implementation delegates to {@link #issuedAt(Date)} for compatibility with existing
+     * {@code ClaimsMutator} implementations. Implementations are encouraged to override this method
+     * directly.</p>
+     *
+     * @param iat the JWT {@code iat} value or {@code null} to remove the property from the JSON map.
+     * @return the {@code Claims} instance for method chaining.
+     * @since 0.14.0
+     */
+    default T issuedAt(Instant iat) {
+        return issuedAt(iat != null ? Date.from(iat) : null);
+    }
 
     /**
      * Sets the JWT <a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.7">

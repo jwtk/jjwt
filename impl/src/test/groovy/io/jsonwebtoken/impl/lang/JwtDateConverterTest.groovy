@@ -17,22 +17,58 @@ package io.jsonwebtoken.impl.lang
 
 import org.junit.Test
 
-import static org.junit.Assert.assertNull
+import java.time.Instant
+
+import static org.junit.Assert.*
 
 class JwtDateConverterTest {
 
     @Test
-    void testApplyToNull() {
-        assertNull JwtDateConverter.INSTANCE.applyTo(null)
-    }
-
-    @Test
-    void testApplyFromNull() {
-        assertNull JwtDateConverter.INSTANCE.applyFrom(null)
-    }
-
-    @Test
     void testToDateWithNull() {
         assertNull JwtDateConverter.toDate(null)
+    }
+
+    @Test
+    void testToDateWithDate() {
+        def date = new Date()
+        assertSame date, JwtDateConverter.toDate(date)
+    }
+
+    @Test
+    void testToDateWithCalendar() {
+        def cal = Calendar.getInstance()
+        assertEquals cal.getTime(), JwtDateConverter.toDate(cal)
+    }
+
+    @Test
+    void testToDateNumberIsMillis() {
+        assertEquals new Date(1700000000123L), JwtDateConverter.toDate(1700000000123L)
+    }
+
+    @Test
+    void testToDateWithIso8601String() {
+        assertEquals Date.from(Instant.parse('2023-11-14T22:13:20.123Z')),
+                JwtDateConverter.toDate('2023-11-14T22:13:20.123Z')
+    }
+
+    @Test
+    void testToDateWithInvalidString() {
+        try {
+            JwtDateConverter.toDate('not a date')
+            fail()
+        } catch (IllegalArgumentException expected) {
+            assertTrue expected.getMessage().startsWith(
+                    'String value is not a JWT NumericDate, nor is it ISO-8601-formatted. All heuristics exhausted.')
+        }
+    }
+
+    @Test
+    void testToDateWithUnsupportedType() {
+        try {
+            JwtDateConverter.toDate(new Object())
+            fail()
+        } catch (IllegalArgumentException expected) {
+            assertEquals 'Cannot create Date from object of type java.lang.Object.', expected.getMessage()
+        }
     }
 }
