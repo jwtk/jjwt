@@ -118,4 +118,25 @@ class JacksonSerializerTest {
         byte[] result = serialize([hello: '世界'])
         assertArrayEquals expected, result
     }
+
+    @Test
+    void testMapValues() {
+        byte[] result = serialize([bytes: Strings.utf8('hi'), chars: 'hi'.toCharArray()])
+        assertEquals '{"bytes":"aGk=","chars":"hi"}', Strings.utf8(result)
+    }
+
+    @Test
+    void testNestedMapValues() {
+        def value = [
+                nullValue: null,
+                map      : [string: 'value'],
+                iterable : ['one', 'two'],
+                array    : ['three', 'four'] as String[]
+        ]
+
+        byte[] result = serialize(value)
+
+        assertEquals '{"nullValue":null,"map":{"string":"value"},"iterable":["one","two"],' +
+                '"array":["three","four"]}', Strings.utf8(result)
+    }
 }
