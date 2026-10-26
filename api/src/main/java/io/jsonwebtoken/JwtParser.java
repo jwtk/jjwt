@@ -70,6 +70,24 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * <blockquote><pre>
      * Jwe&lt;Claims&gt; jwe = parser.parse(input).accept({@link Jwe#CLAIMS});</pre></blockquote>
      *
+     * <p><b>Claims Validation</b></p>
+     *
+     * <p>If the JWT payload is a {@link Claims} instance, the following claims are validated after any signature
+     * verification or decryption, using the parser's {@link JwtParserBuilder#clock(Clock) clock} and allowing for
+     * any configured {@link JwtParserBuilder#clockSkewSeconds(long) clock skew}:</p>
+     * <ul>
+     *     <li>{@link Claims#getExpiration() exp} - if present, the JWT is rejected with an
+     *     {@link ExpiredJwtException} if the current time is after the expiration time.</li>
+     *     <li>{@link Claims#getNotBefore() nbf} - if present, the JWT is rejected with a
+     *     {@link PrematureJwtException} if the current time is before the not-before time.</li>
+     *     <li>Any claims configured via the {@link JwtParserBuilder}'s {@code require*} methods - the JWT is rejected
+     *     with a {@link MissingClaimException} or {@link IncorrectClaimException} if a required claim is missing or
+     *     does not have the expected value.</li>
+     * </ul>
+     *
+     * <p>The {@link Claims#getIssuedAt() iat} claim is <em>not</em> validated against the current time; if your
+     * application requires {@code iat} validation, it must be performed after parsing.</p>
+     *
      * @param jwt the compact serialized JWT to parse
      * @return the parsed JWT instance
      * @throws MalformedJwtException    if the specified JWT was incorrectly constructed (and therefore invalid).
@@ -79,6 +97,8 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws SecurityException        if the specified JWT string is a JWE and decryption fails
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
+     * @throws PrematureJwtException    if the specified JWT is a Claims JWT and the Claims has a not-before time
+     *                                  after the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace.
      * @see Jwt#accept(JwtVisitor)
      */
@@ -106,6 +126,8 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws SecurityException        if the specified JWT string is a JWE and decryption fails
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
+     * @throws PrematureJwtException    if the specified JWT is a Claims JWT and the Claims has a not-before time
+     *                                  after the time this method is invoked.
      * @throws IllegalArgumentException if the specified string is {@code null} or empty or only whitespace, or if the
      *                                  {@code handler} is {@code null}.
      * @see Jwt#accept(JwtVisitor)
@@ -195,6 +217,8 @@ public interface JwtParser extends Parser<Jwt<?, ?>> {
      * @throws SecurityException        if the {@code jws} string is actually a JWE and decryption fails
      * @throws ExpiredJwtException      if the specified JWT is a Claims JWT and the Claims has an expiration time
      *                                  before the time this method is invoked.
+     * @throws PrematureJwtException    if the specified JWT is a Claims JWT and the Claims has a not-before time
+     *                                  after the time this method is invoked.
      * @throws IllegalArgumentException if the {@code claimsJws} string is {@code null} or empty or only whitespace
      * @see #parseSignedClaims(CharSequence)
      * @see #parseEncryptedClaims(CharSequence)
