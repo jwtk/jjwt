@@ -15,7 +15,7 @@
  */
 package io.jsonwebtoken
 
-import io.jsonwebtoken.jackson.io.JacksonDeserializer
+import io.jsonwebtoken.jackson2.io.JacksonDeserializer
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals

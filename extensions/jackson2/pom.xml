@@ -25,8 +25,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jjwt-jackson</artifactId>
-    <name>JJWT :: Extensions :: Jackson</name>
+    <artifactId>jjwt-jackson2</artifactId>
+    <name>JJWT :: Extensions :: Jackson 2</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -51,7 +51,7 @@
 
     <build>
         <plugins>
-            <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
+            <!-- The following plugin section is used in jjwt-jackson2 and jjwt-orgjson, to repackage (and verify)
                  binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
                  avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
             <!-- TODO: remove these deprecated packages and this config before v1.0 -->
@@ -61,17 +61,15 @@
                 <configuration>
                     <relocations>
                         <relocation>
-                            <pattern>io.jsonwebtoken.jackson.io</pattern>
+                            <pattern>io.jsonwebtoken.jackson2.io</pattern>
                             <shadedPattern>io.jsonwebtoken.io</shadedPattern>
-                            <includes>io.jsonwebtoken.jackson.io.*</includes>
+                            <includes>io.jsonwebtoken.jackson2.io.*</includes>
                         </relocation>
                     </relocations>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.github.siom79.japicmp</groupId>
-                <artifactId>japicmp-maven-plugin</artifactId>
-            </plugin>
+            <!-- TODO: enable japicmp for this module once a jjwt-jackson2 release exists to compare against
+                 (i.e. when jjwt.previousVersion is 0.14.0 or later). -->
         </plugins>
     </build>
 </project>

@@ -27,8 +27,10 @@
 
     <artifactId>jjwt-jackson-testkit</artifactId>
     <name>JJWT :: Extensions :: Jackson :: Test Kit</name>
-    <description>Test cases that every JJWT Jackson extension must pass, shared so the Jackson 2 and Jackson 3
-        modules are always held to identical behavior. Build-time only: this module is never published.</description>
+    <description>
+        Test cases that every JJWT Jackson extension must pass, shared so the Jackson 2 and Jackson 3
+        modules are always held to identical behavior. Build-time only: this module is never published.
+    </description>
     <packaging>jar</packaging>
 
     <properties>

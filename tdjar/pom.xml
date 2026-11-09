@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
+            <artifactId>jjwt-jackson2</artifactId>
             <scope>runtime</scope>
         </dependency>
 

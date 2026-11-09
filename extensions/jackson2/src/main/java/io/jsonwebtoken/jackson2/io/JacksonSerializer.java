@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.jackson.io;
+package io.jsonwebtoken.jackson2.io;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -28,13 +28,16 @@ import io.jsonwebtoken.lang.Assert;
 import java.io.OutputStream;
 
 /**
- * Serializer using a Jackson {@link ObjectMapper}.
+ * Serializer using a Jackson 2 ({@code com.fasterxml.jackson}) {@link ObjectMapper}, for Java 8 or later.
  *
- * @since 0.10.0
+ * <p>Before 0.14.0 this class was {@code io.jsonwebtoken.jackson.io.JacksonSerializer} in the {@code jjwt-jackson} module,
+ * which now uses Jackson 3 and requires Java 17 or later.</p>
+ *
+ * @since 0.14.0
  */
 public class JacksonSerializer<T> extends AbstractSerializer<T> {
 
-    static final String MODULE_ID = "jjwt-jackson";
+    static final String MODULE_ID = "jjwt-jackson2";
     static final Module MODULE;
 
     static {
@@ -46,11 +49,11 @@ public class JacksonSerializer<T> extends AbstractSerializer<T> {
     static final ObjectMapper DEFAULT_OBJECT_MAPPER = newObjectMapper();
 
     /**
-     * Creates and returns a new ObjectMapper with the {@code jjwt-jackson} module registered and
+     * Creates and returns a new ObjectMapper with the {@code jjwt-jackson2} module registered and
      * {@code JsonParser.Feature.STRICT_DUPLICATE_DETECTION} enabled (set to true) and
      * {@code DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} disabled (set to false).
      *
-     * @return a new ObjectMapper with the {@code jjwt-jackson} module registered and
+     * @return a new ObjectMapper with the {@code jjwt-jackson2} module registered and
      * {@code JsonParser.Feature.STRICT_DUPLICATE_DETECTION} enabled (set to true) and
      * {@code DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES} disabled (set to false).
      *

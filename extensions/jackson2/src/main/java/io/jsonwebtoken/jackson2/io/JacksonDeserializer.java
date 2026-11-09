@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jsonwebtoken.jackson.io;
+package io.jsonwebtoken.jackson2.io;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -30,9 +30,12 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Deserializer using a Jackson {@link ObjectMapper}.
+ * Deserializer using a Jackson 2 ({@code com.fasterxml.jackson}) {@link ObjectMapper}, for Java 8 or later.
  *
- * @since 0.10.0
+ * <p>Before 0.14.0 this class was {@code io.jsonwebtoken.jackson.io.JacksonDeserializer} in the {@code jjwt-jackson} module,
+ * which now uses Jackson 3 and requires Java 17 or later.</p>
+ *
+ * @since 0.14.0
  */
 public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
 
