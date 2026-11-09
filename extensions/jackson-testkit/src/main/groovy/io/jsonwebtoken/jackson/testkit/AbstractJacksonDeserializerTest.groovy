@@ -280,4 +280,90 @@ abstract class AbstractJacksonDeserializerTest {
             assertSame ex, se.getCause()
         }
     }
+
+    @Test
+    void testObjectMapperAndClaimTypeMapConstructor() {
+        def deserializer = newDeserializer(newObjectMapper(), Maps.of("custom", CustomBean).build())
+        def result = deserializer.deserialize(new StringReader('{"custom":{"stringValue":"s"},"other":{"stringValue":"s"}}'))
+        assertEquals new CustomBean().setStringValue('s').getStringValue(), result.custom.getStringValue()
+        assertTrue result.custom instanceof CustomBean
+        assertEquals([stringValue: 's'], result.other) // unmapped claims remain Maps
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testObjectMapperAndClaimTypeMapConstructorWithNullObjectMapper() {
+        newDeserializer((Object) null, Maps.of("custom", CustomBean).build())
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testObjectMapperAndClaimTypeMapConstructorWithNullClaimTypeMap() {
+        newDeserializer(newObjectMapper(), (Map) null)
+    }
+
+    @Test
+    void testUntypedNumbers() {
+        def result = read('{"i":1,"l":2147483648,"bi":123456789012345678901234567890,"d":1.5}')
+        assertEquals Integer, result.i.getClass()
+        assertEquals Long, result.l.getClass()
+        assertEquals BigInteger, result.bi.getClass()
+        assertEquals Double, result.d.getClass()
+    }
+
+    @Test
+    void testUntypedStructures() {
+        def result = read('{"a":[1,"x",null,{"b":true}],"u":"https:\\/\\/a\\/b"}')
+        assertEquals([a: [1, 'x', null, [b: true]], u: 'https://a/b'], result)
+        assertTrue result instanceof LinkedHashMap
+        assertTrue result.a instanceof ArrayList
+    }
+
+    @Test
+    void testNestedDuplicateDetection() {
+        try {
+            read('{"a":{"b":1,"b":2}}')
+            fail()
+        } catch (DeserializationException expected) {
+            assertTrue duplicateMemberExceptionType().isInstance(expected.getCause())
+            assertTrue expected.getMessage().startsWith('Unable to deserialize: ' + duplicateMemberMessage('b'))
+        }
+    }
+
+    @Test
+    void testTrailingContentIsIgnored() {
+        assertEquals([a: 1], read('{"a":1}{"b":2}'))
+        assertEquals([a: 1], read('{"a":1} x'))
+    }
+
+    @Test
+    void testNonStandardJsonIsRejected() {
+        for (String json : ["{'a':1}", '{a:1}', '{/*c*/"a":1}', '{"a":1,}', '{"a":01}', '{"a":NaN}', '']) {
+            try {
+                read(json)
+                fail("Should have been rejected: $json")
+            } catch (DeserializationException expected) {
+            }
+        }
+    }
+
+    @Test
+    void testCustomObjectNullForPrimitiveUsesDefaultValue() {
+        def result = newDeserializer(Maps.of("custom", CustomBean).build())
+                .deserialize(new StringReader('{"custom":{"intValue":null,"stringValue":"s"}}'))
+        assertEquals 0, result.custom.getIntValue()
+        assertEquals 's', result.custom.getStringValue()
+    }
+
+    @Test
+    void testCustomObjectCollectionPropertyWithoutSetter() {
+        def result = newDeserializer(Maps.of("custom", SetterlessBean).build())
+                .deserialize(new StringReader('{"custom":{"items":["a","b"]}}'))
+        assertEquals(['a', 'b'], result.custom.getItems())
+    }
+
+    @Test
+    void testCustomEnumIsReadByName() {
+        def result = newDeserializer(Maps.of("custom", TestEnum).build())
+                .deserialize(new StringReader('{"custom":"RED"}'))
+        assertSame TestEnum.RED, result.custom
+    }
 }

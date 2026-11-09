@@ -17,6 +17,7 @@ package io.jsonwebtoken.jackson.testkit
 
 import io.jsonwebtoken.io.Serializer
 import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.ConfidentialValue
 import org.junit.Before
 import org.junit.Test
 
@@ -71,6 +72,18 @@ abstract class AbstractJacksonSerializerTest {
     }
 
     @Test
+    void testObjectMapperConstructorAppliesJjwtModule() {
+        ser = newSerializer(newObjectMapper())
+        def value = new ConfidentialValue() {
+            @Override
+            Object get() {
+                return 'hello'
+            }
+        }
+        assertEquals '{"secret":"hello"}', json([secret: value])
+    }
+
+    @Test
     void testSerialize() {
         byte[] expected = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
         byte[] result = ser.serialize([hello: '世界'])
@@ -115,5 +128,44 @@ abstract class AbstractJacksonSerializerTest {
         byte[] expected = Strings.utf8('{"hello":"世界"}' as String)
         byte[] result = serialize([hello: '世界'])
         assertArrayEquals expected, result
+    }
+
+    @Test
+    void testTypicalClaims() {
+        def claims = [iss: 'https://issuer.example.com/realms/a', sub: 'joe', aud: ['a', 'b'], exp: 1700000000L,
+                      admin: true, nil: null, nested: [k: [1, [x: 'y']]]]
+        String expected = '{"iss":"https://issuer.example.com/realms/a","sub":"joe","aud":["a","b"],' +
+                '"exp":1700000000,"admin":true,"nil":null,"nested":{"k":[1,{"x":"y"}]}}'
+        assertEquals expected, json(claims)
+    }
+
+    @Test
+    void testDateIsWrittenAsEpochMillis() {
+        assertEquals '{"d":1700000000123}', json([d: new Date(1700000000123L)])
+    }
+
+    @Test
+    void testCalendarIsWrittenAsEpochMillis() {
+        def cal = Calendar.getInstance(TimeZone.getTimeZone('UTC'))
+        cal.setTimeInMillis(1700000000123L)
+        assertEquals '{"c":1700000000123}', json([c: cal])
+    }
+
+    @Test
+    void testEnumIsWrittenByName() {
+        assertEquals '{"e":"RED"}', json([e: TestEnum.RED])
+    }
+
+    @Test
+    void testSupplementaryCharactersAreEscaped() {
+        String grinningFace = new String(Character.toChars(0x1F600)) // outside the Basic Multilingual Plane
+        String bs = (char) 92 // a single backslash, spelled this way so this source never contains a unicode escape
+        // i.e. the two UTF-16 surrogates written as two six-character JSON escapes, not as raw 4-byte UTF-8:
+        assertEquals '{"e":"' + bs + 'uD83D' + bs + 'uDE00"}', json([e: grinningFace])
+    }
+
+    @Test
+    void testForwardSlashAndHtmlCharactersAreNotEscaped() {
+        assertEquals '{"u":"a/b","h":"<a href=\'x\'>&</a>"}', json([u: 'a/b', h: "<a href='x'>&</a>"])
     }
 }
