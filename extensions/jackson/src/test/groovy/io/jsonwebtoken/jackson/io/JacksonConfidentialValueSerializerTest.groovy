@@ -15,40 +15,13 @@
  */
 package io.jsonwebtoken.jackson.io
 
+import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.jackson.testkit.AbstractJacksonConfidentialValueSerializerTest
 
-import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.ConfidentialValue
-import org.junit.Test
+class JacksonConfidentialValueSerializerTest extends AbstractJacksonConfidentialValueSerializerTest {
 
-import static org.junit.Assert.assertEquals
-
-class JacksonConfidentialValueSerializerTest {
-
-    @Test
-    void testSupplierNullValue() {
-        def serializer = new JacksonSerializer()
-        def supplier = new ConfidentialValue() {
-            @Override
-            Object get() {
-                return null
-            }
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream()
-        serializer.serialize(supplier, out)
-        assertEquals 'null', Strings.utf8(out.toByteArray())
-    }
-
-    @Test
-    void testSupplierStringValue() {
-        def serializer = new JacksonSerializer()
-        def supplier = new ConfidentialValue() {
-            @Override
-            Object get() {
-                return 'hello'
-            }
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream()
-        serializer.serialize(supplier, out)
-        assertEquals '"hello"', Strings.utf8(out.toByteArray())
+    @Override
+    protected Serializer newSerializer() {
+        return new JacksonSerializer()
     }
 }

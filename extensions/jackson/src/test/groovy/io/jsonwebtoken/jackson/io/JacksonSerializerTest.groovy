@@ -17,37 +17,32 @@ package io.jsonwebtoken.jackson.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.lang.Strings
-import org.junit.Before
+import io.jsonwebtoken.jackson.testkit.AbstractJacksonSerializerTest
 import org.junit.Test
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.Assert.assertSame
 
-class JacksonSerializerTest {
+class JacksonSerializerTest extends AbstractJacksonSerializerTest {
 
-    private JacksonSerializer ser
-
-    @Before
-    void setUp() {
-        ser = new JacksonSerializer()
+    @Override
+    protected Serializer newSerializer() {
+        return new JacksonSerializer()
     }
 
-    byte[] serialize(def value) {
-        def os = new ByteArrayOutputStream()
-        ser.serialize(value, os)
-        return os.toByteArray()
+    @Override
+    protected Serializer newSerializer(Object objectMapper) {
+        return new JacksonSerializer((ObjectMapper) objectMapper)
     }
 
-    @Test
-    void loadService() {
-        def serializer = ServiceLoader.load(Serializer).iterator().next()
-        assertTrue serializer instanceof JacksonSerializer
+    @Override
+    protected Object newObjectMapper() {
+        return new ObjectMapper()
     }
 
-    @Test
-    void testDefaultConstructor() {
-        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER, ser.objectMapper
+    @Override
+    protected Object defaultObjectMapper() {
+        return JacksonSerializer.DEFAULT_OBJECT_MAPPER
     }
 
     @Test
@@ -55,11 +50,6 @@ class JacksonSerializerTest {
         ObjectMapper customOM = new ObjectMapper()
         ser = new JacksonSerializer(customOM)
         assertSame customOM, ser.objectMapper
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testObjectMapperConstructorWithNullArgument() {
-        new JacksonSerializer<>(null)
     }
 
     @Test
@@ -70,52 +60,5 @@ class JacksonSerializerTest {
         //noinspection GroovyResultOfObjectAllocationIgnored
         new JacksonSerializer<>(om)
         verify om
-    }
-
-    @Test
-    void testSerialize() {
-        byte[] expected = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
-        byte[] result = ser.serialize([hello: '世界'])
-        assertTrue Arrays.equals(expected, result)
-    }
-
-    @Test
-    void testByte() {
-        byte[] expected = Strings.utf8("120") //ascii("x") = 120
-        byte[] bytes = Strings.utf8("x")
-        assertArrayEquals expected, serialize(bytes[0]) // single byte
-    }
-
-    @Test
-    void testByteArray() { //expect Base64 string by default:
-        byte[] bytes = Strings.utf8("hi")
-        String expected = '"aGk="' as String //base64(hi) --> aGk=
-        assertEquals expected, Strings.utf8(serialize(bytes))
-    }
-
-    @Test
-    void testEmptyByteArray() { //expect Base64 string by default:
-        byte[] bytes = new byte[0]
-        byte[] result = serialize(bytes)
-        assertEquals '""', Strings.utf8(result)
-    }
-
-    @Test
-    void testChar() { //expect Base64 string by default:
-        byte[] result = serialize('h' as char)
-        assertEquals "\"h\"", Strings.utf8(result)
-    }
-
-    @Test
-    void testCharArray() { //expect Base64 string by default:
-        byte[] result = serialize('hi'.toCharArray())
-        assertEquals "\"hi\"", Strings.utf8(result)
-    }
-
-    @Test
-    void testWriteObject() {
-        byte[] expected = Strings.utf8('{"hello":"世界"}' as String)
-        byte[] result = serialize([hello: '世界'])
-        assertArrayEquals expected, result
     }
 }

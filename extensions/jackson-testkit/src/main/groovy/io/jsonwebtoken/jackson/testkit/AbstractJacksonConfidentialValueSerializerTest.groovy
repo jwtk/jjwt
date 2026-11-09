@@ -1,0 +1,60 @@
+/*
+ * Copyright © 2026 jsonwebtoken.io
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.jsonwebtoken.jackson.testkit
+
+import io.jsonwebtoken.io.Serializer
+import io.jsonwebtoken.lang.Strings
+import io.jsonwebtoken.security.ConfidentialValue
+import org.junit.Test
+
+import static org.junit.Assert.assertEquals
+
+/**
+ * Test cases for how every JJWT Jackson {@link Serializer} must write {@link ConfidentialValue}s, regardless of
+ * which Jackson generation it is built on.
+ */
+abstract class AbstractJacksonConfidentialValueSerializerTest {
+
+    protected abstract Serializer newSerializer()
+
+    @Test
+    void testSupplierNullValue() {
+        def serializer = newSerializer()
+        def supplier = new ConfidentialValue() {
+            @Override
+            Object get() {
+                return null
+            }
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream()
+        serializer.serialize(supplier, out)
+        assertEquals 'null', Strings.utf8(out.toByteArray())
+    }
+
+    @Test
+    void testSupplierStringValue() {
+        def serializer = newSerializer()
+        def supplier = new ConfidentialValue() {
+            @Override
+            Object get() {
+                return 'hello'
+            }
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream()
+        serializer.serialize(supplier, out)
+        assertEquals '"hello"', Strings.utf8(out.toByteArray())
+    }
+}
