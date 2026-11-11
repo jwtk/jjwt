@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 jsonwebtoken.io
+ * Copyright © 2026 jsonwebtoken.io
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,107 +15,51 @@
  */
 package io.jsonwebtoken.jackson.io
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.lang.Strings
-import org.junit.Before
+import io.jsonwebtoken.jackson.testkit.AbstractJacksonSerializerTest
 import org.junit.Test
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
 
-import static org.easymock.EasyMock.*
 import static org.junit.Assert.*
 
-class JacksonSerializerTest {
+class JacksonSerializerTest extends AbstractJacksonSerializerTest {
 
-    private JacksonSerializer ser
-
-    @Before
-    void setUp() {
-        ser = new JacksonSerializer()
+    @Override
+    protected Serializer newSerializer() {
+        return new JacksonSerializer()
     }
 
-    byte[] serialize(def value) {
-        def os = new ByteArrayOutputStream()
-        ser.serialize(value, os)
-        return os.toByteArray()
+    @Override
+    protected Serializer newSerializer(Object objectMapper) {
+        return new JacksonSerializer((ObjectMapper) objectMapper)
     }
 
-    @Test
-    void loadService() {
-        def serializer = ServiceLoader.load(Serializer).iterator().next()
-        assertTrue serializer instanceof JacksonSerializer
+    @Override
+    protected Object newObjectMapper() {
+        return JsonMapper.builder().build()
     }
 
-    @Test
-    void testDefaultConstructor() {
-        assertSame JacksonSerializer.DEFAULT_OBJECT_MAPPER, ser.objectMapper
+    @Override
+    protected Object defaultObjectMapper() {
+        return JacksonSerializer.DEFAULT_OBJECT_MAPPER
     }
 
     @Test
-    void testObjectMapperConstructor() {
-        ObjectMapper customOM = new ObjectMapper()
+    void testObjectMapperConstructorNeverModifiesArgument() {
+        ObjectMapper customOM = JsonMapper.builder().build()
         ser = new JacksonSerializer(customOM)
-        assertSame customOM, ser.objectMapper
-    }
-
-    @Test(expected = IllegalArgumentException)
-    void testObjectMapperConstructorWithNullArgument() {
-        new JacksonSerializer<>(null)
+        assertNotSame customOM, ser.objectMapper
+        assertTrue customOM.registeredModules().isEmpty()
+        assertEquals([JacksonSerializer.MODULE], ser.objectMapper.registeredModules() as List)
     }
 
     @Test
-    void testObjectMapperConstructorAutoRegistersModule() {
-        ObjectMapper om = createMock(ObjectMapper)
-        expect(om.registerModule(same(JacksonSerializer.MODULE))).andReturn(om)
-        replay om
-        //noinspection GroovyResultOfObjectAllocationIgnored
-        new JacksonSerializer<>(om)
-        verify om
-    }
-
-    @Test
-    void testSerialize() {
-        byte[] expected = '{"hello":"世界"}'.getBytes(Strings.UTF_8)
-        byte[] result = ser.serialize([hello: '世界'])
-        assertTrue Arrays.equals(expected, result)
-    }
-
-    @Test
-    void testByte() {
-        byte[] expected = Strings.utf8("120") //ascii("x") = 120
-        byte[] bytes = Strings.utf8("x")
-        assertArrayEquals expected, serialize(bytes[0]) // single byte
-    }
-
-    @Test
-    void testByteArray() { //expect Base64 string by default:
-        byte[] bytes = Strings.utf8("hi")
-        String expected = '"aGk="' as String //base64(hi) --> aGk=
-        assertEquals expected, Strings.utf8(serialize(bytes))
-    }
-
-    @Test
-    void testEmptyByteArray() { //expect Base64 string by default:
-        byte[] bytes = new byte[0]
-        byte[] result = serialize(bytes)
-        assertEquals '""', Strings.utf8(result)
-    }
-
-    @Test
-    void testChar() { //expect Base64 string by default:
-        byte[] result = serialize('h' as char)
-        assertEquals "\"h\"", Strings.utf8(result)
-    }
-
-    @Test
-    void testCharArray() { //expect Base64 string by default:
-        byte[] result = serialize('hi'.toCharArray())
-        assertEquals "\"hi\"", Strings.utf8(result)
-    }
-
-    @Test
-    void testWriteObject() {
-        byte[] expected = Strings.utf8('{"hello":"世界"}' as String)
-        byte[] result = serialize([hello: '世界'])
-        assertArrayEquals expected, result
+    void testObjectMapperConstructorRetainsConfiguration() {
+        ObjectMapper customOM = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build()
+        ser = new JacksonSerializer(customOM)
+        assertTrue ser.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)
+        assertTrue ser.objectMapper instanceof JsonMapper
     }
 }

@@ -15,33 +15,32 @@
  */
 package io.jsonwebtoken.jackson.io;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.jsonwebtoken.security.ConfidentialValue;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 final class JacksonConfidentialValueSerializer extends StdSerializer<ConfidentialValue<?>> {
 
     static final JacksonConfidentialValueSerializer INSTANCE = new JacksonConfidentialValueSerializer();
 
     public JacksonConfidentialValueSerializer() {
-        super(ConfidentialValue.class, false);
+        super(ConfidentialValue.class);
     }
 
     @Override
-    public void serialize(ConfidentialValue<?> confidentialValue, JsonGenerator generator, SerializerProvider provider) throws IOException {
+    public void serialize(ConfidentialValue<?> confidentialValue, JsonGenerator generator, SerializationContext context) throws JacksonException {
         Object value = confidentialValue.get();
 
         if (value == null) {
-            provider.defaultSerializeNull(generator);
+            context.defaultSerializeNullValue(generator);
             return;
         }
 
         Class<?> clazz = value.getClass();
-        JsonSerializer<Object> ser = provider.findTypedValueSerializer(clazz, true, null);
-        ser.serialize(value, generator, provider);
+        ValueSerializer<Object> ser = context.findTypedValueSerializer(clazz, true);
+        ser.serialize(value, generator, context);
     }
 }

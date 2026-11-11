@@ -19,8 +19,8 @@ import io.jsonwebtoken.gson.io.GsonDeserializer
 import io.jsonwebtoken.gson.io.GsonSerializer
 import io.jsonwebtoken.io.Deserializer
 import io.jsonwebtoken.io.Serializer
-import io.jsonwebtoken.jackson.io.JacksonDeserializer
-import io.jsonwebtoken.jackson.io.JacksonSerializer
+import io.jsonwebtoken.jackson2.io.JacksonDeserializer
+import io.jsonwebtoken.jackson2.io.JacksonSerializer
 import io.jsonwebtoken.lang.Strings
 import io.jsonwebtoken.orgjson.io.OrgJsonDeserializer
 import io.jsonwebtoken.orgjson.io.OrgJsonSerializer

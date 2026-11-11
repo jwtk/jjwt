@@ -64,4 +64,29 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <!-- jjwt-jackson (Jackson 3) is Java 17 bytecode and cannot be loaded by the JDK 8 and 11 legs
+                         of the multi-JDK test matrix (see the jdk-8 and jdk-11 profiles in the root pom): -->
+                    <execution>
+                        <id>test-jdk-8</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-jdk-11</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

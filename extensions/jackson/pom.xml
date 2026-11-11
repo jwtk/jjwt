@@ -31,6 +31,10 @@
 
     <properties>
         <jjwt.root>${basedir}/../..</jjwt.root>
+        <!-- Jackson 3 requires Java 17, so this is the one JJWT module that does not target Java 8.
+             Applications on Java 8 through 16 use jjwt-jackson2 (or jjwt-gson / jjwt-orgjson) instead. -->
+        <jdk.release.version>17</jdk.release.version>
+        <jdk.version>17</jdk.version>
     </properties>
 
     <dependencies>
@@ -39,33 +43,49 @@
             <artifactId>jjwt-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson-testkit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- The following plugin section is used in jjwt-jackson and jjwt-orgjson, to repackage (and verify)
-                 binary compatibility with previous versions. In v0.11.0 the implementations changed packages to
-                 avoid split package issues with Java 9+ see: https://github.com/jwtk/jjwt/issues/399 -->
-            <!-- TODO: remove these deprecated packages and this config before v1.0 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <relocations>
-                        <relocation>
-                            <pattern>io.jsonwebtoken.jackson.io</pattern>
-                            <shadedPattern>io.jsonwebtoken.io</shadedPattern>
-                            <includes>io.jsonwebtoken.jackson.io.*</includes>
-                        </relocation>
-                    </relocations>
-                </configuration>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <!-- This module's classes are Java 17 bytecode and cannot be loaded by the JDK 8 and 11 legs of
+                         the multi-JDK test matrix (see the jdk-8 and jdk-11 profiles in the root pom): -->
+                    <execution>
+                        <id>test-jdk-8</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-jdk-11</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
+                <configuration>
+                    <parameter>
+                        <!-- jjwt-jackson releases before 0.14.0 were compiled against Jackson 2, which is not on
+                             this module's classpath, so japicmp cannot load every class they reference.
+                             TODO: remove when jjwt.previousVersion is 0.14.0 or later. -->
+                        <ignoreMissingClasses>true</ignoreMissingClasses>
+                    </parameter>
+                </configuration>
             </plugin>
         </plugins>
     </build>

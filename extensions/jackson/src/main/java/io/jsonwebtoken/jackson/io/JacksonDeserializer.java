@@ -15,22 +15,26 @@
  */
 package io.jsonwebtoken.jackson.io;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jsonwebtoken.io.AbstractDeserializer;
 import io.jsonwebtoken.lang.Assert;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.deser.jdk.UntypedObjectDeserializer;
+import tools.jackson.databind.module.SimpleModule;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
 import java.util.Map;
 
 /**
- * Deserializer using a Jackson {@link ObjectMapper}.
+ * Deserializer using a Jackson 3 {@link ObjectMapper}.
+ *
+ * <p>As of 0.14.0 this class uses Jackson 3 ({@code tools.jackson}) and requires Java 17 or later.  The equivalent
+ * Jackson 2 ({@code com.fasterxml.jackson}) implementation for Java 8 or later is
+ * {@code io.jsonwebtoken.jackson2.io.JacksonDeserializer} in the {@code jjwt-jackson2} module.</p>
  *
  * @since 0.10.0
  */
@@ -61,20 +65,16 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
      * Passing a map of {@code ["user": User.class]} to this constructor would result in the {@code user} claim being
      * transformed to an instance of your custom {@code User} class, instead of the default of {@code Map}.
      * <p>
-     * Because custom type parsing requires modifying the state of a Jackson {@code ObjectMapper}, this
-     * constructor creates a new internal {@code ObjectMapper} instance and customizes it to support the
-     * specified {@code claimTypeMap}.  This ensures that the JJWT parsing behavior does not unexpectedly
-     * modify the state of another application-specific {@code ObjectMapper}.
+     * This constructor uses a copy of JJWT's default {@code ObjectMapper} that is customized to support the
+     * specified {@code claimTypeMap}.
      * <p>
-     * If you would like to use your own {@code ObjectMapper} instance that also supports custom types for
-     * JWT {@code Claims}, you will need to first customize your {@code ObjectMapper} instance by registering
-     * your custom types and then use the {@link #JacksonDeserializer(ObjectMapper)} constructor instead.
+     * If you would like to use your own {@code ObjectMapper} configuration that also supports custom types for
+     * JWT {@code Claims}, use the {@link #JacksonDeserializer(ObjectMapper, Map)} constructor instead.
      *
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
      */
     public JacksonDeserializer(Map<String, Class<?>> claimTypeMap) {
-        // DO NOT specify JacksonSerializer.DEFAULT_OBJECT_MAPPER here as that would modify the shared instance
-        this(JacksonSerializer.newObjectMapper(), claimTypeMap);
+        this(JacksonSerializer.DEFAULT_OBJECT_MAPPER, claimTypeMap);
     }
 
     /**
@@ -89,7 +89,8 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
 
     /**
      * Creates a new JacksonDeserializer where the values of the claims can be parsed into given types by registering
-     * a type-converting {@link  com.fasterxml.jackson.databind.Module Module} on the specified {@link ObjectMapper}.
+     * a type-converting {@link tools.jackson.databind.JacksonModule JacksonModule} on a copy of the specified
+     * {@link ObjectMapper}.
      * A common usage example is to parse custom User object out of a claim, for example the claims:
      * <pre>{@code
      * {
@@ -102,27 +103,17 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
      * Passing a map of {@code ["user": User.class]} to this constructor would result in the {@code user} claim being
      * transformed to an instance of your custom {@code User} class, instead of the default of {@code Map}.
      * <p>
-     * Because custom type parsing requires modifying the state of a Jackson {@code ObjectMapper}, this
-     * constructor modifies the specified {@code objectMapper} argument and customizes it to support the
-     * specified {@code claimTypeMap}.
-     * <p>
-     * If you do not want your {@code ObjectMapper} instance modified, but also want to support custom types for
-     * JWT {@code Claims}, you will need to first customize your {@code ObjectMapper} instance by registering
-     * your custom types separately and then use the {@link #JacksonDeserializer(ObjectMapper)} constructor instead
-     * (which does not modify the {@code objectMapper} argument).
+     * Jackson 3 {@code ObjectMapper}s are immutable, so the specified {@code objectMapper} argument is never
+     * modified: this deserializer instead uses a copy of it that is customized to support the specified
+     * {@code claimTypeMap}.
      *
-     * @param objectMapper the objectMapper to modify by registering a custom type-converting
-     *                     {@link com.fasterxml.jackson.databind.Module Module}
+     * @param objectMapper the objectMapper whose configuration will be used, in addition to a custom type-converting
+     *                     {@link tools.jackson.databind.JacksonModule JacksonModule}
      * @param claimTypeMap The claim name-to-class map used to deserialize claims into the given type
      * @since 0.13.0
      */
     public JacksonDeserializer(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap) {
-        this(objectMapper);
-        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
-        // register a new Deserializer on the ObjectMapper instance:
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
-        objectMapper.registerModule(module);
+        this(withClaimTypes(objectMapper, claimTypeMap));
     }
 
     private JacksonDeserializer(ObjectMapper objectMapper, Class<T> returnType) {
@@ -132,13 +123,22 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
         this.returnType = returnType;
     }
 
+    private static ObjectMapper withClaimTypes(ObjectMapper objectMapper, Map<String, Class<?>> claimTypeMap) {
+        Assert.notNull(objectMapper, "ObjectMapper cannot be null.");
+        Assert.notNull(claimTypeMap, "Claim type map cannot be null.");
+        // register a new Deserializer on a copy of the ObjectMapper instance:
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Object.class, new MappedTypeDeserializer(Collections.unmodifiableMap(claimTypeMap)));
+        return objectMapper.rebuild().addModule(module).build();
+    }
+
     @Override
     protected T doDeserialize(Reader reader) throws Exception {
         return objectMapper.readValue(reader, returnType);
     }
 
     /**
-     * A Jackson {@link com.fasterxml.jackson.databind.JsonDeserializer JsonDeserializer}, that will convert claim
+     * A Jackson {@link tools.jackson.databind.ValueDeserializer ValueDeserializer}, that will convert claim
      * values to types based on {@code claimTypeMap}.
      */
     private static class MappedTypeDeserializer extends UntypedObjectDeserializer {
@@ -146,18 +146,17 @@ public class JacksonDeserializer<T> extends AbstractDeserializer<T> {
         private final Map<String, Class<?>> claimTypeMap;
 
         private MappedTypeDeserializer(Map<String, Class<?>> claimTypeMap) {
-            super((JavaType)null, null);
+            super((JavaType) null, null);
             this.claimTypeMap = claimTypeMap;
         }
 
         @Override
-        public Object deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        public Object deserialize(JsonParser parser, DeserializationContext context) throws JacksonException {
             // check if the current claim key is mapped, if so traverse it's value
             String name = parser.currentName();
             if (claimTypeMap != null && name != null && claimTypeMap.containsKey(name)) {
                 Class<?> type = claimTypeMap.get(name);
-                //noinspection resource
-                return parser.readValueAsTree().traverse(parser.getCodec()).readValueAs(type);
+                return context.readTreeAsValue(context.readTree(parser), type);
             }
             // otherwise default to super
             return super.deserialize(parser, context);
