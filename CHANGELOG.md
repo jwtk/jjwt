@@ -4,8 +4,39 @@
 
 The first JJWT release that uses Java 8+ features.  This release is not strictly backwards compatible and will also not work with Java 7.
 
+#### Jackson 3
+
+The `jjwt-jackson` module now uses [Jackson 3](https://github.com/FasterXML/jackson/blob/main/jackson3/MIGRATING_TO_JACKSON_3.md)
+(`tools.jackson`) instead of Jackson 2 (`com.fasterxml.jackson`), and the Jackson 2 implementation has moved to a new
+`jjwt-jackson2` module.  See [Issue 1029](https://github.com/jwtk/jjwt/issues/1029).
+
+Jackson 3 requires Java 17, so **`jjwt-jackson` now requires Java 17 or later**.  Every other JJWT module, including
+`jjwt-jackson2`, continues to require only Java 8.
+
+What you need to do depends on how you use JJWT:
+
+* **Java 17 or later, with `jjwt-jackson` declared as a `runtime` dependency (the documented default):** nothing.  You
+  are upgraded to Jackson 3 automatically, and the JSON that JJWT writes and accepts does not change: JJWT's default
+  `ObjectMapper` deliberately retains Jackson 2's behavior wherever Jackson 3 changed a default (for example,
+  `java.util.Date` claim values are still written as numeric timestamps, not ISO-8601 strings).
+* **Java 8 through 16, or if you want to remain on Jackson 2:** replace your `jjwt-jackson` dependency with
+  `jjwt-jackson2`.  Nothing else changes if it is a `runtime` dependency.
+* **If you give JJWT your own `ObjectMapper`** via `new JacksonSerializer(objectMapper)` or
+  `new JacksonDeserializer(objectMapper)`: either supply a Jackson 3 `tools.jackson.databind.ObjectMapper` (for
+  example a `JsonMapper`), or switch to `jjwt-jackson2` and import those two classes from the
+  `io.jsonwebtoken.jackson2.io` package instead of `io.jsonwebtoken.jackson.io`.
+
 #### Backwards Compatibility Breaking Changes
 
+- `jjwt-jackson` requires Java 17 or later and Jackson 3, as described above.  Consequently:
+    - The legacy `io.jsonwebtoken:jjwt` jar, which transitively includes `jjwt-jackson`, also requires Java 17 or later.
+    - The `JacksonSerializer` and `JacksonDeserializer` constructors accept a `tools.jackson.databind.ObjectMapper`.
+      Because Jackson 3 `ObjectMapper`s are immutable, these constructors no longer modify the instance you supply;
+      they use a copy of it that has the necessary JJWT module registered.
+    - If JSON cannot be read, the cause of the resulting JJWT exception is a Jackson 3
+      `tools.jackson.core.JacksonException` instead of a Jackson 2 `com.fasterxml.jackson.core.JsonProcessingException`.
+    - The `deprecated`-classifier jar that retains the pre-0.11.0 `io.jsonwebtoken.io.Jackson*` class names is now
+      published for `jjwt-jackson2` instead of `jjwt-jackson`.
 - The `io.jsonwebtoken.lang.Supplier` interface has been renamed and moved to `io.jsonwebtoken.security.ConfidentialValue` to avoid any potential risk of conflict or accidental use
  with `java.util.function.Supplier`.  If you have explicitly configured a `Gson` instance to work with this type previously, you must update your usage to reference the new interface, for example:
     ```java

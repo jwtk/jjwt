@@ -56,7 +56,8 @@ toc::[]
 
 == Features
 
-* Fully functional on all Java 8+ JDKs and Android
+* Fully functional on all Java 8+ JDKs and Android (only the optional Jackson 3 <<json-jackson,JSON module>>
+requires Java 17+)
 * Automatic security best practices and assertions
 * Easy to learn and read API
 * Convenient and readable http://en.wikipedia.org/wiki/Fluent_interface[fluent] interfaces, great for IDE
@@ -582,7 +583,7 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
-    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+    <artifactId>jjwt-jackson</artifactId> <!-- Jackson 3, requires Java 17+.  Or jjwt-jackson2 (Jackson 2, Java 8+), or jjwt-gson if Gson is preferred -->
     <version>{project-version}</version>
     <scope>runtime</scope>
 </dependency>
@@ -609,7 +610,9 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:{project-version}'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:{project-version}'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:{project-version}' // or 'io.jsonwebtoken:jjwt-gson:{project-version}' for gson
+    // Jackson 3, requires Java 17+.  Or 'io.jsonwebtoken:jjwt-jackson2:{project-version}' (Jackson 2, Java 8+),
+    // or 'io.jsonwebtoken:jjwt-gson:{project-version}' for gson:
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:{project-version}'
     /*
       Uncomment this next dependency if you are using:
        - JDK 10 or earlier, and you want to use RSASSA-PSS (PS256, PS384, PS512) signature algorithms.
@@ -3280,8 +3283,9 @@ If you don't explicitly configure a ``JwtBuilder``'s `Serializer` or a ``JwtPars
 automatically attempt to discover and use the following JSON implementations if found in the runtime classpath. +
 They are checked in order, and the first one found is used:
 
-. Jackson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-jackson` as a project runtime
-dependency.  Jackson supports POJOs as claims with full marshaling/unmarshaling as necessary.
+. Jackson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-jackson` (Jackson 3, requires
+Java 17+) or `io.jsonwebtoken:jjwt-jackson2` (Jackson 2, Java 8+) as a project runtime dependency.  Jackson
+supports POJOs as claims with full marshaling/unmarshaling as necessary.
 . Gson: This will automatically be used if you specify `io.jsonwebtoken:jjwt-gson` as a project runtime dependency.
 Gson also supports POJOs as claims with full marshaling/unmarshaling as necessary.
 . JSON-Java (`org.json`): This will be used automatically if you specify `io.jsonwebtoken:jjwt-orgjson` as a
@@ -3294,7 +3298,7 @@ Android applications _unless_ you want to use POJOs as claims.  The `org.json` l
 Object-to-JSON marshaling, but it _does not_ support JSON-to-Object unmarshalling.
 ====
 
-*If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` or
+*If you want to use POJOs as claim values, use either the `io.jsonwebtoken:jjwt-jackson` (or `jjwt-jackson2`) or
 `io.jsonwebtoken:jjwt-gson` dependency* (or implement your own Serializer and Deserializer if desired). *But beware*,
 Jackson will force a sizable (> 1 MB) dependency to an Android application thus increasing the app download size for
 mobile users.
@@ -3341,12 +3345,22 @@ If you want to use Jackson for JSON processing, just including the `io.jsonwebto
 runtime dependency is all that is necessary in most projects, since Gradle and Maven will automatically pull in
 the necessary Jackson dependencies as well.
 
+[NOTE]
+====
+`jjwt-jackson` uses Jackson 3 (`tools.jackson`), which requires Java 17 or later.  If your application runs on
+Java 8 through 16, or needs to remain on Jackson 2 (`com.fasterxml.jackson`), use the
+<<json-jackson2,`jjwt-jackson2`>> module instead.  Both behave identically and produce identical JSON.
+====
+
 After including this dependency, JJWT will automatically find the Jackson implementation on the runtime classpath and
 use it internally for JSON parsing.  There is nothing else you need to do - JJWT will automatically create a new
 Jackson ObjectMapper for its needs as required.
 
 However, if you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications),
-you can configure JJWT to use your own `ObjectMapper` instead.
+you can configure JJWT to use your own `ObjectMapper` instead.  Jackson 3 ``ObjectMapper``s are immutable, so JJWT
+never modifies the instance you give it: it uses a copy that additionally knows how to write JJWT's own types.
+Creating that copy has a cost, so create a `JacksonSerializer` or `JacksonDeserializer` once and reuse it rather
+than creating a new one for every JWT.
 
 You do this by declaring the `io.jsonwebtoken:jjwt-jackson` dependency with *compile* scope (not runtime
 scope which is the typical JJWT default).  That is:
@@ -3376,7 +3390,7 @@ And then you can specify the `JacksonSerializer` using your own `ObjectMapper` o
 
 [,java]
 ----
-ObjectMapper objectMapper = getMyObjectMapper(); //implement me
+ObjectMapper objectMapper = getMyObjectMapper(); //implement me (a tools.jackson.databind.ObjectMapper)
 
 String jws = Jwts.builder()
 
@@ -3444,11 +3458,25 @@ Jwts.parser()
 
 [NOTE]
 ====
-Using this constructor is mutually exclusive with the `JacksonDeserializer(ObjectMapper)` constructor
-<<json-jackson,described above>>. This is because JJWT configures an `ObjectMapper` directly and could have negative
-consequences for a shared `ObjectMapper` instance. This should work for most applications, if you need a more advanced
-parsing options, <<json-jackson,configure the mapper directly>>.
+This constructor uses JJWT's default `ObjectMapper` configuration.  To combine custom claim types with your own
+`ObjectMapper`, use the `JacksonDeserializer(ObjectMapper, Map)` constructor instead.
 ====
+
++++<a name="json-jackson2">++++++</a>+++
+
+==== Jackson 2
+
+If your application runs on Java 8 through 16, or needs to remain on Jackson 2, declare the
+`io.jsonwebtoken:jjwt-jackson2` dependency instead of `io.jsonwebtoken:jjwt-jackson`.  Everything in this section
+applies to it as well, with these differences:
+
+* `JacksonSerializer` and `JacksonDeserializer` are in the `io.jsonwebtoken.jackson2.io` package (instead of
+`io.jsonwebtoken.jackson.io`) and accept a Jackson 2 `com.fasterxml.jackson.databind.ObjectMapper`.
+* Jackson 2 ``ObjectMapper``s are mutable, and JJWT registers what it needs directly on the instance you give it.
+For that reason, do not use the `JacksonDeserializer(ObjectMapper, Map)` constructor with an `ObjectMapper` that
+is shared with the rest of your application unless you intend for it to be modified.
+
+Do not declare both `jjwt-jackson` and `jjwt-jackson2`: JJWT uses whichever JSON implementation it finds first.
 
 +++<a name="json-gson">++++++</a>+++
 
