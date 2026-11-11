@@ -35,6 +35,7 @@
 
     <modules>
         <module>jackson-testkit</module>
+        <module>jackson</module>
         <module>jackson2</module>
         <module>orgjson</module>
         <module>gson</module>
